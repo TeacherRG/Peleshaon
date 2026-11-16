@@ -1,0 +1,174 @@
+package app.mychitas.peleshaon.alarm
+
+import android.app.KeyguardManager
+import android.content.Context
+import android.content.Intent
+import android.net.Uri
+import android.os.Build
+import android.os.Bundle
+import android.view.WindowManager
+import androidx.activity.ComponentActivity
+import androidx.activity.compose.setContent
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.tween
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.*
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import app.mychitas.peleshaon.R
+import app.mychitas.peleshaon.ui.GoldAccent
+import app.mychitas.peleshaon.ui.NavyDark
+import app.mychitas.peleshaon.ui.TecheletBlue
+import java.time.ZonedDateTime
+import java.time.format.DateTimeFormatter
+import java.util.Locale
+
+class AlarmRingActivity : ComponentActivity() {
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O_MR1) {
+            setShowWhenLocked(true)
+            setTurnScreenOn(true)
+            val km = getSystemService(Context.KEYGUARD_SERVICE) as KeyguardManager
+            km.requestDismissKeyguard(this, null)
+        } else {
+            @Suppress("DEPRECATION")
+            window.addFlags(
+                WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED or
+                        WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON or
+                        WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON
+            )
+        }
+
+        val alarmType = intent.getStringExtra(AlarmScheduler.EXTRA_ALARM_TYPE) ?: "TORAH"
+        val wakeModeName = intent.getStringExtra("wake_mode") ?: WakeMode.SOUND_AND_LIGHT.name
+        val wakeMode = WakeMode.valueOf(wakeModeName)
+        val useLight = wakeMode != WakeMode.SOUND_ONLY
+
+        if (useLight) {
+            window.attributes = window.attributes.apply {
+                screenBrightness = 1.0f
+            }
+        }
+
+        val appLang = when (Locale.getDefault().language) {
+            "ru" -> "ru"
+            "de" -> "de"
+            "iw", "he" -> "he"
+            else -> "en"
+        }
+
+        setContent {
+            var sunriseStarted by remember { mutableStateOf(false) }
+            LaunchedEffect(Unit) { sunriseStarted = true }
+
+            val bgColor by animateColorAsState(
+                targetValue = if (useLight && sunriseStarted) Color(0xFFFFF4D6) else NavyDark,
+                animationSpec = tween(durationMillis = 25_000),
+                label = "sunrise"
+            )
+            val textColor = if (useLight && sunriseStarted) NavyDark else Color.White
+
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(bgColor)
+                    .padding(24.dp),
+                contentAlignment = Alignment.Center
+            ) {
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.spacedBy(20.dp)
+                ) {
+                    Text(
+                        text = ZonedDateTime.now().format(DateTimeFormatter.ofPattern("HH:mm")),
+                        fontSize = 64.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = textColor
+                    )
+
+                    Text(
+                        text = if (alarmType == "TORAH") {
+                            stringResource(R.string.torah_alarm_title)
+                        } else {
+                            stringResource(R.string.morning_alarm_title)
+                        },
+                        fontSize = 24.sp,
+                        color = textColor
+                    )
+
+                    if (alarmType == "TORAH") {
+                        Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                            Button(
+                                onClick = {
+                                    stopAlarm()
+                                    openUrl("https://niflaot.mychitas.app/?lang=$appLang&ref=share#/neviim")
+                                },
+                                colors = ButtonDefaults.buttonColors(containerColor = TecheletBlue)
+                            ) {
+                                Text(stringResource(R.string.btn_neviim))
+                            }
+                            Button(
+                                onClick = {
+                                    stopAlarm()
+                                    openUrl("https://niflaot.mychitas.app/?lang=$appLang&ref=share#/ktuvim")
+                                },
+                                colors = ButtonDefaults.buttonColors(containerColor = GoldAccent)
+                            ) {
+                                Text(stringResource(R.string.btn_ktuvim), color = NavyDark)
+                            }
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.height(24.dp))
+
+                    OutlinedButton(
+                        onClick = {
+                            AlarmScheduler.scheduleExactAlarm(
+                                context = this@AlarmRingActivity,
+                                triggerTime = ZonedDateTime.now().plusMinutes(5),
+                                alarmType = alarmType,
+                                isSnooze = true
+                            )
+                            stopAlarm()
+                        },
+                        modifier = Modifier.fillMaxWidth().height(52.dp)
+                    ) {
+                        Text(stringResource(R.string.btn_snooze_5), color = textColor, fontSize = 18.sp)
+                    }
+
+                    Button(
+                        onClick = { stopAlarm() },
+                        modifier = Modifier.fillMaxWidth().height(56.dp),
+                        colors = ButtonDefaults.buttonColors(containerColor = GoldAccent)
+                    ) {
+                        Text(
+                            text = stringResource(R.string.btn_stop),
+                            color = NavyDark,
+                            fontSize = 20.sp,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
+                }
+            }
+        }
+    }
+
+    private fun stopAlarm() {
+        stopService(Intent(this, AlarmRingService::class.java))
+        finish()
+    }
+
+    private fun openUrl(url: String) {
+        startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(url)))
+    }
+}

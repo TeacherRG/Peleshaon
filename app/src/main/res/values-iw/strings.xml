@@ -1,0 +1,15 @@
+<resources>
+    <string name="app_name">פלא שעון</string>
+    <string name="morning_alarm_title">שעון מעורר</string>
+    <string name="torah_alarm_title">זמן ללמוד תורה</string>
+    <string name="btn_stop">עצור</string>
+    <string name="btn_snooze_5">עוד 5 דקות</string>
+    <string name="btn_neviim">נביאים</string>
+    <string name="btn_ktuvim">כתובים</string>
+    <string name="alarm_missed">שעון מעורר שלא נענה</string>
+    <string name="mode_sound_light">צליל ואור</string>
+    <string name="mode_sound_only">צליל בלבד</string>
+    <string name="mode_light_only">אור בלבד (שקט)</string>
+    <string name="quiet_shabbat">ללא צלצול: שבת</string>
+    <string name="quiet_yom_tov">ללא צלצול: יום טוב</string>
+</resources>

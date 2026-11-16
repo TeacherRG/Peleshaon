@@ -1,0 +1,15 @@
+<resources>
+    <string name="app_name">Pele Schaon</string>
+    <string name="morning_alarm_title">Morgenwecker</string>
+    <string name="torah_alarm_title">Zeit zum Tora-Lernen</string>
+    <string name="btn_stop">Stopp</string>
+    <string name="btn_snooze_5">Noch 5 Minuten</string>
+    <string name="btn_neviim">Newiim — Propheten</string>
+    <string name="btn_ktuvim">Ketuwim — Schriften</string>
+    <string name="alarm_missed">Wecker verpasst</string>
+    <string name="mode_sound_light">Ton und Licht</string>
+    <string name="mode_sound_only">Nur Ton</string>
+    <string name="mode_light_only">Nur Licht (lautlos)</string>
+    <string name="quiet_shabbat">Kein Wecker: Schabbat</string>
+    <string name="quiet_yom_tov">Kein Wecker: Jom Tow</string>
+</resources>

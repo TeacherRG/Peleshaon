@@ -1,0 +1,15 @@
+<resources>
+    <string name="app_name">Пеле Шаон</string>
+    <string name="morning_alarm_title">Утренний будильник</string>
+    <string name="torah_alarm_title">Время учить Тору</string>
+    <string name="btn_stop">Стоп</string>
+    <string name="btn_snooze_5">Ещё 5 минут</string>
+    <string name="btn_neviim">Невиим — Пророки</string>
+    <string name="btn_ktuvim">Ктувим — Писания</string>
+    <string name="alarm_missed">Будильник пропущен</string>
+    <string name="mode_sound_light">Звук и свет</string>
+    <string name="mode_sound_only">Только звук</string>
+    <string name="mode_light_only">Только свет (без звука)</string>
+    <string name="quiet_shabbat">Без звонка: Шабат</string>
+    <string name="quiet_yom_tov">Без звонка: Йом Тов</string>
+</resources>

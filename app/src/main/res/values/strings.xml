@@ -1,0 +1,15 @@
+<resources>
+    <string name="app_name">Pele Shaon</string>
+    <string name="morning_alarm_title">Morning Alarm</string>
+    <string name="torah_alarm_title">Time to Learn Torah</string>
+    <string name="btn_stop">Stop</string>
+    <string name="btn_snooze_5">Snooze 5 min</string>
+    <string name="btn_neviim">Neviim — Prophets</string>
+    <string name="btn_ktuvim">Ktuvim — Writings</string>
+    <string name="alarm_missed">Missed alarm</string>
+    <string name="mode_sound_light">Sound + Light</string>
+    <string name="mode_sound_only">Sound only</string>
+    <string name="mode_light_only">Light only (silent)</string>
+    <string name="quiet_shabbat">No alarm: Shabbat</string>
+    <string name="quiet_yom_tov">No alarm: Yom Tov</string>
+</resources>
