@@ -175,7 +175,7 @@ fun ClockScreen(onNightScreen: () -> Unit) {
     }
     // меняется, когда меняют настройки (город, будильник) — перечитать
     var version by remember { mutableIntStateOf(0) }
-    val bump = { version++ }
+    val bump: () -> Unit = { version++ }
 
     val city = remember(version) { Prefs.city(context) }
     val auto = remember(version) { Prefs.chosenCity(context) == null }
