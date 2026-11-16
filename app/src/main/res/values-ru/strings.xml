@@ -29,7 +29,7 @@
     <string name="zf_sunset">Закат (конец Минхи)</string>
     <string name="zf_tzait">Выход звёзд (Цет)</string>
     <string name="left">осталось %s</string>
-    <string name="in">через %s</string>
+    <string name="in_time">через %s</string>
     <string name="dur_hm">%1$d ч %2$d мин</string>
     <string name="dur_m">%d мин</string>
     <string name="morning_offset">За %d мин до конца Шма</string>

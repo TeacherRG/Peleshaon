@@ -29,7 +29,7 @@
     <string name="zf_sunset">שקיעה (סוף זמן מנחה)</string>
     <string name="zf_tzait">צאת הכוכבים</string>
     <string name="left">נותרו %s</string>
-    <string name="in">בעוד %s</string>
+    <string name="in_time">בעוד %s</string>
     <string name="dur_hm">%1$d שע׳ %2$d דק׳</string>
     <string name="dur_m">%d דק׳</string>
     <string name="morning_offset">%d דק׳ לפני סוף זמן ק״ש</string>

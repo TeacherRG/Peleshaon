@@ -1,0 +1,17 @@
+<resources>
+    <string name="app_name">פלא שעון</string>
+    <string name="zs_sunrise">הנץ</string>
+    <string name="zs_shma">שמע</string>
+    <string name="zs_tfila">תפילה</string>
+    <string name="zs_chatzot">חצות</string>
+    <string name="zs_mincha">מנחה גד׳</string>
+    <string name="zs_plag">פלג</string>
+    <string name="zs_sunset">שקיעה</string>
+    <string name="zs_tzait">צאה״כ</string>
+    <string name="left">נותרו %s</string>
+    <string name="in_time">בעוד %s</string>
+    <string name="dur_hm">%1$d שע׳ %2$d דק׳</string>
+    <string name="dur_m">%d דק׳</string>
+    <string name="candles">הדלקת נרות</string>
+    <string name="polar">היום אין זריחה או שקיעה</string>
+</resources>

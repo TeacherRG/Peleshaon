@@ -39,9 +39,7 @@ dependencies {
     implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.8.6")
     implementation("androidx.savedstate:savedstate-ktx:1.2.1")
 
-    // Расчёт зманим по методу Алтер Ребе (KosherJava)
-    implementation("com.kosherjava:zmanim:2.5.0")
+    // Расчёт зманим и Шабат — общий с часами модуль
+    implementation(project(":core"))
 
-    // Геолокация (только по кнопке)
-    implementation("com.google.android.gms:play-services-location:21.3.0")
 }

@@ -29,7 +29,7 @@
     <string name="zf_sunset">Sonnenuntergang (Ende Mincha)</string>
     <string name="zf_tzait">Sterne (Zet)</string>
     <string name="left">noch %s</string>
-    <string name="in">in %s</string>
+    <string name="in_time">in %s</string>
     <string name="dur_hm">%1$d Std. %2$d Min.</string>
     <string name="dur_m">%d Min.</string>
     <string name="morning_offset">%d Min. vor dem spätesten Schma</string>

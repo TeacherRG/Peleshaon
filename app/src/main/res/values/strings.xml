@@ -29,7 +29,7 @@
     <string name="zf_sunset">Sunset (end of Mincha)</string>
     <string name="zf_tzait">Nightfall (Tzeit)</string>
     <string name="left">%s left</string>
-    <string name="in">in %s</string>
+    <string name="in_time">in %s</string>
     <string name="dur_hm">%1$d h %2$d min</string>
     <string name="dur_m">%d min</string>
     <string name="morning_offset">%d min before latest Shma</string>
