@@ -112,8 +112,8 @@ class PeleDreamService : DreamService(), LifecycleOwner, SavedStateRegistryOwner
         lifecycleRegistry.handleLifecycleEvent(Lifecycle.Event.ON_RESUME)
     }
 
-    override fun onDetachedToWindow() {
+    override fun onDetachedFromWindow() {
         lifecycleRegistry.handleLifecycleEvent(Lifecycle.Event.ON_DESTROY)
-        super.onDetachedToWindow()
+        super.onDetachedFromWindow()
     }
 }

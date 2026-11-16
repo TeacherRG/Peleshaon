@@ -54,8 +54,8 @@ object ZmanimEngine {
     ): DayZmanimResult {
         val today = now.withZoneSameInstant(zoneId).toLocalDate()
         val todayCal = buildCalendar(today, cityName, lat, lon, elevation, zoneId)
-        val todaySunset = todayCal.sunsetBaalHatanya?.toZoned(zoneId)
-        val todaySunrise = todayCal.sunriseBaalHatanya?.toZoned(zoneId)
+        val todaySunset = todayCal.sunset?.toZoned(zoneId)
+        val todaySunrise = todayCal.sunrise?.toZoned(zoneId)
 
         if (todaySunrise == null || todaySunset == null) {
             return DayZmanimResult(
@@ -114,13 +114,13 @@ object ZmanimEngine {
 
     private fun extractZmanim(cal: ComplexZmanimCalendar, zoneId: ZoneId): List<ZmanItem> {
         val rawMap = listOf(
-            ZmanType.SUNRISE to cal.sunriseBaalHatanya,
+            ZmanType.SUNRISE to cal.sunrise,
             ZmanType.SOF_ZMAN_SHMA to cal.sofZmanShmaBaalHatanya,
             ZmanType.SOF_ZMAN_TFILA to cal.sofZmanTfilaBaalHatanya,
-            ZmanType.CHATZOT to cal.chatzotBaalHatanya,
+            ZmanType.CHATZOT to cal.chatzos,
             ZmanType.MINCHA_GEDOLA to cal.minchaGedolaBaalHatanya,
             ZmanType.PLAG_HAMINCHA to cal.plagHaminchaBaalHatanya,
-            ZmanType.SUNSET to cal.sunsetBaalHatanya,
+            ZmanType.SUNSET to cal.sunset,
             ZmanType.TZAIT to cal.tzaisBaalHatanya
         )
 
