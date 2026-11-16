@@ -29,7 +29,9 @@ object AlarmScheduler {
             putExtra(EXTRA_IS_SNOOZE, isSnooze)
         }
 
-        val requestCode = if (alarmType == "MORNING") 1001 else 1002
+        // Отложенный звонок — свой PendingIntent: иначе он затирает следующий будильник,
+        // а пересчёт расписания (открыли приложение) — отложенный звонок.
+        val requestCode = (if (alarmType == "MORNING") 1001 else 1002) + (if (isSnooze) 10 else 0)
         val pendingIntent = PendingIntent.getBroadcast(
             context,
             requestCode,

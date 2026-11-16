@@ -139,7 +139,7 @@ object ZmanimEngine {
     }
 
     private fun getJewishDateStrings(gregorianDate: LocalDate, isIsrael: Boolean): Pair<String, String> {
-        val jc = JewishCalendar(gregorianDate.year, gregorianDate.monthValue, gregorianDate.dayOfMonth)
+        val jc = JewishCalendar(gregorianDate)
         jc.inIsrael = isIsrael
         val hebFormatter = HebrewDateFormatter().apply { isHebrewFormat = true }
         val latFormatter = HebrewDateFormatter().apply { isHebrewFormat = false }

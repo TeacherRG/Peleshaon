@@ -79,22 +79,33 @@ class AlarmRingService : Service() {
     }
 
     private fun startCrescendoAudio() {
-        val alarmUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM)
-            ?: RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION)
-
-        mediaPlayer = MediaPlayer().apply {
-            setDataSource(applicationContext, alarmUri)
-            setAudioAttributes(
-                AudioAttributes.Builder()
-                    .setUsage(AudioAttributes.USAGE_ALARM)
-                    .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
-                    .build()
-            )
-            isLooping = true
-            setVolume(0.05f, 0.05f)
-            prepare()
-            start()
+        // Мелодия будильника может быть не задана или недоступна — пробуем по очереди.
+        val uris = listOfNotNull(
+            RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM),
+            RingtoneManager.getDefaultUri(RingtoneManager.TYPE_RINGTONE),
+            RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION)
+        )
+        for (uri in uris) {
+            val player = MediaPlayer()
+            try {
+                player.setDataSource(applicationContext, uri)
+                player.setAudioAttributes(
+                    AudioAttributes.Builder()
+                        .setUsage(AudioAttributes.USAGE_ALARM)
+                        .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
+                        .build()
+                )
+                player.isLooping = true
+                player.setVolume(0.05f, 0.05f)
+                player.prepare()
+                player.start()
+                mediaPlayer = player
+                break
+            } catch (e: Exception) {
+                player.release()
+            }
         }
+        if (mediaPlayer == null) return
 
         scope.launch {
             for (step in 1..30) {

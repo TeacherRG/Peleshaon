@@ -430,7 +430,7 @@ private fun AlarmsTab(
                 ) {
                     Column {
                         Text(stringResource(R.string.torah_alarm_title), color = Color.White, fontWeight = FontWeight.Bold, fontSize = 18.sp)
-                        Text("20:00 • niflaot.mychitas.app/?lang=en&ref=share#/neviim", color = TecheletBlue, fontSize = 11.sp)
+                        Text("20:00 • niflaot.mychitas.app/#/neviim", color = TecheletBlue, fontSize = 11.sp)
                     }
                     Switch(checked = torahEnabled, onCheckedChange = onToggleTorah)
                 }
