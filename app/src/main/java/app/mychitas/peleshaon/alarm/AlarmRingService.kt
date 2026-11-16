@@ -7,7 +7,9 @@ import android.media.AudioAttributes
 import android.media.MediaPlayer
 import android.media.RingtoneManager
 import android.os.*
+import android.content.pm.ServiceInfo
 import androidx.core.app.NotificationCompat
+import androidx.core.app.ServiceCompat
 import app.mychitas.peleshaon.R
 import kotlinx.coroutines.*
 
@@ -59,7 +61,10 @@ class AlarmRingService : Service() {
             .setOngoing(true)
             .build()
 
-        startForeground(3001, notification)
+        val fgsType = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            ServiceInfo.FOREGROUND_SERVICE_TYPE_MEDIA_PLAYBACK
+        } else 0
+        ServiceCompat.startForeground(this, 3001, notification, fgsType)
         startActivity(fullScreenIntent)
 
         if (wakeMode != WakeMode.LIGHT_ONLY) {
@@ -148,7 +153,7 @@ class AlarmRingService : Service() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val channel = NotificationChannel(
                 CHANNEL_ID,
-                "Alarms",
+                getString(R.string.channel_alarms),
                 NotificationManager.IMPORTANCE_HIGH
             ).apply {
                 setSound(null, null)

@@ -1,7 +1,13 @@
 package app.mychitas.peleshaon
 
 import android.Manifest
+import android.app.AlarmManager
+import android.app.NotificationManager
 import android.content.Context
+import android.content.Intent
+import android.content.res.Resources
+import android.net.Uri
+import android.provider.Settings
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
@@ -14,6 +20,8 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
@@ -22,6 +30,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalLifecycleOwner
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -295,7 +306,8 @@ private fun ClockMainTab(
     onToggleTheme: () -> Unit,
     onEnableNightScreen: () -> Unit
 ) {
-    val labelsMap = dayZmanim.items.associateWith { getShortZmanLabel(it.type) }
+    val res = LocalContext.current.resources
+    val labelsMap = dayZmanim.items.associateWith { res.getString(shortZmanLabel(it.type)) }
 
     LazyColumn(
         modifier = modifier.fillMaxSize().padding(horizontal = 16.dp),
@@ -347,8 +359,8 @@ private fun ClockMainTab(
             val diffMin = ChronoUnit.MINUTES.between(cityNow, item.roundedTime)
             val countdown = when {
                 diffMin < 0 -> ""
-                item.type.isDeadline -> "осталось ${formatMinutes(diffMin)}"
-                else -> "через ${formatMinutes(diffMin)}"
+                item.type.isDeadline -> res.getString(R.string.left, formatMinutes(res, diffMin))
+                else -> res.getString(R.string.in_, formatMinutes(res, diffMin))
             }
 
             Surface(
@@ -362,7 +374,7 @@ private fun ClockMainTab(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Column {
-                        Text(getFullZmanLabel(item.type), color = textColor, fontWeight = FontWeight.Medium)
+                        Text(stringResource(fullZmanLabel(item.type)), color = textColor, fontWeight = FontWeight.Medium)
                         if (countdown.isNotEmpty()) {
                             Text(countdown, color = TecheletBlue, fontSize = 12.sp)
                         }
@@ -394,9 +406,11 @@ private fun AlarmsTab(
     onChangeTorahMode: (WakeMode) -> Unit
 ) {
     Column(
-        modifier = modifier.fillMaxSize().padding(16.dp),
+        modifier = modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
+        PermissionsCard()
+
         Surface(shape = RoundedCornerShape(16.dp), color = Color(0xFF13263A), modifier = Modifier.fillMaxWidth()) {
             Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
                 Row(
@@ -407,13 +421,13 @@ private fun AlarmsTab(
                     Text(stringResource(R.string.morning_alarm_title), color = Color.White, fontWeight = FontWeight.Bold, fontSize = 18.sp)
                     Switch(checked = morningEnabled, onCheckedChange = onToggleMorning)
                 }
-                Text("За $morningOffset мин до конца Шма", color = GoldAccent, fontSize = 14.sp)
+                Text(stringResource(R.string.morning_offset, morningOffset), color = GoldAccent, fontSize = 14.sp)
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     listOf(15, 30, 45, 60).forEach { min ->
                         FilterChip(
                             selected = morningOffset == min,
                             onClick = { onChangeMorningOffset(min) },
-                            label = { Text("$min м") }
+                            label = { Text(stringResource(R.string.chip_min, min)) }
                         )
                     }
                 }
@@ -430,7 +444,7 @@ private fun AlarmsTab(
                 ) {
                     Column {
                         Text(stringResource(R.string.torah_alarm_title), color = Color.White, fontWeight = FontWeight.Bold, fontSize = 18.sp)
-                        Text("20:00 • niflaot.mychitas.app/#/neviim", color = TecheletBlue, fontSize = 11.sp)
+                        Text(stringResource(R.string.torah_alarm_sub), color = TecheletBlue, fontSize = 11.sp)
                     }
                     Switch(checked = torahEnabled, onCheckedChange = onToggleTorah)
                 }
@@ -483,30 +497,116 @@ private fun CitySelectorTab(
     }
 }
 
-private fun formatMinutes(totalMinutes: Long): String {
-    val h = totalMinutes / 60
-    val m = totalMinutes % 60
-    return if (h > 0) "${h} ч ${m} мин" else "${m} мин"
+private fun formatMinutes(res: Resources, totalMinutes: Long): String {
+    val h = (totalMinutes / 60).toInt()
+    val m = (totalMinutes % 60).toInt()
+    return if (h > 0) res.getString(R.string.dur_hm, h, m) else res.getString(R.string.dur_m, m)
 }
 
-private fun getShortZmanLabel(type: ZmanType): String = when (type) {
-    ZmanType.SUNRISE -> "Восход"
-    ZmanType.SOF_ZMAN_SHMA -> "Шма"
-    ZmanType.SOF_ZMAN_TFILA -> "Тфила"
-    ZmanType.CHATZOT -> "Полдень"
-    ZmanType.MINCHA_GEDOLA -> "Минха гд."
-    ZmanType.PLAG_HAMINCHA -> "Плаг"
-    ZmanType.SUNSET -> "Закат"
-    ZmanType.TZAIT -> "Звёзды"
+private fun shortZmanLabel(type: ZmanType): Int = when (type) {
+    ZmanType.SUNRISE -> R.string.zs_sunrise
+    ZmanType.SOF_ZMAN_SHMA -> R.string.zs_shma
+    ZmanType.SOF_ZMAN_TFILA -> R.string.zs_tfila
+    ZmanType.CHATZOT -> R.string.zs_chatzot
+    ZmanType.MINCHA_GEDOLA -> R.string.zs_mincha
+    ZmanType.PLAG_HAMINCHA -> R.string.zs_plag
+    ZmanType.SUNSET -> R.string.zs_sunset
+    ZmanType.TZAIT -> R.string.zs_tzait
 }
 
-private fun getFullZmanLabel(type: ZmanType): String = when (type) {
-    ZmanType.SUNRISE -> "Восход солнца (Нец)"
-    ZmanType.SOF_ZMAN_SHMA -> "Конец времени Шма"
-    ZmanType.SOF_ZMAN_TFILA -> "Конец времени молитвы"
-    ZmanType.CHATZOT -> "Полдень (Хацот)"
-    ZmanType.MINCHA_GEDOLA -> "Минха гдола"
-    ZmanType.PLAG_HAMINCHA -> "Плаг ґа-минха"
-    ZmanType.SUNSET -> "Закат (конец Минхи)"
-    ZmanType.TZAIT -> "Выход звёзд (Цет)"
+private fun fullZmanLabel(type: ZmanType): Int = when (type) {
+    ZmanType.SUNRISE -> R.string.zf_sunrise
+    ZmanType.SOF_ZMAN_SHMA -> R.string.zf_shma
+    ZmanType.SOF_ZMAN_TFILA -> R.string.zf_tfila
+    ZmanType.CHATZOT -> R.string.zf_chatzot
+    ZmanType.MINCHA_GEDOLA -> R.string.zf_mincha
+    ZmanType.PLAG_HAMINCHA -> R.string.zf_plag
+    ZmanType.SUNSET -> R.string.zf_sunset
+    ZmanType.TZAIT -> R.string.zf_tzait
+}
+
+/** Что мешает будильнику: точное время, окно на весь экран, уведомления. */
+private data class PermissionState(val exact: Boolean, val fullScreen: Boolean, val notifications: Boolean)
+
+private fun readPermissions(context: Context): PermissionState {
+    val am = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
+    val nm = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+    val exact = Build.VERSION.SDK_INT < Build.VERSION_CODES.S || am.canScheduleExactAlarms()
+    val fullScreen = Build.VERSION.SDK_INT < Build.VERSION_CODES.UPSIDE_DOWN_CAKE || nm.canUseFullScreenIntent()
+    val notifications = nm.areNotificationsEnabled()
+    return PermissionState(exact, fullScreen, notifications)
+}
+
+private fun openSettings(context: Context, action: String) {
+    val pkg = context.packageName
+    val intent = when (action) {
+        Settings.ACTION_APP_NOTIFICATION_SETTINGS ->
+            Intent(action).putExtra(Settings.EXTRA_APP_PACKAGE, pkg)
+        else -> Intent(action, Uri.parse("package:$pkg"))
+    }.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+    try {
+        context.startActivity(intent)
+    } catch (e: Exception) {
+        context.startActivity(
+            Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS, Uri.parse("package:$pkg"))
+                .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+        )
+    }
+}
+
+@Composable
+private fun PermissionsCard() {
+    val context = LocalContext.current
+    var state by remember { mutableStateOf(readPermissions(context)) }
+    val owner = LocalLifecycleOwner.current
+    DisposableEffect(owner) {
+        val observer = LifecycleEventObserver { _, event ->
+            if (event == Lifecycle.Event.ON_RESUME) {
+                val fresh = readPermissions(context)
+                if (fresh.exact && !state.exact) AlarmScheduler.rescheduleAllFromPrefs(context)
+                state = fresh
+            }
+        }
+        owner.lifecycle.addObserver(observer)
+        onDispose { owner.lifecycle.removeObserver(observer) }
+    }
+    if (state.exact && state.fullScreen && state.notifications) return
+
+    Surface(shape = RoundedCornerShape(16.dp), color = Color(0xFF3A2A13), modifier = Modifier.fillMaxWidth()) {
+        Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            Text(stringResource(R.string.perm_title), color = GoldAccent, fontWeight = FontWeight.Bold, fontSize = 18.sp)
+            Text(stringResource(R.string.perm_note), color = Color.White.copy(alpha = 0.8f), fontSize = 13.sp)
+            PermissionRow(R.string.perm_exact, state.exact) {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                    openSettings(context, Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM)
+                }
+            }
+            PermissionRow(R.string.perm_fullscreen, state.fullScreen) {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+                    openSettings(context, Settings.ACTION_MANAGE_APP_USE_FULL_SCREEN_INTENT)
+                }
+            }
+            PermissionRow(R.string.perm_notif, state.notifications) {
+                openSettings(context, Settings.ACTION_APP_NOTIFICATION_SETTINGS)
+            }
+        }
+    }
+}
+
+@Composable
+private fun PermissionRow(label: Int, granted: Boolean, onFix: () -> Unit) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Text(stringResource(label), color = Color.White, fontSize = 14.sp, modifier = Modifier.weight(1f))
+        if (granted) {
+            Text("✓ " + stringResource(R.string.perm_ok), color = TecheletBlue, fontSize = 13.sp)
+        } else {
+            Button(onClick = onFix, colors = ButtonDefaults.buttonColors(containerColor = GoldAccent)) {
+                Text(stringResource(R.string.perm_fix), color = NavyDark)
+            }
+        }
+    }
 }
