@@ -150,4 +150,15 @@
     <string name="legend_t">איך קוראים את השעון</string>
     <string name="help">עזרה</string>
     <string name="alarm_how_note">אור — המסך מתבהר לאט, כמו שחר; «אור בלבד» מעיר בלי צליל.</string>
+    <string name="about_t">על היישום</string>
+    <string name="about_version">גרסה %s</string>
+    <string name="about_by">פרויקט התורה MyChitas · ה״שעון״ של אתר נפלאות</string>
+    <string name="about_site">אתר נפלאות — niflaot.mychitas.app</string>
+    <string name="about_mail">כתבו לנו — Office@mychitas.app</string>
+    <string name="privacy_t">פרטיות</string>
+    <string name="privacy_1">היישום אינו אוסף עליכם שום מידע: אין חשבונות, פרסומות, ניתוח נתונים או מונים.</string>
+    <string name="privacy_2">הוא אינו מתחבר לאינטרנט — אין לו אפילו הרשאה לכך. האתר נפתח רק בלחיצה שלכם, בדפדפן.</string>
+    <string name="privacy_3">העיר, השעונים המעוררים וההגדרות נשמרים רק בטלפון. אם הגיבוי של אנדרואיד מופעל, המערכת עשויה לשמור אותם בחשבון Google שלכם.</string>
+    <string name="privacy_4">המיקום אינו מתבקש: העיר נקבעת לפי אזור הזמן או לפי בחירתכם.</string>
+    <string name="privacy_full">הטקסט המלא באתר ←</string>
 </resources>

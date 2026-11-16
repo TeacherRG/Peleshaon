@@ -150,4 +150,15 @@
     <string name="legend_t">How to read the dial</string>
     <string name="help">Help</string>
     <string name="alarm_how_note">Light — the screen slowly brightens, like dawn; «Light only» wakes you without sound.</string>
+    <string name="about_t">About</string>
+    <string name="about_version">Version %s</string>
+    <string name="about_by">MyChitas Torah project · the «Clock» of the Niflaot site</string>
+    <string name="about_site">Niflaot site — niflaot.mychitas.app</string>
+    <string name="about_mail">Write to us — Office@mychitas.app</string>
+    <string name="privacy_t">Privacy</string>
+    <string name="privacy_1">The app collects no data about you: no accounts, no ads, no analytics, no trackers.</string>
+    <string name="privacy_2">It does not go online — it does not even have the internet permission. The site opens only when you tap a button, in your browser.</string>
+    <string name="privacy_3">The city, alarms and settings stay on the phone. If Android backup is on, the system may save them to your Google account.</string>
+    <string name="privacy_4">Location is not requested: the city comes from the time zone or your choice.</string>
+    <string name="privacy_full">Full text on the site →</string>
 </resources>

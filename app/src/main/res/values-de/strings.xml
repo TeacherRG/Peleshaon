@@ -150,4 +150,15 @@
     <string name="legend_t">So liest du das Zifferblatt</string>
     <string name="help">Hilfe</string>
     <string name="alarm_how_note">Licht — der Bildschirm wird langsam hell wie die Morgendämmerung; «Nur Licht» weckt ohne Ton.</string>
+    <string name="about_t">Über die App</string>
+    <string name="about_version">Version %s</string>
+    <string name="about_by">Tora-Projekt MyChitas · die «Uhr» der Seite Niflaot</string>
+    <string name="about_site">Seite Niflaot — niflaot.mychitas.app</string>
+    <string name="about_mail">Schreib uns — Office@mychitas.app</string>
+    <string name="privacy_t">Datenschutz</string>
+    <string name="privacy_1">Die App sammelt keine Daten über dich: keine Konten, keine Werbung, keine Analyse, keine Zähler.</string>
+    <string name="privacy_2">Sie geht nicht ins Internet — sie hat nicht einmal diese Berechtigung. Die Seite öffnet sich nur auf deinen Knopfdruck, im Browser.</string>
+    <string name="privacy_3">Stadt, Wecker und Einstellungen bleiben auf dem Handy. Ist die Android-Sicherung an, kann das System sie in deinem Google-Konto speichern.</string>
+    <string name="privacy_4">Der Standort wird nicht abgefragt: die Stadt kommt aus der Zeitzone oder von deiner Wahl.</string>
+    <string name="privacy_full">Vollständiger Text auf der Seite →</string>
 </resources>

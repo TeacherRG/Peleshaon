@@ -97,7 +97,7 @@ import java.util.Locale
 import kotlin.math.roundToInt
 
 /** Окно поверх часов: город, Шабат, два будильника, все времена, «Как считаем». */
-private enum class Panel { CITY, SHABBAT, WAKE, STUDY, TIMES, INFO }
+private enum class Panel { CITY, SHABBAT, WAKE, STUDY, TIMES, INFO, PRIVACY }
 
 /** «осталось / через N ч M мин» — как на сайте: минуты вверх, больше суток — дни и часы. */
 private fun until(context: Context, now: ZonedDateTime, at: ZonedDateTime, deadline: Boolean): String {
@@ -280,7 +280,8 @@ fun ClockScreen(onNightScreen: () -> Unit, onIntro: () -> Unit = {}) {
                         Prefs.setMarks(context, marks)
                     },
                     onTziruf = { tziruf = it; Prefs.setTziruf(context, it) })
-                Panel.INFO -> InfoSheet(onNightScreen = { panel = null; onNightScreen() }, onIntro = { panel = null; onIntro() })
+                Panel.INFO -> InfoSheet(onNightScreen = { panel = null; onNightScreen() }, onIntro = { panel = null; onIntro() }, onPrivacy = { panel = Panel.PRIVACY })
+                Panel.PRIVACY -> PrivacySheet()
             }
         }
     }
@@ -738,7 +739,7 @@ private fun TimesSheet(
 // ---------------------------------------------------------------- как считаем
 
 @Composable
-private fun InfoSheet(onNightScreen: () -> Unit, onIntro: () -> Unit) {
+private fun InfoSheet(onNightScreen: () -> Unit, onIntro: () -> Unit, onPrivacy: () -> Unit) {
     SheetColumn {
         SheetTitle(stringResource(R.string.help))
         Text(stringResource(R.string.legend_t), fontWeight = FontWeight.Bold, color = ClockColors.Ink)
@@ -758,5 +759,68 @@ private fun InfoSheet(onNightScreen: () -> Unit, onIntro: () -> Unit) {
         OutlinedButton(onClick = onIntro, border = BorderStroke(1.dp, ClockColors.Line)) {
             Text(stringResource(R.string.ob_again), color = ClockColors.Ink)
         }
+        HorizontalDivider(color = ClockColors.Line)
+        AboutBlock(onPrivacy)
+    }
+}
+
+private const val SITE = "https://niflaot.mychitas.app/"
+private const val PRIVACY_URL = "https://niflaot.mychitas.app/peleshaon/privacy/"
+private const val MAIL = "Office@mychitas.app"
+
+private fun langParam(): String = when (Locale.getDefault().language) {
+    "ru" -> "ru"; "de" -> "de"; "iw", "he" -> "he"; else -> "en"
+}
+
+private fun openUri(context: Context, uri: String) {
+    try {
+        context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(uri)).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
+    } catch (e: Exception) {
+        // нет браузера или почты — ничего не открываем
+    }
+}
+
+/** «О приложении»: версия, сайт Нифлаот, почта, конфиденциальность. */
+@Composable
+private fun AboutBlock(onPrivacy: () -> Unit) {
+    val context = LocalContext.current
+    val version = remember {
+        runCatching { context.packageManager.getPackageInfo(context.packageName, 0).versionName }.getOrNull() ?: ""
+    }
+    Text(stringResource(R.string.about_t), fontWeight = FontWeight.Bold, color = ClockColors.Ink)
+    Note(stringResource(R.string.about_by) + " · " + stringResource(R.string.about_version, version))
+    LinkRow(stringResource(R.string.about_site)) { openUri(context, "$SITE?lang=${langParam()}&ref=app") }
+    LinkRow(stringResource(R.string.about_mail)) { openUri(context, "mailto:$MAIL") }
+    LinkRow(stringResource(R.string.privacy_t), onPrivacy)
+}
+
+@Composable
+private fun LinkRow(text: String, onClick: () -> Unit) {
+    Text(
+        text,
+        color = ClockColors.TcheletDeep,
+        fontWeight = FontWeight.SemiBold,
+        fontSize = 15.sp,
+        modifier = Modifier.fillMaxWidth().clickable(onClick = onClick).padding(vertical = 6.dp)
+    )
+}
+
+/** Коротко — что приложение делает с данными; полный текст — на сайте (тот же, что в Google Play). */
+@Composable
+private fun PrivacySheet() {
+    val context = LocalContext.current
+    SheetColumn {
+        SheetTitle(stringResource(R.string.privacy_t))
+        for (id in listOf(R.string.privacy_1, R.string.privacy_2, R.string.privacy_3, R.string.privacy_4)) {
+            Row {
+                Text("•", color = ClockColors.Gold, fontSize = 18.sp, modifier = Modifier.padding(end = 10.dp))
+                Text(stringResource(id), fontSize = 14.5.sp, lineHeight = 21.sp, color = ClockColors.Ink2)
+            }
+        }
+        LinkRow(stringResource(R.string.privacy_full)) {
+            val anchor = when (langParam()) { "ru" -> "ru"; "de" -> "de"; "he" -> "he"; else -> "en" }
+            openUri(context, "$PRIVACY_URL#$anchor")
+        }
+        Note(stringResource(R.string.about_mail))
     }
 }
