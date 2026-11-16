@@ -16,6 +16,23 @@ android {
         versionName = "1.0.0-alpha1"
     }
 
+    // Один ключ для всех тестовых сборок: иначе каждая сборка на GitHub подписана новым ключом,
+    // и Android не ставит её поверх прошлой («Приложение не установлено»).
+    signingConfigs {
+        getByName("debug") {
+            storeFile = rootProject.file("debug.keystore")
+            storePassword = "android"
+            keyAlias = "androiddebugkey"
+            keyPassword = "android"
+        }
+    }
+
+    buildTypes {
+        getByName("debug") {
+            signingConfig = signingConfigs.getByName("debug")
+        }
+    }
+
     buildFeatures {
         compose = true
     }
