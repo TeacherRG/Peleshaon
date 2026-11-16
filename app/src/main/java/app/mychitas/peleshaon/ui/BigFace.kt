@@ -18,6 +18,12 @@ import androidx.compose.ui.graphics.drawscope.translate
 import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.graphics.nativeCanvas
 import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.graphics.ImageBitmap
+import androidx.compose.ui.graphics.asAndroidBitmap
+import androidx.compose.ui.graphics.drawscope.CanvasDrawScope
+import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.unit.Density
+import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.graphics.vector.PathParser
 import androidx.compose.ui.input.pointer.pointerInput
 import app.mychitas.peleshaon.domain.DashState
@@ -127,12 +133,7 @@ fun BigFace(
 ) {
     val dots = remember(events, zone) { place(events, zone) }
     // подписанные времена — раздвинуты по ободу, чтобы не налезали
-    val labelled = remember(dots) {
-        val l = dots.filter { it.e.label }.sortedBy { it.turn }
-        val turns = l.map { it.turn }.toMutableList()
-        for (i in 1 until turns.size) turns[i] = max(turns[i], turns[i - 1] + 0.045)
-        l.zip(turns)
-    }
+    val labelled = remember(dots) { labelsOf(dots) }
 
     val tap = if (onPick != null) Modifier.pointerInput(dots) {
         detectTapGestures { o ->
@@ -170,7 +171,8 @@ private fun DrawScope.drawFace(
     labelled: List<Pair<DotPlace, Double>>,
     active: String?,
     tziruf: Boolean,
-    k: Float
+    k: Float,
+    showTime: Boolean = true
 ) {
     val c = Offset(100f, 100f)
     drawCircle(ClockColors.RimFill, radius = 99f, center = c)
@@ -241,7 +243,61 @@ private fun DrawScope.drawFace(
     if (tziruf && ring != null) {
         text(Dial.TZIRUFIM[ring.hour], 100f, 148f, 22f, ClockColors.TzirufC)
     }
-    val t = now.withZoneSameInstant(zone)
-    text(String.format(Locale.ROOT, "%02d:%02d", t.hour, t.minute), 100f, 94f, 34f, ClockColors.BigTime)
-    text(String.format(Locale.ROOT, "%02d", t.second), 100f, 119f, 14f, ClockColors.Seconds)
+    if (showTime) {
+        val t = now.withZoneSameInstant(zone)
+        text(String.format(Locale.ROOT, "%02d:%02d", t.hour, t.minute), 100f, 94f, 34f, ClockColors.BigTime)
+        text(String.format(Locale.ROOT, "%02d", t.second), 100f, 119f, 14f, ClockColors.Seconds)
+    }
+}
+
+/** Подписанные времена — раздвинуты по ободу, чтобы не налезали. */
+private fun labelsOf(dots: List<DotPlace>): List<Pair<DotPlace, Double>> {
+    val l = dots.filter { it.e.label }.sortedBy { it.turn }
+    val turns = l.map { it.turn }.toMutableList()
+    for (i in 1 until turns.size) turns[i] = max(turns[i], turns[i - 1] + 0.045)
+    return l.zip(turns)
+}
+
+/**
+ * Тот же циферблат картинкой — для виджета на рабочем столе (там нет Compose).
+ * Время в центре не рисуется: его показывает TextClock поверх, он идёт сам.
+ */
+fun renderFace(
+    sizePx: Int,
+    now: ZonedDateTime,
+    zone: ZoneId,
+    ring: Ring?,
+    events: List<FaceEvent>,
+    tziruf: Boolean
+): android.graphics.Bitmap {
+    val bmp = ImageBitmap(sizePx, sizePx)
+    val k = sizePx / BOX
+    val dots = place(events, zone)
+    CanvasDrawScope().draw(Density(1f), LayoutDirection.Ltr, androidx.compose.ui.graphics.Canvas(bmp), Size(sizePx.toFloat(), sizePx.toFloat())) {
+        scale(k, k, pivot = Offset.Zero) {
+            translate(-BOX_MIN, -BOX_MIN) {
+                drawFace(now, zone, ring, dots, labelsOf(dots), null, tziruf, k, showTime = false)
+            }
+        }
+    }
+    return bmp.asAndroidBitmap()
+}
+
+/**
+ * Точки циферблата: все времена показанного дня (выбранные — с подписью);
+ * свечи и исход Шабата — когда до них меньше суток (или прошло не больше двух часов).
+ */
+fun faceEvents(
+    day: app.mychitas.peleshaon.domain.DayZmanimResult,
+    sh: app.mychitas.peleshaon.domain.ShabbatTimes,
+    marks: Set<ZmanType>,
+    now: ZonedDateTime
+): List<FaceEvent> {
+    val list = day.items.map { FaceEvent(it.type.name, it.roundedTime, zmanColor(it.type), it.type in marks) }.toMutableList()
+    for ((id, at) in listOf(CANDLES to sh.candles, HAVDALAH to sh.havdalah)) {
+        if (at != null && at.isBefore(now.plusHours(22)) && at.isAfter(now.minusHours(2))) {
+            list += FaceEvent(id, at, ClockColors.GoldDeep, true)
+        }
+    }
+    return list
 }

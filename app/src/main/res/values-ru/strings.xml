@@ -110,4 +110,14 @@
     <string name="study_lead">Напомнит, что пора учить Тору, — и откроет отрывок дня:</string>
     <string name="study_when">Учить в это время</string>
     <string name="alarm_note">Будильник звонит и при закрытом приложении. В Шабат, Йом Тов и Йом Кипур он молчит — от зажигания свечей до исхода. Настройки хранятся только на этом телефоне.</string>
+    <string name="live_left">осталось</string>
+    <string name="live_in">через</string>
+    <string name="live_channel">Ближайшее время дня</string>
+    <string name="polar_short">Сегодня нет восхода и заката</string>
+    <string name="widget_face_name">Пеле Шаон — циферблат дня</string>
+    <string name="widget_line_name">Пеле Шаон — ближайшее время</string>
+    <string name="widget_face_desc">Кольцо дня со всеми временами, ближайшее время и отсчёт до него</string>
+    <string name="widget_line_desc">Время, ближайшее время дня и отсчёт до него</string>
+    <string name="live_notif">Ближайшее время в уведомлении</string>
+    <string name="live_notif_note">Тихое уведомление с отсчётом до ближайшего времени дня. Видно на экране блокировки, а на многих телефонах — значком на выключенном экране («Всегда на экране»).</string>
 </resources>

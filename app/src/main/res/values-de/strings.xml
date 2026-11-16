@@ -110,4 +110,14 @@
     <string name="study_lead">Erinnert dich daran, dass es Zeit ist, Tora zu lernen — und öffnet den Abschnitt des Tages:</string>
     <string name="study_when">Um diese Zeit lernen</string>
     <string name="alarm_note">Der Wecker klingelt auch bei geschlossener App. An Schabbat, Jom Tow und Jom Kippur schweigt er — vom Kerzenzünden bis zum Ausgang. Die Einstellungen bleiben nur auf diesem Handy.</string>
+    <string name="live_left">noch</string>
+    <string name="live_in">in</string>
+    <string name="live_channel">Nächste Zeit des Tages</string>
+    <string name="polar_short">Heute kein Auf- oder Untergang</string>
+    <string name="widget_face_name">Pele Schaon — Tageszifferblatt</string>
+    <string name="widget_line_name">Pele Schaon — nächste Zeit</string>
+    <string name="widget_face_desc">Der Ring des Tages mit allen Zeiten, die nächste Zeit und ein Countdown</string>
+    <string name="widget_line_desc">Uhrzeit, die nächste Zeit des Tages und ein Countdown dazu</string>
+    <string name="live_notif">Nächste Zeit in der Benachrichtigung</string>
+    <string name="live_notif_note">Eine stille Benachrichtigung mit Countdown zur nächsten Zeit des Tages. Sie ist auf dem Sperrbildschirm zu sehen, auf vielen Handys auch als Symbol auf dem Always-on-Display.</string>
 </resources>

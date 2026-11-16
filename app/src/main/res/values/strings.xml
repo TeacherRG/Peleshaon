@@ -110,4 +110,14 @@
     <string name="study_lead">Reminds you that it is time to learn Torah — and opens the passage of the day:</string>
     <string name="study_when">Learn at this time</string>
     <string name="alarm_note">The alarm rings even when the app is closed. On Shabbat, Yom Tov and Yom Kippur it keeps quiet — from candle lighting until the day ends. The settings are kept on this phone only.</string>
+    <string name="live_left">left</string>
+    <string name="live_in">in</string>
+    <string name="live_channel">Next time of the day</string>
+    <string name="polar_short">No sunrise or sunset today</string>
+    <string name="widget_face_name">Pele Shaon — day dial</string>
+    <string name="widget_line_name">Pele Shaon — next time</string>
+    <string name="widget_face_desc">The ring of the day with every time of the day, the next one and a countdown</string>
+    <string name="widget_line_desc">The time, the next time of the day and a countdown to it</string>
+    <string name="live_notif">Next time in the notifications</string>
+    <string name="live_notif_note">A quiet notification with a countdown to the next time of the day. It is shown on the lock screen, and on many phones — as an icon on the always-on display.</string>
 </resources>

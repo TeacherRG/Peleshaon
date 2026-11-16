@@ -27,6 +27,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.core.content.ContextCompat
 import app.mychitas.peleshaon.alarm.AlarmScheduler
+import app.mychitas.peleshaon.live.Live
 import app.mychitas.peleshaon.ui.ClockScreen
 import app.mychitas.peleshaon.ui.NightFace
 
@@ -43,6 +44,12 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         AlarmScheduler.rescheduleAllFromPrefs(this)
         setContent { PeleShaonApp() }
+    }
+
+    // Город, подписи, «Сочетание Имени» могли поменяться — виджеты и уведомление подхватят
+    override fun onStop() {
+        super.onStop()
+        Live.update(this)
     }
 }
 

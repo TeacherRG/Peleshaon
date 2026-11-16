@@ -109,5 +109,6 @@ class AlarmReceiver : BroadcastReceiver() {
 class BootReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent) {
         AlarmScheduler.rescheduleAllFromPrefs(context)
+        app.mychitas.peleshaon.live.Live.update(context)
     }
 }

@@ -84,6 +84,7 @@ import app.mychitas.peleshaon.domain.Dial
 import app.mychitas.peleshaon.domain.ZmanType
 import app.mychitas.peleshaon.domain.ZmanimEngine
 import app.mychitas.peleshaon.domain.findCities
+import app.mychitas.peleshaon.live.Live
 import kotlinx.coroutines.delay
 import java.time.DayOfWeek
 import java.time.Duration
@@ -97,56 +98,6 @@ import kotlin.math.roundToInt
 
 /** Окно поверх часов: город, Шабат, два будильника, все времена, «Как считаем». */
 private enum class Panel { CITY, SHABBAT, WAKE, STUDY, TIMES, INFO }
-
-private fun short(id: String): Int = when (id) {
-    CANDLES -> R.string.z_s_candles
-    HAVDALAH -> R.string.z_s_havdalah
-    else -> when (ZmanType.valueOf(id)) {
-        ZmanType.ALOT -> R.string.z_s_alot
-        ZmanType.SUNRISE -> R.string.z_s_sunrise
-        ZmanType.SOF_ZMAN_SHMA -> R.string.z_s_sof_zman_shma
-        ZmanType.SOF_ZMAN_TFILA -> R.string.z_s_sof_zman_tfila
-        ZmanType.CHATZOT -> R.string.z_s_chatzot
-        ZmanType.MINCHA_GEDOLA -> R.string.z_s_mincha_gedola
-        ZmanType.PLAG_HAMINCHA -> R.string.z_s_plag_hamincha
-        ZmanType.SUNSET -> R.string.z_s_sunset
-        ZmanType.TZAIT -> R.string.z_s_tzait
-    }
-}
-
-private fun full(id: String): Int = when (id) {
-    CANDLES -> R.string.z_t_candles
-    HAVDALAH -> R.string.z_t_havdalah
-    else -> when (ZmanType.valueOf(id)) {
-        ZmanType.ALOT -> R.string.z_t_alot
-        ZmanType.SUNRISE -> R.string.z_t_sunrise
-        ZmanType.SOF_ZMAN_SHMA -> R.string.z_t_sof_zman_shma
-        ZmanType.SOF_ZMAN_TFILA -> R.string.z_t_sof_zman_tfila
-        ZmanType.CHATZOT -> R.string.z_t_chatzot
-        ZmanType.MINCHA_GEDOLA -> R.string.z_t_mincha_gedola
-        ZmanType.PLAG_HAMINCHA -> R.string.z_t_plag_hamincha
-        ZmanType.SUNSET -> R.string.z_t_sunset
-        ZmanType.TZAIT -> R.string.z_t_tzait
-    }
-}
-
-private fun about(id: String): Int = when (id) {
-    CANDLES -> R.string.z_d_candles
-    HAVDALAH -> R.string.z_d_havdalah
-    else -> when (ZmanType.valueOf(id)) {
-        ZmanType.ALOT -> R.string.z_d_alot
-        ZmanType.SUNRISE -> R.string.z_d_sunrise
-        ZmanType.SOF_ZMAN_SHMA -> R.string.z_d_sof_zman_shma
-        ZmanType.SOF_ZMAN_TFILA -> R.string.z_d_sof_zman_tfila
-        ZmanType.CHATZOT -> R.string.z_d_chatzot
-        ZmanType.MINCHA_GEDOLA -> R.string.z_d_mincha_gedola
-        ZmanType.PLAG_HAMINCHA -> R.string.z_d_plag_hamincha
-        ZmanType.SUNSET -> R.string.z_d_sunset
-        ZmanType.TZAIT -> R.string.z_d_tzait
-    }
-}
-
-private fun isDeadline(id: String) = id != CANDLES && id != HAVDALAH && ZmanType.valueOf(id).isDeadline
 
 /** «осталось / через N ч M мин» — как на сайте: минуты вверх, больше суток — дни и часы. */
 private fun until(context: Context, now: ZonedDateTime, at: ZonedDateTime, deadline: Boolean): String {
@@ -198,15 +149,7 @@ fun ClockScreen(onNightScreen: () -> Unit) {
     )
 
     // точки циферблата: все времена показанного дня; свечи и исход — когда до них меньше суток
-    val events = remember(day, sh, marks, minute) {
-        val list = day.items.map { FaceEvent(it.type.name, it.roundedTime, zmanColor(it.type), it.type in marks) }.toMutableList()
-        for ((id, at) in listOf(CANDLES to sh.candles, HAVDALAH to sh.havdalah)) {
-            if (at != null && at.isBefore(cityNow.plusHours(22)) && at.isAfter(cityNow.minusHours(2))) {
-                list += FaceEvent(id, at, ClockColors.GoldDeep, true)
-            }
-        }
-        list.toList()
-    }
+    val events = remember(day, sh, marks, minute) { faceEvents(day, sh, marks, cityNow) }
 
     val wdTime = { at: ZonedDateTime ->
         "${at.withZoneSameInstant(zone).dayOfWeek.getDisplayName(TextStyle.SHORT, locale)} ${at.withZoneSameInstant(zone).format(HHMM)}"
@@ -781,6 +724,13 @@ private fun TimesSheet(
             Text(stringResource(R.string.tziruf), color = ClockColors.Ink, fontWeight = FontWeight.SemiBold)
         }
         if (tziruf) Note(stringResource(R.string.tziruf_note))
+        HorizontalDivider(color = ClockColors.Line)
+        var live by remember { mutableStateOf(Live.notificationOn(context)) }
+        Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.clickable { live = !live; Live.setNotification(context, live) }) {
+            Checkbox(checked = live, onCheckedChange = { live = it; Live.setNotification(context, it) }, colors = checkColors())
+            Text(stringResource(R.string.live_notif), color = ClockColors.Ink, fontWeight = FontWeight.SemiBold)
+        }
+        Note(stringResource(R.string.live_notif_note))
     }
 }
 
