@@ -1,23 +1,17 @@
 package app.mychitas.peleshaon
 
-import android.Manifest
-import android.content.pm.PackageManager
-import android.os.Build
 import android.os.Bundle
 import android.view.WindowManager
 import androidx.activity.ComponentActivity
 import androidx.activity.SystemBarStyle
 import androidx.activity.compose.BackHandler
-import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -25,11 +19,11 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
-import androidx.core.content.ContextCompat
 import app.mychitas.peleshaon.alarm.AlarmScheduler
 import app.mychitas.peleshaon.live.Live
 import app.mychitas.peleshaon.ui.ClockScreen
 import app.mychitas.peleshaon.ui.NightFace
+import app.mychitas.peleshaon.ui.Onboarding
 
 /**
  * Пеле Шаон — «Часы» сайта Нифлаот в телефоне: циферблат дня на весь экран, времена по Алтер Ребе,
@@ -57,17 +51,17 @@ class MainActivity : ComponentActivity() {
 fun PeleShaonApp() {
     val context = LocalContext.current
     var night by remember { mutableStateOf(false) }
+    // Знакомство — при первом запуске (разрешение на уведомления просит его шаг про будильники, с объяснением)
+    var intro by remember { mutableStateOf(!Prefs.of(context).getBoolean("onboarded", false)) }
 
-    val notifLauncher = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { }
-    LaunchedEffect(Unit) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
-            ContextCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED
-        ) {
-            notifLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
-        }
-    }
-
-    if (night) {
+    if (intro) {
+        Onboarding(onDone = {
+            Prefs.of(context).edit().putBoolean("onboarded", true).apply()
+            AlarmScheduler.rescheduleAllFromPrefs(context)
+            Live.update(context)
+            intro = false
+        })
+    } else if (night) {
         // Ночной экран у кровати: тёмный, экран не гаснет, нажатие — назад
         DisposableEffect(Unit) {
             val window = (context as? ComponentActivity)?.window
@@ -82,6 +76,6 @@ fun PeleShaonApp() {
         BackHandler { night = false }
         NightFace(Modifier.fillMaxSize().background(Color.Black).clickable { night = false })
     } else {
-        ClockScreen(onNightScreen = { night = true })
+        ClockScreen(onNightScreen = { night = true }, onIntro = { intro = true })
     }
 }

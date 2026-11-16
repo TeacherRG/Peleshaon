@@ -113,7 +113,7 @@ private val HHMM: DateTimeFormatter = DateTimeFormatter.ofPattern("HH:mm")
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ClockScreen(onNightScreen: () -> Unit) {
+fun ClockScreen(onNightScreen: () -> Unit, onIntro: () -> Unit = {}) {
     val context = LocalContext.current
     val locale = Locale.getDefault()
 
@@ -182,7 +182,7 @@ fun ClockScreen(onNightScreen: () -> Unit) {
                     if (day.isNextJewishDayAfterSunset) Text(stringResource(R.string.evening), color = ClockColors.Muted, fontSize = 11.sp, textAlign = TextAlign.Center)
                 }
                 Chip(onClick = { panel = Panel.INFO }, round = true) {
-                    Text("i", fontWeight = FontWeight.Bold, fontSize = 16.sp, color = ClockColors.TcheletDeep)
+                    Text("?", fontWeight = FontWeight.Bold, fontSize = 17.sp, color = ClockColors.TcheletDeep)
                 }
             }
 
@@ -280,7 +280,7 @@ fun ClockScreen(onNightScreen: () -> Unit) {
                         Prefs.setMarks(context, marks)
                     },
                     onTziruf = { tziruf = it; Prefs.setTziruf(context, it) })
-                Panel.INFO -> InfoSheet(onNightScreen = { panel = null; onNightScreen() })
+                Panel.INFO -> InfoSheet(onNightScreen = { panel = null; onNightScreen() }, onIntro = { panel = null; onIntro() })
             }
         }
     }
@@ -407,12 +407,12 @@ private fun SheetColumn(content: @Composable () -> Unit) {
 // ---------------------------------------------------------------- город
 
 @Composable
-private fun CitySheet(city: CityOption, auto: Boolean, onPick: (CityOption?) -> Unit) {
+internal fun CitySheet(city: CityOption, auto: Boolean, title: Boolean = true, onPick: (CityOption?) -> Unit) {
     val locale = Locale.getDefault()
     var q by remember { mutableStateOf("") }
     val list = remember(q) { if (q.isBlank()) CITIES.sortedBy { it.title(locale) } else findCities(q, 30) }
     Column(modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp).padding(bottom = 16.dp)) {
-        SheetTitle(stringResource(R.string.city))
+        if (title) SheetTitle(stringResource(R.string.city))
         Text(
             city.title(locale) + if (auto) " · " + stringResource(R.string.city_auto) else "",
             color = ClockColors.Gold, fontWeight = FontWeight.Bold
@@ -602,6 +602,7 @@ private fun AlarmSheet(
                 )
             }
         }
+        Note(stringResource(R.string.alarm_how_note))
 
         if (spec.on) {
             Surface(shape = RoundedCornerShape(12.dp), color = ClockColors.Surface, border = BorderStroke(1.dp, ClockColors.Line), modifier = Modifier.fillMaxWidth()) {
@@ -737,14 +738,25 @@ private fun TimesSheet(
 // ---------------------------------------------------------------- как считаем
 
 @Composable
-private fun InfoSheet(onNightScreen: () -> Unit) {
+private fun InfoSheet(onNightScreen: () -> Unit, onIntro: () -> Unit) {
     SheetColumn {
-        SheetTitle(stringResource(R.string.info))
+        SheetTitle(stringResource(R.string.help))
+        Text(stringResource(R.string.legend_t), fontWeight = FontWeight.Bold, color = ClockColors.Ink)
+        DialLegend()
+        HorizontalDivider(color = ClockColors.Line)
+        Text(stringResource(R.string.info), fontWeight = FontWeight.Bold, color = ClockColors.Ink)
         Note(stringResource(R.string.note))
         Note(stringResource(R.string.shabbat_note))
         Note(stringResource(R.string.alarm_note))
         Button(onClick = onNightScreen, colors = ButtonDefaults.buttonColors(containerColor = ClockColors.Surface)) {
             Text("🌙  " + stringResource(R.string.night_screen), color = ClockColors.Ink)
+        }
+        HorizontalDivider(color = ClockColors.Line)
+        Note(stringResource(R.string.ob5_l1))
+        Note(stringResource(R.string.ob5_l2))
+        Note(stringResource(R.string.ob5_l3))
+        OutlinedButton(onClick = onIntro, border = BorderStroke(1.dp, ClockColors.Line)) {
+            Text(stringResource(R.string.ob_again), color = ClockColors.Ink)
         }
     }
 }
