@@ -61,7 +61,37 @@
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
                 <action android:name="android.intent.action.TIMEZONE_CHANGED" />
                 <action android:name="android.intent.action.TIME_SET" />
+                <action android:name="android.intent.action.LOCALE_CHANGED" />
             </intent-filter>
+        </receiver>
+
+        <!-- Виджеты и уведомление «Ближайшее время» -->
+        <receiver
+            android:name=".live.LiveReceiver"
+            android:exported="false" />
+
+        <receiver
+            android:name=".live.FaceWidget"
+            android:exported="false"
+            android:label="@string/widget_face_name">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/widget_face_info" />
+        </receiver>
+
+        <receiver
+            android:name=".live.LineWidget"
+            android:exported="false"
+            android:label="@string/widget_line_name">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/widget_line_info" />
         </receiver>
     </application>
 </manifest>

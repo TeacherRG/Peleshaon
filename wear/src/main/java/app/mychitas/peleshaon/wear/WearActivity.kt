@@ -75,7 +75,7 @@ fun WearApp() {
 
     // Город — по часовому поясу часов (без геолокации)
     val city = remember { cityForZone(ZoneId.systemDefault()) }
-    val zone = ZoneId.of(city.zoneId)
+    val zone = city.zone()
     val cityNow = now.withZoneSameInstant(zone)
     val day = remember(cityNow.toLocalDate(), cityNow.hour) {
         ZmanimEngine.calculateForMoment(cityNow, city.name, city.lat, city.lon, 0.0, zone, city.isIsrael)
@@ -212,6 +212,7 @@ private fun countdown(res: Resources, now: ZonedDateTime, z: ZmanItem): String {
 }
 
 private fun shortLabel(type: ZmanType): Int = when (type) {
+    ZmanType.ALOT -> R.string.zs_alot
     ZmanType.SUNRISE -> R.string.zs_sunrise
     ZmanType.SOF_ZMAN_SHMA -> R.string.zs_shma
     ZmanType.SOF_ZMAN_TFILA -> R.string.zs_tfila

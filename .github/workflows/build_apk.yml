@@ -29,6 +29,18 @@ jobs:
       - name: Build Debug APKs (phone and watch)
         run: gradle :app:assembleDebug :wear:assembleDebug
 
+      - name: Privacy promise — no internet permission
+        # Политика конфиденциальности (niflaot.mychitas.app/peleshaon/privacy/) обещает: приложение не выходит в интернет.
+        # Если разрешение INTERNET появилось (например, его принесла библиотека) — сначала поправить политику.
+        run: |
+          AAPT=$(ls "$ANDROID_HOME"/build-tools/*/aapt2 | sort -V | tail -1)
+          for apk in app/build/outputs/apk/debug/app-debug.apk wear/build/outputs/apk/debug/wear-debug.apk; do
+            echo "== $apk"; "$AAPT" dump permissions "$apk"
+            if "$AAPT" dump permissions "$apk" | grep -q 'android.permission.INTERNET'; then
+              echo "::error::$apk requests INTERNET — the privacy policy says the app does not go online"; exit 1
+            fi
+          done
+
       - name: Upload phone APK
         uses: actions/upload-artifact@v5
         with:
