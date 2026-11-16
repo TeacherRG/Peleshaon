@@ -13,4 +13,6 @@ dependencyResolutionManagement {
     }
 }
 rootProject.name = "PeleShaon"
+include(":core")
 include(":app")
+include(":wear")

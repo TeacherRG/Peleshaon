@@ -1,0 +1,17 @@
+<resources>
+    <string name="app_name">Пеле Шаон</string>
+    <string name="zs_sunrise">Восход</string>
+    <string name="zs_shma">Шма</string>
+    <string name="zs_tfila">Тфила</string>
+    <string name="zs_chatzot">Полдень</string>
+    <string name="zs_mincha">Минха гд.</string>
+    <string name="zs_plag">Плаг</string>
+    <string name="zs_sunset">Закат</string>
+    <string name="zs_tzait">Звёзды</string>
+    <string name="left">осталось %s</string>
+    <string name="in_time">через %s</string>
+    <string name="dur_hm">%1$d ч %2$d мин</string>
+    <string name="dur_m">%d мин</string>
+    <string name="candles">Свечи</string>
+    <string name="polar">Сегодня нет восхода или заката</string>
+</resources>

@@ -1,0 +1,17 @@
+<resources>
+    <string name="app_name">Pele Shaon</string>
+    <string name="zs_sunrise">Sunrise</string>
+    <string name="zs_shma">Shma</string>
+    <string name="zs_tfila">Tefila</string>
+    <string name="zs_chatzot">Midday</string>
+    <string name="zs_mincha">Mincha g.</string>
+    <string name="zs_plag">Plag</string>
+    <string name="zs_sunset">Sunset</string>
+    <string name="zs_tzait">Stars</string>
+    <string name="left">%s left</string>
+    <string name="in_time">in %s</string>
+    <string name="dur_hm">%1$d h %2$d min</string>
+    <string name="dur_m">%d min</string>
+    <string name="candles">Candles</string>
+    <string name="polar">No sunrise or sunset today</string>
+</resources>

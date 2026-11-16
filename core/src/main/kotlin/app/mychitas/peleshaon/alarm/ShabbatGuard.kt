@@ -53,7 +53,7 @@ object ShabbatGuard {
         muteCholHamoed: Boolean
     ): String? {
         val nextDay = erevGregorianDate.plusDays(1)
-        val jc = JewishCalendar(nextDay.year, nextDay.monthValue, nextDay.dayOfMonth).apply {
+        val jc = JewishCalendar(nextDay).apply {
             inIsrael = isIsrael
         }
 

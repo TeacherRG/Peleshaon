@@ -7,7 +7,9 @@ import android.media.AudioAttributes
 import android.media.MediaPlayer
 import android.media.RingtoneManager
 import android.os.*
+import android.content.pm.ServiceInfo
 import androidx.core.app.NotificationCompat
+import androidx.core.app.ServiceCompat
 import app.mychitas.peleshaon.R
 import kotlinx.coroutines.*
 
@@ -59,7 +61,10 @@ class AlarmRingService : Service() {
             .setOngoing(true)
             .build()
 
-        startForeground(3001, notification)
+        val fgsType = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            ServiceInfo.FOREGROUND_SERVICE_TYPE_MEDIA_PLAYBACK
+        } else 0
+        ServiceCompat.startForeground(this, 3001, notification, fgsType)
         startActivity(fullScreenIntent)
 
         if (wakeMode != WakeMode.LIGHT_ONLY) {
@@ -79,22 +84,33 @@ class AlarmRingService : Service() {
     }
 
     private fun startCrescendoAudio() {
-        val alarmUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM)
-            ?: RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION)
-
-        mediaPlayer = MediaPlayer().apply {
-            setDataSource(applicationContext, alarmUri)
-            setAudioAttributes(
-                AudioAttributes.Builder()
-                    .setUsage(AudioAttributes.USAGE_ALARM)
-                    .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
-                    .build()
-            )
-            isLooping = true
-            setVolume(0.05f, 0.05f)
-            prepare()
-            start()
+        // Мелодия будильника может быть не задана или недоступна — пробуем по очереди.
+        val uris = listOfNotNull(
+            RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM),
+            RingtoneManager.getDefaultUri(RingtoneManager.TYPE_RINGTONE),
+            RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION)
+        )
+        for (uri in uris) {
+            val player = MediaPlayer()
+            try {
+                player.setDataSource(applicationContext, uri)
+                player.setAudioAttributes(
+                    AudioAttributes.Builder()
+                        .setUsage(AudioAttributes.USAGE_ALARM)
+                        .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
+                        .build()
+                )
+                player.isLooping = true
+                player.setVolume(0.05f, 0.05f)
+                player.prepare()
+                player.start()
+                mediaPlayer = player
+                break
+            } catch (e: Exception) {
+                player.release()
+            }
         }
+        if (mediaPlayer == null) return
 
         scope.launch {
             for (step in 1..30) {
@@ -137,7 +153,7 @@ class AlarmRingService : Service() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val channel = NotificationChannel(
                 CHANNEL_ID,
-                "Alarms",
+                getString(R.string.channel_alarms),
                 NotificationManager.IMPORTANCE_HIGH
             ).apply {
                 setSound(null, null)

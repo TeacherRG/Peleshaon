@@ -1,0 +1,17 @@
+<resources>
+    <string name="app_name">Pele Schaon</string>
+    <string name="zs_sunrise">Aufgang</string>
+    <string name="zs_shma">Schma</string>
+    <string name="zs_tfila">Tefila</string>
+    <string name="zs_chatzot">Mittag</string>
+    <string name="zs_mincha">Mincha g.</string>
+    <string name="zs_plag">Plag</string>
+    <string name="zs_sunset">Untergang</string>
+    <string name="zs_tzait">Sterne</string>
+    <string name="left">noch %s</string>
+    <string name="in_time">in %s</string>
+    <string name="dur_hm">%1$d Std. %2$d Min.</string>
+    <string name="dur_m">%d Min.</string>
+    <string name="candles">Kerzen</string>
+    <string name="polar">Heute kein Auf- oder Untergang</string>
+</resources>

@@ -111,7 +111,7 @@ class AlarmRingActivity : ComponentActivity() {
                             Button(
                                 onClick = {
                                     stopAlarm()
-                                    openUrl("https://niflaot.mychitas.app/?lang=$appLang&ref=share#/neviim")
+                                    openUrl("https://niflaot.mychitas.app/?lang=$appLang&ref=app#/neviim")
                                 },
                                 colors = ButtonDefaults.buttonColors(containerColor = TecheletBlue)
                             ) {
@@ -120,7 +120,7 @@ class AlarmRingActivity : ComponentActivity() {
                             Button(
                                 onClick = {
                                     stopAlarm()
-                                    openUrl("https://niflaot.mychitas.app/?lang=$appLang&ref=share#/ktuvim")
+                                    openUrl("https://niflaot.mychitas.app/?lang=$appLang&ref=app#/ketuvim")
                                 },
                                 colors = ButtonDefaults.buttonColors(containerColor = GoldAccent)
                             ) {
