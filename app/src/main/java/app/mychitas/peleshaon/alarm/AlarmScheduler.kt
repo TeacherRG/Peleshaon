@@ -6,10 +6,7 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.os.Build
-import app.mychitas.peleshaon.domain.ZmanType
-import app.mychitas.peleshaon.domain.ZmanimEngine
-import java.time.LocalTime
-import java.time.ZoneId
+import app.mychitas.peleshaon.Prefs
 import java.time.ZonedDateTime
 
 object AlarmScheduler {
@@ -68,66 +65,30 @@ object AlarmScheduler {
         }
     }
 
+    /** Следующие звонки обоих будильников — по настройкам и городу; нет звонка — будильник снят. */
     fun rescheduleAllFromPrefs(context: Context) {
-        val prefs = context.getSharedPreferences("pele_prefs", Context.MODE_PRIVATE)
-        val cityName = prefs.getString("city_name", "Vienna") ?: "Vienna"
-        val lat = prefs.getFloat("lat", 48.2082f).toDouble()
-        val lon = prefs.getFloat("lon", 16.3738f).toDouble()
-        val zoneId = ZoneId.of(prefs.getString("zone_id", "Europe/Vienna"))
-        val isIsrael = prefs.getBoolean("is_israel", false)
-        val muteCholHamoed = prefs.getBoolean("mute_chol_hamoed", false)
-        val now = ZonedDateTime.now(zoneId)
-
-        if (prefs.getBoolean("torah_enabled", true)) {
-            for (dayOffset in 0..14) {
-                val candidateDate = now.toLocalDate().plusDays(dayOffset.toLong())
-                val candidate = ZonedDateTime.of(candidateDate, LocalTime.of(20, 0), zoneId)
-                if (!candidate.isAfter(now)) continue
-                val quiet = ShabbatGuard.checkMoment(candidate, cityName, lat, lon, zoneId, isIsrael, muteCholHamoed)
-                if (!quiet.isQuietTime) {
-                    scheduleExactAlarm(context, candidate, "TORAH")
-                    break
-                }
-            }
-        }
-
-        if (prefs.getBoolean("morning_enabled", false)) {
-            val offsetMin = prefs.getInt("morning_offset_shma", 30).toLong()
-            for (dayOffset in 0..14) {
-                val checkMoment = now.plusDays(dayOffset.toLong()).withHour(10).withMinute(0)
-                val res = ZmanimEngine.calculateForMoment(checkMoment, cityName, lat, lon, 0.0, zoneId, isIsrael)
-                val shma = res.items.find { it.type == ZmanType.SOF_ZMAN_SHMA } ?: continue
-                val candidate = shma.roundedTime.minusMinutes(offsetMin)
-                if (!candidate.isAfter(now)) continue
-                val quiet = ShabbatGuard.checkMoment(candidate, cityName, lat, lon, zoneId, isIsrael, muteCholHamoed)
-                if (!quiet.isQuietTime) {
-                    scheduleExactAlarm(context, candidate, "MORNING")
-                    break
-                }
-            }
+        val city = Prefs.city(context)
+        val now = ZonedDateTime.now(city.zone())
+        for (type in listOf(Prefs.MORNING, Prefs.TORAH)) {
+            val next = AlarmRules.nextRing(Prefs.alarm(context, type), now, city)
+            if (next != null) scheduleExactAlarm(context, next, type) else cancelAlarm(context, type)
         }
     }
 }
 
 class AlarmReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent) {
-        val alarmType = intent.getStringExtra(AlarmScheduler.EXTRA_ALARM_TYPE) ?: "MORNING"
-        val prefs = context.getSharedPreferences("pele_prefs", Context.MODE_PRIVATE)
-        val cityName = prefs.getString("city_name", "Vienna") ?: "Vienna"
-        val lat = prefs.getFloat("lat", 48.2082f).toDouble()
-        val lon = prefs.getFloat("lon", 16.3738f).toDouble()
-        val zoneId = ZoneId.of(prefs.getString("zone_id", "Europe/Vienna"))
-        val isIsrael = prefs.getBoolean("is_israel", false)
-        val muteCholHamoed = prefs.getBoolean("mute_chol_hamoed", false)
-
+        val alarmType = intent.getStringExtra(AlarmScheduler.EXTRA_ALARM_TYPE) ?: Prefs.MORNING
+        val city = Prefs.city(context)
+        // Последняя проверка в момент звонка: Шабат, Йом Тов, Йом Кипур (и Хол ґа-моэд по галочке) — молчим
         val quietStatus = ShabbatGuard.checkMoment(
-            moment = ZonedDateTime.now(zoneId),
-            cityName = cityName,
-            lat = lat,
-            lon = lon,
-            zoneId = zoneId,
-            isIsrael = isIsrael,
-            muteCholHamoed = muteCholHamoed
+            moment = ZonedDateTime.now(city.zone()),
+            cityName = city.name,
+            lat = city.lat,
+            lon = city.lon,
+            zoneId = city.zone(),
+            isIsrael = city.isIsrael,
+            muteCholHamoed = Prefs.alarm(context, alarmType).chm
         )
 
         if (!quietStatus.isQuietTime) {
