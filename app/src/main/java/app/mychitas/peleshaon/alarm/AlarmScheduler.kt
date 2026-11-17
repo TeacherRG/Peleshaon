@@ -97,9 +97,10 @@ object AlarmScheduler {
     fun rescheduleAllFromPrefs(context: Context) {
         val city = Prefs.city(context)
         val now = ZonedDateTime.now(city.zone())
+        val early = Prefs.earlyShabbatMinutes(context)
         for (type in listOf(Prefs.MORNING, Prefs.TORAH) + Prefs.customAlarms(context)) {
             val spec = Prefs.alarm(context, type)
-            val next = AlarmRules.nextRing(spec, now, city)
+            val next = AlarmRules.nextRing(spec, now, city, early)
             if (next != null) scheduleExactAlarm(context, next, type)
             else cancelAlarm(context, type, includeSnooze = !spec.on || spec.days.isEmpty())
         }
@@ -116,7 +117,9 @@ object AlarmScheduler {
 
     /** Мясное съедено: напомнить через 6 часов. */
     fun startKashrut(context: Context) {
-        Prefs.setKashrutAt(context, System.currentTimeMillis() + Prefs.kashrutHours(context) * 3_600_000L)
+        Prefs.clearKashrutReset(context)
+        Prefs.setKashrutDeferred(context, false)
+        Prefs.setKashrutAt(context, KashrutPolicy.deadline(System.currentTimeMillis()))
         rescheduleAllFromPrefs(context)
     }
 
@@ -144,7 +147,6 @@ class AlarmReceiver : BroadcastReceiver() {
         }
         if (alarmType == Prefs.KASHRUT &&
             (Prefs.kashrutAt(context) <= 0L || Prefs.kashrutAt(context) > System.currentTimeMillis() + 2_000L)) return
-        if (alarmType == Prefs.KASHRUT && !intent.getBooleanExtra(AlarmScheduler.EXTRA_IS_SNOOZE, false)) Prefs.setKashrutAt(context, 0L)
         // Последняя проверка в момент звонка: Шабат, Йом Тов, Йом Кипур (и Хол ґа-моэд по галочке) — молчим
         val quietStatus = ShabbatGuard.checkMoment(
             moment = ZonedDateTime.now(city.zone()),
@@ -153,10 +155,18 @@ class AlarmReceiver : BroadcastReceiver() {
             lon = city.lon,
             zoneId = city.zone(),
             isIsrael = city.isIsrael,
-            muteCholHamoed = Prefs.alarm(context, alarmType).chm
+            muteCholHamoed = Prefs.alarm(context, alarmType).chm,
+            earlyShabbatMinutes = Prefs.earlyShabbatMinutes(context)
         )
 
+        if (quietStatus.isQuietTime && alarmType == Prefs.KASHRUT) {
+            // The six hours elapsed, but an audible reminder during Shabbat/Yom Tov is forbidden.
+            // Preserve this fact for the user to see after the quiet period.
+            Prefs.setKashrutAt(context, 0L)
+            Prefs.setKashrutDeferred(context, true)
+        }
         if (!quietStatus.isQuietTime) {
+            if (alarmType == Prefs.KASHRUT) Prefs.setKashrutAt(context, 0L)
             val serviceIntent = Intent(context, AlarmRingService::class.java).apply {
                 putExtra(AlarmScheduler.EXTRA_ALARM_TYPE, alarmType)
             }

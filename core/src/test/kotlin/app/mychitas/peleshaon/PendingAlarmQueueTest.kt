@@ -19,6 +19,16 @@ class PendingAlarmQueueTest {
         assertNull(queue.poll())
         assertTrue(queue.isEmpty())
     }
+    @Test fun everyConfiguredAlarmFitsWithoutDroppingTheTail() {
+        val queue = PendingAlarmQueue()
+        assertTrue(queue.enqueue("TORAH", "MORNING"))
+        assertTrue(queue.enqueue("KASHRUT", "MORNING"))
+        for (n in 1..10) assertTrue(queue.enqueue("C$n", "MORNING"))
+        assertFalse(queue.enqueue("TORAH", "MORNING"))
+        assertEquals(listOf("TORAH", "KASHRUT") + (1..10).map { "C$it" },
+            (1..12).map { queue.poll() })
+        assertNull(queue.poll())
+    }
     @Test fun queueCanBeClearedAfterServiceDestruction() {
         val queue = PendingAlarmQueue()
         queue.enqueue("TORAH", "MORNING")

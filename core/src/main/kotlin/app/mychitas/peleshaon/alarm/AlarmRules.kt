@@ -55,12 +55,12 @@ object AlarmRules {
         if (spec.byShma) ZmanimEngine.shmaOf(date, city)?.minusMinutes(spec.before.toLong())
         else resolveWallTime(date, LocalTime.of(spec.hour, spec.minute), city.zone())
 
-    private fun quiet(at: ZonedDateTime, spec: AlarmSpec, city: CityOption): String? =
-        ShabbatGuard.checkMoment(at, city.name, city.lat, city.lon, city.zone(), city.isIsrael, spec.chm)
+    private fun quiet(at: ZonedDateTime, spec: AlarmSpec, city: CityOption, earlyShabbatMinutes: Long): String? =
+        ShabbatGuard.checkMoment(at, city.name, city.lat, city.lon, city.zone(), city.isIsrael, spec.chm, earlyShabbatMinutes)
             .takeIf { it.isQuietTime }?.reasonKey
 
     /** Следующий звонок после `now` в ближайшие три недели; нет — null. */
-    fun nextRing(spec: AlarmSpec, now: ZonedDateTime, city: CityOption): ZonedDateTime? {
+    fun nextRing(spec: AlarmSpec, now: ZonedDateTime, city: CityOption, earlyShabbatMinutes: Long = 0L): ZonedDateTime? {
         if (!spec.on || spec.days.isEmpty()) return null
         val today = now.withZoneSameInstant(city.zone()).toLocalDate()
         for (n in 0..21L) {
@@ -68,14 +68,14 @@ object AlarmRules {
             if (dayIndex(date) !in spec.days) continue
             val at = ringOn(spec, date, city) ?: continue
             if (!at.isAfter(now)) continue
-            if (quiet(at, spec, city) != null) continue
+            if (quiet(at, spec, city, earlyShabbatMinutes) != null) continue
             return at
         }
         return null
     }
 
     /** Звонки ближайших 8 дней, которые отменили праздники (без Шабата — о нём и так понятно). */
-    fun skipped(spec: AlarmSpec, now: ZonedDateTime, city: CityOption, max: Int = 2): List<SkippedRing> {
+    fun skipped(spec: AlarmSpec, now: ZonedDateTime, city: CityOption, max: Int = 2, earlyShabbatMinutes: Long = 0L): List<SkippedRing> {
         if (!spec.on) return emptyList()
         val today = now.withZoneSameInstant(city.zone()).toLocalDate()
         val out = mutableListOf<SkippedRing>()
@@ -85,7 +85,7 @@ object AlarmRules {
             if (dayIndex(date) !in spec.days) continue
             val at = ringOn(spec, date, city) ?: continue
             if (at.isBefore(now)) continue
-            val why = quiet(at, spec, city) ?: continue
+            val why = quiet(at, spec, city, earlyShabbatMinutes) ?: continue
             if (why != "shabbat") out += SkippedRing(at, why)
         }
         return out

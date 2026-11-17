@@ -168,7 +168,7 @@ object ZmanimEngine {
                 items.none { it.type == ZmanType.SUNSET },
             items = items,
             candleLighting = todaySunset.minusMinutes(candleMinutesFor(cityName)),
-            tzeitShabbat = havdalahOf(todayCal, zoneId) ?: todaySunset.plusMinutes(END_MIN)
+            tzeitShabbat = havdalahOf(todayCal, zoneId)
         )
     }
 

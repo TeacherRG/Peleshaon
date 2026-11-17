@@ -3,6 +3,7 @@ package app.mychitas.peleshaon
 import android.content.Context
 import android.content.SharedPreferences
 import app.mychitas.peleshaon.alarm.AlarmSpec
+import app.mychitas.peleshaon.alarm.KashrutPolicy
 import app.mychitas.peleshaon.alarm.WakeMode
 import app.mychitas.peleshaon.domain.CityOption
 import app.mychitas.peleshaon.domain.ZmanType
@@ -22,15 +23,38 @@ object Prefs {
     const val KASHRUT = "KASHRUT"
     /** свои будильники — «C1», «C2»… (владелец, 18.11.2026: «возможность добавить будильники») */
     const val MAX_CUSTOM = 10
-    const val KASHRUT_HOURS = 6L
+    const val KASHRUT_HOURS = KashrutPolicy.WAIT_HOURS
 
-    fun kashrutHours(context: Context): Long =
-        of(context).getInt("kashrut_hours", KASHRUT_HOURS.toInt())
-            .takeIf { it in setOf(1, 3, 5, 6) }?.toLong() ?: KASHRUT_HOURS
+    /** The old absolute deadline has no start timestamp; never assume it was six hours. */
+    fun migrateKashrut(context: Context) {
+        val p = of(context)
+        val version = p.getInt("kashrut_policy_version", 0)
+        if (version >= KashrutPolicy.POLICY_VERSION) return
+        val reset = KashrutPolicy.resetLegacyTimer(version, p.getLong("kashrut_at", 0L))
+        p.edit().apply {
+            if (reset) {
+                putLong("kashrut_at", 0L)
+                putBoolean("kashrut_timer_reset", true)
+            }
+            remove("kashrut_hours")
+            putInt("kashrut_policy_version", KashrutPolicy.POLICY_VERSION)
+        }.commit()
+    }
 
-    fun setKashrutHours(context: Context, hours: Long) {
-        require(hours in setOf(1L, 3L, 5L, 6L))
-        of(context).edit().putInt("kashrut_hours", hours.toInt()).apply()
+    fun kashrutTimerWasReset(context: Context): Boolean = of(context).getBoolean("kashrut_timer_reset", false)
+    fun clearKashrutReset(context: Context) { of(context).edit().putBoolean("kashrut_timer_reset", false).apply() }
+    fun kashrutDeferred(context: Context): Boolean = of(context).getBoolean("kashrut_deferred", false)
+    fun setKashrutDeferred(context: Context, on: Boolean) {
+        of(context).edit().putBoolean("kashrut_deferred", on).apply()
+    }
+
+    /** Extra silence before Friday candle lighting (not a change to calendar or candle time). */
+    fun earlyShabbatMinutes(context: Context): Long =
+        of(context).getInt("early_shabbat_quiet", 0).takeIf { it in setOf(0, 15, 30, 45, 60) }?.toLong() ?: 0L
+
+    fun setEarlyShabbatMinutes(context: Context, minutes: Long) {
+        require(minutes in setOf(0L, 15L, 30L, 45L, 60L))
+        of(context).edit().putInt("early_shabbat_quiet", minutes.toInt()).apply()
     }
 
     fun of(context: Context): SharedPreferences = context.getSharedPreferences(NAME, Context.MODE_PRIVATE)
@@ -116,7 +140,10 @@ object Prefs {
         val n = (1..99).first { "C$it" !in list }
         val id = "C$n"
         of(context).edit().putString("custom_alarms", (list + id).joinToString(",")).apply()
-        setAlarm(context, id, alarm(context, id).copy(on = true))
+        // An ID can be reused: initialize every field rather than inheriting deleted values.
+        setAlarm(context, id, AlarmSpec(on = true, byShma = false, hour = 7, minute = 0,
+            before = 30, days = (0..6).toSet(), chm = false))
+        setWakeMode(context, id, WakeMode.SOUND_AND_LIGHT)
         return id
     }
 

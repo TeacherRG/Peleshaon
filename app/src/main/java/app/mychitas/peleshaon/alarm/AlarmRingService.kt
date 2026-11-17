@@ -13,6 +13,8 @@ import android.content.pm.ServiceInfo
 import androidx.core.app.NotificationCompat
 import androidx.core.app.ServiceCompat
 import app.mychitas.peleshaon.R
+import app.mychitas.peleshaon.Prefs
+import java.time.ZonedDateTime
 import kotlinx.coroutines.*
 
 enum class WakeMode {
@@ -67,7 +69,20 @@ class AlarmRingService : Service() {
         return START_NOT_STICKY
     }
 
+    private fun isQuietNow(alarmType: String): Boolean {
+        val city = Prefs.city(this)
+        return ShabbatGuard.checkMoment(ZonedDateTime.now(city.zone()), city.name, city.lat,
+            city.lon, city.zone(), city.isIsrael, Prefs.alarm(this, alarmType).chm,
+            Prefs.earlyShabbatMinutes(this)).isQuietTime
+    }
+
     private fun beginRing(alarmType: String, test: Boolean) {
+        if (isQuietNow(alarmType)) {
+            val next = pendingAlarms.poll()
+            hasQueuedAlarms = !pendingAlarms.isEmpty()
+            if (next == null) stopSelf() else beginRing(next, false)
+            return
+        }
         val token = java.util.UUID.randomUUID().toString()
         currentSessionId = token
         activeSession = token
@@ -133,10 +148,24 @@ class AlarmRingService : Service() {
             startVibration()
         }
 
+        // A ringing or queued alarm must also stop when Friday quiet time begins.
+        val city = Prefs.city(this)
+        val quietStart = ShabbatGuard.nextQuietStart(ZonedDateTime.now(city.zone()), city.name,
+            city.lat, city.lon, city.zone(), city.isIsrael, Prefs.alarm(this, alarmType).chm,
+            Prefs.earlyShabbatMinutes(this))
+        val untilQuiet = quietStart?.toInstant()?.toEpochMilli()?.minus(System.currentTimeMillis())
+        if (untilQuiet != null && untilQuiet in 1L..180_000L) {
+            scope.launch {
+                // Stop slightly early rather than risk playing across a religious boundary.
+                delay((untilQuiet - 500L).coerceAtLeast(0L))
+                if (activeSession == token) advanceOrStop()
+            }
+        }
+
         scope.launch {
             delay(3 * 60 * 1000L)
             if (activeSession == token) {
-                showMissedNotification(title, alarmType)
+                if (!test) showMissedNotification(title, alarmType)
                 advanceOrStop()
             }
         }
@@ -200,6 +229,11 @@ class AlarmRingService : Service() {
                     }
                     if (!isActive) {
                         player.release()
+                        return@launch
+                    }
+                    if (isQuietNow(alarmType)) {
+                        player.release()
+                        if (activeType == alarmType) advanceOrStop()
                         return@launch
                     }
                     mediaPlayer = player

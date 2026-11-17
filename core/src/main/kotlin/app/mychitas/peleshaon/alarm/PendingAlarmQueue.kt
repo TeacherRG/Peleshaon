@@ -7,7 +7,7 @@ package app.mychitas.peleshaon.alarm
 class PendingAlarmQueue {
     private val values = ArrayDeque<String>()
     fun enqueue(type: String, currentlyRinging: String?): Boolean {
-        if (type == currentlyRinging || values.contains(type) || values.size >= 10) return false
+        if (type == currentlyRinging || values.contains(type)) return false
         values.addLast(type)
         return true
     }

@@ -14,6 +14,7 @@ import java.util.Locale
 class PeleApp : Application() {
     override fun onCreate() {
         super.onCreate()
+        Prefs.migrateKashrut(this)
         ZmanimEngine.minhag = Prefs.minhag(this)
         ZmanimEngine.candleOffsetOverride = Prefs.candleOffset(this)
         AppLang.migratePlatformLanguage(this)
