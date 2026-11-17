@@ -2,13 +2,20 @@ name: Build Pele Shaon APK
 
 on:
   push:
-    branches: [ "main", "ccr-*", "fixes/**" ]
-  pull_request:
+    branches: [ "main", "fixes/independent-beta" ]
   workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   build:
     runs-on: ubuntu-latest
+    timeout-minutes: 25
     steps:
       - uses: actions/checkout@v5
 
@@ -26,11 +33,10 @@ jobs:
       - name: Check source and translation integrity
         run: python3 scripts/check_integrity.py
 
-      - name: Test zmanim and Shabbat rules
-        run: gradle :core:test
-
-      - name: Build Debug APKs (phone and watch)
-        run: gradle :app:assembleDebug :wear:assembleDebug
+      # One Gradle invocation shares dependency resolution and configuration
+      # across tests and both APKs, avoiding duplicate runner time.
+      - name: Test core and build both Beta APKs
+        run: gradle --no-daemon :core:test :app:assembleDebug :wear:assembleDebug
 
       - name: Privacy promise — no internet permission
         # Политика конфиденциальности (niflaot.mychitas.app/peleshaon/privacy/) обещает: приложение не выходит в интернет.
