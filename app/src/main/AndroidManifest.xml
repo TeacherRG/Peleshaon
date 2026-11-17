@@ -65,14 +65,15 @@
             </intent-filter>
         </receiver>
 
-        <!-- Виджеты и уведомление «Ближайшее время» -->
+        <!-- Виджеты и уведомление «Ближайшее время». Виджеты — exported: рабочие столы некоторых телефонов
+             (ColorOS, MIUI) ищут виджеты сами и пропускают закрытые; APPWIDGET_UPDATE шлёт только система. -->
         <receiver
             android:name=".live.LiveReceiver"
             android:exported="false" />
 
         <receiver
             android:name=".live.FaceWidget"
-            android:exported="false"
+            android:exported="true"
             android:label="@string/widget_face_name">
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
@@ -84,7 +85,7 @@
 
         <receiver
             android:name=".live.LineWidget"
-            android:exported="false"
+            android:exported="true"
             android:label="@string/widget_line_name">
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />

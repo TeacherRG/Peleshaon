@@ -777,6 +777,7 @@ private fun InfoSheet(onNightScreen: () -> Unit, onIntro: () -> Unit, onPrivacy:
         }
         HorizontalDivider(color = ClockColors.Line)
         Note(stringResource(R.string.ob5_l1))
+        AddWidgetButtons()
         Note(stringResource(R.string.ob5_l2))
         Note(stringResource(R.string.ob5_l3))
         OutlinedButton(onClick = onIntro, border = BorderStroke(1.dp, ClockColors.Line)) {

@@ -267,4 +267,6 @@ private fun StepOutside() {
             Body(stringResource(id))
         }
     }
+    Spacer(Modifier.height(8.dp))
+    AddWidgetButtons()
 }

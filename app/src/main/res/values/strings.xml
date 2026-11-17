@@ -174,4 +174,7 @@
     <string name="cal_candles_after">Candles — after nightfall, not before</string>
     <string name="cal_parsha">Torah portion: %s</string>
     <string name="cal_hint">Tap the Jewish date at the top to open the calendar: the month, festivals, the Torah portion and the times of any day.</string>
+    <string name="widget_add_face">Put the day dial on the home screen</string>
+    <string name="widget_add_line">Put the «next time» line</string>
+    <string name="widget_add_manual">Your home screen cannot add widgets from an app. Long-press an empty spot on the home screen → «Widgets» → find «Pele Shaon» (if it is not there, restart the phone once after installing).</string>
 </resources>

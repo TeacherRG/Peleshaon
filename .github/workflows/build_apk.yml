@@ -41,6 +41,18 @@ jobs:
             fi
           done
 
+      - name: Widgets are in the APK
+        # Виджеты должны быть видны рабочему столу: приёмник exported, с APPWIDGET_UPDATE и описанием виджета.
+        run: |
+          AAPT=$(ls "$ANDROID_HOME"/build-tools/*/aapt2 | sort -V | tail -1)
+          apk=app/build/outputs/apk/debug/app-debug.apk
+          "$AAPT" dump xmltree "$apk" --file AndroidManifest.xml > manifest.txt
+          for w in FaceWidget LineWidget; do
+            grep -A12 "live.$w" manifest.txt | tee /dev/stderr | grep -q 'android.appwidget.provider' || { echo "::error::$w is not a widget"; exit 1; }
+            grep -A3 "live.$w" manifest.txt | grep -q 'exported.*=true\|exported.*0xffffffff' || { echo "::error::$w is not exported"; exit 1; }
+          done
+          "$AAPT" dump xmltree "$apk" --file res/xml/widget_face_info.xml || true
+
       - name: Upload phone APK
         uses: actions/upload-artifact@v5
         with:

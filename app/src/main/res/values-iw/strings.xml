@@ -174,4 +174,7 @@
     <string name="cal_candles_after">נרות — אחרי צאת הכוכבים, לא לפני</string>
     <string name="cal_parsha">פרשת השבוע: %s</string>
     <string name="cal_hint">הקישו על התאריך העברי למעלה — ייפתח הלוח: החודש, החגים, פרשת השבוע וזמני כל יום.</string>
+    <string name="widget_add_face">הוספת שעון היום למסך הבית</string>
+    <string name="widget_add_line">הוספת שורת «הזמן הקרוב»</string>
+    <string name="widget_add_manual">מסך הבית שלך לא מאפשר להוסיף ווידג׳טים מתוך היישום. לחיצה ארוכה על מקום ריק במסך הבית ← «ווידג׳טים» ← «פלא שעון» (אם הוא לא מופיע — הפעילו מחדש את הטלפון פעם אחת אחרי ההתקנה).</string>
 </resources>

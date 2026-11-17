@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Картинка виджета «Ближайшее время» в списке виджетов. -->
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:drawable="@drawable/widget_bg" android:width="250dp" android:height="56dp" />
+    <item android:drawable="@drawable/ic_launcher_fg" android:width="56dp" android:height="56dp"
+        android:gravity="start|center_vertical" android:left="8dp" />
+</layer-list>
