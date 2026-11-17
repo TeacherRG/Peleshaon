@@ -1010,6 +1010,7 @@ private fun InfoSheet(onNightScreen: () -> Unit, onIntro: () -> Unit, onPrivacy:
         AddIconButton()
         Note(stringResource(R.string.ob5_l1))
         AddWidgetButtons()
+        HomeScreenHelp()
         Note(stringResource(R.string.ob5_l2))
         Note(stringResource(R.string.ob5_l3))
         OutlinedButton(onClick = onIntro, border = BorderStroke(1.dp, ClockColors.Line)) {

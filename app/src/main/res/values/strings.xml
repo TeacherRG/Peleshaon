@@ -252,4 +252,14 @@
     <string name="jer_dir">Jerusalem: %1$s (%2$d°) · %3$s km</string>
     <string name="jer_hold">Hold the phone flat, or upright in front of you — then the arrow follows the camera. The gold arrow points to Jerusalem.</string>
     <string name="jer_note">We pray facing Jerusalem, the place of the Temple (Berachot 30a; Shulchan Aruch, Orach Chaim 94:1). The direction is the shortest path on the globe (a great circle); many communities simply face east or south-east — follow your community and ask your rabbi.</string>
+    <string name="home_t">The icon or the widgets did not appear?</string>
+    <string name="home_oppo">On OPPO, realme and OnePlus phones an app installed not from Google Play may not put icons and widgets on the home screen until you allow it. Open the app settings → «Permissions» (or «Other permissions») → «Home screen shortcuts» → «Allow», then tap the buttons above again. Widgets in the list: long-press the home screen → «Widgets» → look for «Pele Shaon» (often at the end, or use the search).</string>
+    <string name="home_xiaomi">On Xiaomi, Redmi and POCO phones: app settings → «Other permissions» → «Home screen shortcuts» → «Allow». Then tap the buttons above again.</string>
+    <string name="home_vivo">On vivo phones: app settings → «Permissions» → «Home screen shortcuts» → «Allow». Then tap the buttons above again.</string>
+    <string name="home_huawei">On Huawei and Honor phones: app settings → «Permissions» → «Home screen shortcuts» → «Allow». Then tap the buttons above again.</string>
+    <string name="home_other">If no «add» window appeared, open the app settings and check the permissions related to the home screen («Shortcuts»). Widgets: long-press an empty spot on the home screen → «Widgets» → «Pele Shaon».</string>
+    <string name="home_zero">The phone does not see the app\'s widgets — restart the phone once. If it is still 0, send a screenshot of this screen to Office@mychitas.app.</string>
+    <string name="home_open">Open the app settings</string>
+    <string name="home_status">App widgets on the phone: %1$d of 2 · home screen: %2$s · %3$s, Android %4$s</string>
+    <string name="pin_done">Done — look at the home screen</string>
 </resources>

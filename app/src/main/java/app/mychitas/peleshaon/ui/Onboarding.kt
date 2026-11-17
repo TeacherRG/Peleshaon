@@ -263,6 +263,7 @@ private fun StepHome() {
     Text(stringResource(R.string.obh_widgets_t), fontWeight = FontWeight.Bold, fontSize = 18.sp, color = ClockColors.Ink)
     Body(stringResource(R.string.obh_widgets))
     AddWidgetButtons()
+    HomeScreenHelp()
 }
 
 @Composable
