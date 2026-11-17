@@ -15,6 +15,7 @@ class PeleApp : Application() {
     override fun onCreate() {
         super.onCreate()
         ZmanimEngine.minhag = Prefs.minhag(this)
+        AppLang.migratePlatformLanguage(this)
         AppLang.applyToProcess(this)
     }
 }
@@ -29,15 +30,48 @@ object AppLang {
     /** "" — как в телефоне */
     val TAGS = listOf("", "uk", "ru", "en", "de", "he")
 
-    fun tag(context: Context): String = Prefs.of(context).getString("lang", "") ?: ""
+    private const val MIGRATED = "lang_platform_migrated"
+
+    /** Android 13+: systemic per-app language is authoritative, including changes made in system Settings. */
+    fun tag(context: Context): String {
+        val prefs = Prefs.of(context)
+        if (Build.VERSION.SDK_INT >= 33) {
+            val systemTags = runCatching {
+                context.getSystemService(LocaleManager::class.java).applicationLocales.toLanguageTags()
+            }.getOrNull()
+            if (systemTags != null) {
+                val raw = systemTags.substringBefore(',').substringBefore('-')
+                val selected = when (raw) { "iw" -> "he"; else -> raw }.takeIf { it in TAGS } ?: ""
+                if (prefs.getString("lang", "") != selected) prefs.edit().putString("lang", selected).apply()
+                return selected
+            }
+        }
+        return prefs.getString("lang", "") ?: ""
+    }
+
+    /** Migrate existing in-app selection once, without overriding later external system changes. */
+    fun migratePlatformLanguage(context: Context) {
+        if (Build.VERSION.SDK_INT < 33) return
+        val prefs = Prefs.of(context)
+        if (prefs.getBoolean(MIGRATED, false)) return
+        val stored = prefs.getString("lang", "") ?: ""
+        runCatching {
+            val manager = context.getSystemService(LocaleManager::class.java)
+            if (manager.applicationLocales.toLanguageTags().isEmpty() && stored.isNotEmpty()) {
+                manager.applicationLocales = LocaleList.forLanguageTags(stored)
+            }
+            prefs.edit().putBoolean(MIGRATED, true).apply()
+        }
+    }
 
     fun set(context: Context, tag: String) {
-        Prefs.of(context).edit().putString("lang", tag).apply()
-        applyToProcess(context.applicationContext)
+        val selected = tag.takeIf { it in TAGS } ?: ""
+        Prefs.of(context).edit().putString("lang", selected).putBoolean(MIGRATED, true).apply()
         if (Build.VERSION.SDK_INT >= 33) runCatching {
             context.getSystemService(LocaleManager::class.java).applicationLocales =
-                if (tag.isEmpty()) LocaleList.getEmptyLocaleList() else LocaleList.forLanguageTags(tag)
+                if (selected.isEmpty()) LocaleList.getEmptyLocaleList() else LocaleList.forLanguageTags(selected)
         }
+        applyToProcess(context.applicationContext)
     }
 
     /** Язык процесса: по умолчанию и в ресурсах приложения (их читают будильники и виджеты). */
@@ -48,7 +82,9 @@ object AppLang {
         Locale.setDefault(loc)
         val res = app.resources
         val conf = Configuration(res.configuration).apply { setLocale(loc) }
-        res.updateConfiguration(conf, res.displayMetrics)
+        // On Android 13+ LocaleManager updates the app's resources and recreates Activity.
+        // Keep legacy app-context resources synchronized only on older systems.
+        if (Build.VERSION.SDK_INT < 33) res.updateConfiguration(conf, res.displayMetrics)
     }
 
     /** Окно — на выбранном языке. */

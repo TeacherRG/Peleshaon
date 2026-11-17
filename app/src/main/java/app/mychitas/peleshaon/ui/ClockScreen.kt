@@ -1128,7 +1128,16 @@ private fun SettingsSheet(onChange: () -> Unit) {
                         lang = t
                         AppLang.set(context, t)
                         // окно — заново, уже на новом языке
-                        (context as? android.app.Activity)?.recreate()
+                        // Android 13+ normally recreates Activity via LocaleManager.
+                        // Some ColorOS variants need manual recreation for resource refresh.
+                        if (android.os.Build.VERSION.SDK_INT < 33 ||
+                            android.os.Build.MANUFACTURER.lowercase() in setOf("oppo", "realme", "oneplus")) {
+                            var host: Context = context
+                            while (host is android.content.ContextWrapper && host !is android.app.Activity) {
+                                host = host.baseContext
+                            }
+                            (host as? android.app.Activity)?.recreate()
+                        }
                         app.mychitas.peleshaon.live.Live.update(context)
                     },
                     label = { Text(if (t.isEmpty()) stringResource(R.string.lang_system) else AppLang.label(t), fontSize = 13.sp) },
