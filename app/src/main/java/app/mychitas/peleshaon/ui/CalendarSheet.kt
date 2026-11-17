@@ -81,7 +81,7 @@ fun CalendarSheet(city: CityOption, now: ZonedDateTime) {
     val locale = Locale.getDefault()
     val zone = city.zone()
     // после заката — уже завтрашний еврейский день
-    val today = remember(now.toLocalDate()) {
+    val today = remember(now.toEpochSecond() / 60, city) {
         val t = now.withZoneSameInstant(zone)
         val set = ZmanimEngine.sunsetOf(t.toLocalDate(), city)
         if (set != null && !t.isBefore(set)) t.toLocalDate().plusDays(1) else t.toLocalDate()

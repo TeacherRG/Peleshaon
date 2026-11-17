@@ -10,11 +10,11 @@ android {
 
     defaultConfig {
         // Тот же id, что у телефона: Google Play связывает приложение на телефоне и на часах
-        applicationId = "app.mychitas.peleshaon"
+        applicationId = "app.mychitas.peleshaon.beta"
         minSdk = 30
         targetSdk = 35
-        versionCode = 1
-        versionName = "1.0.0-alpha1-wear"
+        versionCode = 2
+        versionName = "1.0.0-beta1-wear"
     }
 
     // Один ключ для всех тестовых сборок: иначе каждая сборка на GitHub подписана новым ключом,

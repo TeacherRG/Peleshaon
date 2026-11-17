@@ -59,6 +59,7 @@ import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -142,7 +143,7 @@ fun ClockScreen(onNightScreen: () -> Unit, onIntro: () -> Unit = {}, onMoon: () 
     val auto = remember(version) { Prefs.chosenCity(context) == null }
     var marks by remember { mutableStateOf(Prefs.marks(context)) }
     var tziruf by remember { mutableStateOf(Prefs.tziruf(context)) }
-    var panel by remember { mutableStateOf<Panel?>(null) }
+    var panel by rememberSaveable { mutableStateOf<Panel?>(null) }
     // свой будильник, открытый в окне (C1, C2…)
     var editAlarm by remember { mutableStateOf(Prefs.MORNING) }
     var pop by remember { mutableStateOf<Triple<String, Float, Float>?>(null) }

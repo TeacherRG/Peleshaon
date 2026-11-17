@@ -159,10 +159,16 @@ object ZmanimEngine {
     fun sunsetOf(date: LocalDate, city: CityOption): ZonedDateTime? =
         buildCalendar(date, city.name, city.lat, city.lon, 0.0, city.zone()).sunset?.toZoned(city.zone())
 
-    /** Конец времени Шма календарного дня (округлён вниз). */
+    /** Конец времени Шма по выбранной общине (округлён вниз). */
     fun shmaOf(date: LocalDate, city: CityOption): ZonedDateTime? =
-        buildCalendar(date, city.name, city.lat, city.lon, 0.0, city.zone()).sofZmanShmaBaalHatanya
-            ?.toZoned(city.zone())?.truncatedTo(ChronoUnit.MINUTES)
+        shmaFrom(cal(date, city))?.toZoned(city.zone())?.truncatedTo(ChronoUnit.MINUTES)
+
+    /** Общая формула для будильников и отображаемых времён. */
+    private fun shmaFrom(cal: ComplexZmanimCalendar): Date? = when (minhag) {
+        Minhag.CHABAD -> cal.sofZmanShmaBaalHatanya
+        Minhag.LITVISH -> cal.sofZmanShmaGRA
+        Minhag.SEFARDI -> cal.sofZmanShmaMGA72MinutesZmanis
+    }
 
     /**
      * Шабат этой недели: с воскресенья по пятницу — ближайший; в субботу — сегодняшний, пока он не вышел;
@@ -252,11 +258,7 @@ object ZmanimEngine {
         val rawMap = listOf(
             ZmanType.ALOT to alotOf(cal),
             ZmanType.SUNRISE to cal.sunrise,
-            ZmanType.SOF_ZMAN_SHMA to when (minhag) {
-                Minhag.CHABAD -> cal.sofZmanShmaBaalHatanya
-                Minhag.LITVISH -> cal.sofZmanShmaGRA
-                Minhag.SEFARDI -> cal.sofZmanShmaMGA72MinutesZmanis
-            },
+            ZmanType.SOF_ZMAN_SHMA to shmaFrom(cal),
             ZmanType.SOF_ZMAN_TFILA to if (chabad) cal.sofZmanTfilaBaalHatanya else cal.sofZmanTfilaGRA,
             ZmanType.CHATZOT to cal.chatzos,
             ZmanType.MINCHA_GEDOLA to if (chabad) cal.minchaGedolaBaalHatanya else cal.minchaGedola,
@@ -265,9 +267,7 @@ object ZmanimEngine {
             ZmanType.TZAIT to tzeitOf(cal)
         )
 
-        // Летом на севере солнце не опускается на 16,1° — рассвета нет; остальное без восхода и заката не считается
-        if (rawMap.any { it.second == null && it.first != ZmanType.ALOT }) return emptyList()
-
+        // Сохраняем доступные времена даже при отсутствии отдельного астрономического события.
         return rawMap.mapNotNull { (type, dateObj) ->
             val zdt = dateObj?.toZoned(zoneId) ?: return@mapNotNull null
             val truncated = zdt.truncatedTo(ChronoUnit.MINUTES)

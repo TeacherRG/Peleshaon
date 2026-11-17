@@ -127,9 +127,11 @@ val CITIES: List<CityOption> = listOf(
     CityOption("Asia/Shanghai", "Shanghai", "Шанхай", "Schanghai", 31.23, 121.47, "Asia/Shanghai", false),
     CityOption("Asia/Tokyo", "Tokyo", "Токио", "Tokio", 35.68, 139.69, "Asia/Tokyo", false),
     CityOption("Asia/Singapore", "Singapore", "Сингапур", "Singapur", 1.35, 103.82, "Asia/Singapore", false),
-    CityOption("Asia/Kolkata", "Kolkata", "Мумбаи", "Mumbai", 19.08, 72.88, "Asia/Kolkata", false),
+    // Исторический ID сохранён для совместимости с ранее выбранным городом.
+    CityOption("Asia/Kolkata", "Mumbai", "Мумбаи", "Mumbai", 19.08, 72.88, "Asia/Kolkata", false),
+    CityOption("kolkata", "Kolkata", "Калькутта", "Kalkutta", 22.5726, 88.3639, "Asia/Kolkata", false),
     CityOption("haifa", "Haifa", "Хайфа", null, 32.79, 34.99, "Asia/Jerusalem", true),
-    CityOption("beer-sheva", "er Sheva\", ", ", \"Be", null, 31.25, 34.79, "Asia/Jerusalem", true),
+    CityOption("beer-sheva", "Be'er Sheva", "Беэр-Шева", "Be'er Scheva", 31.25, 34.79, "Asia/Jerusalem", true),
     CityOption("bnei-brak", "Bnei Brak", "Бней-Брак", null, 32.08, 34.83, "Asia/Jerusalem", true),
     CityOption("tzfat", "Tzfat (Safed)", "Цфат", "Zfat (Safed)", 32.96, 35.5, "Asia/Jerusalem", true),
     CityOption("tiberias", "Tiberias", "Тверия", "Tiberias", 32.79, 35.53, "Asia/Jerusalem", true),
@@ -252,7 +254,9 @@ fun inIsrael(zone: ZoneId): Boolean = zone.id in IL_ZONES
 
 /** Город по часовому поясу устройства; нет такого — Вена. */
 fun cityForZone(zone: ZoneId = ZoneId.systemDefault()): CityOption =
-    CITIES.find { it.zoneId == zone.id } ?: CITIES.first { it.id == "Europe/Vienna" }
+    CITIES.find { it.id == (if (zone.id == "Europe/Kyiv") "Europe/Kiev" else zone.id) }
+        ?: CITIES.find { it.zoneId == zone.id }
+        ?: CITIES.first { it.id == "Europe/Vienna" }
 
 /** Город по id или по прежнему английскому имени. */
 fun cityById(id: String?): CityOption? =

@@ -77,7 +77,7 @@ fun WearApp() {
     val city = remember { cityForZone(ZoneId.systemDefault()) }
     val zone = city.zone()
     val cityNow = now.withZoneSameInstant(zone)
-    val day = remember(cityNow.toLocalDate(), cityNow.hour) {
+    val day = remember(city, cityNow.truncatedTo(ChronoUnit.MINUTES)) {
         ZmanimEngine.calculateForMoment(cityNow, city.name, city.lat, city.lon, 0.0, zone, city.isIsrael)
     }
     val res = LocalContext.current.resources
