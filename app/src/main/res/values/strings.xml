@@ -219,4 +219,18 @@
     <string name="alarms_more">More alarms</string>
     <string name="alarm_add">Add an alarm</string>
     <string name="alarm_delete">Delete this alarm</string>
+    <string name="settings">Settings</string>
+    <string name="lang_t">Language</string>
+    <string name="lang_system">As on the phone</string>
+    <string name="minhag_t">Community</string>
+    <string name="minhag_chabad">Chabad</string>
+    <string name="minhag_litvish">Lithuanian (Ashkenazi)</string>
+    <string name="minhag_sefardi">Sephardi</string>
+    <string name="minhag_d_chabad">Times according to the Alter Rebbe (Baal HaTanya), as in Chabad calendars. Shabbat ends 50 minutes after sunset. Kiddush Levana from 7 days after the molad. The calendar shows the Chabad dates.</string>
+    <string name="minhag_d_litvish">Times according to the Vilna Gaon (GRA): Shema and the morning prayer are counted from sunrise to sunset; nightfall and the end of Shabbat — when the sun is 8.5° below the horizon. Kiddush Levana from 3 days after the molad.</string>
+    <string name="minhag_d_sefardi">Times according to Rav Ovadia Yosef (Yalkut Yosef): dawn — 72 «proportional» minutes before sunrise, Shema by the Magen Avraham, the morning prayer by the GRA, nightfall — 13.5 proportional minutes after sunset, the end of Shabbat — by Rabbeinu Tam (72 proportional minutes). Kiddush Levana from 7 to 15 days after the molad.</string>
+    <string name="minhag_note">The times of the day, the end of Shabbat, the alarms and the Kiddush Levana reminder adjust by themselves. Candles are always 18 minutes before sunset (in Jerusalem many light earlier). Not checked by a rabbi — ask the rabbi of your community.</string>
+    <string name="note_acc">Calculated from the city\'s coordinates, accurate to 1–2 minutes: do not leave it to the last minute and check your community\'s calendar.</string>
+    <string name="kl_note_litvish">Times follow the Ashkenazi custom: from 3 days after the molad to the middle of the month, not on the eve of Shabbat or Yom Tov; in Av — after Tisha B\'Av, in Tishrei — after Yom Kippur. Ask your community rabbi.</string>
+    <string name="kl_note_sefardi">Times follow the Sephardi custom: from 7 days after the molad to 15 days, not on the eve of Shabbat or Yom Tov; in Av — after Tisha B\'Av, in Tishrei — after Yom Kippur. Ask your community rabbi.</string>
 </resources>

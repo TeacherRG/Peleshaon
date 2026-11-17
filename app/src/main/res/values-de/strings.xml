@@ -219,4 +219,18 @@
     <string name="alarms_more">Weitere Wecker</string>
     <string name="alarm_add">Wecker hinzufügen</string>
     <string name="alarm_delete">Diesen Wecker löschen</string>
+    <string name="settings">Einstellungen</string>
+    <string name="lang_t">Sprache</string>
+    <string name="lang_system">Wie am Handy</string>
+    <string name="minhag_t">Gemeinde</string>
+    <string name="minhag_chabad">Chabad</string>
+    <string name="minhag_litvish">Litauisch (aschkenasisch)</string>
+    <string name="minhag_sefardi">Sefardisch</string>
+    <string name="minhag_d_chabad">Zeiten nach dem Alter Rebbe (Baal HaTanja), wie in den Kalendern von Chabad. Schabbat endet 50 Minuten nach Sonnenuntergang. Kiddusch Lewana ab 7 Tagen nach dem Molad. Im Kalender stehen die Chabad-Daten.</string>
+    <string name="minhag_d_litvish">Zeiten nach dem Wilnaer Gaon (GRA): Schma und Morgengebet werden von Sonnenaufgang bis Sonnenuntergang gerechnet; Erscheinen der Sterne und Schabbatende — wenn die Sonne 8,5° unter dem Horizont steht. Kiddusch Lewana ab 3 Tagen nach dem Molad.</string>
+    <string name="minhag_d_sefardi">Zeiten nach Raw Owadja Josef (Jalkut Josef): Morgendämmerung — 72 «zeitliche» Minuten vor Sonnenaufgang, Schma nach dem Magen Awraham, Morgengebet nach dem GRA, Erscheinen der Sterne — 13,5 zeitliche Minuten nach Sonnenuntergang, Schabbatende — nach Rabbenu Tam (72 zeitliche Minuten). Kiddusch Lewana von 7 bis 15 Tagen nach dem Molad.</string>
+    <string name="minhag_note">Die Zeiten des Tages, das Schabbatende, die Wecker und die Erinnerung an Kiddusch Lewana passen sich von selbst an. Kerzen immer 18 Minuten vor Sonnenuntergang (in Jerusalem zünden viele früher). Nicht von einem Rabbiner geprüft — frag den Rabbiner deiner Gemeinde.</string>
+    <string name="note_acc">Berechnet nach den Koordinaten der Stadt, auf 1–2 Minuten genau: Warte nicht bis zur letzten Minute und vergleiche mit dem Kalender deiner Gemeinde.</string>
+    <string name="kl_note_litvish">Die Zeiten folgen dem aschkenasischen Brauch: ab 3 Tagen nach dem Molad bis zur Mitte des Monats, nicht am Vorabend von Schabbat und Jom Tow; im Aw — nach Tischa beAw, im Tischri — nach Jom Kippur. Frag den Rabbiner deiner Gemeinde.</string>
+    <string name="kl_note_sefardi">Die Zeiten folgen dem sefardischen Brauch: von 7 bis 15 Tagen nach dem Molad, nicht am Vorabend von Schabbat und Jom Tow; im Aw — nach Tischa beAw, im Tischri — nach Jom Kippur. Frag den Rabbiner deiner Gemeinde.</string>
 </resources>

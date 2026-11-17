@@ -35,6 +35,11 @@ import app.mychitas.peleshaon.ui.Onboarding
  * Шабат и два будильника, которые молчат в Шабат и праздники.
  */
 class MainActivity : ComponentActivity() {
+    // язык, выбранный в «Настройках» (до Android 13 — здесь)
+    override fun attachBaseContext(newBase: android.content.Context) {
+        super.attachBaseContext(app.mychitas.peleshaon.AppLang.wrap(newBase))
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         enableEdgeToEdge(
             statusBarStyle = SystemBarStyle.dark(android.graphics.Color.TRANSPARENT),

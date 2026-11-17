@@ -122,4 +122,13 @@ object Prefs {
 
     fun kashrutAt(context: Context): Long = of(context).getLong("kashrut_at", 0L)
     fun setKashrutAt(context: Context, at: Long) = of(context).edit().putLong("kashrut_at", at).apply()
+
+    // ---- община: по ней считаются времена дня, исход Шабата, Кидуш Левана и даты
+
+    fun minhag(context: Context): app.mychitas.peleshaon.domain.Minhag =
+        runCatching { app.mychitas.peleshaon.domain.Minhag.valueOf(of(context).getString("minhag", null) ?: "") }
+            .getOrDefault(app.mychitas.peleshaon.domain.Minhag.CHABAD)
+
+    fun setMinhag(context: Context, m: app.mychitas.peleshaon.domain.Minhag) =
+        of(context).edit().putString("minhag", m.name).apply()
 }

@@ -31,6 +31,11 @@ import java.time.format.DateTimeFormatter
 import java.util.Locale
 
 class AlarmRingActivity : ComponentActivity() {
+    // язык, выбранный в «Настройках» (до Android 13 — здесь)
+    override fun attachBaseContext(newBase: android.content.Context) {
+        super.attachBaseContext(app.mychitas.peleshaon.AppLang.wrap(newBase))
+    }
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
