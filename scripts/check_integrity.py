@@ -43,7 +43,7 @@ def main() -> None:
         gradle = read(f"{module}/build.gradle.kts")
         check('applicationId = "app.mychitas.peleshaon.beta"' in gradle,
               f"{module}: unsafe applicationId, would overwrite original")
-        check("versionCode = 2" in gradle, f"{module}: unexpected version")
+        check("versionCode = 3" in gradle, f"{module}: unexpected version")
         manifest = ET.parse(ROOT / module / "src" / "main" / "AndroidManifest.xml")
         namespace = "{http://schemas.android.com/apk/res/android}"
         app = manifest.getroot().find("application")
