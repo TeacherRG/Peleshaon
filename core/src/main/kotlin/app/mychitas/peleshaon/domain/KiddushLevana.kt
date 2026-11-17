@@ -113,7 +113,7 @@ data class KiddushLevanaNow(
 )
 
 /**
- * Когда говорят Кидуш Левана — по обычаю Хабада: с семи суток после молада и до середины месяца (между моладами,
+ * Когда говорят Кидуш Левана — по общине (`ZmanimEngine.minhag`; ниже — Хабад): с семи суток после молада и до середины месяца (между моладами,
  * ≈ 14 сут. 18 ч — KosherJava `tchilasZmanKidushLevana7Days` / `sofZmanKidushLevanaBetweenMoldos`), ночью;
  * не в вечер Шабата и Йом Това (вечер после их исхода — можно); в ав — после 9 ава, в тишрей — после Йом Кипура.
  * Раввином не проверено — на экране: «сверяйтесь с раввином общины».
@@ -125,7 +125,10 @@ object KiddushLevanaRules {
         val jc = JewishCalendar(jewishGreg).apply { inIsrael = city.isIsrael }
         val zone = city.zone()
         fun z(d: java.util.Date) = java.time.Instant.ofEpochMilli(d.time).atZone(zone)
-        return z(jc.tchilasZmanKidushLevana7Days) to z(jc.sofZmanKidushLevanaBetweenMoldos)
+        // Хабад и сефарды — с 7 суток после молада; литовские (по Рема) — с 3 суток. Конец: ашкеназы — середина между моладами, сефарды — 15 суток
+        val start = if (ZmanimEngine.minhag == Minhag.LITVISH) jc.tchilasZmanKidushLevana3Days else jc.tchilasZmanKidushLevana7Days
+        val end = if (ZmanimEngine.minhag == Minhag.SEFARDI) jc.sofZmanKidushLevana15Days else jc.sofZmanKidushLevanaBetweenMoldos
+        return z(start) to z(end)
     }
 
     /** Ночь с этим моментом: гражданский день, вечером которого она началась; днём — null. */
@@ -180,7 +183,7 @@ object KiddushLevanaRules {
         val sunset = ZmanimEngine.sunsetOf(evening, city) ?: return null
         var at = tzeit
         if (ShabbatGuard.checkMoment(at, city.name, city.lat, city.lon, zone, city.isIsrael, false).isQuietTime) {
-            at = sunset.plusMinutes(ZmanimEngine.END_MIN).withSecond(0).withNano(0).plusMinutes(1)
+            at = (ZmanimEngine.havdalahOn(evening, city) ?: sunset.plusMinutes(ZmanimEngine.END_MIN)).withSecond(0).withNano(0).plusMinutes(1)
             if (ShabbatGuard.checkMoment(at, city.name, city.lat, city.lon, zone, city.isIsrael, false).isQuietTime) return null
         }
         val (start, end) = window(evening.plusDays(1), city)

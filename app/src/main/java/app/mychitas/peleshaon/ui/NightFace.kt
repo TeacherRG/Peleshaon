@@ -29,6 +29,11 @@ import java.time.temporal.ChronoUnit
 @Composable
 fun NightFace(modifier: Modifier = Modifier) {
     val context = LocalContext.current
+    // ночной экран и заставка — всегда тёмные, какая бы тема ни была выбрана
+    androidx.compose.runtime.DisposableEffect(Unit) {
+        ClockTheme.darkHolds++
+        onDispose { ClockTheme.darkHolds-- }
+    }
     var now by remember { mutableStateOf(ZonedDateTime.now()) }
     var shift by remember { mutableStateOf(0 to 0) }
     LaunchedEffect(Unit) {
@@ -45,9 +50,9 @@ fun NightFace(modifier: Modifier = Modifier) {
     val cityNow = now.withZoneSameInstant(zone)
     val minute = cityNow.truncatedTo(ChronoUnit.MINUTES)
     val half = remember(minute) { ZmanimEngine.halfOf(cityNow, city) }
-    val events = remember(half) {
+    val events = remember(half) { ClockTheme.dark {
         faceEvents(half, half?.let { ZmanimEngine.halfItems(it, city) } ?: emptyList(), ZmanimEngine.shabbatOf(cityNow, city), marks)
-    }
+    } }
     val ring = Dial.ring(cityNow, half)
     val hourLabel = half?.let { stringResource(if (it.day) R.string.hour_day else R.string.hour_night, it.hour(cityNow)) }
     Box(modifier = modifier) {

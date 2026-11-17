@@ -30,8 +30,15 @@ class AlarmRingService : Service() {
             stopSelf()
             return START_NOT_STICKY
         }
+        if (intent?.action == ACTION_SNOOZE) {
+            val type = intent.getStringExtra(AlarmScheduler.EXTRA_ALARM_TYPE) ?: "MORNING"
+            AlarmScheduler.scheduleExactAlarm(this, java.time.ZonedDateTime.now().plusMinutes(5), type, isSnooze = true)
+            stopSelf()
+            return START_NOT_STICKY
+        }
 
         val alarmType = intent?.getStringExtra(AlarmScheduler.EXTRA_ALARM_TYPE) ?: "MORNING"
+        val test = intent?.getBooleanExtra(AlarmScheduler.EXTRA_TEST, false) == true
         val prefs = getSharedPreferences("pele_prefs", Context.MODE_PRIVATE)
         val wakeModeName = prefs.getString("wake_mode_$alarmType", WakeMode.SOUND_AND_LIGHT.name)
         val wakeMode = WakeMode.valueOf(wakeModeName ?: WakeMode.SOUND_AND_LIGHT.name)
@@ -43,13 +50,19 @@ class AlarmRingService : Service() {
             addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP)
             putExtra(AlarmScheduler.EXTRA_ALARM_TYPE, alarmType)
             putExtra("wake_mode", wakeMode.name)
+            putExtra(AlarmScheduler.EXTRA_TEST, test)
         }
         val fullScreenPendingIntent = PendingIntent.getActivity(
             this, 2001, fullScreenIntent,
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
 
-        val title = if (alarmType == "TORAH") getString(R.string.torah_alarm_title) else getString(R.string.morning_alarm_title)
+        val title = alarmTitle(this, alarmType)
+        // окно звонка смахнули — выключить можно и из уведомления
+        fun action(act: String, code: Int) = PendingIntent.getService(
+            this, code, Intent(this, AlarmRingService::class.java).setAction(act).putExtra(AlarmScheduler.EXTRA_ALARM_TYPE, alarmType),
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
 
         val notification = NotificationCompat.Builder(this, CHANNEL_ID)
             .setSmallIcon(android.R.drawable.ic_lock_idle_alarm)
@@ -58,7 +71,10 @@ class AlarmRingService : Service() {
             .setPriority(NotificationCompat.PRIORITY_MAX)
             .setCategory(NotificationCompat.CATEGORY_ALARM)
             .setFullScreenIntent(fullScreenPendingIntent, true)
+            .setContentIntent(fullScreenPendingIntent)
             .setOngoing(true)
+            .addAction(0, getString(R.string.btn_stop), action(ACTION_STOP, 2002))
+            .apply { if (!test) addAction(0, getString(R.string.btn_snooze_5), action(ACTION_SNOOZE, 2003)) }
             .build()
 
         val fgsType = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
@@ -164,6 +180,12 @@ class AlarmRingService : Service() {
         }
     }
 
+    /** Окно звонка смахнули из недавних — музыка не должна играть дальше без способа её выключить. */
+    override fun onTaskRemoved(rootIntent: Intent?) {
+        stopSelf()
+        super.onTaskRemoved(rootIntent)
+    }
+
     override fun onDestroy() {
         scope.cancel()
         mediaPlayer?.stop()
@@ -177,5 +199,14 @@ class AlarmRingService : Service() {
     companion object {
         const val CHANNEL_ID = "pele_alarm_channel"
         const val ACTION_STOP = "app.mychitas.peleshaon.STOP_ALARM"
+        const val ACTION_SNOOZE = "app.mychitas.peleshaon.SNOOZE_ALARM"
     }
+}
+
+/** Заголовок звонка: будильник, будильник N, учёба, «можно молочное». */
+fun alarmTitle(context: Context, type: String): String = when {
+    type == "TORAH" -> context.getString(R.string.torah_alarm_title)
+    type == "KASHRUT" -> context.getString(R.string.kashrut_title)
+    type.startsWith("C") -> context.getString(R.string.alarm_n, app.mychitas.peleshaon.Prefs.customNumber(type))
+    else -> context.getString(R.string.morning_alarm_title)
 }

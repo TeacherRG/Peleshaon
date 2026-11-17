@@ -21,11 +21,12 @@ import java.time.format.TextStyle
 import java.util.Locale
 import kotlin.math.roundToInt
 
-/** Сторона света по азимуту — на языке телефона (иврит — 8 сторон словами, остальные — 16 букв). */
+/** Сторона света по азимуту — на языке телефона (иврит и украинский — 8 сторон, остальные — 16). */
 fun compassName(az: Double, locale: Locale = Locale.getDefault()): String {
     val i16 = (((az + 11.25) % 360) / 22.5).toInt() % 16
     return when (locale.language) {
-        "ru", "uk", "be" -> listOf("С", "ССВ", "СВ", "ВСВ", "В", "ВЮВ", "ЮВ", "ЮЮВ", "Ю", "ЮЮЗ", "ЮЗ", "ЗЮЗ", "З", "ЗСЗ", "СЗ", "ССЗ")[i16]
+        "uk" -> listOf("Пн", "ПнСх", "Сх", "ПдСх", "Пд", "ПдЗх", "Зх", "ПнЗх")[(((az + 22.5) % 360) / 45).toInt() % 8]
+        "ru", "be" -> listOf("С", "ССВ", "СВ", "ВСВ", "В", "ВЮВ", "ЮВ", "ЮЮВ", "Ю", "ЮЮЗ", "ЮЗ", "ЗЮЗ", "З", "ЗСЗ", "СЗ", "ССЗ")[i16]
         "de" -> listOf("N", "NNO", "NO", "ONO", "O", "OSO", "SO", "SSO", "S", "SSW", "SW", "WSW", "W", "WNW", "NW", "NNW")[i16]
         "iw", "he" -> listOf("צפון", "צפון־מזרח", "מזרח", "דרום־מזרח", "דרום", "דרום־מערב", "מערב", "צפון־מערב")[(((az + 22.5) % 360) / 45).toInt() % 8]
         else -> listOf("N", "NNE", "NE", "ENE", "E", "ESE", "SE", "SSE", "S", "SSW", "SW", "WSW", "W", "WNW", "NW", "NNW")[i16]

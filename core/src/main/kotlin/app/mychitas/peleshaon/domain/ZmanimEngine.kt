@@ -84,10 +84,24 @@ data class ShabbatTimes(
     val saturday: LocalDate get() = friday.plusDays(1)
 }
 
+/**
+ * Община — по ней считаются времена дня, исход Шабата, Кидуш Левана и даты календаря (владелец, 18.11.2026:
+ * «выбор общины: Хабад, литовская, сефардская — даты и зманим автоматически подстроятся»). Раввином не проверено.
+ * - `CHABAD` — по Алтер Ребе (Бааль ґа-Тания), как в календарях Хабада; исход Шабата — закат + 50 мин.
+ * - `LITVISH` — по Виленскому Гаону (ГРА): «Шма» и молитва — от восхода до заката; выход звёзд и исход Шабата — солнце на 8,5° под горизонтом.
+ * - `SEFARDI` — по раву Овадье Йосефу («Ялкут Йосеф»): рассвет — 72 «временные» минуты, «Шма» — по Маген Авраґаму, молитва — по ГРА,
+ *   выход звёзд — 13,5 «временной» минуты после заката, исход Шабата — по Рабейну Таму (72 «временные» минуты).
+ */
+enum class Minhag { CHABAD, LITVISH, SEFARDI }
+
 object ZmanimEngine {
 
     const val CANDLE_MIN = 18L
     const val END_MIN = 50L
+
+    /** Община приложения; ставится при запуске и в «Настройках». */
+    @Volatile
+    var minhag: Minhag = Minhag.CHABAD
 
     fun calculateForMoment(
         now: ZonedDateTime,
@@ -137,7 +151,7 @@ object ZmanimEngine {
             isPolarAnomaly = items.isEmpty(),
             items = items,
             candleLighting = todaySunset.minusMinutes(CANDLE_MIN),
-            tzeitShabbat = todaySunset.plusMinutes(END_MIN)
+            tzeitShabbat = havdalahOf(todayCal, zoneId) ?: todaySunset.plusMinutes(END_MIN)
         )
     }
 
@@ -162,7 +176,7 @@ object ZmanimEngine {
         fun span(fri: LocalDate) = ShabbatTimes(
             friday = fri,
             candles = sunsetOf(fri, city)?.minusMinutes(CANDLE_MIN),
-            havdalah = sunsetOf(fri.plusDays(1), city)?.plusMinutes(END_MIN)
+            havdalah = havdalahOn(fri.plusDays(1), city)
         )
         val sh = span(today.plusDays(back))
         val end = sh.havdalah
@@ -182,11 +196,11 @@ object ZmanimEngine {
         if (now.isBefore(rise)) {
             val y = cal(today.minusDays(1), city)
             val start = y.sunset?.toZoned(zone) ?: return null
-            return Half(false, start, rise, t.alos16Point1Degrees?.toZoned(zone), y.tzaisBaalHatanya?.toZoned(zone))
+            return Half(false, start, rise, alotOf(t)?.toZoned(zone), tzeitOf(y)?.toZoned(zone))
         }
         val n = cal(today.plusDays(1), city)
         val end = n.sunrise?.toZoned(zone) ?: return null
-        return Half(false, set, end, n.alos16Point1Degrees?.toZoned(zone), t.tzaisBaalHatanya?.toZoned(zone))
+        return Half(false, set, end, alotOf(n)?.toZoned(zone), tzeitOf(t)?.toZoned(zone))
     }
 
     /**
@@ -234,16 +248,21 @@ object ZmanimEngine {
     }
 
     private fun extractZmanim(cal: ComplexZmanimCalendar, zoneId: ZoneId): List<ZmanItem> {
+        val chabad = minhag == Minhag.CHABAD
         val rawMap = listOf(
-            ZmanType.ALOT to cal.alos16Point1Degrees,
+            ZmanType.ALOT to alotOf(cal),
             ZmanType.SUNRISE to cal.sunrise,
-            ZmanType.SOF_ZMAN_SHMA to cal.sofZmanShmaBaalHatanya,
-            ZmanType.SOF_ZMAN_TFILA to cal.sofZmanTfilaBaalHatanya,
+            ZmanType.SOF_ZMAN_SHMA to when (minhag) {
+                Minhag.CHABAD -> cal.sofZmanShmaBaalHatanya
+                Minhag.LITVISH -> cal.sofZmanShmaGRA
+                Minhag.SEFARDI -> cal.sofZmanShmaMGA72MinutesZmanis
+            },
+            ZmanType.SOF_ZMAN_TFILA to if (chabad) cal.sofZmanTfilaBaalHatanya else cal.sofZmanTfilaGRA,
             ZmanType.CHATZOT to cal.chatzos,
-            ZmanType.MINCHA_GEDOLA to cal.minchaGedolaBaalHatanya,
-            ZmanType.PLAG_HAMINCHA to cal.plagHaminchaBaalHatanya,
+            ZmanType.MINCHA_GEDOLA to if (chabad) cal.minchaGedolaBaalHatanya else cal.minchaGedola,
+            ZmanType.PLAG_HAMINCHA to if (chabad) cal.plagHaminchaBaalHatanya else cal.plagHamincha,
             ZmanType.SUNSET to cal.sunset,
-            ZmanType.TZAIT to cal.tzaisBaalHatanya
+            ZmanType.TZAIT to tzeitOf(cal)
         )
 
         // Летом на севере солнце не опускается на 16,1° — рассвета нет; остальное без восхода и заката не считается
@@ -256,6 +275,32 @@ object ZmanimEngine {
             ZmanItem(type = type, exactTime = zdt, roundedTime = rounded)
         }
     }
+
+    /** Рассвет по общине. */
+    private fun alotOf(cal: ComplexZmanimCalendar): Date? =
+        if (minhag == Minhag.SEFARDI) cal.alos72Zmanis else cal.alos16Point1Degrees
+
+    /** Выход звёзд по общине. */
+    private fun tzeitOf(cal: ComplexZmanimCalendar): Date? = when (minhag) {
+        Minhag.CHABAD -> cal.tzaisBaalHatanya
+        Minhag.LITVISH -> cal.tzaisGeonim8Point5Degrees
+        Minhag.SEFARDI -> {
+            // 13,5 «временной» минуты после заката (рав Овадья Йосеф)
+            val set = cal.sunset
+            val hour = cal.shaahZmanisGra
+            if (set == null || hour == Long.MIN_VALUE) null else Date(set.time + (hour * 13.5 / 60).toLong())
+        }
+    }
+
+    /** Исход Шабата и праздника по общине: Хабад — закат + 50 мин, литовская — 8,5°, сефардская — Рабейну Там (72 «временные» мин). */
+    private fun havdalahOf(cal: ComplexZmanimCalendar, zone: ZoneId): ZonedDateTime? = when (minhag) {
+        Minhag.CHABAD -> cal.sunset?.toZoned(zone)?.plusMinutes(END_MIN)
+        Minhag.LITVISH -> cal.tzaisGeonim8Point5Degrees?.toZoned(zone)
+        Minhag.SEFARDI -> cal.tzais72Zmanis?.toZoned(zone)
+    }?.let { if (it.second > 0 || it.nano > 0) it.withSecond(0).withNano(0).plusMinutes(1) else it }
+
+    /** Исход Шабата / праздника этого календарного дня в городе. */
+    fun havdalahOn(date: LocalDate, city: CityOption): ZonedDateTime? = havdalahOf(cal(date, city), city.zone())
 
     private fun getJewishDateStrings(gregorianDate: LocalDate, isIsrael: Boolean): Pair<String, String> {
         // JewishCalendar(LocalDate): конструктор (год, месяц, день) ждёт ЕВРЕЙСКУЮ дату

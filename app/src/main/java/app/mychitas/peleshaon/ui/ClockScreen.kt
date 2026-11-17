@@ -53,6 +53,7 @@ import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -83,6 +84,9 @@ import app.mychitas.peleshaon.domain.CityOption
 import app.mychitas.peleshaon.domain.Dial
 import app.mychitas.peleshaon.domain.ZmanType
 import app.mychitas.peleshaon.domain.ZmanimEngine
+import app.mychitas.peleshaon.domain.Minhag
+import app.mychitas.peleshaon.AppLang
+import androidx.compose.foundation.layout.FlowRow
 import app.mychitas.peleshaon.domain.KiddushLevanaRules
 import app.mychitas.peleshaon.domain.findCities
 import app.mychitas.peleshaon.live.Live
@@ -98,7 +102,7 @@ import java.util.Locale
 import kotlin.math.roundToInt
 
 /** Окно поверх часов: город, Шабат, два будильника, все времена, «Как считаем». */
-private enum class Panel { CITY, SHABBAT, WAKE, STUDY, TIMES, INFO, PRIVACY, CALENDAR }
+private enum class Panel { SETTINGS, CITY, SHABBAT, WAKE, STUDY, CUSTOM, TIMES, INFO, PRIVACY, CALENDAR }
 
 /** «осталось / через N ч M мин» — как на сайте: минуты вверх, больше суток — дни и часы. */
 private fun until(context: Context, now: ZonedDateTime, at: ZonedDateTime, deadline: Boolean): String {
@@ -134,25 +138,27 @@ fun ClockScreen(onNightScreen: () -> Unit, onIntro: () -> Unit = {}, onMoon: () 
     var marks by remember { mutableStateOf(Prefs.marks(context)) }
     var tziruf by remember { mutableStateOf(Prefs.tziruf(context)) }
     var panel by remember { mutableStateOf<Panel?>(null) }
+    // свой будильник, открытый в окне (C1, C2…)
+    var editAlarm by remember { mutableStateOf(Prefs.MORNING) }
     var pop by remember { mutableStateOf<Triple<String, Float, Float>?>(null) }
 
     val zone = city.zone()
     val cityNow = now.withZoneSameInstant(zone)
     val minute = cityNow.truncatedTo(ChronoUnit.MINUTES)
-    val day = remember(city, minute) {
+    val day = remember(city, minute, version) {
         ZmanimEngine.calculateForMoment(cityNow, city.name, city.lat, city.lon, 0.0, zone, city.isIsrael)
     }
-    val sh = remember(city, minute) { ZmanimEngine.shabbatOf(cityNow, city) }
+    val sh = remember(city, minute, version) { ZmanimEngine.shabbatOf(cityNow, city) }
     // циферблат — половина суток: 12 галахических часов дня или ночи (владелец, 17.11.2026)
-    val half = remember(city, minute) { ZmanimEngine.halfOf(cityNow, city) }
-    val halfItems = remember(half, city) { half?.let { ZmanimEngine.halfItems(it, city) } ?: emptyList() }
+    val half = remember(city, minute, version) { ZmanimEngine.halfOf(cityNow, city) }
+    val halfItems = remember(half, city, version) { half?.let { ZmanimEngine.halfItems(it, city) } ?: emptyList() }
     val ring = Dial.ring(cityNow, half)
     val hourLabel = half?.let { stringResource(if (it.day) R.string.hour_day else R.string.hour_night, it.hour(cityNow)) }
     // еврейская дата — день обычным числом, крупно
     val jd = remember(day.date, city) { ZmanimEngine.jewishDay(day.date, city.isIsrael) }
 
     // точки циферблата: времена этой половины суток; свечи и исход — если они в ней
-    val events = remember(half, halfItems, sh, marks) { faceEvents(half, halfItems, sh, marks) }
+    val events = remember(half, halfItems, sh, marks, ClockTheme.light) { faceEvents(half, halfItems, sh, marks) }
 
     val wdTime = { at: ZonedDateTime ->
         "${at.withZoneSameInstant(zone).dayOfWeek.getDisplayName(TextStyle.SHORT, locale)} ${at.withZoneSameInstant(zone).format(HHMM)}"
@@ -161,12 +167,7 @@ fun ClockScreen(onNightScreen: () -> Unit, onIntro: () -> Unit = {}, onMoon: () 
     val shabbatOn = sh.candles != null && !cityNow.isBefore(sh.candles)
 
     Box(modifier = Modifier.fillMaxSize().background(Color(0xFF060B1E))) {
-        Image(
-            painter = painterResource(R.drawable.clock_bg),
-            contentDescription = null,
-            contentScale = ContentScale.Crop,
-            modifier = Modifier.fillMaxSize()
-        )
+        ClockBackground()
         Column(
             modifier = Modifier.fillMaxSize().safeDrawingPadding().padding(horizontal = 12.dp, vertical = 8.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
@@ -210,6 +211,10 @@ fun ClockScreen(onNightScreen: () -> Unit, onIntro: () -> Unit = {}, onMoon: () 
                     if (day.isNextJewishDayAfterSunset) Text(stringResource(R.string.evening), color = ClockColors.Muted, fontSize = 11.sp, textAlign = TextAlign.Center)
                 }
                 }
+                Chip(onClick = { panel = Panel.SETTINGS }, round = true) {
+                    Text("⚙", fontSize = 17.sp, color = ClockColors.TcheletDeep)
+                }
+                Spacer(Modifier.width(6.dp))
                 Chip(onClick = { panel = Panel.INFO }, round = true) {
                     Text("?", fontWeight = FontWeight.Bold, fontSize = 17.sp, color = ClockColors.TcheletDeep)
                 }
@@ -264,7 +269,7 @@ fun ClockScreen(onNightScreen: () -> Unit, onIntro: () -> Unit = {}, onMoon: () 
                 }
             }
             // Кидуш Левана: в подходящий вечер — плашка с полумесяцем вместо подсказки; нажатие — лунный компас
-            val kl = remember(city, minute) { runCatching { KiddushLevanaRules.now(cityNow, city) }.getOrNull() }
+            val kl = remember(city, minute, version) { runCatching { KiddushLevanaRules.now(cityNow, city) }.getOrNull() }
             if (pop == null && kl != null) {
                 MoonPill(kl, onClick = onMoon)
             } else if (pop == null && !day.isPolarAnomaly) {
@@ -273,7 +278,13 @@ fun ClockScreen(onNightScreen: () -> Unit, onIntro: () -> Unit = {}, onMoon: () 
 
             // ---- кнопки внизу: Шабат · Будильник · Учёба · Времена
             val off = stringResource(R.string.off2)
-            val nextWake = remember(version, city, minute) { AlarmRules.nextRing(Prefs.alarm(context, Prefs.MORNING), cityNow, city) }
+            // ближайший из будильников (основной и свои); идёт таймер «мясное → молочное» — он
+            val nextWake = remember(version, city, minute) {
+                val k = Prefs.kashrutAt(context)
+                if (k > System.currentTimeMillis()) java.time.Instant.ofEpochMilli(k).atZone(zone)
+                else (listOf(Prefs.MORNING) + Prefs.customAlarms(context))
+                    .mapNotNull { AlarmRules.nextRing(Prefs.alarm(context, it), cityNow, city) }.minOrNull()
+            }
             val nextStudy = remember(version, city, minute) { AlarmRules.nextRing(Prefs.alarm(context, Prefs.TORAH), cityNow, city) }
             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 DockTool("🕯️", stringResource(R.string.dock_shabbat),
@@ -305,10 +316,14 @@ fun ClockScreen(onNightScreen: () -> Unit, onIntro: () -> Unit = {}, onMoon: () 
                     panel = null
                 }
                 Panel.SHABBAT -> ShabbatSheet(sh, cityNow, city, wdTime, dayText)
-                Panel.WAKE, Panel.STUDY -> AlarmSheet(
-                    type = if (open == Panel.WAKE) Prefs.MORNING else Prefs.TORAH,
-                    city = city, now = cityNow, wdTime = wdTime, dayText = dayText, onChange = bump
-                )
+                Panel.WAKE, Panel.STUDY, Panel.CUSTOM -> {
+                    val t = when (open) { Panel.WAKE -> Prefs.MORNING; Panel.STUDY -> Prefs.TORAH; else -> editAlarm }
+                    key(t) { AlarmSheet(
+                    type = t,
+                    city = city, now = cityNow, wdTime = wdTime, dayText = dayText, onChange = bump,
+                    onOpen = { id -> editAlarm = id; panel = Panel.CUSTOM },
+                    onDeleted = { bump(); panel = Panel.WAKE }
+                ) } }
                 Panel.TIMES -> TimesSheet(day.items, day.isNextJewishDayAfterSunset, cityNow, zone, marks, tziruf, dayText,
                     onToggle = { type ->
                         marks = if (type in marks) marks - type else marks + type
@@ -318,6 +333,7 @@ fun ClockScreen(onNightScreen: () -> Unit, onIntro: () -> Unit = {}, onMoon: () 
                 Panel.INFO -> InfoSheet(onNightScreen = { panel = null; onNightScreen() }, onIntro = { panel = null; onIntro() }, onPrivacy = { panel = Panel.PRIVACY })
                 Panel.PRIVACY -> PrivacySheet()
                 Panel.CALENDAR -> CalendarSheet(city, cityNow)
+                Panel.SETTINGS -> SettingsSheet(onChange = bump)
             }
         }
     }
@@ -539,11 +555,14 @@ private fun AlarmSheet(
     now: ZonedDateTime,
     wdTime: (ZonedDateTime) -> String,
     dayText: (LocalDate) -> String,
-    onChange: () -> Unit
+    onChange: () -> Unit,
+    onOpen: (String) -> Unit = {},
+    onDeleted: () -> Unit = {}
 ) {
     val context = LocalContext.current
     val locale = Locale.getDefault()
     val study = type == Prefs.TORAH
+    val custom = type.startsWith("C")
     var spec by remember { mutableStateOf(Prefs.alarm(context, type)) }
     var mode by remember { mutableStateOf(Prefs.wakeMode(context, type)) }
     val change = { s: AlarmSpec ->
@@ -562,7 +581,10 @@ private fun AlarmSheet(
     SheetColumn {
         PermissionsCard()
         Row(verticalAlignment = Alignment.CenterVertically) {
-            Text(stringResource(if (study) R.string.study else R.string.alarm), fontWeight = FontWeight.Bold, fontSize = 20.sp, color = ClockColors.Ink, modifier = Modifier.weight(1f))
+            Text(
+                if (custom) stringResource(R.string.alarm_n, Prefs.customNumber(type)) else stringResource(if (study) R.string.study else R.string.alarm),
+                fontWeight = FontWeight.Bold, fontSize = 20.sp, color = ClockColors.Ink, modifier = Modifier.weight(1f)
+            )
             Text(stringResource(if (spec.on) R.string.alarm_on else R.string.alarm_off), color = if (spec.on) ClockColors.Ok else ClockColors.Muted, fontSize = 13.sp)
             Spacer(Modifier.width(8.dp))
             Switch(checked = spec.on, onCheckedChange = { change(spec.copy(on = it)) }, colors = SwitchDefaults.colors(checkedTrackColor = ClockColors.Gold, checkedThumbColor = ClockColors.SheetBg))
@@ -666,12 +688,98 @@ private fun AlarmSheet(
         OutlinedButton(
             onClick = {
                 val i = Intent(context, AlarmRingService::class.java).putExtra(AlarmScheduler.EXTRA_ALARM_TYPE, type)
+                    .putExtra(AlarmScheduler.EXTRA_TEST, true)
                 androidx.core.content.ContextCompat.startForegroundService(context, i)
             },
             border = BorderStroke(1.dp, ClockColors.Line)
         ) { Text(stringResource(R.string.alarm_test), color = ClockColors.Ink) }
         Note(stringResource(R.string.alarm_note))
+
+        if (custom) {
+            OutlinedButton(
+                onClick = { AlarmScheduler.removeCustom(context, type); onDeleted() },
+                border = BorderStroke(1.dp, ClockColors.Bad)
+            ) { Text(stringResource(R.string.alarm_delete), color = ClockColors.Bad) }
+        }
+        if (type == Prefs.MORNING) {
+            HorizontalDivider(color = ClockColors.Line)
+            MoreAlarms(city, now, onOpen, onChange)
+            HorizontalDivider(color = ClockColors.Line)
+            KashrutCard(onChange)
+        }
     }
+}
+
+/** Свои будильники: список (время, дни, вкл.) и «＋ Добавить будильник». */
+@Composable
+private fun MoreAlarms(city: CityOption, now: ZonedDateTime, onOpen: (String) -> Unit, onChange: () -> Unit) {
+    val context = LocalContext.current
+    var ids by remember { mutableStateOf(Prefs.customAlarms(context)) }
+    Text(stringResource(R.string.alarms_more), fontWeight = FontWeight.Bold, color = ClockColors.Ink)
+    for (id in ids) key(id) {
+        var spec by remember { mutableStateOf(Prefs.alarm(context, id)) }
+        val time = if (spec.byShma) stringResource(R.string.before_min, spec.before) else String.format(Locale.ROOT, "%02d:%02d", spec.hour, spec.minute)
+        Surface(
+            onClick = { onOpen(id) },
+            shape = RoundedCornerShape(12.dp), color = ClockColors.Surface, border = BorderStroke(1.dp, ClockColors.Line),
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Row(Modifier.padding(horizontal = 12.dp, vertical = 6.dp), verticalAlignment = Alignment.CenterVertically) {
+                Column(Modifier.weight(1f)) {
+                    Text(stringResource(R.string.alarm_n, Prefs.customNumber(id)), color = ClockColors.Muted, fontSize = 12.sp)
+                    Text(time, color = ClockColors.Ink, fontWeight = FontWeight.Bold, fontSize = 20.sp)
+                    val next = if (spec.on) AlarmRules.nextRing(spec, now, city) else null
+                    if (next != null) Text(next.format(DateTimeFormatter.ofPattern("EEE d MMM, HH:mm", Locale.getDefault())), color = ClockColors.Ink2, fontSize = 12.sp)
+                }
+                Switch(
+                    checked = spec.on,
+                    onCheckedChange = {
+                        spec = spec.copy(on = it)
+                        Prefs.setAlarm(context, id, spec)
+                        AlarmScheduler.rescheduleAllFromPrefs(context)
+                        onChange()
+                    },
+                    colors = SwitchDefaults.colors(checkedTrackColor = ClockColors.Gold, checkedThumbColor = ClockColors.SheetBg)
+                )
+            }
+        }
+    }
+    if (ids.size < Prefs.MAX_CUSTOM) {
+        OutlinedButton(
+            onClick = {
+                val id = Prefs.addCustomAlarm(context) ?: return@OutlinedButton
+                ids = Prefs.customAlarms(context)
+                AlarmScheduler.rescheduleAllFromPrefs(context)
+                onChange()
+                onOpen(id)
+            },
+            border = BorderStroke(1.dp, ClockColors.Gold)
+        ) { Text("＋  " + stringResource(R.string.alarm_add), color = ClockColors.Ink) }
+    }
+}
+
+/** «Мясное → молочное»: один звонок через 6 часов. */
+@Composable
+private fun KashrutCard(onChange: () -> Unit) {
+    val context = LocalContext.current
+    var at by remember { mutableStateOf(Prefs.kashrutAt(context)) }
+    val running = at > System.currentTimeMillis()
+    Text("🍖 → 🥛  " + stringResource(R.string.kashrut_t), fontWeight = FontWeight.Bold, color = ClockColors.Ink)
+    if (running) {
+        val t = java.time.Instant.ofEpochMilli(at).atZone(java.time.ZoneId.systemDefault())
+        Text(stringResource(R.string.kashrut_until, t.format(DateTimeFormatter.ofPattern("HH:mm"))), color = ClockColors.GoldDeep, fontWeight = FontWeight.Bold)
+        OutlinedButton(
+            onClick = { AlarmScheduler.stopKashrut(context); at = 0L; onChange() },
+            border = BorderStroke(1.dp, ClockColors.Line)
+        ) { Text(stringResource(R.string.kashrut_cancel), color = ClockColors.Ink) }
+    } else {
+        Button(
+            onClick = { AlarmScheduler.startKashrut(context); at = Prefs.kashrutAt(context); onChange() },
+            colors = ButtonDefaults.buttonColors(containerColor = ClockColors.Gold),
+            modifier = Modifier.fillMaxWidth()
+        ) { Text(stringResource(R.string.kashrut_start), color = ClockColors.SheetBg, fontWeight = FontWeight.Bold) }
+    }
+    Note(stringResource(R.string.kashrut_note))
 }
 
 @Composable
@@ -699,7 +807,7 @@ private fun LinkButton(text: String, route: String, modifier: Modifier) {
     Surface(
         onClick = {
             val lang = when (Locale.getDefault().language) {
-                "ru" -> "ru"; "de" -> "de"; "iw", "he" -> "he"; else -> "en"
+                "ru", "uk", "be" -> "ru"; "de" -> "de"; "iw", "he" -> "he"; else -> "en"
             }
             context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("https://niflaot.mychitas.app/?lang=$lang&ref=app#/$route")))
         },
@@ -784,7 +892,7 @@ private fun InfoSheet(onNightScreen: () -> Unit, onIntro: () -> Unit, onPrivacy:
         Note("📅 " + stringResource(R.string.cal_hint))
         HorizontalDivider(color = ClockColors.Line)
         Text(stringResource(R.string.info), fontWeight = FontWeight.Bold, color = ClockColors.Ink)
-        Note(stringResource(R.string.note))
+        Note(minhagNote())
         Note(stringResource(R.string.shabbat_note))
         Note(stringResource(R.string.alarm_note))
         Note(stringResource(R.string.kl_help))
@@ -811,7 +919,7 @@ private const val PRIVACY_URL = "https://niflaot.mychitas.app/peleshaon/privacy/
 private const val MAIL = "Office@mychitas.app"
 
 private fun langParam(): String = when (Locale.getDefault().language) {
-    "ru" -> "ru"; "de" -> "de"; "iw", "he" -> "he"; else -> "en"
+    "ru", "uk", "be" -> "ru"; "de" -> "de"; "iw", "he" -> "he"; else -> "en"
 }
 
 private fun openUri(context: Context, uri: String) {
@@ -877,4 +985,100 @@ private fun TzirufMore() {
         modifier = Modifier.clickable { open = !open }.padding(vertical = 6.dp)
     )
     if (open) for (p in stringResource(R.string.tziruf_more_body).split("\n\n")) Note(p)
+}
+
+/** Как считаем: у Хабада — прежний текст, у других общин — их правило и точность расчёта. */
+@Composable
+private fun minhagNote(): String = when (ZmanimEngine.minhag) {
+    Minhag.CHABAD -> stringResource(R.string.note)
+    Minhag.LITVISH -> stringResource(R.string.minhag_d_litvish) + " " + stringResource(R.string.note_acc)
+    Minhag.SEFARDI -> stringResource(R.string.minhag_d_sefardi) + " " + stringResource(R.string.note_acc)
+}
+
+/**
+ * «Настройки» (владелец, 18.11.2026): язык, тема и община — Хабад, литовская, сефардская; по общине сами меняются
+ * времена дня, исход Шабата, Кидуш Левана и даты календаря.
+ */
+@OptIn(androidx.compose.foundation.layout.ExperimentalLayoutApi::class)
+@Composable
+private fun SettingsSheet(onChange: () -> Unit) {
+    val context = LocalContext.current
+    SheetColumn {
+        SheetTitle(stringResource(R.string.settings))
+
+        // язык
+        Text(stringResource(R.string.lang_t), fontWeight = FontWeight.Bold, color = ClockColors.Ink)
+        var lang by remember { mutableStateOf(AppLang.tag(context)) }
+        FlowRow(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+            for (t in AppLang.TAGS) {
+                FilterChip(
+                    selected = lang == t,
+                    onClick = {
+                        if (lang == t) return@FilterChip
+                        lang = t
+                        AppLang.set(context, t)
+                        // до Android 13 окно само не пересоздаётся
+                        if (android.os.Build.VERSION.SDK_INT < 33) (context as? android.app.Activity)?.recreate()
+                        app.mychitas.peleshaon.live.Live.update(context)
+                    },
+                    label = { Text(if (t.isEmpty()) stringResource(R.string.lang_system) else AppLang.label(t), fontSize = 13.sp) },
+                    colors = chipColors()
+                )
+            }
+        }
+        HorizontalDivider(color = ClockColors.Line)
+
+        // тема
+        Text(stringResource(R.string.theme_t), fontWeight = FontWeight.Bold, color = ClockColors.Ink)
+        Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+            for ((m, label) in listOf(ClockTheme.AUTO to R.string.theme_auto, ClockTheme.LIGHT to R.string.theme_light, ClockTheme.DARK to R.string.theme_dark)) {
+                FilterChip(
+                    selected = ClockTheme.mode == m,
+                    onClick = { ClockTheme.set(context, m) },
+                    label = { Text(stringResource(label), fontSize = 13.sp) },
+                    colors = chipColors()
+                )
+            }
+        }
+        Note(stringResource(R.string.theme_note))
+        HorizontalDivider(color = ClockColors.Line)
+
+        // община
+        Text(stringResource(R.string.minhag_t), fontWeight = FontWeight.Bold, color = ClockColors.Ink)
+        var minhag by remember { mutableStateOf(ZmanimEngine.minhag) }
+        for ((m, title, about) in listOf(
+            Triple(Minhag.CHABAD, R.string.minhag_chabad, R.string.minhag_d_chabad),
+            Triple(Minhag.LITVISH, R.string.minhag_litvish, R.string.minhag_d_litvish),
+            Triple(Minhag.SEFARDI, R.string.minhag_sefardi, R.string.minhag_d_sefardi)
+        )) {
+            val on = minhag == m
+            Surface(
+                onClick = {
+                    if (on) return@Surface
+                    minhag = m
+                    ZmanimEngine.minhag = m
+                    Prefs.setMinhag(context, m)
+                    // будильник «до конца Шма», покой в Шабат, напоминание о Кидуш Левана, виджеты — по новой общине
+                    AlarmScheduler.rescheduleAllFromPrefs(context)
+                    app.mychitas.peleshaon.moon.MoonReminder.schedule(context)
+                    app.mychitas.peleshaon.live.Live.update(context)
+                    onChange()
+                },
+                shape = RoundedCornerShape(12.dp),
+                color = if (on) ClockColors.Gold.copy(alpha = 0.18f) else ClockColors.Surface,
+                border = BorderStroke(if (on) 2.dp else 1.dp, if (on) ClockColors.Gold else ClockColors.Line),
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Row(Modifier.padding(12.dp), verticalAlignment = Alignment.Top) {
+                    RadioButton(selected = on, onClick = null, colors = radioColors())
+                    Spacer(Modifier.width(8.dp))
+                    Column {
+                        Text(stringResource(title), fontWeight = FontWeight.Bold, color = ClockColors.Ink)
+                        Text(stringResource(about), color = ClockColors.Ink2, fontSize = 13.sp)
+                    }
+                }
+            }
+        }
+        Note(stringResource(R.string.minhag_note))
+    }
 }

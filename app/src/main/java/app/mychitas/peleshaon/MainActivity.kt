@@ -23,6 +23,9 @@ import app.mychitas.peleshaon.alarm.AlarmScheduler
 import app.mychitas.peleshaon.live.Live
 import app.mychitas.peleshaon.moon.MoonReminder
 import app.mychitas.peleshaon.ui.MoonCompass
+import app.mychitas.peleshaon.ui.ClockTheme
+import androidx.compose.runtime.LaunchedEffect
+import kotlinx.coroutines.delay
 import app.mychitas.peleshaon.ui.ClockScreen
 import app.mychitas.peleshaon.ui.NightFace
 import app.mychitas.peleshaon.ui.Onboarding
@@ -32,18 +35,39 @@ import app.mychitas.peleshaon.ui.Onboarding
  * Шабат и два будильника, которые молчат в Шабат и праздники.
  */
 class MainActivity : ComponentActivity() {
+    // язык, выбранный в «Настройках» (до Android 13 — здесь)
+    override fun attachBaseContext(newBase: android.content.Context) {
+        super.attachBaseContext(app.mychitas.peleshaon.AppLang.wrap(newBase))
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         enableEdgeToEdge(
             statusBarStyle = SystemBarStyle.dark(android.graphics.Color.TRANSPARENT),
             navigationBarStyle = SystemBarStyle.dark(android.graphics.Color.TRANSPARENT)
         )
         super.onCreate(savedInstanceState)
+        ClockTheme.load(this)
         AlarmScheduler.rescheduleAllFromPrefs(this)
         MoonReminder.schedule(this)
         // компас переводит экран в портрет — активность пересоздаётся, а компас должен остаться открытым
         openMoon.value = savedInstanceState?.getBoolean("moon")
             ?: (intent?.getBooleanExtra(MoonReminder.EXTRA_OPEN, false) == true)
-        setContent { PeleShaonApp(openMoon) }
+        setContent {
+            // тема: днём светлая, ночью тёмная (или как выбрано) — и значки строки состояния под неё
+            LaunchedEffect(Unit) {
+                while (true) {
+                    ClockTheme.refresh(this@MainActivity)
+                    delay(30_000L)
+                }
+            }
+            val light = ClockTheme.light
+            LaunchedEffect(light) {
+                val bars = if (light) SystemBarStyle.light(android.graphics.Color.TRANSPARENT, android.graphics.Color.TRANSPARENT)
+                else SystemBarStyle.dark(android.graphics.Color.TRANSPARENT)
+                enableEdgeToEdge(statusBarStyle = bars, navigationBarStyle = bars)
+            }
+            PeleShaonApp(openMoon)
+        }
     }
 
     // уведомление «Кидуш Левана сегодня» — сразу экран-компас

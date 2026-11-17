@@ -88,8 +88,8 @@ import kotlin.math.roundToInt
 import kotlin.math.sin
 
 /** Серебро лунной стрелки. */
-private val Silver = Color(0xFFDCE3F0)
-private val SilverDim = Color(0x80DCE3F0)
+private val Silver: Color get() = if (ClockTheme.light) Color(0xFF5B6B8C) else Color(0xFFDCE3F0)
+private val SilverDim: Color get() = Silver.copy(alpha = 0.5f)
 
 /**
  * Плашка на главном экране — только когда сейчас можно сказать Кидуш Левана (с 7 суток после молада до середины месяца,
@@ -201,12 +201,7 @@ fun MoonCompass(onClose: () -> Unit) {
     val askNotif = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { }
 
     Box(modifier = Modifier.fillMaxSize().background(Color(0xFF060B1E))) {
-        Image(
-            painter = painterResource(R.drawable.clock_bg),
-            contentDescription = null,
-            contentScale = ContentScale.Crop,
-            modifier = Modifier.fillMaxSize()
-        )
+        ClockBackground()
         Column(
             modifier = Modifier.fillMaxSize().safeDrawingPadding().verticalScroll(rememberScrollState())
                 .padding(horizontal = 16.dp, vertical = 8.dp),
@@ -279,7 +274,11 @@ fun MoonCompass(onClose: () -> Unit) {
                     Text(stringResource(R.string.kl_remind_note), color = ClockColors.Muted, fontSize = 12.sp)
                 }
             }
-            Text(stringResource(R.string.kl_note), color = ClockColors.Muted, fontSize = 12.sp, textAlign = TextAlign.Center,
+            Text(stringResource(when (app.mychitas.peleshaon.domain.ZmanimEngine.minhag) {
+                app.mychitas.peleshaon.domain.Minhag.CHABAD -> R.string.kl_note
+                app.mychitas.peleshaon.domain.Minhag.LITVISH -> R.string.kl_note_litvish
+                app.mychitas.peleshaon.domain.Minhag.SEFARDI -> R.string.kl_note_sefardi
+            }), color = ClockColors.Muted, fontSize = 12.sp, textAlign = TextAlign.Center,
                 modifier = Modifier.widthIn(max = 460.dp).heightIn(min = 0.dp).padding(bottom = 8.dp))
         }
     }
@@ -294,7 +293,8 @@ private fun askNotifications(context: Context, ask: () -> Unit) {
 
 /** Стороны света на розе: буквы языка телефона и под ними — на иврите. */
 private fun cardinal(i: Int): String = when (Locale.getDefault().language) {
-    "ru", "uk", "be" -> listOf("С", "В", "Ю", "З")[i]
+    "uk" -> listOf("Пн", "Сх", "Пд", "Зх")[i]
+    "ru", "be" -> listOf("С", "В", "Ю", "З")[i]
     "de" -> listOf("N", "O", "S", "W")[i]
     "iw", "he" -> listOf("צפון", "מזרח", "דרום", "מערב")[i]
     else -> listOf("N", "E", "S", "W")[i]

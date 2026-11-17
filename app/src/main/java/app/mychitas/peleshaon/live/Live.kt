@@ -29,6 +29,7 @@ import app.mychitas.peleshaon.domain.ZmanimEngine
 import app.mychitas.peleshaon.ui.FaceEvent
 import app.mychitas.peleshaon.ui.faceEvents
 import app.mychitas.peleshaon.ui.full
+import app.mychitas.peleshaon.ui.ClockTheme
 import app.mychitas.peleshaon.ui.isDeadline
 import app.mychitas.peleshaon.ui.jewishMonthName
 import app.mychitas.peleshaon.ui.jewishDayMonth
@@ -110,7 +111,7 @@ object Live {
             cancelTick(context)
             return
         }
-        val s = LiveState.of(context)
+        val s = ClockTheme.dark { LiveState.of(context) }
         val m = AppWidgetManager.getInstance(context)
         for (id in m.getAppWidgetIds(ComponentName(context, FaceWidget::class.java))) m.updateAppWidget(id, faceViews(context, s, id))
         for (id in m.getAppWidgetIds(ComponentName(context, DateWidget::class.java))) m.updateAppWidget(id, dateViews(context, s))
