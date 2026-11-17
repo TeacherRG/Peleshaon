@@ -83,6 +83,7 @@ import app.mychitas.peleshaon.domain.CityOption
 import app.mychitas.peleshaon.domain.Dial
 import app.mychitas.peleshaon.domain.ZmanType
 import app.mychitas.peleshaon.domain.ZmanimEngine
+import app.mychitas.peleshaon.domain.KiddushLevanaRules
 import app.mychitas.peleshaon.domain.findCities
 import app.mychitas.peleshaon.live.Live
 import kotlinx.coroutines.delay
@@ -113,7 +114,7 @@ private val HHMM: DateTimeFormatter = DateTimeFormatter.ofPattern("HH:mm")
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ClockScreen(onNightScreen: () -> Unit, onIntro: () -> Unit = {}) {
+fun ClockScreen(onNightScreen: () -> Unit, onIntro: () -> Unit = {}, onMoon: () -> Unit = {}) {
     val context = LocalContext.current
     val locale = Locale.getDefault()
 
@@ -178,9 +179,16 @@ fun ClockScreen(onNightScreen: () -> Unit, onIntro: () -> Unit = {}) {
                     Text(city.title(locale), maxLines = 1, overflow = TextOverflow.Ellipsis, fontWeight = FontWeight.Bold, fontSize = 14.sp, color = ClockColors.Ink)
                     Text("▾", fontSize = 12.sp, color = ClockColors.TcheletDeep)
                 }
-                Column(
+                // дата — полупрозрачной плашкой, как кнопка города: видно, что она нажимается (открывает календарь)
+                Surface(
+                    onClick = { panel = Panel.CALENDAR },
+                    shape = RoundedCornerShape(16.dp),
+                    color = ClockColors.Surface,
+                    border = BorderStroke(1.dp, ClockColors.Line),
                     modifier = Modifier.weight(1f).padding(horizontal = 6.dp)
-                        .clickable(onClickLabel = stringResource(R.string.cal_title)) { panel = Panel.CALENDAR },
+                ) {
+                Column(
+                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     // «7 кислева 5787» крупно; ниже — буквами и гражданская дата; нажатие — календарь
@@ -191,14 +199,16 @@ fun ClockScreen(onNightScreen: () -> Unit, onIntro: () -> Unit = {}) {
                         Text(
                             jewishMonthName(jd, locale) + "  " + jd.year,
                             color = ClockColors.GoldDeep, fontSize = 18.sp, fontWeight = FontWeight.Bold,
-                            maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.padding(bottom = 3.dp)
+                            maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.weight(1f, fill = false).padding(bottom = 3.dp)
                         )
+                        Text(" ▾", fontSize = 12.sp, color = ClockColors.TcheletDeep, modifier = Modifier.padding(bottom = 5.dp))
                     }
                     Text(
                         day.jewishDateHebrew + " · " + cityNow.format(DateTimeFormatter.ofPattern("EEE, d MMMM", locale)),
                         color = ClockColors.Ink2, fontSize = 12.sp, textAlign = TextAlign.Center, maxLines = 1, overflow = TextOverflow.Ellipsis
                     )
                     if (day.isNextJewishDayAfterSunset) Text(stringResource(R.string.evening), color = ClockColors.Muted, fontSize = 11.sp, textAlign = TextAlign.Center)
+                }
                 }
                 Chip(onClick = { panel = Panel.INFO }, round = true) {
                     Text("?", fontWeight = FontWeight.Bold, fontSize = 17.sp, color = ClockColors.TcheletDeep)
@@ -253,7 +263,11 @@ fun ClockScreen(onNightScreen: () -> Unit, onIntro: () -> Unit = {}) {
                     )
                 }
             }
-            if (pop == null && !day.isPolarAnomaly) {
+            // Кидуш Левана: в подходящий вечер — плашка с полумесяцем вместо подсказки; нажатие — лунный компас
+            val kl = remember(city, minute) { runCatching { KiddushLevanaRules.now(cityNow, city) }.getOrNull() }
+            if (pop == null && kl != null) {
+                MoonPill(kl, onClick = onMoon)
+            } else if (pop == null && !day.isPolarAnomaly) {
                 Text(stringResource(R.string.hint), color = ClockColors.Muted, fontSize = 12.sp, textAlign = TextAlign.Center)
             }
 
@@ -748,6 +762,7 @@ private fun TimesSheet(
             Text(stringResource(R.string.tziruf), color = ClockColors.Ink, fontWeight = FontWeight.SemiBold)
         }
         if (tziruf) Note(stringResource(R.string.tziruf_note))
+        TzirufMore()
         HorizontalDivider(color = ClockColors.Line)
         var live by remember { mutableStateOf(Live.notificationOn(context)) }
         Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.clickable { live = !live; Live.setNotification(context, live) }) {
@@ -772,11 +787,15 @@ private fun InfoSheet(onNightScreen: () -> Unit, onIntro: () -> Unit, onPrivacy:
         Note(stringResource(R.string.note))
         Note(stringResource(R.string.shabbat_note))
         Note(stringResource(R.string.alarm_note))
+        Note(stringResource(R.string.kl_help))
+        TzirufMore()
         Button(onClick = onNightScreen, colors = ButtonDefaults.buttonColors(containerColor = ClockColors.Surface)) {
             Text("🌙  " + stringResource(R.string.night_screen), color = ClockColors.Ink)
         }
         HorizontalDivider(color = ClockColors.Line)
+        AddIconButton()
         Note(stringResource(R.string.ob5_l1))
+        AddWidgetButtons()
         Note(stringResource(R.string.ob5_l2))
         Note(stringResource(R.string.ob5_l3))
         OutlinedButton(onClick = onIntro, border = BorderStroke(1.dp, ClockColors.Line)) {
@@ -846,4 +865,16 @@ private fun PrivacySheet() {
         }
         Note(stringResource(R.string.about_mail))
     }
+}
+
+/** «Что такое сочетание Имени?» — раскрывается нажатием: число сочетаний, источники, порядок на часах, как смотреть. */
+@Composable
+private fun TzirufMore() {
+    var open by remember { mutableStateOf(false) }
+    Text(
+        (if (open) "▾ " else "▸ ") + stringResource(R.string.tziruf_more),
+        color = ClockColors.Gold, fontWeight = FontWeight.SemiBold,
+        modifier = Modifier.clickable { open = !open }.padding(vertical = 6.dp)
+    )
+    if (open) for (p in stringResource(R.string.tziruf_more_body).split("\n\n")) Note(p)
 }

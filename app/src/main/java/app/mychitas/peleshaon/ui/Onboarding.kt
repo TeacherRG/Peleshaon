@@ -60,9 +60,9 @@ import java.util.Locale
 
 /**
  * Знакомство при первом запуске: что это, город, как читать циферблат, будильники (здесь же — разрешение на
- * уведомления, а не сразу при запуске), часы вне приложения. Повторить — «?» → «Знакомство с приложением».
+ * уведомления, а не сразу при запуске), значок и виджеты на главный экран, часы вне приложения. Повторить — «?» → «Знакомство с приложением».
  */
-private const val STEPS = 5
+private const val STEPS = 6
 
 @Composable
 fun Onboarding(onDone: () -> Unit) {
@@ -97,6 +97,7 @@ fun Onboarding(onDone: () -> Unit) {
                         1 -> StepCity(onConfirm = { step++ })
                         2 -> StepDial()
                         3 -> StepAlarms()
+                        4 -> StepHome()
                         else -> StepOutside()
                     }
                 }
@@ -258,10 +259,22 @@ private fun StepAlarms() {
 }
 
 @Composable
+private fun StepHome() {
+    Text("🏠", fontSize = 48.sp)
+    Title(R.string.obh_t)
+    Body(stringResource(R.string.obh_icon))
+    AddIconButton()
+    Spacer(Modifier.height(6.dp))
+    Text(stringResource(R.string.obh_widgets_t), fontWeight = FontWeight.Bold, fontSize = 18.sp, color = ClockColors.Ink)
+    Body(stringResource(R.string.obh_widgets))
+    AddWidgetButtons()
+}
+
+@Composable
 private fun StepOutside() {
     Text("📱", fontSize = 48.sp)
     Title(R.string.ob5_t)
-    for (id in listOf(R.string.ob5_l1, R.string.ob5_l2, R.string.ob5_l3)) {
+    for (id in listOf(R.string.ob5_l2, R.string.ob5_l3)) {
         Row {
             Text("•", color = ClockColors.Gold, fontSize = 18.sp, modifier = Modifier.padding(end = 10.dp))
             Body(stringResource(id))

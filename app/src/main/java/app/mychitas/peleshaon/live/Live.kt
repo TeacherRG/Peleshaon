@@ -30,6 +30,7 @@ import app.mychitas.peleshaon.ui.FaceEvent
 import app.mychitas.peleshaon.ui.faceEvents
 import app.mychitas.peleshaon.ui.full
 import app.mychitas.peleshaon.ui.isDeadline
+import app.mychitas.peleshaon.ui.jewishMonthName
 import app.mychitas.peleshaon.ui.jewishDayMonth
 import app.mychitas.peleshaon.ui.renderFace
 import app.mychitas.peleshaon.ui.short
@@ -90,7 +91,7 @@ object Live {
     fun widgetIds(context: Context): IntArray {
         val m = AppWidgetManager.getInstance(context)
         return m.getAppWidgetIds(ComponentName(context, FaceWidget::class.java)) +
-            m.getAppWidgetIds(ComponentName(context, LineWidget::class.java))
+            m.getAppWidgetIds(ComponentName(context, DateWidget::class.java))
     }
 
     fun notificationOn(context: Context): Boolean = Prefs.of(context).getBoolean("live_notification", false)
@@ -112,7 +113,7 @@ object Live {
         val s = LiveState.of(context)
         val m = AppWidgetManager.getInstance(context)
         for (id in m.getAppWidgetIds(ComponentName(context, FaceWidget::class.java))) m.updateAppWidget(id, faceViews(context, s, id))
-        for (id in m.getAppWidgetIds(ComponentName(context, LineWidget::class.java))) m.updateAppWidget(id, lineViews(context, s))
+        for (id in m.getAppWidgetIds(ComponentName(context, DateWidget::class.java))) m.updateAppWidget(id, dateViews(context, s))
         if (notif) showNotification(context, s)
         scheduleTick(context, s)
     }
@@ -166,14 +167,16 @@ object Live {
         return v
     }
 
-    /** Строка: время города, ближайшее время с отсчётом, еврейская дата. */
-    private fun lineViews(context: Context, s: LiveState): RemoteViews {
-        val v = RemoteViews(context.packageName, R.layout.widget_line)
-        v.clocks(context, s, R.id.w_time)
-        val e = s.next
-        v.setTextViewText(R.id.w_next, e?.let { nextTitle(context, it, s) } ?: context.getString(R.string.polar_short))
-        v.countdown(R.id.w_count, context, e, s)
-        v.setTextViewText(R.id.w_date, dateLine(s) + " · " + s.city.title(Locale.getDefault()))
+    /** Маленький виджет: только еврейская дата — день числом, месяц, год и она же буквами иврита. После заката — уже следующая. */
+    private fun dateViews(context: Context, s: LiveState): RemoteViews {
+        val v = RemoteViews(context.packageName, R.layout.widget_date)
+        val jd = ZmanimEngine.jewishDay(s.day.date, s.city.isIsrael)
+        v.setTextViewText(R.id.w_day, jd.day.toString())
+        // на иврите в списке месяцев — «בכסלו» (для «7 בכסלו»); отдельной строкой — без ב
+        val month = jewishMonthName(jd).let { if (Locale.getDefault().language in setOf("iw", "he") && it.startsWith("ב")) it.drop(1) else it }
+        v.setTextViewText(R.id.w_month, month)
+        v.setTextViewText(R.id.w_year, jd.year.toString())
+        v.setTextViewText(R.id.w_heb, s.day.jewishDateHebrew)
         v.setOnClickPendingIntent(R.id.w_root, openApp(context))
         return v
     }

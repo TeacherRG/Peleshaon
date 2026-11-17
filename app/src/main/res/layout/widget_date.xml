@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Маленький виджет: только еврейская дата — день числом крупно, месяц, год, ниже буквами иврита. -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/w_root"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/widget_bg"
+    android:gravity="center"
+    android:orientation="vertical"
+    android:padding="8dp">
+
+    <TextView
+        android:id="@+id/w_day"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:includeFontPadding="false"
+        android:text="7"
+        android:textColor="#E2BF72"
+        android:textSize="44sp"
+        android:textStyle="bold" />
+
+    <TextView
+        android:id="@+id/w_month"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:ellipsize="end"
+        android:maxLines="1"
+        android:text="кислева"
+        android:textColor="#F4F1E8"
+        android:textSize="16sp"
+        android:textStyle="bold" />
+
+    <TextView
+        android:id="@+id/w_year"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="5787"
+        android:textColor="#C9CFE3"
+        android:textSize="13sp" />
+
+    <TextView
+        android:id="@+id/w_heb"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="2dp"
+        android:ellipsize="end"
+        android:maxLines="1"
+        android:text="ז׳ כסלו תשפ״ז"
+        android:textColor="#9AA4C4"
+        android:textDirection="rtl"
+        android:textSize="12sp" />
+</LinearLayout>

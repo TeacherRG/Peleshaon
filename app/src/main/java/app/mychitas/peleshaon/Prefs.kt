@@ -45,7 +45,7 @@ object Prefs {
         of(context).edit().putString("clock_marks", ZmanType.entries.filter { it in marks }.joinToString(",") { it.name }).apply()
     }
 
-    fun tziruf(context: Context): Boolean = of(context).getBoolean("clock_tziruf", false)
+    fun tziruf(context: Context): Boolean = of(context).getBoolean("clock_tziruf", true)
     fun setTziruf(context: Context, on: Boolean) = of(context).edit().putBoolean("clock_tziruf", on).apply()
 
     // ---- будильники

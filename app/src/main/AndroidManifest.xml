@@ -65,14 +65,20 @@
             </intent-filter>
         </receiver>
 
-        <!-- Виджеты и уведомление «Ближайшее время» -->
+        <!-- Напоминание о Кидуш Левана (по желанию) -->
+        <receiver
+            android:name=".moon.MoonReminderReceiver"
+            android:exported="false" />
+
+        <!-- Виджеты и уведомление «Ближайшее время». Виджеты — exported: рабочие столы некоторых телефонов
+             (ColorOS, MIUI) ищут виджеты сами и пропускают закрытые; APPWIDGET_UPDATE шлёт только система. -->
         <receiver
             android:name=".live.LiveReceiver"
             android:exported="false" />
 
         <receiver
             android:name=".live.FaceWidget"
-            android:exported="false"
+            android:exported="true"
             android:label="@string/widget_face_name">
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
@@ -83,15 +89,15 @@
         </receiver>
 
         <receiver
-            android:name=".live.LineWidget"
-            android:exported="false"
-            android:label="@string/widget_line_name">
+            android:name=".live.DateWidget"
+            android:exported="true"
+            android:label="@string/widget_date_name">
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
             </intent-filter>
             <meta-data
                 android:name="android.appwidget.provider"
-                android:resource="@xml/widget_line_info" />
+                android:resource="@xml/widget_date_info" />
         </receiver>
     </application>
 </manifest>

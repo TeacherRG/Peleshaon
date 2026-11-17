@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Картинка виджета «Циферблат дня» в списке виджетов (для рабочих столов, которые не рисуют previewLayout). -->
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:drawable="@drawable/widget_bg" android:width="180dp" android:height="200dp" />
+    <item android:drawable="@drawable/ic_launcher_fg" android:width="170dp" android:height="170dp"
+        android:gravity="center" />
+</layer-list>

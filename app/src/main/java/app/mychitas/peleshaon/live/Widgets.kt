@@ -13,7 +13,7 @@ class FaceWidget : AppWidgetProvider() {
 }
 
 /** Виджет-строка «Ближайшее время»: время города, ближайшее время дня и отсчёт до него. */
-class LineWidget : AppWidgetProvider() {
+class DateWidget : AppWidgetProvider() {
     override fun onUpdate(context: Context, manager: AppWidgetManager, ids: IntArray) = Live.update(context)
     override fun onDisabled(context: Context) = Live.update(context)
 }
