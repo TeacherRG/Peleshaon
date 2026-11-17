@@ -205,6 +205,10 @@
     <string name="kl_notif_title">Кидуш Левана сегодня</string>
     <string name="kl_channel">Кидуш Левана</string>
     <string name="kl_help">🌙 Кидуш Левана: в подходящие вечера под циферблатом появляется плашка с полумесяцем — нажмите, откроется лунный компас.</string>
+    <string name="candle_offset_title">Время до заката для свечей</string>
+    <string name="candle_offset_local">По городу</string>
+    <string name="candle_offset_minutes">%1$d мин</string>
+    <string name="candle_offset_note">По умолчанию: Иерусалим — 40 мин, Хайфа — 30 мин, другие города — 18 мин. Уточните обычай своей общины.</string>
     <string name="theme_t">Тема</string>
     <string name="theme_auto">Авто</string>
     <string name="theme_light">Светлая</string>

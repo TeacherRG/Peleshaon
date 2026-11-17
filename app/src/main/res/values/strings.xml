@@ -205,6 +205,10 @@
     <string name="kl_notif_title">Kiddush Levana tonight</string>
     <string name="kl_channel">Kiddush Levana</string>
     <string name="kl_help">🌙 Kiddush Levana: on suitable evenings a moon pill appears under the dial — tap it for the moon compass.</string>
+    <string name="candle_offset_title">Candle-lighting offset</string>
+    <string name="candle_offset_local">Local custom</string>
+    <string name="candle_offset_minutes">%1$d min</string>
+    <string name="candle_offset_note">Defaults: Jerusalem 40 min, Haifa 30 min, other cities 18 min. Check your local practice and ask your rabbi.</string>
     <string name="theme_t">Theme</string>
     <string name="theme_auto">Auto</string>
     <string name="theme_light">Light</string>

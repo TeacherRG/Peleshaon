@@ -103,6 +103,20 @@ object ZmanimEngine {
     @Volatile
     var minhag: Minhag = Minhag.CHABAD
 
+    /** null = city default; a user's minhag may override local practice. */
+    @Volatile
+    var candleOffsetOverride: Long? = null
+
+    fun candleMinutesFor(cityName: String): Long =
+        candleOffsetOverride ?: when (cityName.lowercase(java.util.Locale.ROOT)) {
+            "jerusalem" -> 40L
+            "haifa", "zikhron yaakov", "zichron yaakov" -> 30L
+            else -> CANDLE_MIN
+        }
+
+    fun candleLightingOn(date: LocalDate, city: CityOption): ZonedDateTime? =
+        sunsetOf(date, city)?.minusMinutes(candleMinutesFor(city.name))
+
     fun calculateForMoment(
         now: ZonedDateTime,
         cityName: String,
@@ -151,7 +165,7 @@ object ZmanimEngine {
             isPolarAnomaly = items.none { it.type == ZmanType.SUNRISE } ||
                 items.none { it.type == ZmanType.SUNSET },
             items = items,
-            candleLighting = todaySunset.minusMinutes(CANDLE_MIN),
+            candleLighting = todaySunset.minusMinutes(candleMinutesFor(cityName)),
             tzeitShabbat = havdalahOf(todayCal, zoneId) ?: todaySunset.plusMinutes(END_MIN)
         )
     }
@@ -182,7 +196,7 @@ object ZmanimEngine {
         else ((DayOfWeek.FRIDAY.value - today.dayOfWeek.value + 7) % 7).toLong()
         fun span(fri: LocalDate) = ShabbatTimes(
             friday = fri,
-            candles = sunsetOf(fri, city)?.minusMinutes(CANDLE_MIN),
+            candles = candleLightingOn(fri, city),
             havdalah = havdalahOn(fri.plusDays(1), city)
         )
         val sh = span(today.plusDays(back))

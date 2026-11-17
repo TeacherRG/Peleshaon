@@ -200,7 +200,7 @@ fun eventName(e: CalEvent, locale: Locale = Locale.getDefault()): String {
         }
         // Шабат мевархим — с месяцем, который благословляют
         else -> (HOLIDAYS[e.key]?.let { pick(it, l) } ?: e.key) +
-            if (e.key == "mevarchim") " · " + jewishMonthOnly(e.n, false, locale) else ""
+            if (e.key == "mevarchim") " · " + jewishMonthOnly(e.n, e.leap, locale) else ""
     }
 }
 

@@ -205,6 +205,10 @@
     <string name="kl_notif_title">Kiddusch Lewana heute</string>
     <string name="kl_channel">Kiddusch Lewana</string>
     <string name="kl_help">🌙 Kiddusch Lewana: an passenden Abenden erscheint unter dem Zifferblatt eine Mondzeile — tippe darauf für den Mondkompass.</string>
+    <string name="candle_offset_title">Kerzen vor Sonnenuntergang</string>
+    <string name="candle_offset_local">Ortsüblich</string>
+    <string name="candle_offset_minutes">%1$d Min.</string>
+    <string name="candle_offset_note">Standard: Jerusalem 40 Min., Haifa 30 Min., andere Städte 18 Min. Örtlichen Brauch mit dem Rabbiner klären.</string>
     <string name="theme_t">Design</string>
     <string name="theme_auto">Automatisch</string>
     <string name="theme_light">Hell</string>

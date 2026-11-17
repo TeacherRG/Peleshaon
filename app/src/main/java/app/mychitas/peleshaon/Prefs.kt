@@ -129,6 +129,15 @@ object Prefs {
         runCatching { app.mychitas.peleshaon.domain.Minhag.valueOf(of(context).getString("minhag", null) ?: "") }
             .getOrDefault(app.mychitas.peleshaon.domain.Minhag.CHABAD)
 
+    /** null uses city custom (Jerusalem 40m, Haifa 30m, other cities 18m). */
+    fun candleOffset(context: Context): Long? =
+        of(context).getInt("candle_offset", -1).takeIf { it in setOf(18, 20, 30, 40) }?.toLong()
+
+    fun setCandleOffset(context: Context, minutes: Long?) {
+        val value = minutes?.toInt()?.takeIf { it in setOf(18, 20, 30, 40) } ?: -1
+        of(context).edit().putInt("candle_offset", value).apply()
+    }
+
     fun setMinhag(context: Context, m: app.mychitas.peleshaon.domain.Minhag) =
         of(context).edit().putString("minhag", m.name).apply()
 }

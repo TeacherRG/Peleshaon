@@ -1185,6 +1185,32 @@ private fun SettingsSheet(onChange: () -> Unit) {
         Note(stringResource(R.string.theme_note))
         HorizontalDivider(color = ClockColors.Line)
 
+        // Local candle-lighting practice is independent of the community's zmanim profile.
+        Text(stringResource(R.string.candle_offset_title), fontWeight = FontWeight.Bold, color = ClockColors.Ink)
+        var candleSetting by remember { mutableStateOf(Prefs.candleOffset(context)) }
+        FlowRow(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+            for (offset in listOf<Long?>(null, 18L, 20L, 30L, 40L)) {
+                FilterChip(
+                    selected = candleSetting == offset,
+                    onClick = {
+                        candleSetting = offset
+                        Prefs.setCandleOffset(context, offset)
+                        ZmanimEngine.candleOffsetOverride = offset
+                        AlarmScheduler.rescheduleAllFromPrefs(context)
+                        app.mychitas.peleshaon.live.Live.update(context)
+                        onChange()
+                    },
+                    label = {
+                        Text(if (offset == null) stringResource(R.string.candle_offset_local)
+                            else stringResource(R.string.candle_offset_minutes, offset.toInt()), fontSize = 12.sp)
+                    },
+                    colors = chipColors()
+                )
+            }
+        }
+        Note(stringResource(R.string.candle_offset_note))
+        HorizontalDivider(color = ClockColors.Line)
+
         // община
         Text(stringResource(R.string.minhag_t), fontWeight = FontWeight.Bold, color = ClockColors.Ink)
         var minhag by remember { mutableStateOf(ZmanimEngine.minhag) }

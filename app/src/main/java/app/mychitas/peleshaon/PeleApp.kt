@@ -15,6 +15,7 @@ class PeleApp : Application() {
     override fun onCreate() {
         super.onCreate()
         ZmanimEngine.minhag = Prefs.minhag(this)
+        ZmanimEngine.candleOffsetOverride = Prefs.candleOffset(this)
         AppLang.migratePlatformLanguage(this)
         AppLang.applyToProcess(this)
     }

@@ -13,7 +13,14 @@ import java.time.LocalDate
 enum class CalKind { HOLIDAY, EREV, FAST, MINOR, ROSH_CHODESH, CHABAD, PARSHA, SPECIAL_SHABBAT, OMER, CHANUKAH }
 
 /** Событие дня: вид, ключ названия (`pesach`, `chabad_19_kislev`, `parsha_VAYETZEI`…) и число (день Омера, свеча Хануки). */
-data class CalEvent(val kind: CalKind, val key: String, val n: Int = 0)
+data class CalEvent(val kind: CalKind, val key: String, val n: Int = 0, val leap: Boolean = false)
+
+/**
+ * Presentation of candle-lighting transitions. Friday Yom-Tov -> Shabbat
+ * must not be treated as a generic 'after nightfall' transfer.
+ * These labels do not constitute a ruling on transferring flame or eruv tavshilin.
+ */
+enum class CandleTransition { NONE, BEFORE_SUNSET, AFTER_NIGHTFALL }
 
 /**
  * Шабат мевархим — благословение нового месяца в последний Шабат месяца (23–29-го; перед тишреем — нет).
@@ -135,7 +142,7 @@ object JewishCal {
             if (p != JewishCalendar.Parsha.NONE) ev += CalEvent(CalKind.PARSHA, "parsha_${p.name}")
             val sp = jc.specialShabbos
             if (sp != JewishCalendar.Parsha.NONE) ev += CalEvent(CalKind.SPECIAL_SHABBAT, "special_${sp.name}")
-            mevarchim(date, isIsrael)?.let { ev += CalEvent(CalKind.SPECIAL_SHABBAT, "mevarchim", it.month) }
+            mevarchim(date, isIsrael)?.let { ev += CalEvent(CalKind.SPECIAL_SHABBAT, "mevarchim", it.month, it.leap) }
         }
         val jd = JewishDay(jc.jewishDayOfMonth, jc.jewishMonth, jc.isJewishLeapYear, jc.jewishYear)
         return CalDay(date, jd, ev, jc.isAssurBemelacha, jc.hasCandleLighting())
@@ -162,6 +169,16 @@ object JewishCal {
         val jc = jcOf(date, isIsrael)
         val first = date.minusDays((jc.jewishDayOfMonth - 1).toLong())
         return (0 until jc.daysInJewishMonth).map { day(first.plusDays(it.toLong()), isIsrael) }
+    }
+
+    /** Only a timing category; actual religious practice needs local guidance. */
+    fun candleTransition(date: LocalDate, isIsrael: Boolean): CandleTransition {
+        val current = day(date, isIsrael)
+        if (!current.candles) return CandleTransition.NONE
+        val next = day(date.plusDays(1), isIsrael)
+        return if (!current.holy ||
+            (date.dayOfWeek == java.time.DayOfWeek.FRIDAY && next.holy)
+        ) CandleTransition.BEFORE_SUNSET else CandleTransition.AFTER_NIGHTFALL
     }
 
     /** Первый день следующего / прошлого еврейского месяца. */

@@ -205,6 +205,10 @@
     <string name="kl_notif_title">קידוש לבנה הערב</string>
     <string name="kl_channel">קידוש לבנה</string>
     <string name="kl_help">🌙 קידוש לבנה: בערבים המתאימים מופיעה מתחת לשעון שורה עם סהר — לחצו עליה ויפתח מצפן הירח.</string>
+    <string name="candle_offset_title">הדלקת נרות לפני השקיעה</string>
+    <string name="candle_offset_local">לפי העיר</string>
+    <string name="candle_offset_minutes">%1$d דק׳</string>
+    <string name="candle_offset_note">ברירת מחדל: ירושלים 40 דקות, חיפה 30 דקות, ערים אחרות 18 דקות. יש לברר את מנהג המקום עם הרב.</string>
     <string name="theme_t">ערכת נושא</string>
     <string name="theme_auto">אוטומטי</string>
     <string name="theme_light">בהירה</string>

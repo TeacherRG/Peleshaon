@@ -172,6 +172,7 @@ class BootReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent) {
         app.mychitas.peleshaon.AppLang.applyToProcess(context.applicationContext)
         app.mychitas.peleshaon.domain.ZmanimEngine.minhag = Prefs.minhag(context)
+        app.mychitas.peleshaon.domain.ZmanimEngine.candleOffsetOverride = Prefs.candleOffset(context)
         AlarmScheduler.rescheduleAllFromPrefs(context)
         app.mychitas.peleshaon.live.Live.update(context)
         app.mychitas.peleshaon.moon.MoonReminder.schedule(context)

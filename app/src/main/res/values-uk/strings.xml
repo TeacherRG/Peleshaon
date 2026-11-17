@@ -205,6 +205,10 @@
     <string name="kl_notif_title">Кідуш Левана сьогодні</string>
     <string name="kl_channel">Кідуш Левана</string>
     <string name="kl_help">🌙 Кідуш Левана: у відповідні вечори під циферблатом з’являється плашка з півмісяцем — натисніть, відкриється місячний компас.</string>
+    <string name="candle_offset_title">Час до заходу сонця для свічок</string>
+    <string name="candle_offset_local">За містом</string>
+    <string name="candle_offset_minutes">%1$d хв</string>
+    <string name="candle_offset_note">Типово: Єрусалим — 40 хв, Хайфа — 30 хв, інші міста — 18 хв. Звірте звичай своєї громади.</string>
     <string name="theme_t">Тема</string>
     <string name="theme_auto">Авто</string>
     <string name="theme_light">Світла</string>
