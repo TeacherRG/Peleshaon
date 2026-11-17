@@ -15,15 +15,15 @@ def check(cond: bool, message: str) -> None:
     if not cond:
         raise AssertionError(message)
 
-def resource_keys(folder: str) -> set[str]:
-    root = ET.parse(ROOT / "app" / "src" / "main" / "res" / folder / "strings.xml").getroot()
+def resource_keys(folder: str, module: str = "app") -> set[str]:
+    root = ET.parse(ROOT / module / "src" / "main" / "res" / folder / "strings.xml").getroot()
     keys: list[str] = []
     for node in root:
         if node.tag in ("string", "plurals", "string-array"):
             name = node.get("name")
             if name:
                 keys.append(f"{node.tag}:{name}")
-    check(len(keys) == len(set(keys)), f"Duplicate resource keys in {folder}")
+    check(len(keys) == len(set(keys)), f"Duplicate resource keys in {module}/{folder}")
     return set(keys)
 
 def main() -> None:
@@ -33,6 +33,12 @@ def main() -> None:
         extra = resources[folder] - resources["values"]
         check(not missing and not extra,
               f"{folder}: missing={sorted(missing)}, extra={sorted(extra)}")
+    wear_resources = {folder: resource_keys(folder, "wear") for folder in LOCALES}
+    for folder in LOCALES[1:]:
+        missing = wear_resources["values"] - wear_resources[folder]
+        extra = wear_resources[folder] - wear_resources["values"]
+        check(not missing and not extra,
+              f"wear/{folder}: missing={sorted(missing)}, extra={sorted(extra)}")
     for module in ("app", "wear"):
         gradle = read(f"{module}/build.gradle.kts")
         check('applicationId = "app.mychitas.peleshaon.beta"' in gradle,
@@ -55,9 +61,19 @@ def main() -> None:
           "Alarm cancel/showIntent regression")
     service = read("app/src/main/java/app/mychitas/peleshaon/alarm/AlarmRingService.kt")
     check("private var activeSession:" in service and "EXTRA_SESSION" in service and
-          "startActivity(fullScreenIntent)" not in service,
+          "startActivity(fullScreenIntent)" not in service and "pendingAlarms.enqueue(" in service,
           "Ringing-session isolation or background launch regression")
-    print(f"OK: {len(resources['values'])} localized keys × {len(LOCALES)} languages")
+    cal = read("app/src/main/java/app/mychitas/peleshaon/ui/CalendarSheet.kt")
+    check("ZmanimEngine.havdalahOn(d.date, city)" in cal and
+          "CandleTransition.BEFORE_SUNSET" in cal and
+          "ZmanimEngine.END_MIN" not in cal,
+          "Calendar candle/havdalah transition regression")
+    check("fun candleMinutesFor(cityName: String)" in engine,
+          "Local candle-minute policy missing")
+    wear = read("wear/src/main/java/app/mychitas/peleshaon/wear/WearActivity.kt")
+    check("selectedCommunity" in wear and "selectedCity" in wear,
+          "Wear OS independent community/city selectors are missing")
+    print(f"OK: phone {len(resources['values'])} keys, Wear {len(wear_resources['values'])} keys × {len(LOCALES)} languages")
     print("OK: Beta package/manifest, Shma formula, alarm isolation, polar fallback")
 
 if __name__ == "__main__":
