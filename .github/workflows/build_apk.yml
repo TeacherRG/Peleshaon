@@ -2,8 +2,6 @@ name: Build Pele Shaon APK
 
 # Manual trigger only: avoid spending runner minutes on each review commit.
 on:
-  push:
-    branches: [ "fixes/independent-beta" ]
   workflow_dispatch:
 
 permissions:

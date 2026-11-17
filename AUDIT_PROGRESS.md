@@ -76,7 +76,7 @@ The project uses a **manual-only** GitHub Actions workflow while patching; one c
 
 ## Approval
 
-Source patches: YES. Compiled/CI-tested for Beta2: **NOT YET**.
+Source patches: YES. Compiled/CI-tested for Beta2: **YES — PASS** (`:core:test`, Android and Wear debug APKs, resources, widget registration, no INTERNET), run [44175656618](https://github.com/bystrzyca-cloud/Peleshaon/actions/runs/44175656618), source commit `421c5e5f298ab6a39713a5376f6fd2530e39aa10`.
 Verified on Android/Wear devices: **NO**.
 Halakhic correctness of all communal rules: **NOT CERTIFIED**.
 

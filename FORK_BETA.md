@@ -11,3 +11,13 @@ For integrity and JVM testing use `python3 scripts/check_integrity.py` and `grad
 **Safety:** existing public `debug.keystore` is only for compatible debug installs, not trusted release signing. Exact-alarm, full-screen and OEM restrictions cannot be proven by CI, and important alarms must be checked on real hardware. Religious practice is not certified by a rabbi; confirm local candle customs, holy-day transitions and the kashrut interval.
 
 No INTERNET permission added. GitHub Actions is manual-only during audit to conserve minutes.
+
+## Verified CI (Beta2)
+
+Run: https://github.com/bystrzyca-cloud/Peleshaon/actions/runs/44175656618 (success).
+Checked source commit: `421c5e5f298ab6a39713a5376f6fd2530e39aa10`.
+Phone artifact: `PeleShaon-Beta-phone`. Wear artifact: `PeleShaon-Beta-wear`.
+`core:test`, both debug builds, resource integrity, no INTERNET and widget packaging passed.
+**Not tested:** live Android/Wear behavior, OEM locales, sound and exact-alarm runtime, religious interpretation.
+
+GitHub Actions is manual-only again after this verification, to conserve runner minutes.
