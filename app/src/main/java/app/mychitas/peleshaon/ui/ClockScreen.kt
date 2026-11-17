@@ -381,8 +381,13 @@ fun ClockScreen(
                     onToggle = { type ->
                         marks = if (type in marks) marks - type else marks + type
                         Prefs.setMarks(context, marks)
+                        app.mychitas.peleshaon.live.Live.updateAsync(context)
                     },
-                    onTziruf = { tziruf = it; Prefs.setTziruf(context, it) })
+                    onTziruf = {
+                        tziruf = it
+                        Prefs.setTziruf(context, it)
+                        app.mychitas.peleshaon.live.Live.updateAsync(context)
+                    })
                 Panel.INFO -> InfoSheet(onNightScreen = { panel = null; onNightScreen() }, onIntro = { panel = null; onIntro() }, onPrivacy = { panel = Panel.PRIVACY })
                 Panel.PRIVACY -> PrivacySheet()
                 Panel.CALENDAR -> CalendarSheet(city, cityNow)
@@ -904,7 +909,7 @@ private fun KashrutCard(onChange: () -> Unit) {
         }
     }
     if (running) {
-        val t = java.time.Instant.ofEpochMilli(at).atZone(java.time.ZoneId.systemDefault())
+        val t = java.time.Instant.ofEpochMilli(at).atZone(Prefs.city(context).zone())
         Text(stringResource(R.string.kashrut_until, t.format(DateTimeFormatter.ofPattern("HH:mm"))), color = ClockColors.GoldDeep, fontWeight = FontWeight.Bold)
         OutlinedButton(
             onClick = { AlarmScheduler.stopKashrut(context); at = 0L; onChange() },
@@ -1190,7 +1195,10 @@ private fun SettingsSheet(onChange: () -> Unit) {
             for ((m, label) in listOf(ClockTheme.AUTO to R.string.theme_auto, ClockTheme.LIGHT to R.string.theme_light, ClockTheme.DARK to R.string.theme_dark)) {
                 FilterChip(
                     selected = ClockTheme.mode == m,
-                    onClick = { ClockTheme.set(context, m) },
+                    onClick = {
+                        ClockTheme.set(context, m)
+                        app.mychitas.peleshaon.live.Live.updateAsync(context)
+                    },
                     label = { Text(stringResource(label), fontSize = 13.sp) },
                     colors = chipColors()
                 )

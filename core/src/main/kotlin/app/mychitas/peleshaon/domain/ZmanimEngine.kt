@@ -133,15 +133,17 @@ object ZmanimEngine {
 
         if (todaySunrise == null || todaySunset == null) {
             val (hebStr, translitStr) = getJewishDateStrings(today, isIsrael)
+            // Some phenomena are still computable in polar twilight, even when
+            // sunrise or sunset is undefined. Do not hide surviving valid values.
             return DayZmanimResult(
                 date = today,
                 isNextJewishDayAfterSunset = false,
                 jewishDateHebrew = hebStr,
                 jewishDateTranslit = translitStr,
                 isPolarAnomaly = true,
-                items = emptyList(),
-                candleLighting = null,
-                tzeitShabbat = null
+                items = extractZmanim(todayCal, zoneId),
+                candleLighting = todaySunset?.minusMinutes(candleMinutesFor(cityName)),
+                tzeitShabbat = havdalahOf(todayCal, zoneId)
             )
         }
 

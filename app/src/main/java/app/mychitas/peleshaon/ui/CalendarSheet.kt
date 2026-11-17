@@ -82,11 +82,13 @@ fun CalendarSheet(city: CityOption, now: ZonedDateTime) {
     val locale = Locale.getDefault()
     val zone = city.zone()
     // после заката — уже завтрашний еврейский день
-    val today = remember(now.toEpochSecond() / 60, city) {
-        val t = now.withZoneSameInstant(zone)
-        val set = ZmanimEngine.sunsetOf(t.toLocalDate(), city)
-        if (set != null && !t.isBefore(set)) t.toLocalDate().plusDays(1) else t.toLocalDate()
+    val localNow = now.withZoneSameInstant(zone)
+    val sunsetToday = remember(city, localNow.toLocalDate()) {
+        ZmanimEngine.sunsetOf(localNow.toLocalDate(), city)
     }
+    // Re-evaluate against cached sunset at every clock tick, not just each minute.
+    val today = if (sunsetToday != null && !localNow.isBefore(sunsetToday))
+        localNow.toLocalDate().plusDays(1) else localNow.toLocalDate()
     var anchor by remember { mutableStateOf(today) }
     var selected by remember { mutableStateOf(today) }
     val month = remember(anchor, city) { JewishCal.monthOf(anchor, city.isIsrael) }
