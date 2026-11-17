@@ -67,6 +67,11 @@
             </intent-filter>
         </receiver>
 
+        <!-- «Готово»: рабочий стол поставил значок или виджет -->
+        <receiver
+            android:name=".live.PinDoneReceiver"
+            android:exported="false" />
+
         <!-- Напоминание о Кидуш Левана (по желанию) -->
         <receiver
             android:name=".moon.MoonReminderReceiver"

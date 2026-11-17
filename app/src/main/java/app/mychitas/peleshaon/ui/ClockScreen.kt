@@ -36,6 +36,8 @@ import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CheckboxDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.ModalBottomSheet
@@ -85,6 +87,9 @@ import app.mychitas.peleshaon.domain.Dial
 import app.mychitas.peleshaon.domain.ZmanType
 import app.mychitas.peleshaon.domain.ZmanimEngine
 import app.mychitas.peleshaon.domain.Minhag
+import app.mychitas.peleshaon.domain.JewishCal
+import app.mychitas.peleshaon.domain.Mevarchim
+import androidx.compose.ui.res.pluralStringResource
 import app.mychitas.peleshaon.AppLang
 import androidx.compose.foundation.layout.FlowRow
 import app.mychitas.peleshaon.domain.KiddushLevanaRules
@@ -118,9 +123,9 @@ private val HHMM: DateTimeFormatter = DateTimeFormatter.ofPattern("HH:mm")
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ClockScreen(onNightScreen: () -> Unit, onIntro: () -> Unit = {}, onMoon: () -> Unit = {}) {
+fun ClockScreen(onNightScreen: () -> Unit, onIntro: () -> Unit = {}, onMoon: () -> Unit = {}, onCompass: () -> Unit = {}) {
     val context = LocalContext.current
-    val locale = Locale.getDefault()
+    val locale = androidx.compose.ui.platform.LocalConfiguration.current.locales[0]
 
     var now by remember { mutableStateOf(ZonedDateTime.now()) }
     LaunchedEffect(Unit) {
@@ -175,7 +180,7 @@ fun ClockScreen(onNightScreen: () -> Unit, onIntro: () -> Unit = {}, onMoon: () 
         ) {
             // ---- шапка: город, дата, «Как считаем»
             Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-                Chip(onClick = { panel = Panel.CITY }, modifier = Modifier.widthIn(max = 150.dp)) {
+                Chip(onClick = { panel = Panel.CITY }, modifier = Modifier.widthIn(max = 124.dp)) {
                     Text("📍", fontSize = 14.sp)
                     Text(city.title(locale), maxLines = 1, overflow = TextOverflow.Ellipsis, fontWeight = FontWeight.Bold, fontSize = 14.sp, color = ClockColors.Ink)
                     Text("▾", fontSize = 12.sp, color = ClockColors.TcheletDeep)
@@ -198,25 +203,39 @@ fun ClockScreen(onNightScreen: () -> Unit, onIntro: () -> Unit = {}, onMoon: () 
                         Text("${jd.day}", color = ClockColors.GoldDeep, fontSize = 28.sp, fontWeight = FontWeight.ExtraBold, lineHeight = 30.sp)
                         Spacer(Modifier.width(5.dp))
                         Text(
-                            jewishMonthName(jd, locale) + "  " + jd.year,
+                            jewishMonthName(jd, locale),
                             color = ClockColors.GoldDeep, fontSize = 18.sp, fontWeight = FontWeight.Bold,
                             maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.weight(1f, fill = false).padding(bottom = 3.dp)
                         )
                         Text(" ▾", fontSize = 12.sp, color = ClockColors.TcheletDeep, modifier = Modifier.padding(bottom = 5.dp))
                     }
                     Text(
-                        day.jewishDateHebrew + " · " + cityNow.format(DateTimeFormatter.ofPattern("EEE, d MMMM", locale)),
+                        // год — в еврейской дате буквами; гражданская — коротко, чтобы строка помещалась
+                        day.jewishDateHebrew + " · " + cityNow.format(DateTimeFormatter.ofPattern("EEE d MMM", locale)),
                         color = ClockColors.Ink2, fontSize = 12.sp, textAlign = TextAlign.Center, maxLines = 1, overflow = TextOverflow.Ellipsis
                     )
                     if (day.isNextJewishDayAfterSunset) Text(stringResource(R.string.evening), color = ClockColors.Muted, fontSize = 11.sp, textAlign = TextAlign.Center)
                 }
                 }
-                Chip(onClick = { panel = Panel.SETTINGS }, round = true) {
-                    Text("⚙", fontSize = 17.sp, color = ClockColors.TcheletDeep)
-                }
-                Spacer(Modifier.width(6.dp))
-                Chip(onClick = { panel = Panel.INFO }, round = true) {
-                    Text("?", fontWeight = FontWeight.Bold, fontSize = 17.sp, color = ClockColors.TcheletDeep)
+                // меню: компас, настройки, помощь (владелец, 18.11.2026)
+                Box {
+                    var menu by remember { mutableStateOf(false) }
+                    Chip(onClick = { menu = true }, round = true) {
+                        Text("☰", fontSize = 18.sp, color = ClockColors.TcheletDeep)
+                    }
+                    DropdownMenu(expanded = menu, onDismissRequest = { menu = false }, containerColor = ClockColors.SheetBg) {
+                        for ((icon, label, act) in listOf<Triple<String, Int, () -> Unit>>(
+                            Triple("🧭", R.string.menu_compass, onCompass),
+                            Triple("⚙", R.string.settings, { panel = Panel.SETTINGS }),
+                            Triple("?", R.string.help, { panel = Panel.INFO })
+                        )) {
+                            DropdownMenuItem(
+                                leadingIcon = { Text(icon, fontSize = 18.sp, color = ClockColors.TcheletDeep) },
+                                text = { Text(stringResource(label), color = ClockColors.Ink, fontSize = 16.sp) },
+                                onClick = { menu = false; act() }
+                            )
+                        }
+                    }
                 }
             }
 
@@ -270,8 +289,15 @@ fun ClockScreen(onNightScreen: () -> Unit, onIntro: () -> Unit = {}, onMoon: () 
             }
             // Кидуш Левана: в подходящий вечер — плашка с полумесяцем вместо подсказки; нажатие — лунный компас
             val kl = remember(city, minute, version) { runCatching { KiddushLevanaRules.now(cityNow, city) }.getOrNull() }
+            // Шабат мевархим — в пятницу и в субботу: благословение месяца и молад
+            val mev = remember(city, minute, version) {
+                if (cityNow.dayOfWeek == java.time.DayOfWeek.FRIDAY || cityNow.dayOfWeek == java.time.DayOfWeek.SATURDAY)
+                    JewishCal.mevarchim(cityNow.toLocalDate(), city.isIsrael) else null
+            }
             if (pop == null && kl != null) {
                 MoonPill(kl, onClick = onMoon)
+            } else if (pop == null && mev != null) {
+                MevarchimPill(mev, onClick = { panel = Panel.SHABBAT })
             } else if (pop == null && !day.isPolarAnomaly) {
                 Text(stringResource(R.string.hint), color = ClockColors.Muted, fontSize = 12.sp, textAlign = TextAlign.Center)
             }
@@ -324,7 +350,7 @@ fun ClockScreen(onNightScreen: () -> Unit, onIntro: () -> Unit = {}, onMoon: () 
                     onOpen = { id -> editAlarm = id; panel = Panel.CUSTOM },
                     onDeleted = { bump(); panel = Panel.WAKE }
                 ) } }
-                Panel.TIMES -> TimesSheet(day.items, day.isNextJewishDayAfterSunset, cityNow, zone, marks, tziruf, dayText,
+                Panel.TIMES -> TimesSheet(city, day.items, day.isNextJewishDayAfterSunset, cityNow, zone, marks, tziruf, dayText,
                     onToggle = { type ->
                         marks = if (type in marks) marks - type else marks + type
                         Prefs.setMarks(context, marks)
@@ -392,8 +418,9 @@ private fun PopCard(
     val past = !e.at.isAfter(now)
     Surface(
         shape = RoundedCornerShape(16.dp),
-        color = Color(0xF20C1430),
+        color = ClockColors.SheetBg.copy(alpha = 0.97f),
         border = BorderStroke(1.dp, ClockColors.Line),
+        shadowElevation = 6.dp,
         modifier = modifier
     ) {
         Column {
@@ -461,7 +488,7 @@ private fun SheetColumn(content: @Composable () -> Unit) {
 
 @Composable
 internal fun CitySheet(city: CityOption, auto: Boolean, title: Boolean = true, onPick: (CityOption?) -> Unit) {
-    val locale = Locale.getDefault()
+    val locale = androidx.compose.ui.platform.LocalConfiguration.current.locales[0]
     var q by remember { mutableStateOf("") }
     val list = remember(q) { if (q.isBlank()) CITIES.sortedBy { it.title(locale) } else findCities(q, 30) }
     Column(modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp).padding(bottom = 16.dp)) {
@@ -542,8 +569,79 @@ private fun ShabbatSheet(
                 Text(at?.let(wdTime) ?: stringResource(R.string.no_sun), fontWeight = FontWeight.Bold, color = ClockColors.Gold)
             }
         }
+        SeventhHour(sh.friday, city, now)
         Note(stringResource(R.string.shabbat_note))
+        JewishCal.mevarchim(sh.friday, city.isIsrael)?.let { m ->
+            HorizontalDivider(color = ClockColors.Line)
+            MevarchimBlock(m)
+        }
     }
+}
+
+/** 7-й час ночи Шабата: с … до … — в этот час не делают кидуш. */
+@Composable
+private fun SeventhHour(friday: LocalDate, city: CityOption, now: ZonedDateTime) {
+    val h = remember(friday, city) { ZmanimEngine.seventhHourOfShabbatNight(friday, city) }
+    if (!now.isBefore(h.second)) return
+    val z = city.zone()
+    Surface(shape = RoundedCornerShape(12.dp), color = ClockColors.Bad.copy(alpha = 0.10f), border = BorderStroke(1.dp, ClockColors.Bad.copy(alpha = 0.5f)), modifier = Modifier.fillMaxWidth()) {
+        Row(Modifier.padding(horizontal = 12.dp, vertical = 8.dp), verticalAlignment = Alignment.CenterVertically) {
+            Text("🍷", fontSize = 20.sp, modifier = Modifier.padding(end = 10.dp))
+            Column(Modifier.weight(1f)) {
+                Text(stringResource(R.string.h7_t), color = ClockColors.Ink, fontWeight = FontWeight.Bold, fontSize = 14.sp)
+                Text(stringResource(R.string.h7_note), color = ClockColors.Muted, fontSize = 12.sp)
+            }
+            Text(h.first.withZoneSameInstant(z).format(HHMM) + "–" + h.second.withZoneSameInstant(z).format(HHMM),
+                color = ClockColors.Bad, fontWeight = FontWeight.Bold)
+        }
+    }
+}
+
+/** «Молад: вторник, 8 декабря, 3:47 и 5 частей». */
+@Composable
+private fun moladText(m: Mevarchim): String {
+    val locale = androidx.compose.ui.platform.LocalConfiguration.current.locales[0]
+    val day = m.moladDate.dayOfWeek.getDisplayName(TextStyle.FULL, locale) + ", " +
+        m.moladDate.format(DateTimeFormatter.ofPattern("d MMMM", locale))
+    val time = String.format(Locale.ROOT, "%d:%02d", m.moladHour, m.moladMinute)
+    val parts = pluralStringResource(R.plurals.chalakim, m.moladChalakim, m.moladChalakim)
+    return stringResource(R.string.mev_molad, day, time, parts)
+}
+
+/** Плашка на главном экране в пятницу и субботу перед новым месяцем. */
+@Composable
+private fun MevarchimPill(m: Mevarchim, onClick: () -> Unit) {
+    val locale = androidx.compose.ui.platform.LocalConfiguration.current.locales[0]
+    Surface(
+        onClick = onClick,
+        shape = RoundedCornerShape(16.dp),
+        color = ClockColors.Surface,
+        border = BorderStroke(1.dp, ClockColors.Gold.copy(alpha = 0.6f)),
+        modifier = Modifier.widthIn(max = 420.dp).fillMaxWidth()
+    ) {
+        Row(modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp), verticalAlignment = Alignment.CenterVertically) {
+            Text("🌒", fontSize = 22.sp, modifier = Modifier.padding(end = 10.dp))
+            Column(Modifier.weight(1f)) {
+                Text(stringResource(R.string.mev_title) + " · " + jewishMonthOnly(m.month, m.leap, locale),
+                    color = ClockColors.GoldDeep, fontWeight = FontWeight.Bold, fontSize = 14.sp, maxLines = 1)
+                Text(moladText(m), color = ClockColors.Ink2, fontSize = 12.sp, maxLines = 1, overflow = TextOverflow.Ellipsis)
+            }
+            Text("›", color = ClockColors.GoldDeep, fontSize = 22.sp)
+        }
+    }
+}
+
+/** В окне «Шабат»: благословение месяца, молад, дни Рош Ходеш (у Хабада — и весь Теґилим). */
+@Composable
+private fun MevarchimBlock(m: Mevarchim) {
+    val locale = androidx.compose.ui.platform.LocalConfiguration.current.locales[0]
+    Text("🌒  " + stringResource(R.string.mev_title), fontWeight = FontWeight.Bold, color = ClockColors.Ink)
+    Text(stringResource(R.string.mev_bless, jewishMonthOnly(m.month, m.leap, locale)), color = ClockColors.Ink2)
+    Text(moladText(m), color = ClockColors.GoldDeep, fontWeight = FontWeight.Bold)
+    val rc = m.roshChodesh.joinToString(" · ") { it.format(DateTimeFormatter.ofPattern("EEEE, d MMMM", locale)) }
+    Text(stringResource(R.string.mev_rc, rc), color = ClockColors.Ink2)
+    Note(stringResource(R.string.mev_note))
+    if (ZmanimEngine.minhag == Minhag.CHABAD) Note(stringResource(R.string.mev_tehillim))
 }
 
 // ---------------------------------------------------------------- будильники
@@ -560,7 +658,7 @@ private fun AlarmSheet(
     onDeleted: () -> Unit = {}
 ) {
     val context = LocalContext.current
-    val locale = Locale.getDefault()
+    val locale = androidx.compose.ui.platform.LocalConfiguration.current.locales[0]
     val study = type == Prefs.TORAH
     val custom = type.startsWith("C")
     var spec by remember { mutableStateOf(Prefs.alarm(context, type)) }
@@ -824,6 +922,7 @@ private fun LinkButton(text: String, route: String, modifier: Modifier) {
 
 @Composable
 private fun TimesSheet(
+    city: CityOption,
     items: List<app.mychitas.peleshaon.domain.ZmanItem>,
     tomorrow: Boolean,
     now: ZonedDateTime,
@@ -839,6 +938,13 @@ private fun TimesSheet(
     SheetColumn {
         SheetTitle(stringResource(R.string.times_title))
         if (tomorrow) Text(stringResource(R.string.tomorrow, dayText(now.toLocalDate().plusDays(1))), color = ClockColors.GoldDeep, fontSize = 13.sp)
+        // в пятницу (и ночью Шабата до восхода) — 7-й час ночи, когда не делают кидуш
+        val fri = when (now.dayOfWeek) {
+            java.time.DayOfWeek.FRIDAY -> now.toLocalDate()
+            java.time.DayOfWeek.SATURDAY -> now.toLocalDate().minusDays(1).takeIf { now.hour < 12 }
+            else -> null
+        }
+        fri?.let { SeventhHour(it, city, now) }
         Column {
             for (z in items) {
                 val past = !z.roundedTime.isAfter(now)
@@ -904,6 +1010,7 @@ private fun InfoSheet(onNightScreen: () -> Unit, onIntro: () -> Unit, onPrivacy:
         AddIconButton()
         Note(stringResource(R.string.ob5_l1))
         AddWidgetButtons()
+        HomeScreenHelp()
         Note(stringResource(R.string.ob5_l2))
         Note(stringResource(R.string.ob5_l3))
         OutlinedButton(onClick = onIntro, border = BorderStroke(1.dp, ClockColors.Line)) {

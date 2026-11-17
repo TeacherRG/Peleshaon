@@ -148,7 +148,7 @@
     <string name="ob5_t">The clock outside the app too</string>
     <string name="ob5_l1">Widgets: long-press the home screen → «Widgets» → «Pele Shaon». A large one — the clock, a small one — only the Jewish date.</string>
     <string name="ob5_l2">A notification with a countdown to the next time — turn it on in «Times». It shows on the lock screen.</string>
-    <string name="ob5_l3">At night by the bed: «?» → «Bedside night screen». While charging — a screen saver: phone Settings → Display → Screen saver → «Pele Shaon».</string>
+    <string name="ob5_l3">At night by the bed: «☰» → «Help» → «Bedside night screen». While charging — a screen saver: phone Settings → Display → Screen saver → «Pele Shaon».</string>
     <string name="legend_t">How to read the dial</string>
     <string name="help">Help</string>
     <string name="alarm_how_note">Light — the screen slowly brightens, like dawn; «Light only» wakes you without sound.</string>
@@ -233,4 +233,33 @@
     <string name="note_acc">Calculated from the city\'s coordinates, accurate to 1–2 minutes: do not leave it to the last minute and check your community\'s calendar.</string>
     <string name="kl_note_litvish">Times follow the Ashkenazi custom: from 3 days after the molad to the middle of the month, not on the eve of Shabbat or Yom Tov; in Av — after Tisha B\'Av, in Tishrei — after Yom Kippur. Ask your community rabbi.</string>
     <string name="kl_note_sefardi">Times follow the Sephardi custom: from 7 days after the molad to 15 days, not on the eve of Shabbat or Yom Tov; in Av — after Tisha B\'Av, in Tishrei — after Yom Kippur. Ask your community rabbi.</string>
+    <string name="mev_title">Shabbat Mevarchim</string>
+    <string name="mev_bless">The new month is blessed: %1$s</string>
+    <string name="mev_molad">Molad: %1$s, %2$s and %3$s</string>
+    <string name="mev_rc">Rosh Chodesh: %1$s</string>
+    <string name="mev_note">The molad is given as it is announced in the synagogue — in Jerusalem time (a «part», chelek, is 1/18 of a minute).</string>
+    <string name="mev_tehillim">By Chabad custom, on Shabbat Mevarchim the whole book of Tehillim is said before the morning prayer.</string>
+    <plurals name="chalakim">
+        <item quantity="one">%d part</item>
+        <item quantity="other">%d parts</item>
+    </plurals>
+    <string name="h7_t">Mazal Maadim — no Kiddush</string>
+    <string name="h7_note">The hour of Mars (the 7th hour) on Friday night: by custom Kiddush is not made then (Shulchan Aruch of the Alter Rebbe 271:3). It is 6–7 PM local solar time — every Friday at the same clock time.</string>
+    <string name="menu_compass">Compass</string>
+    <string name="compass_jerusalem">Jerusalem</string>
+    <string name="compass_moon">Moon</string>
+    <string name="jer_ahead">Jerusalem is right in front of you</string>
+    <string name="jer_dir">Jerusalem: %1$s (%2$d°) · %3$s km</string>
+    <string name="jer_hold">Hold the phone flat, or upright in front of you — then the arrow follows the camera. The gold arrow points to Jerusalem.</string>
+    <string name="jer_note">We pray facing Jerusalem, the place of the Temple (Berachot 30a; Shulchan Aruch, Orach Chaim 94:1). The direction is the shortest path on the globe (a great circle); many communities simply face east or south-east — follow your community and ask your rabbi.</string>
+    <string name="home_t">The icon or the widgets did not appear?</string>
+    <string name="home_oppo">On OPPO, realme and OnePlus phones an app installed not from Google Play may not put icons and widgets on the home screen until you allow it. Open the app settings → «Permissions» (or «Other permissions») → «Home screen shortcuts» → «Allow», then tap the buttons above again. Widgets in the list: long-press the home screen → «Widgets» → look for «Pele Shaon» (often at the end, or use the search).</string>
+    <string name="home_xiaomi">On Xiaomi, Redmi and POCO phones: app settings → «Other permissions» → «Home screen shortcuts» → «Allow». Then tap the buttons above again.</string>
+    <string name="home_vivo">On vivo phones: app settings → «Permissions» → «Home screen shortcuts» → «Allow». Then tap the buttons above again.</string>
+    <string name="home_huawei">On Huawei and Honor phones: app settings → «Permissions» → «Home screen shortcuts» → «Allow». Then tap the buttons above again.</string>
+    <string name="home_other">If no «add» window appeared, open the app settings and check the permissions related to the home screen («Shortcuts»). Widgets: long-press an empty spot on the home screen → «Widgets» → «Pele Shaon».</string>
+    <string name="home_zero">The phone does not see the app\'s widgets — restart the phone once. If it is still 0, send a screenshot of this screen to Office@mychitas.app.</string>
+    <string name="home_open">Open the app settings</string>
+    <string name="home_status">App widgets on the phone: %1$d of 2 · home screen: %2$s · %3$s, Android %4$s</string>
+    <string name="pin_done">Done — look at the home screen</string>
 </resources>

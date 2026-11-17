@@ -299,6 +299,22 @@ object ZmanimEngine {
         Minhag.SEFARDI -> cal.tzais72Zmanis?.toZoned(zone)
     }?.let { if (it.second > 0 || it.nano > 0) it.withSecond(0).withNano(0).plusMinutes(1) else it }
 
+    /**
+     * «Мазаль Маадим» — час Марса в ночь Шабата, 7-й час; в него по обычаю не делают кидуш (Шулхан арух Алтер Ребе 271:3).
+     * Часы здесь равные: каждую пятницу с 18:00 до 19:00 по местному солнечному времени города (долгота × 4 мин от Гринвича),
+     * поэтому в часах пояса он всегда в одно время (летом — на час позже). Как на 7thhour.info: Вена — 17:55–18:55 зимой.
+     * Минуты округлены до ближайшей (владелец, 18.11.2026).
+     */
+    fun seventhHourOfShabbatNight(friday: LocalDate, city: CityOption): Pair<ZonedDateTime, ZonedDateTime> {
+        val offSec = (city.lon * 240).toLong() // местное солнечное время = UTC + долгота × 4 мин
+        fun at(h: Int): ZonedDateTime {
+            val utc = friday.atTime(h, 0).toEpochSecond(java.time.ZoneOffset.UTC) - offSec
+            val rounded = (utc + 30) / 60 * 60
+            return Instant.ofEpochSecond(rounded).atZone(city.zone())
+        }
+        return at(18) to at(19)
+    }
+
     /** Исход Шабата / праздника этого календарного дня в городе. */
     fun havdalahOn(date: LocalDate, city: CityOption): ZonedDateTime? = havdalahOf(cal(date, city), city.zone())
 

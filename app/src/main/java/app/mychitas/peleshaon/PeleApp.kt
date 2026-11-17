@@ -16,6 +16,8 @@ class PeleApp : Application() {
         super.onCreate()
         ZmanimEngine.minhag = Prefs.minhag(this)
         AppLang.applyToProcess(this)
+        // Android 13+: язык приложения уже в ресурсах — пусть будет и языком по умолчанию (будильники, виджеты, уведомления)
+        if (Build.VERSION.SDK_INT >= 33) Locale.setDefault(resources.configuration.locales[0])
     }
 }
 

@@ -45,6 +45,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -176,7 +177,7 @@ private fun rememberHeading(lat: Double, lon: Double): Pair<Boolean, Heading?> {
  * дуга справа — на какой высоте её искать. Датчики — только пока открыт экран; ничего не сохраняется и не уходит.
  */
 @Composable
-fun MoonCompass(onClose: () -> Unit) {
+fun MoonCompass(onClose: () -> Unit, startMoon: Boolean = true) {
     val context = LocalContext.current
     BackHandler(onBack = onClose)
     // компас считает «верх экрана» — экран не поворачиваем, пока он открыт
@@ -198,6 +199,9 @@ fun MoonCompass(onClose: () -> Unit) {
     val kl = remember(now.toEpochSecond() / 60) { runCatching { KiddushLevanaRules.now(now, city) }.getOrNull() }
     val (hasSensor, heading) = rememberHeading(city.lat, city.lon)
     var remind by remember { mutableStateOf(MoonReminder.isOn(context)) }
+    // режим: Луна (Кидуш Левана) или Йерушалаим (куда молиться)
+    var moonMode by rememberSaveable { mutableStateOf(startMoon) }
+    val jer = remember(city) { jerusalemBearing(city.lat, city.lon) }
     val askNotif = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { }
 
     Box(modifier = Modifier.fillMaxSize().background(Color(0xFF060B1E))) {
@@ -211,8 +215,27 @@ fun MoonCompass(onClose: () -> Unit) {
             Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
                 TextButton(onClick = onClose) { Text("‹  " + stringResource(R.string.ob_back), color = ClockColors.Ink) }
                 Spacer(Modifier.weight(1f))
-                Text("🌙 " + stringResource(R.string.kl_title), color = Silver, fontWeight = FontWeight.Bold, fontSize = 18.sp)
+                Text("🧭 " + stringResource(R.string.menu_compass), color = ClockColors.Ink, fontWeight = FontWeight.Bold, fontSize = 18.sp)
                 Spacer(Modifier.weight(1f))
+            }
+            // два режима
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                for ((m, label) in listOf(false to "🕍  " + stringResource(R.string.compass_jerusalem), true to "🌙  " + stringResource(R.string.compass_moon))) {
+                    val on = moonMode == m
+                    Surface(
+                        onClick = { moonMode = m },
+                        shape = RoundedCornerShape(50),
+                        color = if (on) ClockColors.Gold else ClockColors.Surface,
+                        border = BorderStroke(1.dp, if (on) ClockColors.Gold else ClockColors.Line)
+                    ) {
+                        Text(label, color = if (on) ClockColors.SheetBg else ClockColors.Ink, fontWeight = FontWeight.Bold,
+                            modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp))
+                    }
+                }
+            }
+            if (!moonMode) {
+                JerusalemMode(jer, heading, hasSensor)
+                return@Column
             }
 
             // что делать: повернуться, поднять взгляд
@@ -232,7 +255,7 @@ fun MoonCompass(onClose: () -> Unit) {
 
             val heLabels = Locale.getDefault().language !in setOf("iw", "he")
             Canvas(modifier = Modifier.fillMaxWidth().widthIn(max = 460.dp).aspectRatio(1f)) {
-                drawCompass(heading?.deg ?: 0f, moon, heLabels)
+                drawCompass(heading?.deg ?: 0f, moon.azimuth, moon, heLabels)
             }
 
             Text(moonLine(context, moon) + " · " + stringResource(R.string.kl_illum, (moon.illumination * 100).roundToInt()),
@@ -284,6 +307,47 @@ fun MoonCompass(onClose: () -> Unit) {
     }
 }
 
+/** Направление и расстояние до Храмовой горы: начальный азимут дуги большого круга (0 — север) и км. */
+private fun jerusalemBearing(lat: Double, lon: Double): Pair<Double, Double> {
+    val la1 = Math.toRadians(lat); val la2 = Math.toRadians(31.7781)
+    val dl = Math.toRadians(35.2354 - lon)
+    val y = sin(dl) * cos(la2)
+    val x = cos(la1) * sin(la2) - sin(la1) * cos(la2) * cos(dl)
+    val az = (Math.toDegrees(atan2(y, x)) + 360) % 360
+    val d = 2 * 6371.0 * Math.asin(Math.sqrt(
+        Math.pow(sin((la2 - la1) / 2), 2.0) + cos(la1) * cos(la2) * Math.pow(sin(dl / 2), 2.0)
+    ))
+    return az to d
+}
+
+/** Режим «Йерушалаим»: куда стоять лицом в молитве (Брахот 30а; Шулхан арух, Орах хаим 94:1). */
+@Composable
+private fun JerusalemMode(jer: Pair<Double, Double>, heading: Heading?, hasSensor: Boolean) {
+    val (az, km) = jer
+    val delta = heading?.let { ((az - it.deg + 540) % 360 - 180).roundToInt() }
+    val big = when {
+        delta == null -> stringResource(R.string.kl_face, compassName(az), az.roundToInt() % 360)
+        abs(delta) <= 5 -> stringResource(R.string.jer_ahead)
+        delta < 0 -> stringResource(R.string.kl_left, -delta)
+        else -> stringResource(R.string.kl_right, delta)
+    }
+    Text(big, color = if (delta != null && abs(delta) <= 5) ClockColors.GoldDeep else ClockColors.Ink,
+        fontSize = 20.sp, fontWeight = FontWeight.Bold, textAlign = TextAlign.Center)
+    val heLabels = Locale.getDefault().language !in setOf("iw", "he")
+    Canvas(modifier = Modifier.fillMaxWidth().widthIn(max = 460.dp).aspectRatio(1f)) {
+        drawCompass(heading?.deg ?: 0f, az, null, heLabels)
+    }
+    Text(stringResource(R.string.jer_dir, compassName(az), az.roundToInt() % 360, String.format(Locale.ROOT, "%,d", km.roundToInt()).replace(',', ' ')),
+        color = ClockColors.Ink2, fontSize = 14.sp, textAlign = TextAlign.Center)
+    if (!hasSensor) Text(stringResource(R.string.kl_nosensor), color = ClockColors.Muted, fontSize = 13.sp, textAlign = TextAlign.Center)
+    else {
+        Text(stringResource(R.string.jer_hold), color = ClockColors.Muted, fontSize = 13.sp, textAlign = TextAlign.Center)
+        if (heading?.low == true) Text(stringResource(R.string.kl_calibrate), color = ClockColors.Bad, fontSize = 13.sp, textAlign = TextAlign.Center)
+    }
+    Text(stringResource(R.string.jer_note), color = ClockColors.Muted, fontSize = 12.sp, textAlign = TextAlign.Center,
+        modifier = Modifier.widthIn(max = 460.dp).padding(bottom = 8.dp))
+}
+
 /** Android 13+: спросить разрешение на уведомления, если его ещё нет. */
 private fun askNotifications(context: Context, ask: () -> Unit) {
     if (Build.VERSION.SDK_INT >= 33 &&
@@ -305,7 +369,7 @@ private val HEB = listOf("צפון", "מזרח", "דרום", "מערב")
  * Роза ветров (поворачивается: вверху — куда направлен телефон), серебряная стрелка на Луну с её фазой и дуга высоты справа:
  * от горизонта (вправо) до зенита (вверх).
  */
-private fun DrawScope.drawCompass(heading: Float, moon: MoonPosition, heLabels: Boolean) {
+private fun DrawScope.drawCompass(heading: Float, targetAz: Double, moon: MoonPosition?, heLabels: Boolean) {
     val c = Offset(size.width / 2, size.height / 2)
     val rr = min(size.width, size.height) / 2 * 0.72f
     fun at(angleDeg: Double, r: Float) = Offset(
@@ -362,15 +426,22 @@ private fun DrawScope.drawCompass(heading: Float, moon: MoonPosition, heLabels: 
         }, ClockColors.GoldDeep)
     }
 
-    // лунная стрелка
-    val a = moon.azimuth - heading
-    val up = moon.aboveHorizon
-    val col = if (up) Silver else SilverDim
+    // стрелка: на Луну — серебряная, на Йерушалаим — золотая
+    val a = targetAz - heading
+    val up = moon?.aboveHorizon ?: true
+    val col = if (moon == null) ClockColors.GoldDeep else if (up) Silver else SilverDim
     val tail = at(a + 180, rr * 0.18f)
     val head = at(a, rr * 0.62f)
     drawLine(col, tail, head, strokeWidth = 4.dp.toPx(), cap = StrokeCap.Round,
         pathEffect = if (up) null else PathEffect.dashPathEffect(floatArrayOf(14f, 10f)))
     drawCircle(col, 5.dp.toPx(), c)
+    if (moon == null) {
+        // Йерушалаим — золотой круг на конце стрелки
+        val jc = at(a, rr * 0.80f)
+        drawCircle(ClockColors.GoldDeep, rr * 0.085f, jc)
+        drawCircle(ClockColors.SheetBg, rr * 0.04f, jc)
+        return
+    }
     // Луна на конце стрелки — с фазой
     val mc = at(a, rr * 0.80f)
     val mr = rr * 0.085f

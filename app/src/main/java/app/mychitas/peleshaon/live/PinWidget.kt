@@ -18,7 +18,7 @@ object PinWidget {
         if (!supported(context)) return false
         val cls = if (date) DateWidget::class.java else FaceWidget::class.java
         return runCatching {
-            AppWidgetManager.getInstance(context).requestPinAppWidget(ComponentName(context, cls), null, null)
+            AppWidgetManager.getInstance(context).requestPinAppWidget(ComponentName(context, cls), null, PinDone.intent(context))
         }.getOrDefault(false)
     }
 
@@ -49,6 +49,32 @@ object PinIcon {
             .setIcon(android.graphics.drawable.Icon.createWithResource(context, app.mychitas.peleshaon.R.mipmap.ic_launcher))
             .setIntent(open)
             .build()
-        return runCatching { sm.requestPinShortcut(info, null) }.getOrDefault(false)
+        return runCatching { sm.requestPinShortcut(info, PinDone.intent(context).intentSender) }.getOrDefault(false)
+    }
+}
+
+/** Рабочий стол поставил значок / виджет — сказать «Готово». Не пришло — значит, рабочий стол запрос молча отклонил. */
+object PinDone {
+    fun intent(context: Context): android.app.PendingIntent = android.app.PendingIntent.getBroadcast(
+        context, 7001, android.content.Intent(context, PinDoneReceiver::class.java),
+        android.app.PendingIntent.FLAG_UPDATE_CURRENT or
+            (if (Build.VERSION.SDK_INT >= 31) android.app.PendingIntent.FLAG_MUTABLE else 0)
+    )
+
+    /** Сколько виджетов приложения видит система (0 — рабочий стол их не покажет). */
+    fun providers(context: Context): Int =
+        AppWidgetManager.getInstance(context).getInstalledProvidersForPackage(context.packageName, null).size
+
+    /** Название рабочего стола телефона. */
+    fun launcher(context: Context): String {
+        val home = android.content.Intent(android.content.Intent.ACTION_MAIN).addCategory(android.content.Intent.CATEGORY_HOME)
+        val ri = context.packageManager.resolveActivity(home, 0) ?: return "?"
+        return ri.loadLabel(context.packageManager).toString() + " (" + ri.activityInfo.packageName + ")"
+    }
+}
+
+class PinDoneReceiver : android.content.BroadcastReceiver() {
+    override fun onReceive(context: Context, intent: android.content.Intent) {
+        android.widget.Toast.makeText(context, app.mychitas.peleshaon.R.string.pin_done, android.widget.Toast.LENGTH_LONG).show()
     }
 }

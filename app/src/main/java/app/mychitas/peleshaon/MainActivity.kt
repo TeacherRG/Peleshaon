@@ -46,12 +46,14 @@ class MainActivity : ComponentActivity() {
             navigationBarStyle = SystemBarStyle.dark(android.graphics.Color.TRANSPARENT)
         )
         super.onCreate(savedInstanceState)
+        // язык из «Настроек»: и для текстов, и для дат, названий месяцев, городов (они берут язык по умолчанию)
+        java.util.Locale.setDefault(resources.configuration.locales[0])
         ClockTheme.load(this)
         AlarmScheduler.rescheduleAllFromPrefs(this)
         MoonReminder.schedule(this)
         // компас переводит экран в портрет — активность пересоздаётся, а компас должен остаться открытым
-        openMoon.value = savedInstanceState?.getBoolean("moon")
-            ?: (intent?.getBooleanExtra(MoonReminder.EXTRA_OPEN, false) == true)
+        openMoon.value = savedInstanceState?.getString("compass")
+            ?: if (intent?.getBooleanExtra(MoonReminder.EXTRA_OPEN, false) == true) "moon" else null
         setContent {
             // тема: днём светлая, ночью тёмная (или как выбрано) — и значки строки состояния под неё
             LaunchedEffect(Unit) {
@@ -71,17 +73,18 @@ class MainActivity : ComponentActivity() {
     }
 
     // уведомление «Кидуш Левана сегодня» — сразу экран-компас
-    private val openMoon = mutableStateOf(false)
+    // компас: "moon" — Луна, "jer" — Йерушалаим, null — закрыт
+    private val openMoon = mutableStateOf<String?>(null)
 
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
-        outState.putBoolean("moon", openMoon.value)
+        outState.putString("compass", openMoon.value)
     }
 
     override fun onNewIntent(intent: android.content.Intent) {
         super.onNewIntent(intent)
         setIntent(intent)
-        if (intent.getBooleanExtra(MoonReminder.EXTRA_OPEN, false)) openMoon.value = true
+        if (intent.getBooleanExtra(MoonReminder.EXTRA_OPEN, false)) openMoon.value = "moon"
     }
 
     // Город, подписи, «Сочетание Имени» могли поменяться — виджеты и уведомление подхватят
@@ -93,7 +96,7 @@ class MainActivity : ComponentActivity() {
 }
 
 @Composable
-fun PeleShaonApp(openMoon: androidx.compose.runtime.MutableState<Boolean>) {
+fun PeleShaonApp(openMoon: androidx.compose.runtime.MutableState<String?>) {
     val context = LocalContext.current
     var night by remember { mutableStateOf(false) }
     // Знакомство — при первом запуске (разрешение на уведомления просит его шаг про будильники, с объяснением)
@@ -106,9 +109,9 @@ fun PeleShaonApp(openMoon: androidx.compose.runtime.MutableState<Boolean>) {
             Live.update(context)
             intro = false
         })
-    } else if (openMoon.value) {
-        // экран-компас Кидуш Левана
-        MoonCompass(onClose = { openMoon.value = false })
+    } else if (openMoon.value != null) {
+        // компас: Йерушалаим или Луна
+        MoonCompass(onClose = { openMoon.value = null }, startMoon = openMoon.value == "moon")
     } else if (night) {
         // Ночной экран у кровати: тёмный, экран не гаснет, нажатие — назад
         DisposableEffect(Unit) {
@@ -124,6 +127,6 @@ fun PeleShaonApp(openMoon: androidx.compose.runtime.MutableState<Boolean>) {
         BackHandler { night = false }
         NightFace(Modifier.fillMaxSize().background(Color.Black).clickable { night = false })
     } else {
-        ClockScreen(onNightScreen = { night = true }, onIntro = { intro = true }, onMoon = { openMoon.value = true })
+        ClockScreen(onNightScreen = { night = true }, onIntro = { intro = true }, onMoon = { openMoon.value = "moon" }, onCompass = { openMoon.value = "jer" })
     }
 }
