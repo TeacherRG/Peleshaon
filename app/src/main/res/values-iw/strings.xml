@@ -118,8 +118,8 @@
     <string name="polar_short">היום אין זריחה ושקיעה</string>
     <string name="widget_face_name">פלא שעון — שעון היום</string>
     <string name="widget_date_name">פלא שעון — תאריך עברי</string>
-    <string name="widget_face_desc">טבעת היום עם כל הזמנים, הזמן הקרוב וספירה לאחור</string>
-    <string name="widget_date_desc">התאריך העברי: היום במספר, החודש והשנה; אחרי השקיעה — כבר היום הבא</string>
+    <string name="widget_face_desc">טבעת היום עם כל הזמנים, השעה והתאריך העברי</string>
+    <string name="widget_date_desc">התאריך העברי: היום במספר, החודש ויום השבוע; אחרי השקיעה — כבר היום הבא</string>
     <string name="live_notif">הזמן הקרוב בהתראה</string>
     <string name="live_notif_note">התראה שקטה עם ספירה לאחור לזמן הקרוב של היום. היא מוצגת במסך הנעילה, ובטלפונים רבים — גם כסמל במסך הכבוי (תמיד מופעל).</string>
     <string name="ob_skip">דלג</string>

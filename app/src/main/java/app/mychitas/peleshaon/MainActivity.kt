@@ -35,7 +35,7 @@ import app.mychitas.peleshaon.ui.Onboarding
  * Шабат и два будильника, которые молчат в Шабат и праздники.
  */
 class MainActivity : ComponentActivity() {
-    // язык, выбранный в «Настройках» (до Android 13 — здесь)
+    // язык, выбранный в «Настройках»
     override fun attachBaseContext(newBase: android.content.Context) {
         super.attachBaseContext(app.mychitas.peleshaon.AppLang.wrap(newBase))
     }
@@ -47,6 +47,7 @@ class MainActivity : ComponentActivity() {
         )
         super.onCreate(savedInstanceState)
         // язык из «Настроек»: и для текстов, и для дат, названий месяцев, городов (они берут язык по умолчанию)
+        app.mychitas.peleshaon.AppLang.applyToProcess(applicationContext)
         java.util.Locale.setDefault(resources.configuration.locales[0])
         ClockTheme.load(this)
         AlarmScheduler.rescheduleAllFromPrefs(this)

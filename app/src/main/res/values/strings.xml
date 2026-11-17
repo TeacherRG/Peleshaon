@@ -118,8 +118,8 @@
     <string name="polar_short">No sunrise or sunset today</string>
     <string name="widget_face_name">Pele Shaon — day dial</string>
     <string name="widget_date_name">Pele Shaon — Jewish date</string>
-    <string name="widget_face_desc">The ring of the day with every time of the day, the next one and a countdown</string>
-    <string name="widget_date_desc">Today’s Jewish date: the day as a number, the month and the year; after sunset — already the next day</string>
+    <string name="widget_face_desc">The ring of the day with every time of the day, the time and the Jewish date</string>
+    <string name="widget_date_desc">Today’s Jewish date: the day as a number, the month and the weekday; after sunset — already the next day</string>
     <string name="live_notif">Next time in the notifications</string>
     <string name="live_notif_note">A quiet notification with a countdown to the next time of the day. It is shown on the lock screen, and on many phones — as an icon on the always-on display.</string>
     <string name="ob_skip">Skip</string>

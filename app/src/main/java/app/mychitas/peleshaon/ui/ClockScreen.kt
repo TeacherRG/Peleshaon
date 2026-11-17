@@ -1124,8 +1124,8 @@ private fun SettingsSheet(onChange: () -> Unit) {
                         if (lang == t) return@FilterChip
                         lang = t
                         AppLang.set(context, t)
-                        // до Android 13 окно само не пересоздаётся
-                        if (android.os.Build.VERSION.SDK_INT < 33) (context as? android.app.Activity)?.recreate()
+                        // окно — заново, уже на новом языке
+                        (context as? android.app.Activity)?.recreate()
                         app.mychitas.peleshaon.live.Live.update(context)
                     },
                     label = { Text(if (t.isEmpty()) stringResource(R.string.lang_system) else AppLang.label(t), fontSize = 13.sp) },

@@ -33,11 +33,11 @@ object ClockTheme {
     var dayNow by mutableStateOf(false)
     /** ночной экран / заставка открыты — темно, что бы ни выбрали */
     var darkHolds by mutableIntStateOf(0)
-    /** картинка виджета рисуется в этом потоке — тёмная */
-    val renderDark = ThreadLocal<Boolean>()
+    /** картинка виджета рисуется в этом потоке — со своей темой (true — светлая, false — тёмная) */
+    val renderTheme = ThreadLocal<Boolean?>()
 
     val light: Boolean
-        get() = renderDark.get() != true && darkHolds == 0 && (mode == LIGHT || (mode == AUTO && dayNow))
+        get() = renderTheme.get() ?: (darkHolds == 0 && (mode == LIGHT || (mode == AUTO && dayNow)))
 
     fun load(context: Context) {
         mode = Prefs.of(context).getString("theme", AUTO) ?: AUTO
@@ -56,11 +56,17 @@ object ClockTheme {
         dayNow = runCatching { ZmanimEngine.halfOf(now, city)?.day }.getOrNull() ?: (now.hour in 7..18)
     }
 
-    inline fun <T> dark(block: () -> T): T {
-        val prev = renderDark.get()
-        renderDark.set(true)
-        try { return block() } finally { renderDark.set(prev) }
+    inline fun <T> dark(block: () -> T): T = render(false, block)
+
+    inline fun <T> render(light: Boolean, block: () -> T): T {
+        val prev = renderTheme.get()
+        renderTheme.set(light)
+        try { return block() } finally { renderTheme.set(prev) }
     }
+
+    /** Тема виджетов: как выбрано; «Авто» — светлая с восхода до заката (владелец, 18.11.2026: «днём — не для тёмного времени»). */
+    fun widgetLight(context: Context, day: Boolean?): Boolean =
+        when (Prefs.of(context).getString("theme", AUTO)) { LIGHT -> true; DARK -> false; else -> day == true }
 }
 
 /** Фон экранов: ночью — звёздное небо, днём — светлое небо. */

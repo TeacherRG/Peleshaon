@@ -118,8 +118,8 @@
     <string name="polar_short">Heute kein Auf- oder Untergang</string>
     <string name="widget_face_name">Pele Schaon — Tageszifferblatt</string>
     <string name="widget_date_name">Pele Schaon — jüdisches Datum</string>
-    <string name="widget_face_desc">Der Ring des Tages mit allen Zeiten, die nächste Zeit und ein Countdown</string>
-    <string name="widget_date_desc">Das jüdische Datum: Tag als Zahl, Monat und Jahr; nach Sonnenuntergang schon der nächste Tag</string>
+    <string name="widget_face_desc">Der Ring des Tages mit allen Zeiten, die Uhrzeit und das jüdische Datum</string>
+    <string name="widget_date_desc">Das jüdische Datum: Tag als Zahl, Monat und Wochentag; nach Sonnenuntergang schon der nächste Tag</string>
     <string name="live_notif">Nächste Zeit in der Benachrichtigung</string>
     <string name="live_notif_note">Eine stille Benachrichtigung mit Countdown zur nächsten Zeit des Tages. Sie ist auf dem Sperrbildschirm zu sehen, auf vielen Handys auch als Symbol auf dem Always-on-Display.</string>
     <string name="ob_skip">Überspringen</string>

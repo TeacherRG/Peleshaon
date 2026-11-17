@@ -111,10 +111,13 @@ object Live {
             cancelTick(context)
             return
         }
-        val s = ClockTheme.dark { LiveState.of(context) }
+        // виджеты — по теме: «Авто» — днём светлые, ночью тёмные
+        val half = runCatching { app.mychitas.peleshaon.domain.ZmanimEngine.halfOf(java.time.ZonedDateTime.now(Prefs.city(context).zone()), Prefs.city(context)) }.getOrNull()
+        val light = ClockTheme.widgetLight(context, half?.day)
+        val s = ClockTheme.render(light) { LiveState.of(context) }
         val m = AppWidgetManager.getInstance(context)
-        for (id in m.getAppWidgetIds(ComponentName(context, FaceWidget::class.java))) m.updateAppWidget(id, faceViews(context, s, id))
-        for (id in m.getAppWidgetIds(ComponentName(context, DateWidget::class.java))) m.updateAppWidget(id, dateViews(context, s))
+        for (id in m.getAppWidgetIds(ComponentName(context, FaceWidget::class.java))) m.updateAppWidget(id, faceViews(context, s, id, light))
+        for (id in m.getAppWidgetIds(ComponentName(context, DateWidget::class.java))) m.updateAppWidget(id, dateViews(context, s, light))
         if (notif) showNotification(context, s)
         scheduleTick(context, s)
     }
@@ -146,38 +149,46 @@ object Live {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) setChronometerCountDown(id, true)
     }
 
+    /** Цвета виджета: тёмный (ночь) или светлый (день) фон и текст. */
+    private const val INK = 0; private const val INK2 = 1; private const val GOLD = 2; private const val MUTED = 3
+    private val DARK_TEXT = intArrayOf(0xFFF4F1E8.toInt(), 0xFFC9CFE3.toInt(), 0xFFE2BF72.toInt(), 0xFF9AA4C4.toInt())
+    private val LIGHT_TEXT = intArrayOf(0xFF16233F.toInt(), 0xFF34415F.toInt(), 0xFF8E6A1C.toInt(), 0xFF5D6886.toInt())
+
+    private fun RemoteViews.paint(light: Boolean, vararg views: Pair<Int, Int>) {
+        val c = if (light) LIGHT_TEXT else DARK_TEXT
+        for ((id, role) in views) setTextColor(id, c[role])
+    }
+
     private fun RemoteViews.clocks(context: Context, s: LiveState, vararg ids: Int) {
         for (id in ids) setString(id, "setTimeZone", s.city.zone().id)
     }
 
-    /** Большой виджет: циферблат дня, время города, ближайшее время с отсчётом, еврейская дата. */
-    private fun faceViews(context: Context, s: LiveState, widgetId: Int): RemoteViews {
+    /** Большой виджет: циферблат дня, время города и еврейская дата; фон прозрачный. */
+    private fun faceViews(context: Context, s: LiveState, widgetId: Int, light: Boolean): RemoteViews {
         val v = RemoteViews(context.packageName, R.layout.widget_face)
         // размер картинки — по виджету, не меньше 360 и не больше 720 пикселей
         val opts = AppWidgetManager.getInstance(context).getAppWidgetOptions(widgetId)
         val dp = maxOf(opts.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_WIDTH, 200), opts.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_HEIGHT, 200))
         val px = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, dp.toFloat(), context.resources.displayMetrics).toInt().coerceIn(360, 720)
-        v.setImageViewBitmap(R.id.w_face, renderFace(px, s.now, s.city.zone(), s.half, s.ring, s.events, Prefs.tziruf(context)))
+        v.setImageViewBitmap(R.id.w_face, renderFace(px, s.now, s.city.zone(), s.half, s.ring, s.events, Prefs.tziruf(context), light = light))
+        v.paint(light, R.id.w_time to INK, R.id.w_date to GOLD)
         v.clocks(context, s, R.id.w_time)
-        val e = s.next
-        v.setTextViewText(R.id.w_next, e?.let { context.getString(short(it.id)) + " " + it.at.withZoneSameInstant(s.city.zone()).format(HHMM) } ?: "")
-        v.countdown(R.id.w_count, context, e, s)
         v.setTextViewText(R.id.w_date, dateLine(s))
-        v.setTextViewText(R.id.w_city, listOfNotNull(hourLabel(context, s), s.city.title(Locale.getDefault())).joinToString(" · "))
         v.setOnClickPendingIntent(R.id.w_root, openApp(context))
         return v
     }
 
-    /** Маленький виджет: только еврейская дата — день числом, месяц, год и она же буквами иврита. После заката — уже следующая. */
-    private fun dateViews(context: Context, s: LiveState): RemoteViews {
+    /** Маленький виджет: еврейская дата — день числом, месяц и день недели. После заката — уже следующий день. */
+    private fun dateViews(context: Context, s: LiveState, light: Boolean): RemoteViews {
         val v = RemoteViews(context.packageName, R.layout.widget_date)
+        v.paint(light, R.id.w_day to GOLD, R.id.w_month to INK, R.id.w_weekday to INK2)
         val jd = ZmanimEngine.jewishDay(s.day.date, s.city.isIsrael)
         v.setTextViewText(R.id.w_day, jd.day.toString())
         // на иврите в списке месяцев — «בכסלו» (для «7 בכסלו»); отдельной строкой — без ב
         val month = jewishMonthName(jd).let { if (Locale.getDefault().language in setOf("iw", "he") && it.startsWith("ב")) it.drop(1) else it }
         v.setTextViewText(R.id.w_month, month)
-        v.setTextViewText(R.id.w_year, jd.year.toString())
-        v.setTextViewText(R.id.w_heb, s.day.jewishDateHebrew)
+        // день недели еврейского дня: после заката — уже следующий
+        v.setTextViewText(R.id.w_weekday, s.day.date.dayOfWeek.getDisplayName(java.time.format.TextStyle.FULL_STANDALONE, Locale.getDefault()))
         v.setOnClickPendingIntent(R.id.w_root, openApp(context))
         return v
     }
