@@ -95,6 +95,11 @@ object AlarmScheduler {
 
     /** Следующие звонки всех будильников — по настройкам и городу; нет звонка — будильник снят. И таймер «мясное → молочное». */
     fun rescheduleAllFromPrefs(context: Context) {
+        if (Prefs.cityUnmatched(context)) {
+            for (type in listOf(Prefs.MORNING, Prefs.TORAH) + Prefs.customAlarms(context) + Prefs.KASHRUT)
+                cancelAlarm(context, type, includeSnooze = true)
+            return
+        }
         val city = Prefs.city(context)
         val now = ZonedDateTime.now(city.zone())
         val early = Prefs.earlyShabbatMinutes(context)
@@ -138,6 +143,10 @@ object AlarmScheduler {
 class AlarmReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent) {
         val alarmType = intent.getStringExtra(AlarmScheduler.EXTRA_ALARM_TYPE) ?: Prefs.MORNING
+        if (Prefs.cityUnmatched(context)) {
+            AlarmScheduler.cancelAlarm(context, alarmType, includeSnooze = true)
+            return
+        }
         val city = Prefs.city(context)
         // таймер «мясное → молочное» — один раз
         if (alarmType.startsWith("C") && alarmType !in Prefs.customAlarms(context)) return

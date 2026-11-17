@@ -252,11 +252,14 @@ fun resolveZone(id: String): ZoneId? =
 private val IL_ZONES = setOf("Asia/Jerusalem", "Asia/Tel_Aviv", "Asia/Hebron", "Asia/Gaza", "Israel")
 fun inIsrael(zone: ZoneId): Boolean = zone.id in IL_ZONES
 
-/** Город по часовому поясу устройства; нет такого — Вена. */
-fun cityForZone(zone: ZoneId = ZoneId.systemDefault()): CityOption =
+/** A time zone can only suggest an approximate city; an unknown zone has no match. */
+fun cityMatchForZone(zone: ZoneId = ZoneId.systemDefault()): CityOption? =
     CITIES.find { it.id == (if (zone.id == "Europe/Kyiv") "Europe/Kiev" else zone.id) }
         ?: CITIES.find { it.zoneId == zone.id }
-        ?: CITIES.first { it.id == "Europe/Vienna" }
+
+/** Retained for legacy display; religious alarms fail closed if the zone has no match. */
+fun cityForZone(zone: ZoneId = ZoneId.systemDefault()): CityOption =
+    cityMatchForZone(zone) ?: CITIES.first { it.id == "Europe/Vienna" }
 
 /** Город по id или по прежнему английскому имени. */
 fun cityById(id: String?): CityOption? =

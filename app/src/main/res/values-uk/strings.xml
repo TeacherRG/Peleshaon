@@ -230,6 +230,8 @@
     <string name="shabbat_quiet_early_choice">%1$d хв</string>
     <string name="shabbat_quiet_early_note">Починати тишу раніше за час свічок у п’ятницю. Не змінює час свічок чи єврейську дату. Нуль вимикає.</string>
     <string name="candle_offset_warning">Обраний час свічок пізніший за місцевий стандарт. Перевірте звичай своєї громади.</string>
+    <string name="city_unconfirmed_warning">Місто визначено приблизно за часовим поясом. Підтвердьте його, перш ніж покладатися на релігійні часи.</string>
+    <string name="city_unmatched_warning">Для часового поясу телефона немає відповідного міста. Відень показано умовно; виберіть місто, інакше будильники не спрацюють.</string>
     <string name="alarm_n">Будильник %1$d</string>
     <string name="alarms_more">Ще будильники</string>
     <string name="alarm_add">Додати будильник</string>

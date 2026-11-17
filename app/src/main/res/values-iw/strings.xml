@@ -230,6 +230,8 @@
     <string name="shabbat_quiet_early_choice">%1$d דקות</string>
     <string name="shabbat_quiet_early_note">הקדמת השקט ביחס לזמן הדלקת הנרות ביום שישי. זמן הנרות והתאריך אינם משתנים. אפס מבטל את התוספת.</string>
     <string name="candle_offset_warning">זמן הדלקת הנרות שנבחר מאוחר יותר מברירת המחדל המקומית. יש לבדוק את מנהג הקהילה.</string>
+    <string name="city_unconfirmed_warning">העיר שנבחרה לפי אזור הזמן היא הערכה בלבד. יש לאשר את העיר לפני הסתמכות על זמנים הלכתיים.</string>
+    <string name="city_unmatched_warning">לא נמצאה עיר תואמת לאזור הזמן של הטלפון. וינה מוצגת רק כברירת מחדל; יש לבחור עיר כדי שהשעונים המעוררים יפעלו.</string>
     <string name="alarm_n">שעון מעורר %1$d</string>
     <string name="alarms_more">עוד שעונים מעוררים</string>
     <string name="alarm_add">הוספת שעון מעורר</string>

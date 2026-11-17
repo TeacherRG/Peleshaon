@@ -230,6 +230,8 @@
     <string name="shabbat_quiet_early_choice">%1$d Min.</string>
     <string name="shabbat_quiet_early_note">Ruhebeginn vor dem Kerzenzünden am Freitag. Kerzenzeit und Kalender bleiben unverändert. Null schaltet die Zusatzzeit aus.</string>
     <string name="candle_offset_warning">Die gewählte Kerzenzeit liegt später als der lokale Standard. Bitte den Gemeindebrauch prüfen.</string>
+    <string name="city_unconfirmed_warning">Der automatisch gewählte Ort ist nur eine Näherung. Bitte bestätigen, bevor religiöse Zeiten verwendet werden.</string>
+    <string name="city_unmatched_warning">Keine passende Stadt für die Zeitzone des Telefons. Wien ist nur ein Platzhalter; bitte eine Stadt wählen, sonst bleiben die Wecker stumm.</string>
     <string name="alarm_n">Wecker %1$d</string>
     <string name="alarms_more">Weitere Wecker</string>
     <string name="alarm_add">Wecker hinzufügen</string>

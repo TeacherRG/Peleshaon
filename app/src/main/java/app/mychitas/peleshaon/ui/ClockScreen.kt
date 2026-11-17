@@ -202,6 +202,10 @@ fun ClockScreen(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(6.dp)
         ) {
+            if (Prefs.cityUnmatched(context)) {
+                Text(stringResource(R.string.city_unmatched_warning), color = ClockColors.Bad,
+                    fontSize = 12.sp, modifier = Modifier.clickable { panel = Panel.CITY })
+            }
             // ---- шапка: город, дата, «Как считаем»
             Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
                 Chip(onClick = { panel = Panel.CITY }, modifier = Modifier.widthIn(max = 124.dp)) {
@@ -1156,6 +1160,10 @@ private fun SettingsSheet(onChange: () -> Unit) {
     val context = LocalContext.current
     SheetColumn {
         SheetTitle(stringResource(R.string.settings))
+        if (Prefs.cityUnconfirmed(context)) {
+            Note(stringResource(if (Prefs.cityUnmatched(context)) R.string.city_unmatched_warning
+                else R.string.city_unconfirmed_warning))
+        }
 
         // язык
         Text(stringResource(R.string.lang_t), fontWeight = FontWeight.Bold, color = ClockColors.Ink)

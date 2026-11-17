@@ -8,6 +8,9 @@ import app.mychitas.peleshaon.domain.Minhag
 import app.mychitas.peleshaon.domain.ZmanimEngine
 import app.mychitas.peleshaon.domain.cityById
 import java.time.LocalDate
+import java.time.ZoneId
+import app.mychitas.peleshaon.domain.cityMatchForZone
+import kotlin.test.assertNull
 import kotlin.test.AfterTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -55,6 +58,18 @@ class ShabbatSafetyTest {
             (0..6).toSet(), false)
         val next = assertNotNull(AlarmRules.nextRing(spec, friday.atStartOfDay(city.zone()), city, 30))
         assertEquals(friday.plusDays(2), next.toLocalDate())
+    }
+
+    @Test fun aKnownSunsetRollsTheDateEvenIfSunriseIsMissing() {
+        val date = LocalDate.of(2027, 2, 1)
+        val sunset = date.atTime(17, 12).atZone(city.zone())
+        assertEquals(date, ZmanimEngine.dateAfterKnownSunset(date, sunset.minusSeconds(1), sunset))
+        assertEquals(date.plusDays(1), ZmanimEngine.dateAfterKnownSunset(date, sunset, sunset))
+        assertEquals(date, ZmanimEngine.dateAfterKnownSunset(date, sunset.plusHours(2), null))
+    }
+
+    @Test fun anUnknownSystemTimeZoneHasNoTrustedCityMatch() {
+        assertNull(cityMatchForZone(ZoneId.of("Pacific/Chatham")))
     }
 
     @Test fun kashrutWaitingTimeIsAlwaysSixHoursAndLegacyIsReset() {

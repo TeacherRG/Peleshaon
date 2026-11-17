@@ -9,6 +9,7 @@ import app.mychitas.peleshaon.domain.CityOption
 import app.mychitas.peleshaon.domain.ZmanType
 import app.mychitas.peleshaon.domain.cityById
 import app.mychitas.peleshaon.domain.cityForZone
+import app.mychitas.peleshaon.domain.cityMatchForZone
 import java.time.ZoneId
 
 /**
@@ -68,6 +69,10 @@ object Prefs {
 
     /** Automatic matching by a time zone is approximate until a city is confirmed. */
     fun cityUnconfirmed(context: Context): Boolean = chosenCity(context) == null
+
+    /** If neither a manual city nor a timezone match exists, do not schedule religious alarms. */
+    fun cityUnmatched(context: Context): Boolean =
+        chosenCity(context) == null && cityMatchForZone(ZoneId.systemDefault()) == null
 
     fun setCity(context: Context, city: CityOption?) {
         of(context).edit().apply {

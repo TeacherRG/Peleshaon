@@ -70,6 +70,7 @@ class AlarmRingService : Service() {
     }
 
     private fun isQuietNow(alarmType: String): Boolean {
+        if (Prefs.cityUnmatched(this)) return true
         val city = Prefs.city(this)
         return ShabbatGuard.checkMoment(ZonedDateTime.now(city.zone()), city.name, city.lat,
             city.lon, city.zone(), city.isIsrael, Prefs.alarm(this, alarmType).chm,

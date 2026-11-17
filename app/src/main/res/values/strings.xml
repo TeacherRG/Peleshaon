@@ -230,6 +230,8 @@
     <string name="shabbat_quiet_early_choice">%1$d min</string>
     <string name="shabbat_quiet_early_note">Additional silence before Friday candle lighting. Does not change the candle time or the Jewish calendar. Zero disables it.</string>
     <string name="candle_offset_warning">This choice is later than the local candle-lighting default. Check the practice of your community.</string>
+    <string name="city_unconfirmed_warning">Auto-selected cities are approximate; confirm your city before relying on religious times.</string>
+    <string name="city_unmatched_warning">No city matches the phone time zone. Vienna is only a placeholder; choose a city before alarms can ring.</string>
     <string name="alarm_n">Alarm %1$d</string>
     <string name="alarms_more">More alarms</string>
     <string name="alarm_add">Add an alarm</string>

@@ -30,7 +30,7 @@ def resource_keys(folder: str, module: str = "app") -> set[str]:
 def format_args(text: str) -> list[tuple[int, str]]:
     # Android resources permit numbered arguments and implicit %s/%d; normalize both.
     out: list[tuple[int, str]] = []
-    for match in re.finditer(r"%(?:([1-9][0-9]*)\\$)?([sdf])", text):
+    for match in re.finditer(r"%(?:([1-9][0-9]*)\$)?([sdf])", text):
         out.append((int(match.group(1)) if match.group(1) else len(out) + 1, match.group(2)))
     return sorted(out)
 

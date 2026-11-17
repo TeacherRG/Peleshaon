@@ -70,7 +70,7 @@ object MoonReminder {
     fun schedule(context: Context) {
         val am = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
         am.cancel(pending(context))
-        if (!isOn(context)) return
+        if (!isOn(context) || Prefs.cityUnmatched(context)) return
         val at = runCatching { KiddushLevanaRules.nextReminder(ZonedDateTime.now(), Prefs.city(context)) }.getOrNull() ?: return
         am.setWindow(AlarmManager.RTC_WAKEUP, at.toInstant().toEpochMilli(), 10 * 60_000L, pending(context))
     }

@@ -119,6 +119,10 @@ object ZmanimEngine {
     fun candleLightingOn(date: LocalDate, city: CityOption): ZonedDateTime? =
         sunsetOf(date, city)?.minusMinutes(candleMinutesFor(city.name))
 
+    /** When sunrise is missing, a known sunset still fixes the transition of the Jewish date. */
+    fun dateAfterKnownSunset(date: LocalDate, moment: ZonedDateTime, sunset: ZonedDateTime?): LocalDate =
+        if (sunset != null && !moment.isBefore(sunset)) date.plusDays(1) else date
+
     fun calculateForMoment(
         now: ZonedDateTime,
         cityName: String,
@@ -134,16 +138,19 @@ object ZmanimEngine {
         val todaySunrise = todayCal.sunrise?.toZoned(zoneId)
 
         if (todaySunrise == null || todaySunset == null) {
-            val (hebStr, translitStr) = getJewishDateStrings(today, isIsrael)
+            val targetDate = dateAfterKnownSunset(today, now, todaySunset)
+            val targetCal = if (targetDate != today)
+                buildCalendar(targetDate, cityName, lat, lon, elevation, zoneId) else todayCal
+            val (hebStr, translitStr) = getJewishDateStrings(targetDate, isIsrael)
             // Some phenomena are still computable in polar twilight, even when
             // sunrise or sunset is undefined. Do not hide surviving valid values.
             return DayZmanimResult(
-                date = today,
-                isNextJewishDayAfterSunset = false,
+                date = targetDate,
+                isNextJewishDayAfterSunset = targetDate != today,
                 jewishDateHebrew = hebStr,
                 jewishDateTranslit = translitStr,
                 isPolarAnomaly = true,
-                items = extractZmanim(todayCal, zoneId),
+                items = extractZmanim(targetCal, zoneId),
                 candleLighting = todaySunset?.minusMinutes(candleMinutesFor(cityName)),
                 tzeitShabbat = havdalahOf(todayCal, zoneId)
             )
