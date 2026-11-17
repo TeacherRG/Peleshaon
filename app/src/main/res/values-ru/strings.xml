@@ -163,4 +163,15 @@
     <string name="privacy_full">Полный текст на сайте →</string>
     <string name="hour_day">%d-й час дня</string>
     <string name="hour_night">%d-й час ночи</string>
+    <string name="cal_title">Еврейский календарь</string>
+    <string name="cal_prev">Прошлый месяц</string>
+    <string name="cal_next">Следующий месяц</string>
+    <string name="cal_today">К сегодняшнему дню</string>
+    <string name="cal_upcoming">Ближайшие даты</string>
+    <string name="cal_today_word">сегодня</string>
+    <string name="cal_tomorrow">завтра</string>
+    <string name="cal_in_days">через %d дн.</string>
+    <string name="cal_candles_after">Свечи — после выхода звёзд, не раньше</string>
+    <string name="cal_parsha">Глава недели: %s</string>
+    <string name="cal_hint">Нажмите на еврейскую дату вверху — откроется календарь: месяц, праздники, глава недели, времена любого дня.</string>
 </resources>

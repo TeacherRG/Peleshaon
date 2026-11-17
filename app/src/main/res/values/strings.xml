@@ -163,4 +163,15 @@
     <string name="privacy_full">Full text on the site →</string>
     <string name="hour_day">Hour %d of the day</string>
     <string name="hour_night">Hour %d of the night</string>
+    <string name="cal_title">Jewish calendar</string>
+    <string name="cal_prev">Previous month</string>
+    <string name="cal_next">Next month</string>
+    <string name="cal_today">Back to today</string>
+    <string name="cal_upcoming">Coming dates</string>
+    <string name="cal_today_word">today</string>
+    <string name="cal_tomorrow">tomorrow</string>
+    <string name="cal_in_days">in %d days</string>
+    <string name="cal_candles_after">Candles — after nightfall, not before</string>
+    <string name="cal_parsha">Torah portion: %s</string>
+    <string name="cal_hint">Tap the Jewish date at the top to open the calendar: the month, festivals, the Torah portion and the times of any day.</string>
 </resources>

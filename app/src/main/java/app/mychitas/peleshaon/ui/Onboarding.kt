@@ -197,6 +197,7 @@ private fun StepDial() {
     Title(R.string.ob3_t)
     LiveDial(Modifier.fillMaxWidth().height(230.dp))
     DialLegend()
+    Text("📅 " + stringResource(R.string.cal_hint), fontSize = 14.sp, lineHeight = 20.sp, color = ClockColors.Ink2)
 }
 
 /** Что на циферблате — образцы цвета и подписи. Есть и в справке «?». */

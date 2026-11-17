@@ -163,4 +163,15 @@
     <string name="privacy_full">הטקסט המלא באתר ←</string>
     <string name="hour_day">השעה ה־%d ביום</string>
     <string name="hour_night">השעה ה־%d בלילה</string>
+    <string name="cal_title">לוח עברי</string>
+    <string name="cal_prev">החודש הקודם</string>
+    <string name="cal_next">החודש הבא</string>
+    <string name="cal_today">להיום</string>
+    <string name="cal_upcoming">המועדים הקרובים</string>
+    <string name="cal_today_word">היום</string>
+    <string name="cal_tomorrow">מחר</string>
+    <string name="cal_in_days">בעוד %d ימים</string>
+    <string name="cal_candles_after">נרות — אחרי צאת הכוכבים, לא לפני</string>
+    <string name="cal_parsha">פרשת השבוע: %s</string>
+    <string name="cal_hint">הקישו על התאריך העברי למעלה — ייפתח הלוח: החודש, החגים, פרשת השבוע וזמני כל יום.</string>
 </resources>

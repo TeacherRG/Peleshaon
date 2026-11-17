@@ -163,4 +163,15 @@
     <string name="privacy_full">Vollständiger Text auf der Seite →</string>
     <string name="hour_day">%d. Stunde des Tages</string>
     <string name="hour_night">%d. Stunde der Nacht</string>
+    <string name="cal_title">Jüdischer Kalender</string>
+    <string name="cal_prev">Voriger Monat</string>
+    <string name="cal_next">Nächster Monat</string>
+    <string name="cal_today">Zu heute</string>
+    <string name="cal_upcoming">Nächste Termine</string>
+    <string name="cal_today_word">heute</string>
+    <string name="cal_tomorrow">morgen</string>
+    <string name="cal_in_days">in %d Tagen</string>
+    <string name="cal_candles_after">Kerzen — nach Nachteinbruch, nicht vor</string>
+    <string name="cal_parsha">Wochenabschnitt: %s</string>
+    <string name="cal_hint">Tippe oben auf das jüdische Datum — es öffnet sich der Kalender: Monat, Feiertage, Wochenabschnitt und die Zeiten jedes Tages.</string>
 </resources>
