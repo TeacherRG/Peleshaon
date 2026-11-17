@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">פלא שעון Beta</string>
+    <string name="app_name">פלא שעון</string>
     <string name="morning_alarm_title">שעון מעורר</string>
     <string name="torah_alarm_title">זמן ללמוד תורה</string>
     <string name="btn_stop">עצור</string>

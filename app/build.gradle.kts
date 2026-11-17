@@ -9,10 +9,10 @@ android {
     compileSdk = 35
 
     defaultConfig {
-        applicationId = "app.mychitas.peleshaon.beta"
+        applicationId = "app.mychitas.peleshaon"
         minSdk = 26
         targetSdk = 35
-        versionCode = 4
+        versionCode = 2
         versionName = "1.0.0-beta3"
     }
 

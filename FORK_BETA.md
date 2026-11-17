@@ -1,3 +1,5 @@
+> **Development branch history, not upstream package configuration.** The upstream integration retains the original application ID and name; see [UPSTREAM_INTEGRATION.md](UPSTREAM_INTEGRATION.md).
+
 # Peleshaon Beta3 — independent Android / Wear test build
 
 Source branch: `fixes/independent-beta`; independent package `app.mychitas.peleshaon.beta` on phone and watch.

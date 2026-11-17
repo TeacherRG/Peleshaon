@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">Pele Schaon Beta</string>
+    <string name="app_name">Pele Schaon</string>
     <string name="morning_alarm_title">Wecker</string>
     <string name="torah_alarm_title">Zeit zum Tora-Lernen</string>
     <string name="btn_stop">Stopp</string>

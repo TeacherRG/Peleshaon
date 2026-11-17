@@ -1,3 +1,5 @@
+> **Historical audit note:** This file records decisions made while developing the independent Beta3. On the integration branch the application ID and visible app label are restored to the original. For merge-specific status see [UPSTREAM_INTEGRATION.md](UPSTREAM_INTEGRATION.md).
+
 # Peleshaon Beta — remediation register (17 November 2026)
 
 Branch: `fixes/independent-beta` (never `main`). Source for this audit: `543abe294b1d94ba60374d8e909bbd7df26f2231`.

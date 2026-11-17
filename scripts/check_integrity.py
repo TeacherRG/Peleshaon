@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Offline source-tree integrity gate for the independent Peleshaon Beta fork."""
+"""Offline source-tree integrity gate for the original Peleshaon application."""
 from __future__ import annotations
 from pathlib import Path
 import sys
@@ -63,14 +63,14 @@ def main() -> None:
     check_format_args("wear")
     for module in ("app", "wear"):
         gradle = read(f"{module}/build.gradle.kts")
-        check('applicationId = "app.mychitas.peleshaon.beta"' in gradle,
-              f"{module}: unsafe applicationId, would overwrite original")
-        check("versionCode = 4" in gradle, f"{module}: unexpected version")
+        check('applicationId = "app.mychitas.peleshaon"' in gradle,
+              f"{module}: wrong applicationId (must match original)")
+        check("versionCode = 2" in gradle, f"{module}: unexpected version")
         manifest = ET.parse(ROOT / module / "src" / "main" / "AndroidManifest.xml")
         namespace = "{http://schemas.android.com/apk/res/android}"
         app = manifest.getroot().find("application")
-        check(app is not None and app.get(namespace + "label") == "Pele Shaon Beta",
-              f"{module}: Beta label missing")
+        check(app is not None and app.get(namespace + "label") == "@string/app_name",
+              f"{module}: expected resource-based original app label")
     engine = read("core/src/main/kotlin/app/mychitas/peleshaon/domain/ZmanimEngine.kt")
     check("ZmanType.SOF_ZMAN_SHMA to shmaFrom(cal)" in engine and
           "shmaFrom(cal(date, city))" in engine,
@@ -109,7 +109,7 @@ def main() -> None:
     check("selectedCommunity" in wear and "selectedCity" in wear,
           "Wear OS independent community/city selectors are missing")
     print(f"OK: phone {len(resources['values'])} keys, Wear {len(wear_resources['values'])} keys × {len(LOCALES)} languages")
-    print("OK: Beta package/manifest, Shma formula, alarm isolation, polar fallback")
+    print("OK: upstream package/manifest, Shma formula, alarm isolation, polar fallback")
 
 if __name__ == "__main__":
     try:
