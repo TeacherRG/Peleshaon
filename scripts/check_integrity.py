@@ -65,7 +65,7 @@ def main() -> None:
         gradle = read(f"{module}/build.gradle.kts")
         check('applicationId = "app.mychitas.peleshaon.beta"' in gradle,
               f"{module}: unsafe applicationId, would overwrite original")
-        check("versionCode = 3" in gradle, f"{module}: unexpected version")
+        check("versionCode = 4" in gradle, f"{module}: unexpected version")
         manifest = ET.parse(ROOT / module / "src" / "main" / "AndroidManifest.xml")
         namespace = "{http://schemas.android.com/apk/res/android}"
         app = manifest.getroot().find("application")
@@ -78,6 +78,11 @@ def main() -> None:
     guard = read("core/src/main/kotlin/app/mychitas/peleshaon/alarm/ShabbatGuard.kt")
     check("LocalTime.of(14, 0)" not in guard and "LocalTime.of(23, 0)" not in guard,
           "Invented polar quiet-time cutoffs reappeared")
+    prefs = read("app/src/main/java/app/mychitas/peleshaon/Prefs.kt")
+    check("fun migrateKashrut" in prefs and "remove(\"kashrut_hours\")" in prefs,
+          "Legacy configurable kashrut settings survived migration")
+    check("for (suffix in listOf(" in prefs and '.remove("wake_mode_$id")' in prefs,
+          "Custom alarms could inherit deleted settings")
     scheduler = read("app/src/main/java/app/mychitas/peleshaon/alarm/AlarmScheduler.kt")
     check("includeSnooze = true" in scheduler and "AlarmClockInfo(triggerMillis, showIntent)" in scheduler,
           "Alarm cancel/showIntent regression")

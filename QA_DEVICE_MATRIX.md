@@ -1,4 +1,4 @@
-# Peleshaon Beta2 — acceptance tests on real hardware
+# Peleshaon Beta3 — acceptance tests on real hardware
 
 These tests cannot be proven by compilation or JVM `core:test`. Test with the Beta installed **beside** the original; disable duplicate alarms in the original during the tests. Record Android build, OEM, device, timezone, language and time.
 
@@ -13,7 +13,7 @@ These tests cannot be proven by compilation or JVM `core:test`. Test with the Be
 | T07 | Regrant exact alarm permission | Replanning occurs, alarm survives reboot and package update |
 | T08 | Disable full-screen notifications on API 34+ | Alarm still exposes actionable notification, UI not claimed full-screen |
 | T09 | Set kashrut timer, delay delivery beyond deadline, open app | Overdue event not erased; no unexpected duplicate |
-| T10 | Let kashrut expire during Shabbat | Behavior recorded and passed to authority; do not infer religious policy |
+| T10 | Let six-hour kashrut timer expire during Shabbat | No sound; expiry preserved and shown only after Shabbat |
 | T11 | Set 18, 20, 30, 40 and local city defaults | Correct candle times and alarm quiet interval |
 | T12 | Compare Shabbat havdalah in calendar, home and alarm for all 3 traditions | No conflicting time displays |
 | T13 | Friday Yom-Tov followed by Shabbat and consecutive holy days | Friday uses before-sunset candle transition; other day-to-day transitions after nightfall |
@@ -32,5 +32,13 @@ These tests cannot be proven by compilation or JVM `core:test`. Test with the Be
 | T26 | Run sound-and-light / sound-only / light-only with DND/Bluetooth | Correct focus, vibration and screen |
 | T27 | Verify full-screen session actions from old notifications | Stale STOP/SNOOZE cannot control a newer alarm |
 | T28 | Verify Beta and original side by side | Separate app ID, prefs, notifications, visible Beta name |
+
+| T29 | Start a test ring during Shabbat and on Yom Tov | No sound, vibration, or forced screen wake |
+| T30 | Trigger a ring one second before Friday quiet start | Active sound ends before the boundary; queued alarms remain silent |
+| T31 | Change early Friday silence to 15/30/45/60 minutes | No ring after chosen early boundary; candle time itself unchanged |
+| T32 | Upgrade an old active 1/3/5/6-hour kashrut timer | Unknown legacy deadline invalidated, user prompted to start exactly six hours |
+| T33 | Remove and recreate custom C1 with former vibration and time settings | Clean default time, days, wake mode and vibration |
+| T34 | Set system timezone without any matching city | No scheduled sound until a city is explicitly selected; clear localized warning |
+| T35 | Check phone and Wear on en/ru/uk/de/he including Hebrew RTL | All new descriptions and warnings localized, no clipped critical controls |
 
 No test is marked PASS until it is actually performed. Report date/time, screenshots/logcat, APK SHA and device model for failures.

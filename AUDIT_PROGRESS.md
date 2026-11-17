@@ -14,7 +14,7 @@ This register merges the supplied neighboring-chat audit, the prior Beta defect 
 | P0-02 all cities 18 min | FIXED_SOURCE + HALAKHIC_REVIEW | `ZmanimEngine.candleMinutesFor`, Jerusalem 40m, Haifa 30m, otherwise 18m by default; explicit user override 18/20/30/40 minutes controls alarm quiet window as well. Local minhag may differ |
 | P0-03 inconsistent havdalah | FIXED_SOURCE | Calendar uses `ZmanimEngine.havdalahOn` for selected tradition instead of adding 50 minutes |
 | P1-03 Kiddush Levana during twilight | FIXED_SOURCE + HALAKHIC_REVIEW | Require selected `TZAIT` before showing eligibility. Exact communal rules still require review |
-| P1-09 fixed kashrut six-hour wait | FIXED_SOURCE + HALAKHIC_REVIEW | User selects 1/3/5/6 hours; not labeled as universal permission |
+| P1-09 fixed kashrut six-hour wait | BETA3_SOURCE + DEVICE_PENDING | Strict six-hour clock only; clear legacy in-flight deadlines; no customizable shortcut |
 | P1-10 tradition definitions | HALAKHIC_REVIEW | Preserve existing CHABAD/LITVISH/SEFARDI formulas; a qualified authority must approve each event-specific method; no automatic KosherJava major-version migration |
 
 References: https://www.hebcal.com/home/4463/candle-lighting-havdalah-fast-times and https://www.ou.org/life/torah/eruv-tavshilin-primer/.
@@ -60,7 +60,7 @@ References: https://www.hebcal.com/home/4463/candle-lighting-havdalah-fast-times
 - P1-05 phone vs Wear: independent watch preferences implemented (accepted alternative), **not live device-to-device synchronization**.
 - P1-06 exact alarms: fallback cannot promise punctual sound.
 - P1-07 simultaneous alarms: queue and session guard; full-screen and notification actions require real-device tests.
-- P1-08 one-shot kashrut during Shabbat: behavior intentionally unchanged pending product/halakhic choice; no silent invented rule.
+- P1-08 one-shot kashrut during Shabbat: expiry saved as deferred status with no audible reminder; verify after-Shabbat UI on device.
 - P2-01 Adar I/II: `CalEvent.leap` now passes through `jewishMonthOnly`.
 - P2-02 Wear Ukrainian strings: `wear/src/main/res/values-uk/strings.xml` added.
 - P2-03 widgets: heavy bitmap work moved off main thread, performance not measured on OEM.
@@ -81,3 +81,7 @@ Verified on Android/Wear devices: **NO**.
 Halakhic correctness of all communal rules: **NOT CERTIFIED**.
 
 See `QA_DEVICE_MATRIX.md` and `FORK_BETA.md` before using the alarm for important wake-ups.
+
+## Beta3 execution status (2026-11-17)
+
+Source patches were committed in small auditable batches: ShabbatGuard / fail-closed end, direct ringing service guard and timed cutoff, six-hour meat-to-dairy policy, clean custom-alarm state and FIFO capacity, phone/Wear changes, and 5-language strings. JVM regression tests added for exact boundaries, early Friday silence, queue capacity, migrated kashrut and known-sunset polar date. Source compilation is **NOT CLAIMED** until a new CI run is green; real-device behavior remains **DEVICE_PENDING**. No upstream merge.

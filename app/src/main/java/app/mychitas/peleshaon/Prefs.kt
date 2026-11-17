@@ -156,7 +156,13 @@ object Prefs {
     }
 
     fun removeCustomAlarm(context: Context, id: String) {
-        of(context).edit().putString("custom_alarms", customAlarms(context).filter { it != id }.joinToString(",")).apply()
+        val key = prefix(id)
+        val editor = of(context).edit()
+            .putString("custom_alarms", customAlarms(context).filter { it != id }.joinToString(","))
+            .remove("chm_$id").remove("wake_mode_$id").remove("vibrate_$id")
+        for (suffix in listOf("enabled", "by_shma", "hour", "minute", "offset_shma", "days"))
+            editor.remove("${key}_$suffix")
+        editor.apply()
     }
 
     /** Номер будильника для подписи: «Будильник 2» (основной — первый). */
