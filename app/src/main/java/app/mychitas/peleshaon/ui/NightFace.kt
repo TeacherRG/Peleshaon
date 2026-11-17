@@ -12,10 +12,11 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import app.mychitas.peleshaon.Prefs
+import app.mychitas.peleshaon.R
 import app.mychitas.peleshaon.domain.Dial
-import app.mychitas.peleshaon.domain.ZmanType
 import app.mychitas.peleshaon.domain.ZmanimEngine
 import kotlinx.coroutines.delay
 import java.time.ZonedDateTime
@@ -43,21 +44,17 @@ fun NightFace(modifier: Modifier = Modifier) {
     val zone = city.zone()
     val cityNow = now.withZoneSameInstant(zone)
     val minute = cityNow.truncatedTo(ChronoUnit.MINUTES)
-    val day = remember(minute) {
-        ZmanimEngine.calculateForMoment(cityNow, city.name, city.lat, city.lon, 0.0, zone, city.isIsrael)
+    val half = remember(minute) { ZmanimEngine.halfOf(cityNow, city) }
+    val events = remember(half) {
+        faceEvents(half, half?.let { ZmanimEngine.halfItems(it, city) } ?: emptyList(), ZmanimEngine.shabbatOf(cityNow, city), marks)
     }
-    val events = remember(day) {
-        day.items.map { FaceEvent(it.type.name, it.roundedTime, zmanColor(it.type), it.type in marks) }
-    }
-    val ring = Dial.ring(
-        cityNow, zone,
-        day.time(ZmanType.SUNRISE)?.exactTime, day.time(ZmanType.SUNSET)?.exactTime,
-        day.time(ZmanType.ALOT)?.exactTime, day.time(ZmanType.TZAIT)?.exactTime
-    )
+    val ring = Dial.ring(cityNow, half)
+    val hourLabel = half?.let { stringResource(if (it.day) R.string.hour_day else R.string.hour_night, it.hour(cityNow)) }
     Box(modifier = modifier) {
         BigFace(
-            now = cityNow, zone = zone, ring = ring, events = events, active = null, tziruf = tziruf,
-            modifier = Modifier.fillMaxSize().padding(24.dp).offset(shift.first.dp, shift.second.dp)
+            now = cityNow, zone = zone, half = half, ring = ring, events = events, active = null, tziruf = tziruf,
+            modifier = Modifier.fillMaxSize().padding(24.dp).offset(shift.first.dp, shift.second.dp),
+            hourLabel = hourLabel
         )
     }
 }

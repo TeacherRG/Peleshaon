@@ -143,7 +143,7 @@ private fun Body(text: String) {
 private fun LiveDial(modifier: Modifier) {
     val context = LocalContext.current
     val s = remember { LiveState.of(context) }
-    BigFace(now = s.now, zone = s.city.zone(), ring = s.ring, events = s.events, active = null, tziruf = false, modifier = modifier)
+    BigFace(now = s.now, zone = s.city.zone(), half = s.half, ring = s.ring, events = s.events, active = null, tziruf = false, modifier = modifier)
 }
 
 @Composable

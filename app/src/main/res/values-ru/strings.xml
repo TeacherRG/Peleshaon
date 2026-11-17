@@ -161,4 +161,6 @@
     <string name="privacy_3">Город, будильники и настройки хранятся только на телефоне. Если включено резервное копирование Android, система может сохранить их в ваш аккаунт Google.</string>
     <string name="privacy_4">Местоположение не запрашивается: город — по часовому поясу или по вашему выбору.</string>
     <string name="privacy_full">Полный текст на сайте →</string>
+    <string name="hour_day">%d-й час дня</string>
+    <string name="hour_night">%d-й час ночи</string>
 </resources>

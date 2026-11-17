@@ -22,6 +22,7 @@ import app.mychitas.peleshaon.R
 import app.mychitas.peleshaon.domain.CityOption
 import app.mychitas.peleshaon.domain.DayZmanimResult
 import app.mychitas.peleshaon.domain.Dial
+import app.mychitas.peleshaon.domain.Half
 import app.mychitas.peleshaon.domain.Ring
 import app.mychitas.peleshaon.domain.ZmanType
 import app.mychitas.peleshaon.domain.ZmanimEngine
@@ -29,17 +30,19 @@ import app.mychitas.peleshaon.ui.FaceEvent
 import app.mychitas.peleshaon.ui.faceEvents
 import app.mychitas.peleshaon.ui.full
 import app.mychitas.peleshaon.ui.isDeadline
+import app.mychitas.peleshaon.ui.jewishDayMonth
 import app.mychitas.peleshaon.ui.renderFace
 import app.mychitas.peleshaon.ui.short
 import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
 import java.util.Locale
 
-/** Что сейчас: город, времена показанного дня, кольцо, точки и ближайшее время. */
+/** Что сейчас: город, времена показанного дня, половина суток, кольцо, точки и ближайшее время. */
 class LiveState(
     val city: CityOption,
     val now: ZonedDateTime,
     val day: DayZmanimResult,
+    val half: Half?,
     val ring: Ring?,
     val events: List<FaceEvent>,
     val next: FaceEvent?
@@ -51,19 +54,28 @@ class LiveState(
             val now = at.withZoneSameInstant(zone)
             val day = ZmanimEngine.calculateForMoment(now, city.name, city.lat, city.lon, 0.0, zone, city.isIsrael)
             val sh = ZmanimEngine.shabbatOf(now, city)
-            val ring = Dial.ring(
-                now, zone,
-                day.time(ZmanType.SUNRISE)?.exactTime, day.time(ZmanType.SUNSET)?.exactTime,
-                day.time(ZmanType.ALOT)?.exactTime, day.time(ZmanType.TZAIT)?.exactTime
-            )
-            val events = faceEvents(day, sh, Prefs.marks(context), now)
+            // циферблат — половина суток: 12 часов дня или ночи
+            val half = ZmanimEngine.halfOf(now, city)
+            val items = half?.let { ZmanimEngine.halfItems(it, city) } ?: emptyList()
+            val ring = Dial.ring(now, half)
+            val events = faceEvents(half, items, sh, Prefs.marks(context))
             val next = events.filter { it.at.isAfter(now) }.minByOrNull { it.at }
-            return LiveState(city, now, day, ring, events, next)
+            return LiveState(city, now, day, half, ring, events, next)
         }
     }
 }
 
 private val HHMM: DateTimeFormatter = DateTimeFormatter.ofPattern("HH:mm")
+
+/** «7 кислева 5787» — еврейская дата, день числом. */
+private fun dateLine(s: LiveState): String {
+    val jd = ZmanimEngine.jewishDay(s.day.date, s.city.isIsrael)
+    return "${jewishDayMonth(jd)} ${jd.year}"
+}
+
+/** «4-й час дня». */
+private fun hourLabel(context: Context, s: LiveState): String? =
+    s.half?.let { context.getString(if (it.day) R.string.hour_day else R.string.hour_night, it.hour(s.now)) }
 
 /**
  * Виджеты и уведомление «Ближайшее время». Обратный отсчёт и время в них идут сами (Chronometer, TextClock),
@@ -143,13 +155,13 @@ object Live {
         val opts = AppWidgetManager.getInstance(context).getAppWidgetOptions(widgetId)
         val dp = maxOf(opts.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_WIDTH, 200), opts.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_HEIGHT, 200))
         val px = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, dp.toFloat(), context.resources.displayMetrics).toInt().coerceIn(360, 720)
-        v.setImageViewBitmap(R.id.w_face, renderFace(px, s.now, s.city.zone(), s.ring, s.events, Prefs.tziruf(context)))
+        v.setImageViewBitmap(R.id.w_face, renderFace(px, s.now, s.city.zone(), s.half, s.ring, s.events, Prefs.tziruf(context)))
         v.clocks(context, s, R.id.w_time)
         val e = s.next
         v.setTextViewText(R.id.w_next, e?.let { context.getString(short(it.id)) + " " + it.at.withZoneSameInstant(s.city.zone()).format(HHMM) } ?: "")
         v.countdown(R.id.w_count, context, e, s)
-        v.setTextViewText(R.id.w_date, s.day.jewishDateHebrew)
-        v.setTextViewText(R.id.w_city, s.city.title(Locale.getDefault()))
+        v.setTextViewText(R.id.w_date, dateLine(s))
+        v.setTextViewText(R.id.w_city, listOfNotNull(hourLabel(context, s), s.city.title(Locale.getDefault())).joinToString(" · "))
         v.setOnClickPendingIntent(R.id.w_root, openApp(context))
         return v
     }
@@ -161,7 +173,7 @@ object Live {
         val e = s.next
         v.setTextViewText(R.id.w_next, e?.let { nextTitle(context, it, s) } ?: context.getString(R.string.polar_short))
         v.countdown(R.id.w_count, context, e, s)
-        v.setTextViewText(R.id.w_date, s.day.jewishDateHebrew + " · " + s.city.title(Locale.getDefault()))
+        v.setTextViewText(R.id.w_date, dateLine(s) + " · " + s.city.title(Locale.getDefault()))
         v.setOnClickPendingIntent(R.id.w_root, openApp(context))
         return v
     }
@@ -182,7 +194,7 @@ object Live {
         val b = NotificationCompat.Builder(context, CHANNEL)
             .setSmallIcon(R.drawable.ic_stat_clock)
             .setContentTitle(e?.let { nextTitle(context, it, s) } ?: context.getString(R.string.polar_short))
-            .setContentText(s.day.jewishDateHebrew + " · " + s.city.title(Locale.getDefault()))
+            .setContentText(dateLine(s) + " · " + s.city.title(Locale.getDefault()))
             .setOngoing(true)
             .setOnlyAlertOnce(true)
             .setSilent(true)

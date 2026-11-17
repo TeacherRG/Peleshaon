@@ -142,14 +142,16 @@ fun ClockScreen(onNightScreen: () -> Unit, onIntro: () -> Unit = {}) {
         ZmanimEngine.calculateForMoment(cityNow, city.name, city.lat, city.lon, 0.0, zone, city.isIsrael)
     }
     val sh = remember(city, minute) { ZmanimEngine.shabbatOf(cityNow, city) }
-    val ring = Dial.ring(
-        cityNow, zone,
-        day.time(ZmanType.SUNRISE)?.exactTime, day.time(ZmanType.SUNSET)?.exactTime,
-        day.time(ZmanType.ALOT)?.exactTime, day.time(ZmanType.TZAIT)?.exactTime
-    )
+    // циферблат — половина суток: 12 галахических часов дня или ночи (владелец, 17.11.2026)
+    val half = remember(city, minute) { ZmanimEngine.halfOf(cityNow, city) }
+    val halfItems = remember(half, city) { half?.let { ZmanimEngine.halfItems(it, city) } ?: emptyList() }
+    val ring = Dial.ring(cityNow, half)
+    val hourLabel = half?.let { stringResource(if (it.day) R.string.hour_day else R.string.hour_night, it.hour(cityNow)) }
+    // еврейская дата — день обычным числом, крупно
+    val jd = remember(day.date, city) { ZmanimEngine.jewishDay(day.date, city.isIsrael) }
 
-    // точки циферблата: все времена показанного дня; свечи и исход — когда до них меньше суток
-    val events = remember(day, sh, marks, minute) { faceEvents(day, sh, marks, cityNow) }
+    // точки циферблата: времена этой половины суток; свечи и исход — если они в ней
+    val events = remember(half, halfItems, sh, marks) { faceEvents(half, halfItems, sh, marks) }
 
     val wdTime = { at: ZonedDateTime ->
         "${at.withZoneSameInstant(zone).dayOfWeek.getDisplayName(TextStyle.SHORT, locale)} ${at.withZoneSameInstant(zone).format(HHMM)}"
@@ -177,8 +179,20 @@ fun ClockScreen(onNightScreen: () -> Unit, onIntro: () -> Unit = {}) {
                     Text("▾", fontSize = 12.sp, color = ClockColors.TcheletDeep)
                 }
                 Column(modifier = Modifier.weight(1f).padding(horizontal = 6.dp), horizontalAlignment = Alignment.CenterHorizontally) {
-                    Text(dayText(cityNow.toLocalDate()), color = ClockColors.Ink2, fontSize = 13.sp, textAlign = TextAlign.Center, maxLines = 1, overflow = TextOverflow.Ellipsis)
-                    Text(day.jewishDateHebrew, color = ClockColors.Ink, fontSize = 15.sp, textAlign = TextAlign.Center)
+                    // «7 кислева 5787» крупно; ниже — буквами и гражданская дата
+                    Row(verticalAlignment = Alignment.Bottom) {
+                        Text("${jd.day}", color = ClockColors.GoldDeep, fontSize = 28.sp, fontWeight = FontWeight.ExtraBold, lineHeight = 30.sp)
+                        Spacer(Modifier.width(5.dp))
+                        Text(
+                            jewishMonthName(jd, locale) + "  " + jd.year,
+                            color = ClockColors.GoldDeep, fontSize = 18.sp, fontWeight = FontWeight.Bold,
+                            maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.padding(bottom = 3.dp)
+                        )
+                    }
+                    Text(
+                        day.jewishDateHebrew + " · " + cityNow.format(DateTimeFormatter.ofPattern("EEE, d MMMM", locale)),
+                        color = ClockColors.Ink2, fontSize = 12.sp, textAlign = TextAlign.Center, maxLines = 1, overflow = TextOverflow.Ellipsis
+                    )
                     if (day.isNextJewishDayAfterSunset) Text(stringResource(R.string.evening), color = ClockColors.Muted, fontSize = 11.sp, textAlign = TextAlign.Center)
                 }
                 Chip(onClick = { panel = Panel.INFO }, round = true) {
@@ -194,11 +208,13 @@ fun ClockScreen(onNightScreen: () -> Unit, onIntro: () -> Unit = {}) {
                 BigFace(
                     now = cityNow,
                     zone = zone,
+                    half = half,
                     ring = ring,
                     events = events,
                     active = pop?.first,
                     tziruf = tziruf,
                     modifier = Modifier.fillMaxSize(),
+                    hourLabel = hourLabel,
                     onPick = { id, fx, fy -> pop = if (id == null || pop?.first == id) null else Triple(id, fx, fy) }
                 )
                 val p = pop
