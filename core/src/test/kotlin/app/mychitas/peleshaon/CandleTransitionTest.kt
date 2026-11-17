@@ -32,6 +32,22 @@ class CandleTransitionTest {
         assertEquals(CandleTransition.BEFORE_SUNSET, JewishCal.candleTransition(found, false))
     }
 
+    @Test fun leapYearMevarchimCarriesNewMonthIdentity() {
+        val first = LocalDate.of(2026, 1, 3)
+        val sample = (0L..250L).map { first.plusWeeks(it) }
+            .firstOrNull { date ->
+                JewishCal.day(date, false).events.any { e ->
+                    e.key == "mevarchim" && e.leap && e.n == 12
+                }
+            }
+        val found = assertNotNull(sample, "A leap-year Adar I is present in the sample")
+        val event = assertNotNull(JewishCal.day(found, false).events.firstOrNull {
+            it.key == "mevarchim"
+        })
+        assertTrue(event.leap)
+        assertEquals(12, event.n)
+    }
+
     @Test fun ordinaryFridayIsBeforeSunset() {
         val friday = LocalDate.of(2026, 11, 20)
         assertEquals(CandleTransition.BEFORE_SUNSET, JewishCal.candleTransition(friday, false))
