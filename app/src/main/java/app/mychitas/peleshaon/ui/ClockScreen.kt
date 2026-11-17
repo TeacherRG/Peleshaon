@@ -748,6 +748,7 @@ private fun TimesSheet(
             Text(stringResource(R.string.tziruf), color = ClockColors.Ink, fontWeight = FontWeight.SemiBold)
         }
         if (tziruf) Note(stringResource(R.string.tziruf_note))
+        TzirufMore()
         HorizontalDivider(color = ClockColors.Line)
         var live by remember { mutableStateOf(Live.notificationOn(context)) }
         Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.clickable { live = !live; Live.setNotification(context, live) }) {
@@ -772,6 +773,7 @@ private fun InfoSheet(onNightScreen: () -> Unit, onIntro: () -> Unit, onPrivacy:
         Note(stringResource(R.string.note))
         Note(stringResource(R.string.shabbat_note))
         Note(stringResource(R.string.alarm_note))
+        TzirufMore()
         Button(onClick = onNightScreen, colors = ButtonDefaults.buttonColors(containerColor = ClockColors.Surface)) {
             Text("🌙  " + stringResource(R.string.night_screen), color = ClockColors.Ink)
         }
@@ -847,4 +849,16 @@ private fun PrivacySheet() {
         }
         Note(stringResource(R.string.about_mail))
     }
+}
+
+/** «Что такое сочетание Имени?» — раскрывается нажатием: число сочетаний, источники, порядок на часах, как смотреть. */
+@Composable
+private fun TzirufMore() {
+    var open by remember { mutableStateOf(false) }
+    Text(
+        (if (open) "▾ " else "▸ ") + stringResource(R.string.tziruf_more),
+        color = ClockColors.Gold, fontWeight = FontWeight.SemiBold,
+        modifier = Modifier.clickable { open = !open }.padding(vertical = 6.dp)
+    )
+    if (open) for (p in stringResource(R.string.tziruf_more_body).split("\n\n")) Note(p)
 }
