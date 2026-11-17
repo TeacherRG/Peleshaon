@@ -24,21 +24,35 @@ class AlarmRingService : Service() {
     private val scope = CoroutineScope(Dispatchers.Main + SupervisorJob())
     private var mediaPlayer: MediaPlayer? = null
     private var vibrator: Vibrator? = null
+    // Only one alarm may control the foreground service; stale notification actions are ignored.
+    private var activeSession: String? = null
+    private var activeType: String? = null
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         if (intent?.action == ACTION_STOP) {
-            stopSelf()
+            if (matchesSession(intent)) stopSelf()
             return START_NOT_STICKY
         }
         if (intent?.action == ACTION_SNOOZE) {
-            val type = intent.getStringExtra(AlarmScheduler.EXTRA_ALARM_TYPE) ?: "MORNING"
-            AlarmScheduler.scheduleExactAlarm(this, java.time.ZonedDateTime.now().plusMinutes(5), type, isSnooze = true)
-            stopSelf()
+            if (matchesSession(intent)) {
+                val type = activeType ?: return START_NOT_STICKY
+                AlarmScheduler.scheduleExactAlarm(this, java.time.ZonedDateTime.now().plusMinutes(5), type, isSnooze = true)
+                stopSelf()
+            }
             return START_NOT_STICKY
         }
 
         val alarmType = intent?.getStringExtra(AlarmScheduler.EXTRA_ALARM_TYPE) ?: "MORNING"
         val test = intent?.getBooleanExtra(AlarmScheduler.EXTRA_TEST, false) == true
+        // A user-triggered sound test cannot interrupt a real ringing alarm.
+        if (test && activeSession != null) return START_NOT_STICKY
+        if (activeSession != null) {
+            activeType?.let { showMissedNotification(alarmTitle(this, it)) }
+            stopRing()
+        }
+        val token = java.util.UUID.randomUUID().toString()
+        activeSession = token
+        activeType = alarmType
         val prefs = getSharedPreferences("pele_prefs", Context.MODE_PRIVATE)
         val wakeModeName = prefs.getString("wake_mode_$alarmType", WakeMode.SOUND_AND_LIGHT.name)
         val wakeMode = runCatching { WakeMode.valueOf(wakeModeName ?: "") }
@@ -52,6 +66,8 @@ class AlarmRingService : Service() {
             putExtra(AlarmScheduler.EXTRA_ALARM_TYPE, alarmType)
             putExtra("wake_mode", wakeMode.name)
             putExtra(AlarmScheduler.EXTRA_TEST, test)
+            putExtra(EXTRA_SESSION, token)
+            action = "app.mychitas.peleshaon.RING_$token"
         }
         val fullScreenPendingIntent = PendingIntent.getActivity(
             this, 2001, fullScreenIntent,
@@ -61,7 +77,12 @@ class AlarmRingService : Service() {
         val title = alarmTitle(this, alarmType)
         // окно звонка смахнули — выключить можно и из уведомления
         fun action(act: String, code: Int) = PendingIntent.getService(
-            this, code, Intent(this, AlarmRingService::class.java).setAction(act).putExtra(AlarmScheduler.EXTRA_ALARM_TYPE, alarmType),
+            this, code,
+            Intent(this, AlarmRingService::class.java)
+                .setAction(act)
+                .setData(android.net.Uri.parse("peleshaon://alarm/$token/$code"))
+                .putExtra(AlarmScheduler.EXTRA_ALARM_TYPE, alarmType)
+                .putExtra(EXTRA_SESSION, token),
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
 
@@ -93,47 +114,58 @@ class AlarmRingService : Service() {
 
         scope.launch {
             delay(3 * 60 * 1000L)
-            showMissedNotification(title)
-            stopSelf()
+            if (activeSession == token) {
+                showMissedNotification(title)
+                stopSelf()
+            }
         }
 
         return START_NOT_STICKY
     }
 
     private fun startCrescendoAudio() {
-        // Мелодия будильника может быть не задана или недоступна — пробуем по очереди.
+        // prepare() may read a slow ringtone provider; never block the service main thread.
         val uris = listOfNotNull(
             RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM),
             RingtoneManager.getDefaultUri(RingtoneManager.TYPE_RINGTONE),
             RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION)
         )
-        for (uri in uris) {
-            val player = MediaPlayer()
-            try {
-                player.setDataSource(applicationContext, uri)
-                player.setAudioAttributes(
-                    AudioAttributes.Builder()
-                        .setUsage(AudioAttributes.USAGE_ALARM)
-                        .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
-                        .build()
-                )
-                player.isLooping = true
-                player.setVolume(0.05f, 0.05f)
-                player.prepare()
-                player.start()
-                mediaPlayer = player
-                break
-            } catch (e: Exception) {
-                player.release()
-            }
-        }
-        if (mediaPlayer == null) return
-
         scope.launch {
-            for (step in 1..30) {
-                delay(1000L)
-                val vol = (step / 30f).coerceIn(0.05f, 1.0f)
-                mediaPlayer?.setVolume(vol, vol)
+            for (uri in uris) {
+                val player = MediaPlayer()
+                try {
+                    withContext(Dispatchers.IO) {
+                        player.setDataSource(applicationContext, uri)
+                        player.setAudioAttributes(
+                            AudioAttributes.Builder()
+                                .setUsage(AudioAttributes.USAGE_ALARM)
+                                .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
+                                .build()
+                        )
+                        player.isLooping = true
+                        player.setVolume(0.05f, 0.05f)
+                        player.prepare()
+                    }
+                    if (!isActive) {
+                        player.release()
+                        return@launch
+                    }
+                    mediaPlayer = player
+                    player.start()
+                    for (step in 1..30) {
+                        delay(1000L)
+                        if (mediaPlayer !== player) break
+                        val vol = (step / 30f).coerceIn(0.05f, 1.0f)
+                        player.setVolume(vol, vol)
+                    }
+                    return@launch
+                } catch (cancelled: CancellationException) {
+                    runCatching { player.release() }
+                    throw cancelled
+                } catch (_: Exception) {
+                    if (mediaPlayer === player) mediaPlayer = null
+                    runCatching { player.release() }
+                }
             }
         }
     }
@@ -187,11 +219,24 @@ class AlarmRingService : Service() {
         super.onTaskRemoved(rootIntent)
     }
 
-    override fun onDestroy() {
-        scope.cancel()
-        mediaPlayer?.stop()
-        mediaPlayer?.release()
+    private fun matchesSession(intent: Intent): Boolean =
+        activeSession != null && intent.getStringExtra(EXTRA_SESSION) == activeSession
+
+    private fun stopRing() {
+        scope.coroutineContext.cancelChildren()
+        mediaPlayer?.let { player ->
+            runCatching { player.stop() }
+            runCatching { player.release() }
+        }
+        mediaPlayer = null
         vibrator?.cancel()
+    }
+
+    override fun onDestroy() {
+        stopRing()
+        scope.cancel()
+        activeSession = null
+        activeType = null
         super.onDestroy()
     }
 
@@ -199,6 +244,7 @@ class AlarmRingService : Service() {
 
     companion object {
         const val CHANNEL_ID = "pele_alarm_channel"
+        const val EXTRA_SESSION = "alarm_session"
         const val ACTION_STOP = "app.mychitas.peleshaon.STOP_ALARM"
         const val ACTION_SNOOZE = "app.mychitas.peleshaon.SNOOZE_ALARM"
     }

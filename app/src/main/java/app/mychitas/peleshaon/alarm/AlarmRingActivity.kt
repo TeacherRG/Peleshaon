@@ -137,13 +137,7 @@ class AlarmRingActivity : ComponentActivity() {
                     // «Проверить звук» — без «Отложить»
                     if (!test) OutlinedButton(
                         onClick = {
-                            AlarmScheduler.scheduleExactAlarm(
-                                context = this@AlarmRingActivity,
-                                triggerTime = ZonedDateTime.now().plusMinutes(5),
-                                alarmType = alarmType,
-                                isSnooze = true
-                            )
-                            stopAlarm()
+                            controlAlarm(AlarmRingService.ACTION_SNOOZE)
                         },
                         modifier = Modifier.fillMaxWidth().height(52.dp)
                     ) {
@@ -167,10 +161,17 @@ class AlarmRingActivity : ComponentActivity() {
         }
     }
 
-    private fun stopAlarm() {
-        stopService(Intent(this, AlarmRingService::class.java))
+    private fun controlAlarm(action: String) {
+        // Direct stopService would allow an outdated Activity to stop a newer alarm.
+        startService(
+            Intent(this, AlarmRingService::class.java).setAction(action)
+                .putExtra(AlarmRingService.EXTRA_SESSION, intent.getStringExtra(AlarmRingService.EXTRA_SESSION))
+                .putExtra(AlarmScheduler.EXTRA_ALARM_TYPE, intent.getStringExtra(AlarmScheduler.EXTRA_ALARM_TYPE))
+        )
         finish()
     }
+
+    private fun stopAlarm() = controlAlarm(AlarmRingService.ACTION_STOP)
 
     /** После «Стоп» — на главный экран приложения (владелец, 18.11.2026). */
     private fun goHome() {
@@ -178,6 +179,12 @@ class AlarmRingActivity : ComponentActivity() {
             Intent(this, app.mychitas.peleshaon.MainActivity::class.java)
                 .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP)
         )
+    }
+
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        setIntent(intent)
+        recreate()
     }
 
     private fun openUrl(url: String) {
