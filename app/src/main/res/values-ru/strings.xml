@@ -118,8 +118,8 @@
     <string name="polar_short">Сегодня нет восхода и заката</string>
     <string name="widget_face_name">Пеле Шаон — циферблат дня</string>
     <string name="widget_date_name">Пеле Шаон — еврейская дата</string>
-    <string name="widget_face_desc">Кольцо дня со всеми временами, ближайшее время и отсчёт до него</string>
-    <string name="widget_date_desc">Еврейская дата: день числом, месяц и год; после заката — уже следующий день</string>
+    <string name="widget_face_desc">Кольцо дня со всеми временами, время и еврейская дата</string>
+    <string name="widget_date_desc">Еврейская дата: день числом, месяц и день недели; после заката — уже следующий день</string>
     <string name="live_notif">Ближайшее время в уведомлении</string>
     <string name="live_notif_note">Тихое уведомление с отсчётом до ближайшего времени дня. Видно на экране блокировки, а на многих телефонах — значком на выключенном экране («Всегда на экране»).</string>
     <string name="ob_skip">Пропустить</string>

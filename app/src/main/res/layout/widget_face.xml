@@ -3,7 +3,7 @@
     android:id="@+id/w_root"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@drawable/widget_bg"
+    android:background="@android:color/transparent"
     android:padding="8dp">
 
     <LinearLayout
@@ -41,20 +41,14 @@
                     android:textSize="28sp"
                     android:textStyle="bold" />
 
-                <TextView
-                    android:id="@+id/w_next"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:maxLines="1"
-                    android:textColor="#E2BF72"
-                    android:textSize="12sp"
-                    android:textStyle="bold" />
-
             </LinearLayout>
         </FrameLayout>
 
         <TextView
             android:id="@+id/w_date"
+            android:shadowColor="#99000000"
+            android:shadowDy="1"
+            android:shadowRadius="4"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:gravity="center"
@@ -62,14 +56,5 @@
             android:textColor="#E2BF72"
             android:textSize="17sp"
             android:textStyle="bold" />
-
-        <TextView
-            android:id="@+id/w_city"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:gravity="center"
-            android:maxLines="1"
-            android:textColor="#9AA4C4"
-            android:textSize="11sp" />
     </LinearLayout>
 </FrameLayout>
