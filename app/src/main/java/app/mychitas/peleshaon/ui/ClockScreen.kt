@@ -178,9 +178,16 @@ fun ClockScreen(onNightScreen: () -> Unit, onIntro: () -> Unit = {}) {
                     Text(city.title(locale), maxLines = 1, overflow = TextOverflow.Ellipsis, fontWeight = FontWeight.Bold, fontSize = 14.sp, color = ClockColors.Ink)
                     Text("▾", fontSize = 12.sp, color = ClockColors.TcheletDeep)
                 }
-                Column(
+                // дата — полупрозрачной плашкой, как кнопка города: видно, что она нажимается (открывает календарь)
+                Surface(
+                    onClick = { panel = Panel.CALENDAR },
+                    shape = RoundedCornerShape(16.dp),
+                    color = ClockColors.Surface,
+                    border = BorderStroke(1.dp, ClockColors.Line),
                     modifier = Modifier.weight(1f).padding(horizontal = 6.dp)
-                        .clickable(onClickLabel = stringResource(R.string.cal_title)) { panel = Panel.CALENDAR },
+                ) {
+                Column(
+                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     // «7 кислева 5787» крупно; ниже — буквами и гражданская дата; нажатие — календарь
@@ -191,14 +198,16 @@ fun ClockScreen(onNightScreen: () -> Unit, onIntro: () -> Unit = {}) {
                         Text(
                             jewishMonthName(jd, locale) + "  " + jd.year,
                             color = ClockColors.GoldDeep, fontSize = 18.sp, fontWeight = FontWeight.Bold,
-                            maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.padding(bottom = 3.dp)
+                            maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.weight(1f, fill = false).padding(bottom = 3.dp)
                         )
+                        Text(" ▾", fontSize = 12.sp, color = ClockColors.TcheletDeep, modifier = Modifier.padding(bottom = 5.dp))
                     }
                     Text(
                         day.jewishDateHebrew + " · " + cityNow.format(DateTimeFormatter.ofPattern("EEE, d MMMM", locale)),
                         color = ClockColors.Ink2, fontSize = 12.sp, textAlign = TextAlign.Center, maxLines = 1, overflow = TextOverflow.Ellipsis
                     )
                     if (day.isNextJewishDayAfterSunset) Text(stringResource(R.string.evening), color = ClockColors.Muted, fontSize = 11.sp, textAlign = TextAlign.Center)
+                }
                 }
                 Chip(onClick = { panel = Panel.INFO }, round = true) {
                     Text("?", fontWeight = FontWeight.Bold, fontSize = 17.sp, color = ClockColors.TcheletDeep)
