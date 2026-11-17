@@ -28,6 +28,7 @@ import androidx.compose.ui.graphics.vector.PathParser
 import androidx.compose.ui.input.pointer.pointerInput
 import app.mychitas.peleshaon.domain.DashState
 import app.mychitas.peleshaon.domain.Dial
+import app.mychitas.peleshaon.domain.Half
 import app.mychitas.peleshaon.domain.Ring
 import app.mychitas.peleshaon.domain.ZmanType
 import java.time.ZoneId
@@ -58,6 +59,7 @@ object ClockColors {
     val Ok = Color(0xFF6BCB94)
     val Bad = Color(0xFFF2867D)
     val Plum = Color(0xFF9C7BD6)
+    val Hand = Color(0xFFFF7A6E)
     val BigTime = Color(0xFFF4F1E8)
     val Seconds = Color(0xFFB9C2DE)
     val TzirufC = Color(0xFFE8C97E)
@@ -100,9 +102,9 @@ private fun polar(turn: Double, r: Double): Offset =
 
 private data class DotPlace(val e: FaceEvent, val turn: Double, val pos: Offset, var hit: Float)
 
-private fun place(events: List<FaceEvent>, zone: ZoneId): List<DotPlace> {
+private fun place(events: List<FaceEvent>, half: Half?): List<DotPlace> {
     val dots = events.map { e ->
-        val t = Dial.turnOf(e.at, zone)
+        val t = if (half != null) Dial.turnOf(e.at, half) else 0.0
         DotPlace(e, t, polar(t, 91.5), 11f)
     }
     // куда достаёт нажатие: не дальше половины пути до соседней точки (закат и звёзды не сливаются)
@@ -124,14 +126,17 @@ private val HHMM: DateTimeFormatter = DateTimeFormatter.ofPattern("HH:mm")
 fun BigFace(
     now: ZonedDateTime,
     zone: ZoneId,
+    half: Half?,
     ring: Ring?,
     events: List<FaceEvent>,
     active: String?,
     tziruf: Boolean,
     modifier: Modifier = Modifier,
+    /** «4-й час дня» — под временем */
+    hourLabel: String? = null,
     onPick: ((String?, Float, Float) -> Unit)? = null
 ) {
-    val dots = remember(events, zone) { place(events, zone) }
+    val dots = remember(events, half) { place(events, half) }
     // подписанные времена — раздвинуты по ободу, чтобы не налезали
     val labelled = remember(dots) { labelsOf(dots) }
 
@@ -156,7 +161,7 @@ fun BigFace(
         translate((size.width - side) / 2f, (size.height - side) / 2f) {
             scale(k, k, pivot = Offset.Zero) {
                 translate(-BOX_MIN, -BOX_MIN) {
-                    drawFace(now, zone, ring, dots, labelled, active, tziruf, k)
+                    drawFace(now, zone, ring, dots, labelled, active, tziruf, k, hourLabel = hourLabel)
                 }
             }
         }
@@ -172,39 +177,43 @@ private fun DrawScope.drawFace(
     active: String?,
     tziruf: Boolean,
     k: Float,
-    showTime: Boolean = true
+    showTime: Boolean = true,
+    hourLabel: String? = null
 ) {
     val c = Offset(100f, 100f)
     drawCircle(ClockColors.RimFill, radius = 99f, center = c)
     drawCircle(ClockColors.RimStroke, radius = 99f, center = c, style = Stroke(0.5f))
 
     if (ring != null) {
+        // 48 штрихов половины суток: прошедшие горят, будущие бледные, «сейчас» — красный (владелец, 17.11.2026)
+        val slot = ring.dashes.first().width
         for (d in ring.dashes) {
-            val from = polar(d.turn, if (d.hour) 84.0 else 87.0)
+            val from = polar(d.turn, if (d.hour) 82.0 else 86.0)
             val to = polar(d.turn, if (d.state == DashState.NOW) 99.0 else 96.0)
-            val color = if (d.state == DashState.NOW) ClockColors.Bad
+            val color = if (d.state == DashState.NOW) ClockColors.Hand
             else lerp(ClockColors.Tchelet, ClockColors.Gold, d.light.toFloat())
             drawLine(
-                color = color.copy(alpha = if (d.state == DashState.OFF) 0.3f else 1f),
+                color = color.copy(alpha = if (d.state == DashState.OFF) 0.16f else 1f),
                 start = from,
                 end = to,
-                strokeWidth = (d.width * if (d.state == DashState.NOW) 1.5 else 1.0).toFloat(),
+                strokeWidth = (slot * when (d.state) { DashState.NOW -> 1.4; DashState.LIT -> 1.0; DashState.OFF -> 0.7 }).toFloat(),
                 cap = StrokeCap.Butt
             )
         }
-        // солнце — у полудня, луна — напротив
-        val sun = polar(ring.noon, 77.0)
-        translate(sun.x, sun.y) {
-            scale(0.72f, 0.72f, pivot = Offset.Zero) {
-                drawCircle(ClockColors.Gold, radius = 4.5f, center = Offset.Zero)
-                for (i in 0 until 8) rotate(i * 45f, pivot = Offset.Zero) {
-                    drawLine(ClockColors.Gold, Offset(0f, -7f), Offset(0f, -9.5f), strokeWidth = 1.6f, cap = StrokeCap.Round)
+        // короткая стрелка «сейчас» — у самого обода
+        drawLine(ClockColors.Hand, polar(ring.progress, 72.0), polar(ring.progress, 85.0), strokeWidth = 2.6f, cap = StrokeCap.Round)
+        // внутри вверху — солнце днём, луна ночью
+        translate(100f, 56f) {
+            scale(1.15f, 1.15f, pivot = Offset.Zero) {
+                if (ring.day) {
+                    drawCircle(ClockColors.Gold, radius = 4.5f, center = Offset.Zero)
+                    for (i in 0 until 8) rotate(i * 45f, pivot = Offset.Zero) {
+                        drawLine(ClockColors.Gold, Offset(0f, -7f), Offset(0f, -9.5f), strokeWidth = 1.6f, cap = StrokeCap.Round)
+                    }
+                } else {
+                    drawPath(MOON, ClockColors.Tchelet)
                 }
             }
-        }
-        val moon = polar((ring.noon + 0.5) % 1.0, 77.0)
-        translate(moon.x, moon.y) {
-            scale(0.72f, 0.72f, pivot = Offset.Zero) { drawPath(MOON, ClockColors.Tchelet) }
         }
     }
 
@@ -241,13 +250,14 @@ private fun DrawScope.drawFace(
     }
 
     if (tziruf && ring != null) {
-        text(Dial.TZIRUFIM[ring.hour], 100f, 148f, 22f, ClockColors.TzirufC)
+        text(Dial.TZIRUFIM[ring.hour], 100f, 154f, 22f, ClockColors.TzirufC)
     }
     if (showTime) {
         val t = now.withZoneSameInstant(zone)
-        text(String.format(Locale.ROOT, "%02d:%02d", t.hour, t.minute), 100f, 94f, 34f, ClockColors.BigTime)
-        text(String.format(Locale.ROOT, "%02d", t.second), 100f, 119f, 14f, ClockColors.Seconds)
+        text(String.format(Locale.ROOT, "%02d:%02d", t.hour, t.minute), 100f, 91f, 34f, ClockColors.BigTime)
+        text(String.format(Locale.ROOT, "%02d", t.second), 100f, 114f, 14f, ClockColors.Seconds)
     }
+    if (hourLabel != null) text(hourLabel, 100f, if (showTime) 131f else 124f, 9f, ClockColors.Muted)
 }
 
 /** Подписанные времена — раздвинуты по ободу, чтобы не налезали. */
@@ -266,17 +276,19 @@ fun renderFace(
     sizePx: Int,
     now: ZonedDateTime,
     zone: ZoneId,
+    half: Half?,
     ring: Ring?,
     events: List<FaceEvent>,
-    tziruf: Boolean
+    tziruf: Boolean,
+    hourLabel: String? = null
 ): android.graphics.Bitmap {
     val bmp = ImageBitmap(sizePx, sizePx)
     val k = sizePx / BOX
-    val dots = place(events, zone)
+    val dots = place(events, half)
     CanvasDrawScope().draw(Density(1f), LayoutDirection.Ltr, androidx.compose.ui.graphics.Canvas(bmp), Size(sizePx.toFloat(), sizePx.toFloat())) {
         scale(k, k, pivot = Offset.Zero) {
             translate(-BOX_MIN, -BOX_MIN) {
-                drawFace(now, zone, ring, dots, labelsOf(dots), null, tziruf, k, showTime = false)
+                drawFace(now, zone, ring, dots, labelsOf(dots), null, tziruf, k, showTime = false, hourLabel = hourLabel)
             }
         }
     }
@@ -284,20 +296,18 @@ fun renderFace(
 }
 
 /**
- * Точки циферблата: все времена показанного дня (выбранные — с подписью);
- * свечи и исход Шабата — когда до них меньше суток (или прошло не больше двух часов).
+ * Точки циферблата: времена дня, что попадают в эту половину суток (выбранные — с подписью); свечи и исход Шабата — если они в ней.
  */
 fun faceEvents(
-    day: app.mychitas.peleshaon.domain.DayZmanimResult,
+    half: Half?,
+    items: List<app.mychitas.peleshaon.domain.ZmanItem>,
     sh: app.mychitas.peleshaon.domain.ShabbatTimes,
-    marks: Set<ZmanType>,
-    now: ZonedDateTime
+    marks: Set<ZmanType>
 ): List<FaceEvent> {
-    val list = day.items.map { FaceEvent(it.type.name, it.roundedTime, zmanColor(it.type), it.type in marks) }.toMutableList()
+    if (half == null) return emptyList()
+    val list = items.map { FaceEvent(it.type.name, it.roundedTime, zmanColor(it.type), it.type in marks) }.toMutableList()
     for ((id, at) in listOf(CANDLES to sh.candles, HAVDALAH to sh.havdalah)) {
-        if (at != null && at.isBefore(now.plusHours(22)) && at.isAfter(now.minusHours(2))) {
-            list += FaceEvent(id, at, ClockColors.GoldDeep, true)
-        }
+        if (at != null && at.isAfter(half.start) && !at.isAfter(half.end)) list += FaceEvent(id, at, ClockColors.GoldDeep, true)
     }
     return list
 }

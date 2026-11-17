@@ -51,6 +51,30 @@ data class DayZmanimResult(
     fun time(type: ZmanType): ZmanItem? = items.find { it.type == type }
 }
 
+/**
+ * Половина суток, которую показывает циферблат (владелец, 17.11.2026: «12 часов — или дня, или ночи; горит луна или солнце»):
+ * день — от восхода до заката, ночь — от заката до восхода; в каждой 12 галахических часов. `alot`, `tzeit` — рассвет и выход
+ * звёзд этой ночи (там обод переходит от ночи к дню и обратно). Как `halfOf` на странице «Часы» сайта.
+ */
+data class Half(
+    val day: Boolean,
+    val start: ZonedDateTime,
+    val end: ZonedDateTime,
+    val alot: ZonedDateTime?,
+    val tzeit: ZonedDateTime?
+) {
+    /** Где момент в половине: 0 — начало, 1 — конец (оба — вверху циферблата). */
+    fun frac(at: ZonedDateTime): Double =
+        (at.toInstant().toEpochMilli() - start.toInstant().toEpochMilli()).toDouble() /
+            (end.toInstant().toEpochMilli() - start.toInstant().toEpochMilli())
+
+    /** Галахический час половины: 1…12. */
+    fun hour(now: ZonedDateTime): Int = (kotlin.math.floor(frac(now) * 12).toInt() + 1).coerceIn(1, 12)
+}
+
+/** Еврейская дата числами: день, месяц (как в KosherJava: нисан — 1 … адар — 12, адар II — 13), високосный ли год, год. */
+data class JewishDay(val day: Int, val month: Int, val leap: Boolean, val year: Int)
+
 /** Шабат этой недели: зажигание свечей (пятница, закат − 18 мин) и исход (суббота, закат + 50 мин). */
 data class ShabbatTimes(
     val friday: LocalDate,
@@ -143,6 +167,45 @@ object ZmanimEngine {
         val sh = span(today.plusDays(back))
         val end = sh.havdalah
         return if (end != null && !now.isBefore(end)) span(sh.friday.plusDays(7)) else sh
+    }
+
+    private fun cal(date: LocalDate, city: CityOption) = buildCalendar(date, city.name, city.lat, city.lon, 0.0, city.zone())
+
+    /** Половина суток сейчас; нет восхода или заката (полярный день / ночь) — null. */
+    fun halfOf(now: ZonedDateTime, city: CityOption): Half? {
+        val zone = city.zone()
+        val today = now.withZoneSameInstant(zone).toLocalDate()
+        val t = cal(today, city)
+        val rise = t.sunrise?.toZoned(zone) ?: return null
+        val set = t.sunset?.toZoned(zone) ?: return null
+        if (!now.isBefore(rise) && now.isBefore(set)) return Half(true, rise, set, null, null)
+        if (now.isBefore(rise)) {
+            val y = cal(today.minusDays(1), city)
+            val start = y.sunset?.toZoned(zone) ?: return null
+            return Half(false, start, rise, t.alos16Point1Degrees?.toZoned(zone), y.tzaisBaalHatanya?.toZoned(zone))
+        }
+        val n = cal(today.plusDays(1), city)
+        val end = n.sunrise?.toZoned(zone) ?: return null
+        return Half(false, set, end, n.alos16Point1Degrees?.toZoned(zone), t.tzaisBaalHatanya?.toZoned(zone))
+    }
+
+    /**
+     * Времена дня, что попадают в эту половину, — из соседних календарных дней (в ночи — выход звёзд одного дня, рассвет и восход
+     * следующего). Время начала половины (восход дня, закат ночи) не берётся: это конец прошлой половины, он вверху, где и конец этой.
+     */
+    fun halfItems(half: Half, city: CityOption): List<ZmanItem> {
+        val zone = city.zone()
+        val mid = Instant.ofEpochMilli((half.start.toInstant().toEpochMilli() + half.end.toInstant().toEpochMilli()) / 2).atZone(zone).toLocalDate()
+        val seen = mutableSetOf<ZmanType>()
+        return (-1L..1L).flatMap { n -> extractZmanim(cal(mid.plusDays(n), city), zone) }
+            .filter { it.roundedTime.isAfter(half.start) && !it.roundedTime.isAfter(half.end) && seen.add(it.type) }
+            .sortedBy { it.roundedTime }
+    }
+
+    /** Еврейская дата числами — для крупной строки «7 кислева 5787». */
+    fun jewishDay(date: LocalDate, isIsrael: Boolean): JewishDay {
+        val jc = JewishCalendar(date).apply { inIsrael = isIsrael }
+        return JewishDay(jc.jewishDayOfMonth, jc.jewishMonth, jc.isJewishLeapYear, jc.jewishYear)
     }
 
     /** Еврейская дата календарного дня — на иврите и латиницей. */

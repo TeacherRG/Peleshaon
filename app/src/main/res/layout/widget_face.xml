@@ -64,8 +64,9 @@
             android:layout_height="wrap_content"
             android:gravity="center"
             android:maxLines="1"
-            android:textColor="#EEF0F7"
-            android:textSize="13sp" />
+            android:textColor="#E2BF72"
+            android:textSize="17sp"
+            android:textStyle="bold" />
 
         <TextView
             android:id="@+id/w_city"

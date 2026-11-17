@@ -161,4 +161,6 @@
     <string name="privacy_3">העיר, השעונים המעוררים וההגדרות נשמרים רק בטלפון. אם הגיבוי של אנדרואיד מופעל, המערכת עשויה לשמור אותם בחשבון Google שלכם.</string>
     <string name="privacy_4">המיקום אינו מתבקש: העיר נקבעת לפי אזור הזמן או לפי בחירתכם.</string>
     <string name="privacy_full">הטקסט המלא באתר ←</string>
+    <string name="hour_day">השעה ה־%d ביום</string>
+    <string name="hour_night">השעה ה־%d בלילה</string>
 </resources>

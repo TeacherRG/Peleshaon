@@ -6,6 +6,7 @@ import app.mychitas.peleshaon.alarm.ShabbatGuard
 import app.mychitas.peleshaon.domain.CITIES
 import app.mychitas.peleshaon.domain.DashState
 import app.mychitas.peleshaon.domain.Dial
+import app.mychitas.peleshaon.domain.JewishDay
 import app.mychitas.peleshaon.domain.ZmanType
 import app.mychitas.peleshaon.domain.ZmanimEngine
 import app.mychitas.peleshaon.domain.cityById
@@ -75,8 +76,16 @@ class CoreTest {
                 val t = ZonedDateTime.of(d, LocalTime.of(10, 0), z)
                 val r = ZmanimEngine.calculateForMoment(t, city.name, city.lat, city.lon, 0.0, z, city.isIsrael)
                 assertTrue(r.jewishDateTranslit.isNotEmpty(), "${city.id} $t")
-                val shown = r.items.associateBy { it.type }
-                Dial.ring(t, z, shown[ZmanType.SUNRISE]?.exactTime, shown[ZmanType.SUNSET]?.exactTime, shown[ZmanType.ALOT]?.exactTime, shown[ZmanType.TZAIT]?.exactTime)
+                for (h in listOf(1, 10, 22)) {
+                    val now = ZonedDateTime.of(d, LocalTime.of(h, 0), z)
+                    val half = ZmanimEngine.halfOf(now, city) ?: continue
+                    val f = half.frac(now)
+                    assertTrue(f >= 0 && f < 1, "${city.id} $now: «сейчас» вне своей половины")
+                    for (it in ZmanimEngine.halfItems(half, city)) {
+                        assertTrue(it.roundedTime.isAfter(half.start) && !it.roundedTime.isAfter(half.end), "${city.id} $now: ${it.type} вне половины")
+                    }
+                    Dial.ring(now, half)
+                }
                 d = d.plusDays(7)
             }
         }
@@ -95,20 +104,39 @@ class CoreTest {
     }
 
     @Test
-    fun ringOfTheDay() {
-        val now = at(16, 10)
-        val r = day(now)
-        val ring = Dial.ring(now, zone, r.time(ZmanType.SUNRISE)!!.exactTime, r.time(ZmanType.SUNSET)!!.exactTime, r.time(ZmanType.ALOT)?.exactTime, r.time(ZmanType.TZAIT)?.exactTime)!!
-        assertEquals(96, ring.dashes.size)
+    fun ringOfTheHalf() {
+        // 17.11.2026, 10:00 — день; Шма — конец 3-го часа, значит в 10:00 — 4-й час
+        val now = at(17, 10)
+        val half = ZmanimEngine.halfOf(now, vienna)!!
+        assertTrue(half.day)
+        assertEquals(4, half.hour(now))
+        val ring = Dial.ring(now, half)!!
+        assertEquals(48, ring.dashes.size)
         assertEquals(1, ring.dashes.count { it.state == DashState.NOW })
-        // 10:00 в ноябре: восход 07:03, закат 16:15 — день ~9,2 ч, прошло ~2,95 ч → галахический час 3 (с нуля)
         assertEquals(3, ring.hour)
-        // ночные штрихи — тоньше дневных: зимой ночь длиннее, значит, наоборот — толще
-        assertTrue(ring.dashes[60].width > ring.dashes[10].width)
-        // полдень — около верха
-        assertTrue(ring.noon < 0.02 || ring.noon > 0.98)
+        assertTrue(ring.dashes.all { it.light == 1.0 }, "день — весь золотой")
+        val items = ZmanimEngine.halfItems(half, vienna).associateBy { it.type }
+        assertTrue(ZmanType.SUNRISE !in items && ZmanType.SUNSET in items && ZmanType.TZAIT !in items)
+        assertTrue(kotlin.math.abs(half.frac(items[ZmanType.SOF_ZMAN_SHMA]!!.roundedTime) - 0.25) < 0.02, "Шма — четверть дня")
+        assertTrue(kotlin.math.abs(half.frac(items[ZmanType.CHATZOT]!!.roundedTime) - 0.5) < 0.01, "полдень — половина дня")
+        // 22:00 — ночь: выход звёзд, рассвет и восход внутри, заката нет; цвет у начала ночи — ещё не тхелет
+        val night = ZmanimEngine.halfOf(at(17, 22), vienna)!!
+        assertTrue(!night.day)
+        val nItems = ZmanimEngine.halfItems(night, vienna).map { it.type }
+        assertTrue(ZmanType.TZAIT in nItems && ZmanType.ALOT in nItems && ZmanType.SUNRISE in nItems && ZmanType.SUNSET !in nItems)
+        val nRing = Dial.ring(at(17, 22), night)!!
+        assertTrue(nRing.dashes.first().light > 0 && nRing.dashes[24].light == 0.0, "ночь: золото переходит в тхелет")
+        // до восхода — та же ночь, что началась вчера вечером
+        val early = ZmanimEngine.halfOf(at(18, 5), vienna)!!
+        assertEquals(night.start, early.start)
         assertEquals(12, Dial.TZIRUFIM.size)
         assertEquals("י-ה-ו-ה", Dial.TZIRUFIM[0])
+    }
+
+    @Test
+    fun jewishDayAsNumbers() {
+        val d = ZmanimEngine.jewishDay(LocalDate.of(2026, 11, 17), false)
+        assertEquals(JewishDay(7, 9, true, 5787), d) // 7 кислева 5787, год високосный
     }
 
     @Test
