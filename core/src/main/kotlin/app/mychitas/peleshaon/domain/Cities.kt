@@ -266,7 +266,7 @@ private fun norm(s: String): String =
     Normalizer.normalize(s.lowercase(), Normalizer.Form.NFD)
         .replace(Regex("\\p{Mn}+"), "")
         .replace('ё', 'е')
-        .replace(Regex("[^a-zа-я0-9]+"), " ")
+        .replace(Regex("[^\\p{L}0-9]+"), " ")
         .trim()
 
 /** Города, в имени которых (ru, en, de) есть слово с начала запроса; сначала — с начала имени. Как на сайте. */

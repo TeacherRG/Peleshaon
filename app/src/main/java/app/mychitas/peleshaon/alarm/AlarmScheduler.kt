@@ -63,8 +63,14 @@ object AlarmScheduler {
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
             if (alarmManager.canScheduleExactAlarms()) {
-                alarmManager.setAlarmClock(clockInfo, pendingIntent)
+                try {
+                    alarmManager.setAlarmClock(clockInfo, pendingIntent)
+                } catch (_: SecurityException) {
+                    // Permission can be revoked between the check and the schedule call.
+                    alarmManager.setAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, triggerMillis, pendingIntent)
+                }
             } else {
+                // Inexact fallback: the Permissions screen must warn about possible delay.
                 alarmManager.setAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, triggerMillis, pendingIntent)
             }
         } else {
