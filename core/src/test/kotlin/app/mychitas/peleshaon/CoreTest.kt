@@ -5,7 +5,9 @@ import app.mychitas.peleshaon.alarm.AlarmSpec
 import app.mychitas.peleshaon.alarm.ShabbatGuard
 import app.mychitas.peleshaon.domain.CITIES
 import app.mychitas.peleshaon.domain.DashState
+import app.mychitas.peleshaon.domain.CalKind
 import app.mychitas.peleshaon.domain.Dial
+import app.mychitas.peleshaon.domain.JewishCal
 import app.mychitas.peleshaon.domain.JewishDay
 import app.mychitas.peleshaon.domain.ZmanType
 import app.mychitas.peleshaon.domain.ZmanimEngine
@@ -191,5 +193,45 @@ class CoreTest {
         val beforePesach = ZonedDateTime.of(2027, 4, 20, 21, 0, 0, 0, zone)
         val skipped = AlarmRules.skipped(daily, beforePesach, vienna)
         assertTrue(skipped.isNotEmpty() && skipped.all { it.reason == "yom_tov" })
+    }
+
+    @Test
+    fun jewishCalendarOf5787() {
+        val il = false
+        // 10 кислева — пятница 20.11.2026, Шабат 21.11 — глава Ваеце
+        val fri = JewishCal.day(LocalDate.of(2026, 11, 20), il)
+        assertTrue(fri.events.any { it.key == "chabad_10_kislev" })
+        assertTrue(fri.candles && !fri.holy)
+        val sat = JewishCal.day(LocalDate.of(2026, 11, 21), il)
+        assertTrue(sat.holy && sat.events.any { it.key == "parsha_VAYETZEI" })
+        // 19 кислева — 29.11; Ханука — с 25 кислева, 5.12.2026, первая свеча
+        assertTrue(JewishCal.day(LocalDate.of(2026, 11, 29), il).events.any { it.key == "chabad_19_kislev" })
+        val ch = JewishCal.day(LocalDate.of(2026, 12, 5), il).events.first { it.kind == CalKind.CHANUKAH }
+        assertEquals(1, ch.n)
+        // Песах 5787: 15 нисана = 22.04.2027 — праздник, накануне — канун со свечами; 16 нисана — первый день Омера
+        val pesach = JewishCal.day(LocalDate.of(2027, 4, 22), il)
+        assertTrue(pesach.holy && pesach.events.any { it.key == "pesach" && it.kind == CalKind.HOLIDAY })
+        assertTrue(JewishCal.day(LocalDate.of(2027, 4, 21), il).events.any { it.kind == CalKind.EREV })
+        assertEquals(1, JewishCal.day(LocalDate.of(2027, 4, 23), il).events.first { it.kind == CalKind.OMER }.n)
+        // в диаспоре второй день Песаха — святой, в Израиле — Хол ґа-моэд
+        assertTrue(JewishCal.day(LocalDate.of(2027, 4, 23), false).holy)
+        assertTrue(!JewishCal.day(LocalDate.of(2027, 4, 23), true).holy)
+        // месяц: кислев 5787 — с 1-го по последний, следующий — тевет, прошлый — хешван
+        val kislev = JewishCal.monthOf(LocalDate.of(2026, 11, 17), il)
+        assertEquals(1, kislev.first().jd.day)
+        assertTrue(kislev.all { it.jd.month == 9 } && kislev.size in 29..30)
+        val tevet = JewishCal.nextMonth(LocalDate.of(2026, 11, 17), il)
+        assertEquals(10, ZmanimEngine.jewishDay(tevet, il).month)
+        assertEquals(1, ZmanimEngine.jewishDay(tevet, il).day)
+        val cheshvan = JewishCal.prevMonth(LocalDate.of(2026, 11, 17), il)
+        assertEquals(8, ZmanimEngine.jewishDay(cheshvan, il).month)
+        assertEquals(1, ZmanimEngine.jewishDay(cheshvan, il).day)
+        // ближайшие: сначала 10 кислева, потом 19 кислева, потом Ханука — одной строкой
+        val up = JewishCal.upcoming(LocalDate.of(2026, 11, 17), il)
+        assertEquals(listOf("chabad_10_kislev", "chabad_19_kislev", "chanukah"), up.take(3).map { it.second.key })
+        assertEquals(1, up.count { it.second.key == "chanukah" })
+        // весь год: у каждого дня есть еврейская дата, месяцы идут подряд
+        var d = LocalDate.of(2026, 9, 12)
+        repeat(400) { JewishCal.day(d, il); d = d.plusDays(1) }
     }
 }

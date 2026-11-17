@@ -202,6 +202,9 @@ object ZmanimEngine {
             .sortedBy { it.roundedTime }
     }
 
+    /** Времена календарного дня (без перехода на завтра после заката) — для дня, выбранного в календаре. */
+    fun itemsOf(date: LocalDate, city: CityOption): List<ZmanItem> = extractZmanim(cal(date, city), city.zone())
+
     /** Еврейская дата числами — для крупной строки «7 кислева 5787». */
     fun jewishDay(date: LocalDate, isIsrael: Boolean): JewishDay {
         val jc = JewishCalendar(date).apply { inIsrael = isIsrael }

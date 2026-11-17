@@ -97,7 +97,7 @@ import java.util.Locale
 import kotlin.math.roundToInt
 
 /** Окно поверх часов: город, Шабат, два будильника, все времена, «Как считаем». */
-private enum class Panel { CITY, SHABBAT, WAKE, STUDY, TIMES, INFO, PRIVACY }
+private enum class Panel { CITY, SHABBAT, WAKE, STUDY, TIMES, INFO, PRIVACY, CALENDAR }
 
 /** «осталось / через N ч M мин» — как на сайте: минуты вверх, больше суток — дни и часы. */
 private fun until(context: Context, now: ZonedDateTime, at: ZonedDateTime, deadline: Boolean): String {
@@ -178,9 +178,14 @@ fun ClockScreen(onNightScreen: () -> Unit, onIntro: () -> Unit = {}) {
                     Text(city.title(locale), maxLines = 1, overflow = TextOverflow.Ellipsis, fontWeight = FontWeight.Bold, fontSize = 14.sp, color = ClockColors.Ink)
                     Text("▾", fontSize = 12.sp, color = ClockColors.TcheletDeep)
                 }
-                Column(modifier = Modifier.weight(1f).padding(horizontal = 6.dp), horizontalAlignment = Alignment.CenterHorizontally) {
-                    // «7 кислева 5787» крупно; ниже — буквами и гражданская дата
+                Column(
+                    modifier = Modifier.weight(1f).padding(horizontal = 6.dp)
+                        .clickable(onClickLabel = stringResource(R.string.cal_title)) { panel = Panel.CALENDAR },
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    // «7 кислева 5787» крупно; ниже — буквами и гражданская дата; нажатие — календарь
                     Row(verticalAlignment = Alignment.Bottom) {
+                        Text("📅", fontSize = 14.sp, modifier = Modifier.padding(end = 4.dp, bottom = 5.dp))
                         Text("${jd.day}", color = ClockColors.GoldDeep, fontSize = 28.sp, fontWeight = FontWeight.ExtraBold, lineHeight = 30.sp)
                         Spacer(Modifier.width(5.dp))
                         Text(
@@ -298,6 +303,7 @@ fun ClockScreen(onNightScreen: () -> Unit, onIntro: () -> Unit = {}) {
                     onTziruf = { tziruf = it; Prefs.setTziruf(context, it) })
                 Panel.INFO -> InfoSheet(onNightScreen = { panel = null; onNightScreen() }, onIntro = { panel = null; onIntro() }, onPrivacy = { panel = Panel.PRIVACY })
                 Panel.PRIVACY -> PrivacySheet()
+                Panel.CALENDAR -> CalendarSheet(city, cityNow)
             }
         }
     }
@@ -760,6 +766,7 @@ private fun InfoSheet(onNightScreen: () -> Unit, onIntro: () -> Unit, onPrivacy:
         SheetTitle(stringResource(R.string.help))
         Text(stringResource(R.string.legend_t), fontWeight = FontWeight.Bold, color = ClockColors.Ink)
         DialLegend()
+        Note("📅 " + stringResource(R.string.cal_hint))
         HorizontalDivider(color = ClockColors.Line)
         Text(stringResource(R.string.info), fontWeight = FontWeight.Bold, color = ClockColors.Ink)
         Note(stringResource(R.string.note))
