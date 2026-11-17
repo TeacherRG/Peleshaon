@@ -4,6 +4,8 @@ import app.mychitas.peleshaon.domain.CityOption
 import app.mychitas.peleshaon.domain.ZmanimEngine
 import java.time.LocalDate
 import java.time.LocalTime
+import java.time.LocalDateTime
+import java.time.ZoneId
 import java.time.ZonedDateTime
 
 /**
@@ -36,10 +38,22 @@ object AlarmRules {
     /** 0 — воскресенье … 6 — суббота */
     fun dayIndex(date: LocalDate): Int = date.dayOfWeek.value % 7
 
+    /** DST: in a spring-forward gap choose the first valid instant after the gap;
+     *  in an autumn overlap use the earlier occurrence only (one ring). */
+    fun resolveWallTime(date: LocalDate, time: LocalTime, zone: ZoneId): ZonedDateTime {
+        val local = LocalDateTime.of(date, time)
+        val offsets = zone.rules.getValidOffsets(local)
+        return if (offsets.isEmpty()) {
+            zone.rules.getTransition(local).dateTimeAfter.atZone(zone)
+        } else {
+            ZonedDateTime.ofLocal(local, zone, offsets.first())
+        }
+    }
+
     /** Когда звонил бы будильник в этот календарный день (без учёта дней отдыха). */
     fun ringOn(spec: AlarmSpec, date: LocalDate, city: CityOption): ZonedDateTime? =
         if (spec.byShma) ZmanimEngine.shmaOf(date, city)?.minusMinutes(spec.before.toLong())
-        else ZonedDateTime.of(date, LocalTime.of(spec.hour, spec.minute), city.zone())
+        else resolveWallTime(date, LocalTime.of(spec.hour, spec.minute), city.zone())
 
     private fun quiet(at: ZonedDateTime, spec: AlarmSpec, city: CityOption): String? =
         ShabbatGuard.checkMoment(at, city.name, city.lat, city.lon, city.zone(), city.isIsrael, spec.chm)
