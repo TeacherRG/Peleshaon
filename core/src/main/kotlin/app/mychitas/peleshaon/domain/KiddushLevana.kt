@@ -172,7 +172,8 @@ object KiddushLevanaRules {
         val zone = city.zone()
         var day = now.withZoneSameInstant(zone).toLocalDate()
         repeat(40) {
-            val at = reminderOn(day, city, now)
+            // At most one notification per evening; never re-arm the same night each minute.
+            val at = reminderOn(day, city)
             if (at != null && at.isAfter(now)) return at
             day = day.plusDays(1)
         }
@@ -180,7 +181,7 @@ object KiddushLevanaRules {
     }
 
     /** Когда напомнить в вечер этого гражданского дня; нельзя или Луны не видно — null. */
-    fun reminderOn(evening: LocalDate, city: CityOption, notBefore: ZonedDateTime? = null): ZonedDateTime? {
+    fun reminderOn(evening: LocalDate, city: CityOption): ZonedDateTime? {
         if (!eveningAllowed(evening, city)) return null
         val zone = city.zone()
         val items = ZmanimEngine.itemsOf(evening, city)
@@ -196,7 +197,6 @@ object KiddushLevanaRules {
             // окно открывается этой ночью позже — напомнить, когда откроется, если ещё темно
             at = start.withSecond(0).withNano(0).plusMinutes(1)
         }
-        if (notBefore != null && !at.isAfter(notBefore)) at = notBefore.plusMinutes(1)
         if (!at.isBefore(end)) return null
         // A low Moon at nightfall can rise later. Scan the rest of the same
         // night rather than skipping it; never assume astronomical visibility.

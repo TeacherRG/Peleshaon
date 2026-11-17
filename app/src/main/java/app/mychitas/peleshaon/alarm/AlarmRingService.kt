@@ -143,7 +143,7 @@ class AlarmRingService : Service() {
 
         if (wakeMode != WakeMode.LIGHT_ONLY) {
             requestAlarmAudioFocus()
-            startCrescendoAudio()
+            startCrescendoAudio(alarmType)
         }
         if (useVibration && wakeMode != WakeMode.LIGHT_ONLY) {
             startVibration()
@@ -205,7 +205,7 @@ class AlarmRingService : Service() {
         audioManager = null
     }
 
-    private fun startCrescendoAudio() {
+    private fun startCrescendoAudio(alarmType: String) {
         // prepare() may read a slow ringtone provider; never block the service main thread.
         val uris = listOfNotNull(
             RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM),

@@ -68,8 +68,8 @@ class MoonAndPolarRegressionTest {
             val sunrise = ZmanimEngine.itemsOf(day.plusDays(1), vienna)
                 .firstOrNull { it.type == ZmanType.SUNRISE }?.exactTime ?: continue
             if (!later.isBefore(sunrise)) continue
-            val result = KiddushLevanaRules.reminderOn(day, vienna, later)
-            assertTrue(result == null || result.isAfter(later))
+            val result = KiddushLevanaRules.reminderOn(day, vienna)
+            assertTrue(result == null || (result.isAfter(sunset) && result.isBefore(sunrise)))
             checked++
         }
         assertTrue(checked > 0)
