@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Картинка маленького виджета «Еврейская дата» в списке виджетов. -->
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:drawable="@drawable/widget_bg" android:width="110dp" android:height="110dp" />
+    <item android:drawable="@drawable/ic_launcher_fg" android:width="100dp" android:height="100dp"
+        android:gravity="center" />
+</layer-list>

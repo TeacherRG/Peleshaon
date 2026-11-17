@@ -28,15 +28,15 @@ fun AddWidgetButtons() {
     Column(verticalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.fillMaxWidth()) {
         if (can) {
             Button(
-                onClick = { PinWidget.request(context, line = false) },
+                onClick = { PinWidget.request(context) },
                 colors = ButtonDefaults.buttonColors(containerColor = ClockColors.Gold),
                 modifier = Modifier.fillMaxWidth()
             ) { Text("🕰  " + stringResource(R.string.widget_add_face), color = ClockColors.SheetBg, fontWeight = FontWeight.Bold) }
             OutlinedButton(
-                onClick = { PinWidget.request(context, line = true) },
+                onClick = { PinWidget.request(context, date = true) },
                 border = BorderStroke(1.dp, ClockColors.Line),
                 modifier = Modifier.fillMaxWidth()
-            ) { Text("⏱  " + stringResource(R.string.widget_add_line), color = ClockColors.Ink) }
+            ) { Text("📅  " + stringResource(R.string.widget_add_date), color = ClockColors.Ink) }
         } else {
             Text(stringResource(R.string.widget_add_manual), color = ClockColors.Muted, fontSize = 14.sp)
         }

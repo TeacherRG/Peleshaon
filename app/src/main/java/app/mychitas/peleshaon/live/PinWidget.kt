@@ -14,9 +14,9 @@ object PinWidget {
         Build.VERSION.SDK_INT >= Build.VERSION_CODES.O &&
             AppWidgetManager.getInstance(context).isRequestPinAppWidgetSupported
 
-    fun request(context: Context, line: Boolean = false): Boolean {
+    fun request(context: Context, date: Boolean = false): Boolean {
         if (!supported(context)) return false
-        val cls = if (line) LineWidget::class.java else FaceWidget::class.java
+        val cls = if (date) DateWidget::class.java else FaceWidget::class.java
         return runCatching {
             AppWidgetManager.getInstance(context).requestPinAppWidget(ComponentName(context, cls), null, null)
         }.getOrDefault(false)
@@ -26,7 +26,7 @@ object PinWidget {
     fun count(context: Context): Int {
         val m = AppWidgetManager.getInstance(context)
         return m.getAppWidgetIds(ComponentName(context, FaceWidget::class.java)).size +
-            m.getAppWidgetIds(ComponentName(context, LineWidget::class.java)).size
+            m.getAppWidgetIds(ComponentName(context, DateWidget::class.java)).size
     }
 }
 

@@ -117,9 +117,9 @@
     <string name="live_channel">הזמן הקרוב של היום</string>
     <string name="polar_short">היום אין זריחה ושקיעה</string>
     <string name="widget_face_name">פלא שעון — שעון היום</string>
-    <string name="widget_line_name">פלא שעון — הזמן הקרוב</string>
+    <string name="widget_date_name">פלא שעון — תאריך עברי</string>
     <string name="widget_face_desc">טבעת היום עם כל הזמנים, הזמן הקרוב וספירה לאחור</string>
-    <string name="widget_line_desc">השעה, הזמן הקרוב של היום וספירה לאחור אליו</string>
+    <string name="widget_date_desc">התאריך העברי: היום במספר, החודש והשנה; אחרי השקיעה — כבר היום הבא</string>
     <string name="live_notif">הזמן הקרוב בהתראה</string>
     <string name="live_notif_note">התראה שקטה עם ספירה לאחור לזמן הקרוב של היום. היא מוצגת במסך הנעילה, ובטלפונים רבים — גם כסמל במסך הכבוי (תמיד מופעל).</string>
     <string name="ob_skip">דלג</string>
@@ -146,7 +146,7 @@
     <string name="ob4_notif">לאשר התראות</string>
     <string name="ob4_notif_ok">ההתראות מאושרות</string>
     <string name="ob5_t">השעון גם מחוץ ליישום</string>
-    <string name="ob5_l1">ווידג׳טים: לחיצה ארוכה על מסך הבית ← «ווידג׳טים» ← «פלא שעון». יש שעון יום ושורת «הזמן הקרוב».</string>
+    <string name="ob5_l1">ווידג׳טים: לחיצה ארוכה על מסך הבית ← «ווידג׳טים» ← «פלא שעון». גדול — השעון, קטן — רק התאריך העברי.</string>
     <string name="ob5_l2">התראה עם ספירה לאחור לזמן הקרוב — מפעילים בחלון «זמנים». היא מוצגת במסך הנעילה.</string>
     <string name="ob5_l3">בלילה ליד המיטה: «?» ← «מסך לילה». בזמן טעינה — שומר מסך: הגדרות ← תצוגה ← שומר מסך ← «פלא שעון».</string>
     <string name="legend_t">איך קוראים את השעון</string>
@@ -176,13 +176,13 @@
     <string name="cal_candles_after">נרות — אחרי צאת הכוכבים, לא לפני</string>
     <string name="cal_parsha">פרשת השבוע: %s</string>
     <string name="cal_hint">הקישו על התאריך העברי למעלה — ייפתח הלוח: החודש, החגים, פרשת השבוע וזמני כל יום.</string>
-    <string name="widget_add_face">הוספת שעון היום למסך הבית</string>
-    <string name="widget_add_line">הוספת שורת «הזמן הקרוב»</string>
+    <string name="widget_add_face">הוספת השעון למסך הבית (גדול)</string>
+    <string name="widget_add_date">הוספת התאריך העברי (קטן)</string>
     <string name="widget_add_manual">מסך הבית שלך לא מאפשר להוסיף ווידג׳טים מתוך היישום. לחיצה ארוכה על מקום ריק במסך הבית ← «ווידג׳טים» ← «פלא שעון» (אם הוא לא מופיע — הפעילו מחדש את הטלפון פעם אחת אחרי ההתקנה).</string>
     <string name="icon_add">הוספת סמל היישום למסך הבית</string>
     <string name="icon_add_manual">מסך הבית שלך לא מאפשר להוסיף את הסמל מתוך היישום. פתחו את רשימת כל היישומים, לחצו לחיצה ארוכה על «פלא שעון» וגררו אותו למסך הבית.</string>
     <string name="obh_t">פלא שעון במסך הבית</string>
     <string name="obh_icon">הטלפון לא תמיד מוסיף בעצמו את הסמל של יישום חדש למסך הבית — בעיקר כשהיישום לא הותקן מ־Google Play. לחיצה אחת — והסמל במקומו.</string>
     <string name="obh_widgets_t">ווידג׳טים — השעון בלי לפתוח את היישום</string>
-    <string name="obh_widgets">שעון היום עם השעה והזמן הקרוב, או שורה אחת «הזמן הקרוב» עם ספירה לאחור. הם מתעדכנים לבד; בשעון — שעת היום או הלילה והתאריך העברי.</string>
+    <string name="obh_widgets">שני ווידג׳טים: גדול — שעון היום עם השעה והזמן הקרוב, וקטן — רק התאריך העברי (אחרי השקיעה — כבר של היום הבא). לחיצה — והוא במסך הבית.</string>
 </resources>

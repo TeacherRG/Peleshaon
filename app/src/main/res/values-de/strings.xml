@@ -117,9 +117,9 @@
     <string name="live_channel">Nächste Zeit des Tages</string>
     <string name="polar_short">Heute kein Auf- oder Untergang</string>
     <string name="widget_face_name">Pele Schaon — Tageszifferblatt</string>
-    <string name="widget_line_name">Pele Schaon — nächste Zeit</string>
+    <string name="widget_date_name">Pele Schaon — jüdisches Datum</string>
     <string name="widget_face_desc">Der Ring des Tages mit allen Zeiten, die nächste Zeit und ein Countdown</string>
-    <string name="widget_line_desc">Uhrzeit, die nächste Zeit des Tages und ein Countdown dazu</string>
+    <string name="widget_date_desc">Das jüdische Datum: Tag als Zahl, Monat und Jahr; nach Sonnenuntergang schon der nächste Tag</string>
     <string name="live_notif">Nächste Zeit in der Benachrichtigung</string>
     <string name="live_notif_note">Eine stille Benachrichtigung mit Countdown zur nächsten Zeit des Tages. Sie ist auf dem Sperrbildschirm zu sehen, auf vielen Handys auch als Symbol auf dem Always-on-Display.</string>
     <string name="ob_skip">Überspringen</string>
@@ -146,7 +146,7 @@
     <string name="ob4_notif">Benachrichtigungen erlauben</string>
     <string name="ob4_notif_ok">Benachrichtigungen sind erlaubt</string>
     <string name="ob5_t">Die Uhr auch außerhalb der App</string>
-    <string name="ob5_l1">Widgets: lange auf den Startbildschirm drücken → «Widgets» → «Pele Schaon». Es gibt ein Tageszifferblatt und eine Zeile «nächste Zeit».</string>
+    <string name="ob5_l1">Widgets: lange auf den Startbildschirm drücken → «Widgets» → «Pele Schaon». Ein großes — die Uhr, ein kleines — nur das jüdische Datum.</string>
     <string name="ob5_l2">Eine Benachrichtigung mit Countdown zur nächsten Zeit — einschalten unter «Zeiten». Sie erscheint auf dem Sperrbildschirm.</string>
     <string name="ob5_l3">Nachts am Bett: «?» → «Nachtbildschirm». Beim Laden — Bildschirmschoner: Einstellungen → Display → Bildschirmschoner → «Pele Schaon».</string>
     <string name="legend_t">So liest du das Zifferblatt</string>
@@ -176,13 +176,13 @@
     <string name="cal_candles_after">Kerzen — nach Nachteinbruch, nicht vor</string>
     <string name="cal_parsha">Wochenabschnitt: %s</string>
     <string name="cal_hint">Tippe oben auf das jüdische Datum — es öffnet sich der Kalender: Monat, Feiertage, Wochenabschnitt und die Zeiten jedes Tages.</string>
-    <string name="widget_add_face">Tageszifferblatt auf den Startbildschirm</string>
-    <string name="widget_add_line">Zeile «nächste Zeit» hinzufügen</string>
+    <string name="widget_add_face">Uhr auf den Startbildschirm (groß)</string>
+    <string name="widget_add_date">Jüdisches Datum hinzufügen (klein)</string>
     <string name="widget_add_manual">Dein Startbildschirm kann keine Widgets aus der App hinzufügen. Lange auf eine freie Stelle drücken → «Widgets» → «Pele Schaon» (fehlt es, das Telefon nach der Installation einmal neu starten).</string>
     <string name="icon_add">App-Symbol auf den Startbildschirm</string>
     <string name="icon_add_manual">Dein Startbildschirm kann das Symbol nicht aus der App hinzufügen. Öffne die Liste aller Apps, halte «Pele Schaon» gedrückt und ziehe es auf den Startbildschirm.</string>
     <string name="obh_t">Pele Schaon auf den Startbildschirm</string>
     <string name="obh_icon">Das Telefon legt das Symbol einer neuen App nicht immer selbst auf den Startbildschirm — vor allem, wenn sie nicht aus Google Play installiert wurde. Ein Tipp — und das Symbol ist da.</string>
     <string name="obh_widgets_t">Widgets — die Uhr, ohne die App zu öffnen</string>
-    <string name="obh_widgets">Das Tageszifferblatt mit Uhrzeit und nächster Zeit oder eine Zeile «nächste Zeit» mit Countdown. Sie aktualisieren sich selbst; das Zifferblatt zeigt die Stunde des Tages oder der Nacht und das jüdische Datum.</string>
+    <string name="obh_widgets">Zwei Widgets: ein großes — die Tagesuhr mit Uhrzeit und nächster Zeit, ein kleines — nur das jüdische Datum (nach Sonnenuntergang schon vom nächsten Tag). Tippe — und es kommt auf den Startbildschirm.</string>
 </resources>
