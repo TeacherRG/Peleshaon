@@ -13,6 +13,7 @@ import java.time.ZonedDateTime
 object AlarmScheduler {
 
     const val EXTRA_ALARM_TYPE = "alarm_type"
+    const val EXTRA_SHOW_ALARM_TYPE = "show_alarm_type"
     const val EXTRA_IS_SNOOZE = "is_snooze"
     /** «Проверить звук»: без «Отложить» */
     const val EXTRA_TEST = "is_test"
@@ -55,6 +56,7 @@ object AlarmScheduler {
         val showIntent = PendingIntent.getActivity(
             context, requestCode,
             Intent(context, MainActivity::class.java).apply {
+                putExtra(EXTRA_SHOW_ALARM_TYPE, alarmType)
                 addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP)
             },
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE

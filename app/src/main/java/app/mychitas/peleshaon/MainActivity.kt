@@ -56,6 +56,9 @@ class MainActivity : ComponentActivity() {
         // компас переводит экран в портрет — активность пересоздаётся, а компас должен остаться открытым
         openMoon.value = savedInstanceState?.getString("compass")
             ?: if (intent?.getBooleanExtra(MoonReminder.EXTRA_OPEN, false) == true) "moon" else null
+        openAlarm.value = savedInstanceState?.getString("alarm_panel")
+            ?: intent?.getStringExtra(AlarmScheduler.EXTRA_SHOW_ALARM_TYPE)
+        if (openAlarm.value != null) openMoon.value = null
         setContent {
             // тема: днём светлая, ночью тёмная (или как выбрано) — и значки строки состояния под неё
             LaunchedEffect(Unit) {
@@ -70,23 +73,32 @@ class MainActivity : ComponentActivity() {
                 else SystemBarStyle.dark(android.graphics.Color.TRANSPARENT)
                 enableEdgeToEdge(statusBarStyle = bars, navigationBarStyle = bars)
             }
-            PeleShaonApp(openMoon)
+            PeleShaonApp(openMoon, openAlarm)
         }
     }
 
     // уведомление «Кидуш Левана сегодня» — сразу экран-компас
     // компас: "moon" — Луна, "jer" — Йерушалаим, null — закрыт
     private val openMoon = mutableStateOf<String?>(null)
+    private val openAlarm = mutableStateOf<String?>(null)
 
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
         outState.putString("compass", openMoon.value)
+        outState.putString("alarm_panel", openAlarm.value)
     }
 
     override fun onNewIntent(intent: android.content.Intent) {
         super.onNewIntent(intent)
         setIntent(intent)
-        if (intent.getBooleanExtra(MoonReminder.EXTRA_OPEN, false)) openMoon.value = "moon"
+        if (intent.getBooleanExtra(MoonReminder.EXTRA_OPEN, false)) {
+            openAlarm.value = null
+            openMoon.value = "moon"
+        }
+        intent.getStringExtra(AlarmScheduler.EXTRA_SHOW_ALARM_TYPE)?.let {
+            openMoon.value = null
+            openAlarm.value = it
+        }
     }
 
     // Город, подписи, «Сочетание Имени» могли поменяться — виджеты и уведомление подхватят
@@ -98,11 +110,20 @@ class MainActivity : ComponentActivity() {
 }
 
 @Composable
-fun PeleShaonApp(openMoon: androidx.compose.runtime.MutableState<String?>) {
+fun PeleShaonApp(
+    openMoon: androidx.compose.runtime.MutableState<String?>,
+    openAlarm: androidx.compose.runtime.MutableState<String?>
+) {
     val context = LocalContext.current
     var night by rememberSaveable { mutableStateOf(false) }
     // Знакомство — при первом запуске (разрешение на уведомления просит его шаг про будильники, с объяснением)
     var intro by rememberSaveable { mutableStateOf(!Prefs.of(context).getBoolean("onboarded", false)) }
+    LaunchedEffect(openAlarm.value) {
+        if (openAlarm.value != null) {
+            night = false
+            intro = false
+        }
+    }
 
     if (intro) {
         Onboarding(onDone = {
@@ -129,6 +150,7 @@ fun PeleShaonApp(openMoon: androidx.compose.runtime.MutableState<String?>) {
         BackHandler { night = false }
         NightFace(Modifier.fillMaxSize().background(Color.Black).clickable { night = false })
     } else {
-        ClockScreen(onNightScreen = { night = true }, onIntro = { intro = true }, onMoon = { openMoon.value = "moon" }, onCompass = { openMoon.value = "jer" })
+        ClockScreen(onNightScreen = { night = true }, onIntro = { intro = true },
+            onMoon = { openMoon.value = "moon" }, onCompass = { openMoon.value = "jer" }, requestedAlarm = openAlarm)
     }
 }

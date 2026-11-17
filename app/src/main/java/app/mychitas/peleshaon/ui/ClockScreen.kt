@@ -124,7 +124,13 @@ private val HHMM: DateTimeFormatter = DateTimeFormatter.ofPattern("HH:mm")
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ClockScreen(onNightScreen: () -> Unit, onIntro: () -> Unit = {}, onMoon: () -> Unit = {}, onCompass: () -> Unit = {}) {
+fun ClockScreen(
+    onNightScreen: () -> Unit,
+    onIntro: () -> Unit = {},
+    onMoon: () -> Unit = {},
+    onCompass: () -> Unit = {},
+    requestedAlarm: androidx.compose.runtime.MutableState<String?>? = null
+) {
     val context = LocalContext.current
     val locale = androidx.compose.ui.platform.LocalConfiguration.current.locales[0]
 
@@ -147,6 +153,22 @@ fun ClockScreen(onNightScreen: () -> Unit, onIntro: () -> Unit = {}, onMoon: () 
     // свой будильник, открытый в окне (C1, C2…)
     var editAlarm by rememberSaveable { mutableStateOf(Prefs.MORNING) }
     var pop by remember { mutableStateOf<Triple<String, Float, Float>?>(null) }
+    LaunchedEffect(requestedAlarm?.value) {
+        val id = requestedAlarm?.value
+        if (id != null) {
+            when (id) {
+                Prefs.MORNING -> panel = Panel.WAKE
+                Prefs.TORAH -> panel = Panel.STUDY
+                else -> {
+                    if (id in Prefs.customAlarms(context)) {
+                        editAlarm = id
+                        panel = Panel.CUSTOM
+                    } else panel = Panel.WAKE
+                }
+            }
+            requestedAlarm.value = null
+        }
+    }
 
     val zone = city.zone()
     val cityNow = now.withZoneSameInstant(zone)
