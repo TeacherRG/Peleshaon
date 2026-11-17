@@ -104,17 +104,19 @@ object AlarmScheduler {
             else cancelAlarm(context, type, includeSnooze = !spec.on || spec.days.isEmpty())
         }
         val k = Prefs.kashrutAt(context)
-        if (k > System.currentTimeMillis()) {
-            scheduleExactAlarm(context, java.time.Instant.ofEpochMilli(k).atZone(city.zone()), Prefs.KASHRUT)
+        if (k > 0L) {
+            // Never discard an overdue one-shot event before its receiver acknowledges it.
+            // Re-arm a missed delivery shortly after now instead of silently losing it.
+            val whenMs = maxOf(k, System.currentTimeMillis() + 2_000L)
+            scheduleExactAlarm(context, java.time.Instant.ofEpochMilli(whenMs).atZone(city.zone()), Prefs.KASHRUT)
         } else {
-            if (k != 0L) Prefs.setKashrutAt(context, 0L)
             cancelAlarm(context, Prefs.KASHRUT, includeSnooze = true)
         }
     }
 
     /** Мясное съедено: напомнить через 6 часов. */
     fun startKashrut(context: Context) {
-        Prefs.setKashrutAt(context, System.currentTimeMillis() + Prefs.KASHRUT_HOURS * 3_600_000L)
+        Prefs.setKashrutAt(context, System.currentTimeMillis() + Prefs.kashrutHours(context) * 3_600_000L)
         rescheduleAllFromPrefs(context)
     }
 
@@ -140,7 +142,8 @@ class AlarmReceiver : BroadcastReceiver() {
             AlarmScheduler.cancelAlarm(context, alarmType, includeSnooze = true)
             return
         }
-        if (alarmType == Prefs.KASHRUT && Prefs.kashrutAt(context) <= 0L) return
+        if (alarmType == Prefs.KASHRUT &&
+            (Prefs.kashrutAt(context) <= 0L || Prefs.kashrutAt(context) > System.currentTimeMillis() + 2_000L)) return
         if (alarmType == Prefs.KASHRUT && !intent.getBooleanExtra(AlarmScheduler.EXTRA_IS_SNOOZE, false)) Prefs.setKashrutAt(context, 0L)
         // Последняя проверка в момент звонка: Шабат, Йом Тов, Йом Кипур (и Хол ґа-моэд по галочке) — молчим
         val quietStatus = ShabbatGuard.checkMoment(

@@ -218,8 +218,10 @@
     <string name="kashrut_t">М’ясне → молочне: 6 годин</string>
     <string name="kashrut_until">Молочне — з %1$s</string>
     <string name="kashrut_cancel">Скасувати</string>
-    <string name="kashrut_start">Я з’їв(ла) м’ясне — нагадати через 6 годин</string>
-    <string name="kashrut_note">Один дзвінок через 6 годин після натискання (звичай — чекати 6 годин між м’ясним і молочним; звіряйтеся з рабином). У Шабат і Йом Тов не дзвонить.</string>
+    <string name="kashrut_interval">Інтервал за вашим звичаєм</string>
+    <string name="kashrut_hour_choice">%1$d год</string>
+    <string name="kashrut_start">Я з’їв(ла) м’ясне — почати відлік</string>
+    <string name="kashrut_note">Нагадування за обраним інтервалом, не універсальний дозвіл. Звірте звичай з рабином.</string>
     <string name="alarm_n">Будильник %1$d</string>
     <string name="alarms_more">Ще будильники</string>
     <string name="alarm_add">Додати будильник</string>

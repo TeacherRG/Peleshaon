@@ -218,8 +218,10 @@
     <string name="kashrut_t">Мясное → молочное: 6 часов</string>
     <string name="kashrut_until">Молочное — с %1$s</string>
     <string name="kashrut_cancel">Отменить</string>
-    <string name="kashrut_start">Я поел(а) мясное — напомнить через 6 часов</string>
-    <string name="kashrut_note">Один звонок через 6 часов после нажатия (обычай — ждать 6 часов между мясным и молочным; сверяйтесь с раввином). В Шабат и Йом Тов не звонит.</string>
+    <string name="kashrut_interval">Интервал по вашему обычаю</string>
+    <string name="kashrut_hour_choice">%1$d ч</string>
+    <string name="kashrut_start">Я поел(а) мясное — начать отсчёт</string>
+    <string name="kashrut_note">Напоминание по выбранному интервалу, а не универсальное разрешение. Уточните обычай у раввина.</string>
     <string name="alarm_n">Будильник %1$d</string>
     <string name="alarms_more">Ещё будильники</string>
     <string name="alarm_add">Добавить будильник</string>

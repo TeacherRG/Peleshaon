@@ -24,6 +24,15 @@ object Prefs {
     const val MAX_CUSTOM = 10
     const val KASHRUT_HOURS = 6L
 
+    fun kashrutHours(context: Context): Long =
+        of(context).getInt("kashrut_hours", KASHRUT_HOURS.toInt())
+            .takeIf { it in setOf(1, 3, 5, 6) }?.toLong() ?: KASHRUT_HOURS
+
+    fun setKashrutHours(context: Context, hours: Long) {
+        require(hours in setOf(1L, 3L, 5L, 6L))
+        of(context).edit().putInt("kashrut_hours", hours.toInt()).apply()
+    }
+
     fun of(context: Context): SharedPreferences = context.getSharedPreferences(NAME, Context.MODE_PRIVATE)
 
     // ---- город: выбранный вручную, иначе — по часовому поясу телефона

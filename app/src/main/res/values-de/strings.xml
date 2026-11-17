@@ -218,8 +218,10 @@
     <string name="kashrut_t">Fleischig → milchig: 6 Stunden</string>
     <string name="kashrut_until">Milchiges ab %1$s</string>
     <string name="kashrut_cancel">Abbrechen</string>
-    <string name="kashrut_start">Ich habe Fleischiges gegessen — in 6 Stunden erinnern</string>
-    <string name="kashrut_note">Ein Wecker 6 Stunden nach dem Tippen (der Brauch ist, 6 Stunden zwischen Fleischigem und Milchigem zu warten; frag deinen Rabbiner). An Schabbat und Jom Tow klingelt er nicht.</string>
+    <string name="kashrut_interval">Wartezeit nach deinem Brauch</string>
+    <string name="kashrut_hour_choice">%1$d Std.</string>
+    <string name="kashrut_start">Fleisch gegessen — Erinnerung starten</string>
+    <string name="kashrut_note">Erinnerung nach der gewählten Zeit; keine allgemeine religiöse Entscheidung. Rabbi fragen.</string>
     <string name="alarm_n">Wecker %1$d</string>
     <string name="alarms_more">Weitere Wecker</string>
     <string name="alarm_add">Wecker hinzufügen</string>

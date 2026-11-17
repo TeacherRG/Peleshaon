@@ -362,6 +362,8 @@ fun ClockScreen(
                     Prefs.setCity(context, chosen)
                     ClockTheme.refresh(context)
                     AlarmScheduler.rescheduleAllFromPrefs(context)
+                    app.mychitas.peleshaon.moon.MoonReminder.schedule(context)
+                    app.mychitas.peleshaon.live.Live.update(context)
                     pop = null
                     bump()
                     panel = null
@@ -887,8 +889,20 @@ private fun MoreAlarms(city: CityOption, now: ZonedDateTime, onOpen: (String) ->
 private fun KashrutCard(onChange: () -> Unit) {
     val context = LocalContext.current
     var at by remember { mutableStateOf(Prefs.kashrutAt(context)) }
+    var hours by remember { mutableStateOf(Prefs.kashrutHours(context)) }
     val running = at > System.currentTimeMillis()
     Text("🍖 → 🥛  " + stringResource(R.string.kashrut_t), fontWeight = FontWeight.Bold, color = ClockColors.Ink)
+    Text(stringResource(R.string.kashrut_interval), color = ClockColors.Muted, fontSize = 13.sp)
+    Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+        for (h in listOf(1L, 3L, 5L, 6L)) {
+            FilterChip(
+                selected = hours == h,
+                onClick = { hours = h; Prefs.setKashrutHours(context, h); onChange() },
+                label = { Text(stringResource(R.string.kashrut_hour_choice, h.toInt()), fontSize = 12.sp) },
+                colors = chipColors()
+            )
+        }
+    }
     if (running) {
         val t = java.time.Instant.ofEpochMilli(at).atZone(java.time.ZoneId.systemDefault())
         Text(stringResource(R.string.kashrut_until, t.format(DateTimeFormatter.ofPattern("HH:mm"))), color = ClockColors.GoldDeep, fontWeight = FontWeight.Bold)

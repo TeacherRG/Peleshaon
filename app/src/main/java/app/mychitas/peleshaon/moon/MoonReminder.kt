@@ -88,7 +88,7 @@ object MoonReminder {
         val city = Prefs.city(context)
         val now = ZonedDateTime.now(city.zone())
         val kl = runCatching { KiddushLevanaRules.now(now, city) }.getOrNull()
-        if (isOn(context) && kl != null && kl.moon.aboveHorizon) notify(context, kl.moon, kl.end)
+        if (isOn(context) && kl != null && kl.moon.altitude >= 5.0) notify(context, kl.moon, kl.end)
         schedule(context)
     }
 

@@ -218,8 +218,10 @@
     <string name="kashrut_t">Meat → dairy: 6 hours</string>
     <string name="kashrut_until">Dairy from %1$s</string>
     <string name="kashrut_cancel">Cancel</string>
-    <string name="kashrut_start">I ate meat — remind me in 6 hours</string>
-    <string name="kashrut_note">One ring 6 hours after you tap (the custom is to wait 6 hours between meat and dairy; ask your rabbi). It does not ring on Shabbat and Yom Tov.</string>
+    <string name="kashrut_interval">Interval according to your custom</string>
+    <string name="kashrut_hour_choice">%1$d h</string>
+    <string name="kashrut_start">I ate meat — start reminder</string>
+    <string name="kashrut_note">Reminder after the selected interval; this is not a universal religious ruling. Confirm with your rabbi.</string>
     <string name="alarm_n">Alarm %1$d</string>
     <string name="alarms_more">More alarms</string>
     <string name="alarm_add">Add an alarm</string>
