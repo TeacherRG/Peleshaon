@@ -3,6 +3,9 @@ package app.mychitas.peleshaon.alarm
 import android.app.KeyguardManager
 import android.content.Context
 import android.content.Intent
+import android.content.BroadcastReceiver
+import android.content.IntentFilter
+import androidx.core.content.ContextCompat
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
@@ -31,6 +34,35 @@ import java.time.format.DateTimeFormatter
 import java.util.Locale
 
 class AlarmRingActivity : ComponentActivity() {
+    private val finishedReceiver = object : BroadcastReceiver() {
+        override fun onReceive(context: Context, received: Intent) {
+            if (received.getStringExtra(AlarmRingService.EXTRA_SESSION) ==
+                intent.getStringExtra(AlarmRingService.EXTRA_SESSION)) finish()
+        }
+    }
+    private var listening = false
+
+    override fun onStart() {
+        super.onStart()
+        ContextCompat.registerReceiver(this, finishedReceiver,
+            IntentFilter(AlarmRingService.ACTION_SESSION_FINISHED), ContextCompat.RECEIVER_NOT_EXPORTED)
+        listening = true
+    }
+
+    override fun onResume() {
+        super.onResume()
+        val token = intent.getStringExtra(AlarmRingService.EXTRA_SESSION)
+        if (token == null || AlarmRingService.currentSessionId != token) finish()
+    }
+
+    override fun onStop() {
+        if (listening) {
+            unregisterReceiver(finishedReceiver)
+            listening = false
+        }
+        super.onStop()
+    }
+
     // язык, выбранный в «Настройках» (до Android 13 — здесь)
     override fun attachBaseContext(newBase: android.content.Context) {
         super.attachBaseContext(app.mychitas.peleshaon.AppLang.wrap(newBase))
@@ -145,7 +177,11 @@ class AlarmRingActivity : ComponentActivity() {
                     }
 
                     Button(
-                        onClick = { stopAlarm(); goHome() },
+                        onClick = {
+                            val anotherPending = AlarmRingService.hasQueuedAlarms
+                            stopAlarm()
+                            if (!anotherPending) goHome()
+                        },
                         modifier = Modifier.fillMaxWidth().height(56.dp),
                         colors = ButtonDefaults.buttonColors(containerColor = GoldAccent)
                     ) {

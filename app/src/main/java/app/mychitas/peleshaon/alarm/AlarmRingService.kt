@@ -27,36 +27,42 @@ class AlarmRingService : Service() {
     // Only one alarm may control the foreground service; stale notification actions are ignored.
     private var activeSession: String? = null
     private var activeType: String? = null
+    private val pendingAlarms = PendingAlarmQueue()
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         if (intent?.action == ACTION_STOP) {
-            if (activeSession == null || matchesSession(intent)) stopSelf()
+            if (matchesSession(intent)) advanceOrStop()
+            else if (activeSession == null) stopSelf()
             return START_NOT_STICKY
         }
         if (intent?.action == ACTION_SNOOZE) {
             if (matchesSession(intent)) {
                 val type = activeType ?: return START_NOT_STICKY
-                // Kashrut is a one-shot timer. Its original expiry clears state,
-                // so snoozing it would silently disappear on the next re-schedule.
                 if (type != app.mychitas.peleshaon.Prefs.KASHRUT) {
-                    AlarmScheduler.scheduleExactAlarm(this, java.time.ZonedDateTime.now().plusMinutes(5), type, isSnooze = true)
+                    AlarmScheduler.scheduleExactAlarm(
+                        this, java.time.ZonedDateTime.now().plusMinutes(5), type, isSnooze = true
+                    )
                 }
-                stopSelf()
-            } else if (activeSession == null) {
-                stopSelf()
-            }
+                advanceOrStop()
+            } else if (activeSession == null) stopSelf()
             return START_NOT_STICKY
         }
 
         val alarmType = intent?.getStringExtra(AlarmScheduler.EXTRA_ALARM_TYPE) ?: "MORNING"
         val test = intent?.getBooleanExtra(AlarmScheduler.EXTRA_TEST, false) == true
-        // A user-triggered sound test cannot interrupt a real ringing alarm.
-        if (test && activeSession != null) return START_NOT_STICKY
         if (activeSession != null) {
-            activeType?.let { showMissedNotification(alarmTitle(this, it)) }
-            stopRing()
+            // A test cannot replace a real alarm. Real simultaneous events wait in FIFO order.
+            if (!test) pendingAlarms.enqueue(alarmType, activeType)
+            hasQueuedAlarms = !pendingAlarms.isEmpty()
+            return START_NOT_STICKY
         }
+        beginRing(alarmType, test)
+        return START_NOT_STICKY
+    }
+
+    private fun beginRing(alarmType: String, test: Boolean) {
         val token = java.util.UUID.randomUUID().toString()
+        currentSessionId = token
         activeSession = token
         activeType = alarmType
         val prefs = getSharedPreferences("pele_prefs", Context.MODE_PRIVATE)
@@ -122,12 +128,11 @@ class AlarmRingService : Service() {
         scope.launch {
             delay(3 * 60 * 1000L)
             if (activeSession == token) {
-                showMissedNotification(title)
-                stopSelf()
+                showMissedNotification(title, alarmType)
+                advanceOrStop()
             }
         }
 
-        return START_NOT_STICKY
     }
 
     private fun startCrescendoAudio() {
@@ -194,7 +199,7 @@ class AlarmRingService : Service() {
         }
     }
 
-    private fun showMissedNotification(title: String) {
+    private fun showMissedNotification(title: String, type: String) {
         val nm = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         val missed = NotificationCompat.Builder(this, CHANNEL_ID)
             .setSmallIcon(android.R.drawable.ic_lock_idle_alarm)
@@ -202,7 +207,7 @@ class AlarmRingService : Service() {
             .setContentText(getString(R.string.alarm_missed))
             .setAutoCancel(true)
             .build()
-        nm.notify(3002, missed)
+        nm.notify(3100 + AlarmScheduler.requestCode(type, false), missed)
     }
 
     private fun createNotificationChannel() {
@@ -220,10 +225,24 @@ class AlarmRingService : Service() {
         }
     }
 
-    /** Окно звонка смахнули из недавних — музыка не должна играть дальше без способа её выключить. */
-    override fun onTaskRemoved(rootIntent: Intent?) {
-        stopSelf()
-        super.onTaskRemoved(rootIntent)
+    /**
+     * Complete only this session. Keep another simultaneous real alarm pending;
+     * never mislabel a displaced alarm as missed without waiting for user action.
+     */
+    private fun advanceOrStop() {
+        activeSession?.let(::announceFinished)
+        stopRing()
+        activeSession = null
+        activeType = null
+        currentSessionId = null
+        val next = pendingAlarms.poll()
+        hasQueuedAlarms = !pendingAlarms.isEmpty()
+        if (next == null) stopSelf() else beginRing(next, false)
+    }
+
+    private fun announceFinished(token: String) {
+        sendBroadcast(Intent(ACTION_SESSION_FINISHED).setPackage(packageName)
+            .putExtra(EXTRA_SESSION, token))
     }
 
     private fun matchesSession(intent: Intent): Boolean =
@@ -240,10 +259,14 @@ class AlarmRingService : Service() {
     }
 
     override fun onDestroy() {
+        activeSession?.let(::announceFinished)
         stopRing()
+        pendingAlarms.clear()
         scope.cancel()
         activeSession = null
         activeType = null
+        currentSessionId = null
+        hasQueuedAlarms = false
         super.onDestroy()
     }
 
@@ -252,6 +275,11 @@ class AlarmRingService : Service() {
     companion object {
         const val CHANNEL_ID = "pele_alarm_channel"
         const val EXTRA_SESSION = "alarm_session"
+        const val ACTION_SESSION_FINISHED = "app.mychitas.peleshaon.ALARM_SESSION_FINISHED"
+        @Volatile var currentSessionId: String? = null
+            private set
+        @Volatile var hasQueuedAlarms: Boolean = false
+            private set
         const val ACTION_STOP = "app.mychitas.peleshaon.STOP_ALARM"
         const val ACTION_SNOOZE = "app.mychitas.peleshaon.SNOOZE_ALARM"
     }
