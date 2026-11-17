@@ -243,8 +243,8 @@
         <item quantity="one">%d part</item>
         <item quantity="other">%d parts</item>
     </plurals>
-    <string name="h7_t">7th hour of Shabbat night — no Kiddush</string>
-    <string name="h7_note">By custom Kiddush is not made in the 7th hour of the night (the night from sunset to sunrise is divided into 12). Ask your rabbi.</string>
+    <string name="h7_t">Mazal Maadim — no Kiddush</string>
+    <string name="h7_note">The hour of Mars (the 7th hour) on Friday night: by custom Kiddush is not made then (Shulchan Aruch of the Alter Rebbe 271:3). It is 6–7 PM local solar time — every Friday at the same clock time.</string>
     <string name="menu_compass">Compass</string>
     <string name="compass_jerusalem">Jerusalem</string>
     <string name="compass_moon">Moon</string>

@@ -244,8 +244,8 @@
         <item quantity="two">%d חלקים</item>
         <item quantity="other">%d חלקים</item>
     </plurals>
-    <string name="h7_t">השעה השביעית של ליל שבת — בלי קידוש</string>
-    <string name="h7_note">נוהגים שלא לקדש בשעה השביעית של הלילה (הלילה מהשקיעה עד הזריחה מתחלק ל־12). התייעצו עם רב.</string>
+    <string name="h7_t">מזל מאדים — בלי קידוש</string>
+    <string name="h7_note">שעת מאדים (השעה השביעית) בליל שבת: נוהגים שלא לקדש בה (שולחן ערוך אדמו״ר הזקן רעא, ג). זו השעה 18:00–19:00 לפי זמן השמש המקומי — בכל יום שישי באותה שעה.</string>
     <string name="menu_compass">מצפן</string>
     <string name="compass_jerusalem">ירושלים</string>
     <string name="compass_moon">ירח</string>

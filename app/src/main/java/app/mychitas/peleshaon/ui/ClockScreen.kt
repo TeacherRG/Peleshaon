@@ -581,7 +581,7 @@ private fun ShabbatSheet(
 /** 7-й час ночи Шабата: с … до … — в этот час не делают кидуш. */
 @Composable
 private fun SeventhHour(friday: LocalDate, city: CityOption, now: ZonedDateTime) {
-    val h = remember(friday, city, ZmanimEngine.minhag) { ZmanimEngine.seventhHourOfShabbatNight(friday, city) } ?: return
+    val h = remember(friday, city) { ZmanimEngine.seventhHourOfShabbatNight(friday, city) }
     if (!now.isBefore(h.second)) return
     val z = city.zone()
     Surface(shape = RoundedCornerShape(12.dp), color = ClockColors.Bad.copy(alpha = 0.10f), border = BorderStroke(1.dp, ClockColors.Bad.copy(alpha = 0.5f)), modifier = Modifier.fillMaxWidth()) {

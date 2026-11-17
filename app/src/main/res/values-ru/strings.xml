@@ -245,8 +245,8 @@
         <item quantity="many">%d частей</item>
         <item quantity="other">%d части</item>
     </plurals>
-    <string name="h7_t">7-й час ночи Шабата — без кидуша</string>
-    <string name="h7_note">По обычаю в 7-й час ночи (ночь от заката до восхода делится на 12) не делают кидуш. Сверьтесь с раввином.</string>
+    <string name="h7_t">Мазаль Маадим — без кидуша</string>
+    <string name="h7_note">Час Марса (7-й час) в ночь Шабата: по обычаю в это время не делают кидуш (Шулхан арух Алтер Ребе 271:3). Это 18:00–19:00 по местному солнечному времени — каждую пятницу в одно и то же время.</string>
     <string name="menu_compass">Компас</string>
     <string name="compass_jerusalem">Йерушалаим</string>
     <string name="compass_moon">Луна</string>

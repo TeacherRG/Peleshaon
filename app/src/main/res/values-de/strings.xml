@@ -243,8 +243,8 @@
         <item quantity="one">%d Teil</item>
         <item quantity="other">%d Teile</item>
     </plurals>
-    <string name="h7_t">7. Stunde der Schabbatnacht — kein Kiddusch</string>
-    <string name="h7_note">Nach dem Brauch macht man in der 7. Stunde der Nacht keinen Kiddusch (die Nacht von Sonnenuntergang bis Sonnenaufgang wird in 12 geteilt). Frag deinen Rabbiner.</string>
+    <string name="h7_t">Masal Maadim — kein Kiddusch</string>
+    <string name="h7_note">Die Stunde des Mars (die 7. Stunde) am Freitagabend: nach dem Brauch macht man in ihr keinen Kiddusch (Schulchan Aruch des Alter Rebbe 271:3). Das ist 18–19 Uhr Ortszeit nach der Sonne — jeden Freitag zur gleichen Uhrzeit.</string>
     <string name="menu_compass">Kompass</string>
     <string name="compass_jerusalem">Jerusalem</string>
     <string name="compass_moon">Mond</string>

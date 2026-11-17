@@ -41,12 +41,14 @@ class MoladTest {
     @Test
     fun seventhHourOfShabbatNight() {
         val vienna = app.mychitas.peleshaon.domain.cityById("Europe/Vienna")!!
-        val fri = LocalDate.of(2026, 11, 20)
-        val (a, b) = app.mychitas.peleshaon.domain.ZmanimEngine.seventhHourOfShabbatNight(fri, vienna)!!
-        val set = app.mychitas.peleshaon.domain.ZmanimEngine.sunsetOf(fri, vienna)!!
-        // зимой ночь в Вене ≈ 15 ч: 7-й час начинается около полуночи и длится больше часа
-        assertTrue(a.isAfter(set.plusHours(6)) && a.isBefore(set.plusHours(9)), "$a")
-        val min = java.time.Duration.between(a, b).toMinutes()
-        assertTrue(min in 70..85, "$min мин")
+        fun hm(t: java.time.ZonedDateTime) = "%02d:%02d".format(t.hour, t.minute)
+        // зимой — 17:55–18:55, как на 7thhour.info; летом (летнее время) — на час позже
+        val (a, b) = app.mychitas.peleshaon.domain.ZmanimEngine.seventhHourOfShabbatNight(LocalDate.of(2026, 11, 20), vienna)
+        assertEquals("17:55" to "18:55", hm(a) to hm(b))
+        val (c, d) = app.mychitas.peleshaon.domain.ZmanimEngine.seventhHourOfShabbatNight(LocalDate.of(2027, 6, 18), vienna)
+        assertEquals("18:55" to "19:55", hm(c) to hm(d))
+        // Йерушалаим (35,22° в. д., пояс +2): 18:00 по солнцу = 17:39 по часам
+        val jer = app.mychitas.peleshaon.domain.cityById("Asia/Jerusalem")!!
+        assertEquals("17:39", hm(app.mychitas.peleshaon.domain.ZmanimEngine.seventhHourOfShabbatNight(LocalDate.of(2026, 11, 20), jer).first))
     }
 }
