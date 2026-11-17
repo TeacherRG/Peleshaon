@@ -36,6 +36,11 @@ import androidx.wear.compose.foundation.lazy.ScalingLazyColumn
 import androidx.wear.compose.foundation.lazy.items
 import androidx.wear.compose.foundation.lazy.rememberScalingLazyListState
 import androidx.wear.compose.material.MaterialTheme
+import androidx.wear.compose.material.Chip
+import app.mychitas.peleshaon.domain.CITIES
+import app.mychitas.peleshaon.domain.Minhag
+import app.mychitas.peleshaon.domain.cityById
+import java.util.Locale
 import androidx.wear.compose.material.Text
 import app.mychitas.peleshaon.domain.ZmanItem
 import app.mychitas.peleshaon.domain.ZmanType
@@ -73,11 +78,24 @@ fun WearApp() {
         }
     }
 
-    // Город — по часовому поясу часов (без геолокации)
-    val city = remember(now.zone) { cityForZone(ZoneId.systemDefault()) }
+    // Standalone configuration: phone preferences are not silently assumed.
+    val context = LocalContext.current
+    val prefs = remember { context.getSharedPreferences("wear_prefs", android.content.Context.MODE_PRIVATE) }
+    var selectedCity by remember { mutableStateOf(prefs.getString("city_id", "") ?: "") }
+    var selectedCommunity by remember { mutableStateOf(prefs.getString("minhag", "CHABAD") ?: "CHABAD") }
+    var candleMinutes by remember { mutableStateOf(prefs.getInt("candle_minutes", -1)) }
+    var settingsMode by remember { mutableStateOf(0) }
+    val community = remember(selectedCommunity) {
+        runCatching { Minhag.valueOf(selectedCommunity) }.getOrDefault(Minhag.CHABAD)
+    }
+    val city = remember(now.zone, selectedCity) {
+        cityById(selectedCity) ?: cityForZone(ZoneId.systemDefault())
+    }
     val zone = city.zone()
     val cityNow = now.withZoneSameInstant(zone)
-    val day = remember(city, cityNow.truncatedTo(ChronoUnit.MINUTES)) {
+    val day = remember(city, cityNow.truncatedTo(ChronoUnit.MINUTES), community, candleMinutes) {
+        ZmanimEngine.minhag = community
+        ZmanimEngine.candleOffsetOverride = candleMinutes.takeIf { it in setOf(18, 20, 30, 40) }?.toLong()
         ZmanimEngine.calculateForMoment(cityNow, city.name, city.lat, city.lon, 0.0, zone, city.isIsrael)
     }
     val res = LocalContext.current.resources
@@ -87,6 +105,70 @@ fun WearApp() {
     }
 
     MaterialTheme {
+        if (settingsMode == 1) {
+            ScalingLazyColumn(
+                modifier = Modifier.fillMaxSize().background(Color.Black),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                item {
+                    Chip(onClick = { settingsMode = 0 }, modifier = Modifier.fillMaxWidth(),
+                        label = { Text(context.getString(R.string.wear_back)) })
+                }
+                item {
+                    Chip(onClick = {
+                        selectedCity = ""
+                        prefs.edit().remove("city_id").apply()
+                        settingsMode = 0
+                    }, modifier = Modifier.fillMaxWidth(),
+                        label = { Text(context.getString(R.string.wear_auto_city)) })
+                }
+                items(CITIES) { option ->
+                    Chip(onClick = {
+                        selectedCity = option.id
+                        prefs.edit().putString("city_id", option.id).apply()
+                        settingsMode = 0
+                    }, modifier = Modifier.fillMaxWidth(),
+                        label = { Text(option.title(Locale.getDefault())) })
+                }
+            }
+        } else if (settingsMode == 2) {
+            ScalingLazyColumn(modifier = Modifier.fillMaxSize().background(Color.Black),
+                horizontalAlignment = Alignment.CenterHorizontally) {
+                item {
+                    Chip(onClick = { settingsMode = 0 }, modifier = Modifier.fillMaxWidth(),
+                        label = { Text(context.getString(R.string.wear_back)) })
+                }
+                items(Minhag.entries) { option ->
+                    val label = when (option) {
+                        Minhag.CHABAD -> R.string.wear_chabad
+                        Minhag.LITVISH -> R.string.wear_litvish
+                        Minhag.SEFARDI -> R.string.wear_sefardi
+                    }
+                    Chip(onClick = {
+                        selectedCommunity = option.name
+                        prefs.edit().putString("minhag", option.name).apply()
+                        settingsMode = 0
+                    }, modifier = Modifier.fillMaxWidth(), label = { Text(context.getString(label)) })
+                }
+            }
+        } else if (settingsMode == 3) {
+            ScalingLazyColumn(modifier = Modifier.fillMaxSize().background(Color.Black),
+                horizontalAlignment = Alignment.CenterHorizontally) {
+                item {
+                    Chip(onClick = { settingsMode = 0 }, modifier = Modifier.fillMaxWidth(),
+                        label = { Text(context.getString(R.string.wear_back)) })
+                }
+                items(listOf(-1, 18, 20, 30, 40)) { minutes ->
+                    Chip(onClick = {
+                        candleMinutes = minutes
+                        prefs.edit().putInt("candle_minutes", minutes).apply()
+                        settingsMode = 0
+                    }, modifier = Modifier.fillMaxWidth(),
+                        label = { Text(if (minutes == -1) context.getString(R.string.wear_local_candles)
+                            else context.getString(R.string.wear_candle_min, minutes)) })
+                }
+            }
+        } else {
         val listState = rememberScalingLazyListState()
         ScalingLazyColumn(
             modifier = Modifier.fillMaxSize().background(Color.Black),
@@ -136,6 +218,23 @@ fun WearApp() {
                     passed = !z.exactTime.isAfter(cityNow)
                 )
             }
+            item {
+                Chip(onClick = { settingsMode = 1 }, modifier = Modifier.fillMaxWidth(),
+                    label = { Text(context.getString(R.string.wear_city) + ": " + city.title(Locale.getDefault())) })
+            }
+            item {
+                Chip(onClick = { settingsMode = 2 }, modifier = Modifier.fillMaxWidth(),
+                    label = { Text(context.getString(R.string.wear_community) + ": " + selectedCommunity) })
+            }
+            item {
+                Chip(onClick = { settingsMode = 3 }, modifier = Modifier.fillMaxWidth(),
+                    label = { Text(context.getString(R.string.wear_candle_title)) })
+            }
+            item {
+                Text(context.getString(R.string.wear_standalone_note),
+                    color = Color.Gray, fontSize = 11.sp, textAlign = TextAlign.Center)
+            }
+        }
         }
     }
 }
