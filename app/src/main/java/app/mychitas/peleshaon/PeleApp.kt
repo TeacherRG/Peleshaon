@@ -16,14 +16,14 @@ class PeleApp : Application() {
         super.onCreate()
         ZmanimEngine.minhag = Prefs.minhag(this)
         AppLang.applyToProcess(this)
-        // Android 13+: язык приложения уже в ресурсах — пусть будет и языком по умолчанию (будильники, виджеты, уведомления)
-        if (Build.VERSION.SDK_INT >= 33) Locale.setDefault(resources.configuration.locales[0])
     }
 }
 
 /**
  * Язык приложения (владелец, 18.11.2026: «отдельно настройки: выбор языка»): «как в телефоне» или один из пяти.
- * Android 13+ — системный язык приложения (LocaleManager); раньше — подменой конфигурации в окнах и у приложения.
+ * Язык ставится сам, подменой конфигурации в окнах и у приложения — на всех версиях: системный язык приложения
+ * (LocaleManager, Android 13+) на некоторых телефонах (ColorOS) не применяется — владелец, 18.11.2026: «язык нигде не меняется».
+ * LocaleManager тоже ставится — чтобы выбор был виден в настройках телефона.
  */
 object AppLang {
     /** "" — как в телефоне */
@@ -33,18 +33,16 @@ object AppLang {
 
     fun set(context: Context, tag: String) {
         Prefs.of(context).edit().putString("lang", tag).apply()
-        if (Build.VERSION.SDK_INT >= 33) {
+        applyToProcess(context.applicationContext)
+        if (Build.VERSION.SDK_INT >= 33) runCatching {
             context.getSystemService(LocaleManager::class.java).applicationLocales =
                 if (tag.isEmpty()) LocaleList.getEmptyLocaleList() else LocaleList.forLanguageTags(tag)
-        } else {
-            applyToProcess(context.applicationContext)
         }
     }
 
-    /** До Android 13 — язык процесса: по умолчанию и в ресурсах приложения (их читают будильники и виджеты). */
+    /** Язык процесса: по умолчанию и в ресурсах приложения (их читают будильники и виджеты). */
     @Suppress("DEPRECATION")
     fun applyToProcess(app: Context) {
-        if (Build.VERSION.SDK_INT >= 33) return
         val t = tag(app)
         val loc = if (t.isEmpty()) Resources0.system else Locale.forLanguageTag(t)
         Locale.setDefault(loc)
@@ -53,12 +51,10 @@ object AppLang {
         res.updateConfiguration(conf, res.displayMetrics)
     }
 
-    /** Окно — на выбранном языке (до Android 13). */
+    /** Окно — на выбранном языке. */
     fun wrap(base: Context): Context {
-        if (Build.VERSION.SDK_INT >= 33) return base
         val t = tag(base)
-        if (t.isEmpty()) return base
-        val loc = Locale.forLanguageTag(t)
+        val loc = if (t.isEmpty()) Resources0.system else Locale.forLanguageTag(t)
         Locale.setDefault(loc)
         val conf = Configuration(base.resources.configuration).apply { setLocale(loc) }
         return base.createConfigurationContext(conf)
