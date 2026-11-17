@@ -93,20 +93,21 @@ object MoonReminder {
     }
 
     private fun notify(context: Context, m: MoonPosition, end: ZonedDateTime) {
+        val localized = app.mychitas.peleshaon.AppLang.wrap(context)
         val nm = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             nm.createNotificationChannel(
-                NotificationChannel(CHANNEL, context.getString(R.string.kl_channel), NotificationManager.IMPORTANCE_LOW).apply {
+                NotificationChannel(CHANNEL, localized.getString(R.string.kl_channel), NotificationManager.IMPORTANCE_LOW).apply {
                     setShowBadge(false)
                     setSound(null, null)
                     enableVibration(false)
                 }
             )
         }
-        val text = moonLine(context, m) + " · " + context.getString(R.string.kl_until, untilText(end))
+        val text = moonLine(localized, m) + " · " + localized.getString(R.string.kl_until, untilText(end))
         val n = NotificationCompat.Builder(context, CHANNEL)
             .setSmallIcon(R.drawable.ic_stat_clock)
-            .setContentTitle(context.getString(R.string.kl_notif_title))
+            .setContentTitle(localized.getString(R.string.kl_notif_title))
             .setContentText(text)
             .setStyle(NotificationCompat.BigTextStyle().bigText(text))
             .setSilent(true)

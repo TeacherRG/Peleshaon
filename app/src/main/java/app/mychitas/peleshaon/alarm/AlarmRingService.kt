@@ -20,6 +20,9 @@ enum class WakeMode {
 }
 
 class AlarmRingService : Service() {
+    override fun attachBaseContext(newBase: Context) {
+        super.attachBaseContext(app.mychitas.peleshaon.AppLang.wrap(newBase))
+    }
 
     private val scope = CoroutineScope(Dispatchers.Main + SupervisorJob())
     private var mediaPlayer: MediaPlayer? = null

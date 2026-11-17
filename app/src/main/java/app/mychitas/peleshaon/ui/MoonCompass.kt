@@ -62,6 +62,9 @@ import androidx.compose.ui.graphics.nativeCanvas
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalLifecycleOwner
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -127,6 +130,7 @@ private data class Heading(val deg: Float, val low: Boolean)
 @Composable
 private fun rememberHeading(lat: Double, lon: Double): Pair<Boolean, Heading?> {
     val context = LocalContext.current
+    val lifecycleOwner = LocalLifecycleOwner.current
     val sm = remember { context.getSystemService(Context.SENSOR_SERVICE) as SensorManager }
     val sensor = remember {
         sm.getDefaultSensor(Sensor.TYPE_ROTATION_VECTOR) ?: sm.getDefaultSensor(Sensor.TYPE_GEOMAGNETIC_ROTATION_VECTOR)
@@ -135,7 +139,7 @@ private fun rememberHeading(lat: Double, lon: Double): Pair<Boolean, Heading?> {
     val declination = remember(lat, lon) {
         GeomagneticField(lat.toFloat(), lon.toFloat(), 0f, System.currentTimeMillis()).declination
     }
-    DisposableEffect(sensor, declination) {
+    DisposableEffect(sensor, declination, lifecycleOwner) {
         if (sensor == null) return@DisposableEffect onDispose { }
         val r = FloatArray(9)
         val out = FloatArray(9)
@@ -166,8 +170,21 @@ private fun rememberHeading(lat: Double, lon: Double): Pair<Boolean, Heading?> {
                 low = accuracy <= SensorManager.SENSOR_STATUS_ACCURACY_LOW
             }
         }
-        sm.registerListener(listener, sensor, SensorManager.SENSOR_DELAY_UI)
-        onDispose { sm.unregisterListener(listener) }
+        val observer = LifecycleEventObserver { _, event ->
+            when (event) {
+                Lifecycle.Event.ON_RESUME -> sm.registerListener(listener, sensor, SensorManager.SENSOR_DELAY_UI)
+                Lifecycle.Event.ON_PAUSE -> sm.unregisterListener(listener)
+                else -> Unit
+            }
+        }
+        lifecycleOwner.lifecycle.addObserver(observer)
+        if (lifecycleOwner.lifecycle.currentState.isAtLeast(Lifecycle.State.RESUMED)) {
+            sm.registerListener(listener, sensor, SensorManager.SENSOR_DELAY_UI)
+        }
+        onDispose {
+            sm.unregisterListener(listener)
+            lifecycleOwner.lifecycle.removeObserver(observer)
+        }
     }
     return (sensor != null) to heading
 }

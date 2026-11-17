@@ -32,10 +32,13 @@ object AppLang {
     val TAGS = listOf("", "uk", "ru", "en", "de", "he")
 
     private const val MIGRATED = "lang_platform_migrated"
+    private const val FALLBACK = "lang_platform_fallback"
 
     /** Android 13+: systemic per-app language is authoritative, including changes made in system Settings. */
     fun tag(context: Context): String {
         val prefs = Prefs.of(context)
+        // OEM fallback: preserve the user's manual language if platform locale write fails.
+        if (prefs.getBoolean(FALLBACK, false)) return prefs.getString("lang", "") ?: ""
         if (Build.VERSION.SDK_INT >= 33) {
             val systemTags = runCatching {
                 context.getSystemService(LocaleManager::class.java).applicationLocales.toLanguageTags()
@@ -62,16 +65,19 @@ object AppLang {
                 manager.applicationLocales = LocaleList.forLanguageTags(stored)
             }
             prefs.edit().putBoolean(MIGRATED, true).apply()
+        }.onFailure {
+            prefs.edit().putBoolean(FALLBACK, true).apply()
         }
     }
 
     fun set(context: Context, tag: String) {
         val selected = tag.takeIf { it in TAGS } ?: ""
-        Prefs.of(context).edit().putString("lang", selected).putBoolean(MIGRATED, true).apply()
-        if (Build.VERSION.SDK_INT >= 33) runCatching {
+        val applied = if (Build.VERSION.SDK_INT >= 33) runCatching {
             context.getSystemService(LocaleManager::class.java).applicationLocales =
                 if (selected.isEmpty()) LocaleList.getEmptyLocaleList() else LocaleList.forLanguageTags(selected)
-        }
+        }.isSuccess else true
+        Prefs.of(context).edit().putString("lang", selected).putBoolean(MIGRATED, true)
+            .putBoolean(FALLBACK, !applied).apply()
         applyToProcess(context.applicationContext)
     }
 
