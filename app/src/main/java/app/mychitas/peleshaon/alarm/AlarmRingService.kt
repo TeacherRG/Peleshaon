@@ -4,6 +4,8 @@ import android.app.*
 import android.content.Context
 import android.content.Intent
 import android.media.AudioAttributes
+import android.media.AudioManager
+import android.media.AudioFocusRequest
 import android.media.MediaPlayer
 import android.media.RingtoneManager
 import android.os.*
@@ -27,6 +29,8 @@ class AlarmRingService : Service() {
     private val scope = CoroutineScope(Dispatchers.Main + SupervisorJob())
     private var mediaPlayer: MediaPlayer? = null
     private var vibrator: Vibrator? = null
+    private var audioManager: AudioManager? = null
+    private var focusRequest: AudioFocusRequest? = null
     // Only one alarm may control the foreground service; stale notification actions are ignored.
     private var activeSession: String? = null
     private var activeType: String? = null
@@ -122,6 +126,7 @@ class AlarmRingService : Service() {
         // Android 10+ blocks arbitrary background Activity launches; full-screen notification owns the launch.
 
         if (wakeMode != WakeMode.LIGHT_ONLY) {
+            requestAlarmAudioFocus()
             startCrescendoAudio()
         }
         if (useVibration && wakeMode != WakeMode.LIGHT_ONLY) {
@@ -136,6 +141,38 @@ class AlarmRingService : Service() {
             }
         }
 
+    }
+
+    private fun requestAlarmAudioFocus() {
+        val manager = getSystemService(Context.AUDIO_SERVICE) as AudioManager
+        audioManager = manager
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            val req = AudioFocusRequest.Builder(AudioManager.AUDIOFOCUS_GAIN_TRANSIENT_EXCLUSIVE)
+                .setAudioAttributes(AudioAttributes.Builder()
+                    .setUsage(AudioAttributes.USAGE_ALARM)
+                    .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION).build())
+                .setOnAudioFocusChangeListener { /* alarm ends only after user action or timeout */ }
+                .build()
+            focusRequest = req
+            manager.requestAudioFocus(req)
+        } else {
+            @Suppress("DEPRECATION")
+            manager.requestAudioFocus(null, AudioManager.STREAM_ALARM,
+                AudioManager.AUDIOFOCUS_GAIN_TRANSIENT)
+        }
+    }
+
+    private fun releaseAlarmAudioFocus() {
+        audioManager?.let { manager ->
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                focusRequest?.let(manager::abandonAudioFocusRequest)
+            } else {
+                @Suppress("DEPRECATION")
+                manager.abandonAudioFocus(null)
+            }
+        }
+        focusRequest = null
+        audioManager = null
     }
 
     private fun startCrescendoAudio() {
@@ -259,6 +296,7 @@ class AlarmRingService : Service() {
         }
         mediaPlayer = null
         vibrator?.cancel()
+        releaseAlarmAudioFocus()
     }
 
     override fun onDestroy() {
