@@ -85,6 +85,9 @@ import app.mychitas.peleshaon.domain.Dial
 import app.mychitas.peleshaon.domain.ZmanType
 import app.mychitas.peleshaon.domain.ZmanimEngine
 import app.mychitas.peleshaon.domain.Minhag
+import app.mychitas.peleshaon.domain.JewishCal
+import app.mychitas.peleshaon.domain.Mevarchim
+import androidx.compose.ui.res.pluralStringResource
 import app.mychitas.peleshaon.AppLang
 import androidx.compose.foundation.layout.FlowRow
 import app.mychitas.peleshaon.domain.KiddushLevanaRules
@@ -102,7 +105,7 @@ import java.util.Locale
 import kotlin.math.roundToInt
 
 /** Окно поверх часов: город, Шабат, два будильника, все времена, «Как считаем». */
-private enum class Panel { SETTINGS, CITY, SHABBAT, WAKE, STUDY, CUSTOM, TIMES, INFO, PRIVACY, CALENDAR }
+private enum class Panel { SETTINGS, KASHRUT, CITY, SHABBAT, WAKE, STUDY, CUSTOM, TIMES, INFO, PRIVACY, CALENDAR }
 
 /** «осталось / через N ч M мин» — как на сайте: минуты вверх, больше суток — дни и часы. */
 private fun until(context: Context, now: ZonedDateTime, at: ZonedDateTime, deadline: Boolean): String {
@@ -271,10 +274,33 @@ fun ClockScreen(onNightScreen: () -> Unit, onIntro: () -> Unit = {}, onMoon: () 
             }
             // Кидуш Левана: в подходящий вечер — плашка с полумесяцем вместо подсказки; нажатие — лунный компас
             val kl = remember(city, minute, version) { runCatching { KiddushLevanaRules.now(cityNow, city) }.getOrNull() }
+            // Шабат мевархим — в пятницу и в субботу: благословение месяца и молад
+            val mev = remember(city, minute, version) {
+                if (cityNow.dayOfWeek == java.time.DayOfWeek.FRIDAY || cityNow.dayOfWeek == java.time.DayOfWeek.SATURDAY)
+                    JewishCal.mevarchim(cityNow.toLocalDate(), city.isIsrael) else null
+            }
             if (pop == null && kl != null) {
                 MoonPill(kl, onClick = onMoon)
+            } else if (pop == null && mev != null) {
+                MevarchimPill(mev, onClick = { panel = Panel.SHABBAT })
             } else if (pop == null && !day.isPolarAnomaly) {
                 Text(stringResource(R.string.hint), color = ClockColors.Muted, fontSize = 12.sp, textAlign = TextAlign.Center)
+            }
+            // всегда под рукой: лунный компас и таймер «мясное → молочное»
+            if (pop == null) Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                Chip(onClick = onMoon) {
+                    Text("🌙", fontSize = 14.sp)
+                    Text(stringResource(R.string.tool_moon), fontWeight = FontWeight.Bold, fontSize = 13.sp, color = ClockColors.Ink)
+                }
+                val k = remember(version, minute) { Prefs.kashrutAt(context) }
+                Chip(onClick = { panel = Panel.KASHRUT }) {
+                    Text("🍖→🥛", fontSize = 13.sp)
+                    Text(
+                        if (k > System.currentTimeMillis()) stringResource(R.string.tool_kashrut_until, java.time.Instant.ofEpochMilli(k).atZone(zone).format(HHMM))
+                        else stringResource(R.string.tool_kashrut),
+                        fontWeight = FontWeight.Bold, fontSize = 13.sp, color = ClockColors.Ink
+                    )
+                }
             }
 
             // ---- кнопки внизу: Шабат · Будильник · Учёба · Времена
@@ -335,6 +361,7 @@ fun ClockScreen(onNightScreen: () -> Unit, onIntro: () -> Unit = {}, onMoon: () 
                 Panel.PRIVACY -> PrivacySheet()
                 Panel.CALENDAR -> CalendarSheet(city, cityNow)
                 Panel.SETTINGS -> SettingsSheet(onChange = bump)
+                Panel.KASHRUT -> SheetColumn { KashrutCard(bump) }
             }
         }
     }
@@ -545,7 +572,58 @@ private fun ShabbatSheet(
             }
         }
         Note(stringResource(R.string.shabbat_note))
+        JewishCal.mevarchim(sh.friday, city.isIsrael)?.let { m ->
+            HorizontalDivider(color = ClockColors.Line)
+            MevarchimBlock(m)
+        }
     }
+}
+
+/** «Молад: вторник, 8 декабря, 3:47 и 5 частей». */
+@Composable
+private fun moladText(m: Mevarchim): String {
+    val locale = androidx.compose.ui.platform.LocalConfiguration.current.locales[0]
+    val day = m.moladDate.dayOfWeek.getDisplayName(TextStyle.FULL, locale) + ", " +
+        m.moladDate.format(DateTimeFormatter.ofPattern("d MMMM", locale))
+    val time = String.format(Locale.ROOT, "%d:%02d", m.moladHour, m.moladMinute)
+    val parts = pluralStringResource(R.plurals.chalakim, m.moladChalakim, m.moladChalakim)
+    return stringResource(R.string.mev_molad, day, time, parts)
+}
+
+/** Плашка на главном экране в пятницу и субботу перед новым месяцем. */
+@Composable
+private fun MevarchimPill(m: Mevarchim, onClick: () -> Unit) {
+    val locale = androidx.compose.ui.platform.LocalConfiguration.current.locales[0]
+    Surface(
+        onClick = onClick,
+        shape = RoundedCornerShape(16.dp),
+        color = ClockColors.Surface,
+        border = BorderStroke(1.dp, ClockColors.Gold.copy(alpha = 0.6f)),
+        modifier = Modifier.widthIn(max = 420.dp).fillMaxWidth()
+    ) {
+        Row(modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp), verticalAlignment = Alignment.CenterVertically) {
+            Text("🌒", fontSize = 22.sp, modifier = Modifier.padding(end = 10.dp))
+            Column(Modifier.weight(1f)) {
+                Text(stringResource(R.string.mev_title) + " · " + jewishMonthOnly(m.month, m.leap, locale),
+                    color = ClockColors.GoldDeep, fontWeight = FontWeight.Bold, fontSize = 14.sp, maxLines = 1)
+                Text(moladText(m), color = ClockColors.Ink2, fontSize = 12.sp, maxLines = 1, overflow = TextOverflow.Ellipsis)
+            }
+            Text("›", color = ClockColors.GoldDeep, fontSize = 22.sp)
+        }
+    }
+}
+
+/** В окне «Шабат»: благословение месяца, молад, дни Рош Ходеш (у Хабада — и весь Теґилим). */
+@Composable
+private fun MevarchimBlock(m: Mevarchim) {
+    val locale = androidx.compose.ui.platform.LocalConfiguration.current.locales[0]
+    Text("🌒  " + stringResource(R.string.mev_title), fontWeight = FontWeight.Bold, color = ClockColors.Ink)
+    Text(stringResource(R.string.mev_bless, jewishMonthOnly(m.month, m.leap, locale)), color = ClockColors.Ink2)
+    Text(moladText(m), color = ClockColors.GoldDeep, fontWeight = FontWeight.Bold)
+    val rc = m.roshChodesh.joinToString(" · ") { it.format(DateTimeFormatter.ofPattern("EEEE, d MMMM", locale)) }
+    Text(stringResource(R.string.mev_rc, rc), color = ClockColors.Ink2)
+    Note(stringResource(R.string.mev_note))
+    if (ZmanimEngine.minhag == Minhag.CHABAD) Note(stringResource(R.string.mev_tehillim))
 }
 
 // ---------------------------------------------------------------- будильники

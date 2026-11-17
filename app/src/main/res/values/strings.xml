@@ -233,4 +233,17 @@
     <string name="note_acc">Calculated from the city\'s coordinates, accurate to 1–2 minutes: do not leave it to the last minute and check your community\'s calendar.</string>
     <string name="kl_note_litvish">Times follow the Ashkenazi custom: from 3 days after the molad to the middle of the month, not on the eve of Shabbat or Yom Tov; in Av — after Tisha B\'Av, in Tishrei — after Yom Kippur. Ask your community rabbi.</string>
     <string name="kl_note_sefardi">Times follow the Sephardi custom: from 7 days after the molad to 15 days, not on the eve of Shabbat or Yom Tov; in Av — after Tisha B\'Av, in Tishrei — after Yom Kippur. Ask your community rabbi.</string>
+    <string name="mev_title">Shabbat Mevarchim</string>
+    <string name="mev_bless">The new month is blessed: %1$s</string>
+    <string name="mev_molad">Molad: %1$s, %2$s and %3$s</string>
+    <string name="mev_rc">Rosh Chodesh: %1$s</string>
+    <string name="mev_note">The molad is given as it is announced in the synagogue — in Jerusalem time (a «part», chelek, is 1/18 of a minute).</string>
+    <string name="mev_tehillim">By Chabad custom, on Shabbat Mevarchim the whole book of Tehillim is said before the morning prayer.</string>
+    <string name="tool_moon">Moon</string>
+    <string name="tool_kashrut">6 hours</string>
+    <string name="tool_kashrut_until">dairy at %1$s</string>
+    <plurals name="chalakim">
+        <item quantity="one">%d part</item>
+        <item quantity="other">%d parts</item>
+    </plurals>
 </resources>

@@ -71,6 +71,7 @@ private val HOLIDAYS: Map<String, List<String>> = mapOf(
     "special_SHIRA" to listOf("Шабат Шира", "Shabbat Shirah", "Schabbat Schira", "שבת שירה"),
     "special_HAGADOL" to listOf("Шабат ґа-Гадоль", "Shabbat HaGadol", "Schabbat HaGadol", "שבת הגדול"),
     "special_CHAZON" to listOf("Шабат Хазон", "Shabbat Chazon", "Schabbat Chason", "שבת חזון"),
+    "mevarchim" to listOf("Шабат мевархим", "Shabbat Mevarchim", "Schabbat Mewarchim", "שבת מברכים"),
     "special_NACHAMU" to listOf("Шабат Нахаму", "Shabbat Nachamu", "Schabbat Nachamu", "שבת נחמו")
 )
 
@@ -153,7 +154,7 @@ private val UK_NAMES: Map<String, String> = mapOf(
     "День рождения Ребе Рашаба" to "День народження Ребе Рашаба",
     "Шабат Шкалим" to "Шабат Шкалім", "Шабат Захор" to "Шабат Захор", "Шабат Пара" to "Шабат Пара", "Шабат ґа-Ходеш" to "Шабат га-Ходеш",
     "Шабат Шува" to "Шабат Шува", "Шабат Шира" to "Шабат Шіра", "Шабат ґа-Гадоль" to "Шабат га-Ґадоль", "Шабат Хазон" to "Шабат Хазон",
-    "Шабат Нахаму" to "Шабат Нахаму",
+    "Шабат Нахаму" to "Шабат Нахаму", "Шабат мевархим" to "Шабат мевархім",
     // главы
     "Берешит" to "Берешит", "Ноах" to "Ноах", "Лех леха" to "Лех леха", "Вайера" to "Ваєра", "Хаей Сара" to "Хаєй Сара", "Толдот" to "Толдот",
     "Ваеце" to "Ваєце", "Ваишлах" to "Ваїшлах", "Ваешев" to "Ваєшев", "Микец" to "Мікец", "Ваигаш" to "Ваїґаш", "Ваехи" to "Ваєхі",
@@ -197,7 +198,9 @@ fun eventName(e: CalEvent, locale: Locale = Locale.getDefault()): String {
             L.HE -> "יום ${e.n} לעומר"
             L.UK -> "${e.n}-й день Омеру"
         }
-        else -> HOLIDAYS[e.key]?.let { pick(it, l) } ?: e.key
+        // Шабат мевархим — с месяцем, который благословляют
+        else -> (HOLIDAYS[e.key]?.let { pick(it, l) } ?: e.key) +
+            if (e.key == "mevarchim") " · " + jewishMonthOnly(e.n, false, locale) else ""
     }
 }
 
@@ -215,6 +218,13 @@ private val MONTH_TITLES: Map<L, List<String>> = mapOf(
 )
 
 /** «Кислев 5787» — заголовок месяца (в високосный год 12-й месяц — Адар I). */
+/** «Тевет» — название месяца (именительный); в високосный год 12-й — Адар I. */
+fun jewishMonthOnly(month: Int, leap: Boolean, locale: Locale = Locale.getDefault()): String {
+    val l = lang(locale)
+    return if (leap && month == 12) (if (l == L.HE) "אדר א׳" else if (l == L.RU || l == L.UK) "Адар I" else "Adar I")
+    else MONTH_TITLES.getValue(l)[(month - 1).coerceIn(0, 12)]
+}
+
 fun jewishMonthTitle(jd: JewishDay, locale: Locale = Locale.getDefault()): String {
     val l = lang(locale)
     val name = if (jd.leap && jd.month == 12) (if (l == L.HE) "אדר א׳" else "Adar I".let { if (l == L.RU || l == L.UK) "Адар I" else it })

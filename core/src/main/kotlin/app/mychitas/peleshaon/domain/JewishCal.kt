@@ -15,6 +15,24 @@ enum class CalKind { HOLIDAY, EREV, FAST, MINOR, ROSH_CHODESH, CHABAD, PARSHA, S
 /** Событие дня: вид, ключ названия (`pesach`, `chabad_19_kislev`, `parsha_VAYETZEI`…) и число (день Омера, свеча Хануки). */
 data class CalEvent(val kind: CalKind, val key: String, val n: Int = 0)
 
+/**
+ * Шабат мевархим — благословение нового месяца в последний Шабат месяца (23–29-го; перед тишреем — нет).
+ * Молад нового месяца — как его объявляют в синагоге: день, часы и минуты по времени Йерушалаима, и «части» (халаким, 1/18 минуты).
+ */
+data class Mevarchim(
+    val shabbat: LocalDate,
+    /** новый месяц — как в KosherJava: нисан — 1 … адар II — 13 */
+    val month: Int,
+    val leap: Boolean,
+    val year: Int,
+    val moladDate: LocalDate,
+    val moladHour: Int,
+    val moladMinute: Int,
+    val moladChalakim: Int,
+    /** дни Рош Ходеш — один или два */
+    val roshChodesh: List<LocalDate>
+)
+
 data class CalDay(
     val date: LocalDate,
     val jd: JewishDay,
@@ -117,9 +135,26 @@ object JewishCal {
             if (p != JewishCalendar.Parsha.NONE) ev += CalEvent(CalKind.PARSHA, "parsha_${p.name}")
             val sp = jc.specialShabbos
             if (sp != JewishCalendar.Parsha.NONE) ev += CalEvent(CalKind.SPECIAL_SHABBAT, "special_${sp.name}")
+            mevarchim(date, isIsrael)?.let { ev += CalEvent(CalKind.SPECIAL_SHABBAT, "mevarchim", it.month) }
         }
         val jd = JewishDay(jc.jewishDayOfMonth, jc.jewishMonth, jc.isJewishLeapYear, jc.jewishYear)
         return CalDay(date, jd, ev, jc.isAssurBemelacha, jc.hasCandleLighting())
+    }
+
+    /**
+     * Шабат мевархим этой недели (с воскресенья по субботу — ближайший Шабат) и молад нового месяца; не мевархим — null.
+     */
+    fun mevarchim(date: LocalDate, isIsrael: Boolean): Mevarchim? {
+        val sat = date.plusDays(((java.time.DayOfWeek.SATURDAY.value - date.dayOfWeek.value + 7) % 7).toLong())
+        val jc = jcOf(sat, isIsrael)
+        if (jc.jewishDayOfMonth !in 23..29 || jc.jewishMonth == JewishCalendar.ELUL) return null
+        var first = sat
+        while (jcOf(first, isIsrael).jewishDayOfMonth != 1) first = first.plusDays(1)
+        val rc = if (jcOf(first.minusDays(1), isIsrael).jewishDayOfMonth == 30) listOf(first.minusDays(1), first) else listOf(first)
+        val next = jcOf(first, isIsrael)
+        val m = next.molad
+        return Mevarchim(sat, next.jewishMonth, next.isJewishLeapYear, next.jewishYear,
+            m.localDate, m.moladHours, m.moladMinutes, m.moladChalakim, rc)
     }
 
     /** Все дни еврейского месяца, в котором стоит `date`. */

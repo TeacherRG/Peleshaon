@@ -233,4 +233,18 @@
     <string name="note_acc">החישוב לפי קואורדינטות העיר, בדיוק של 1–2 דקות: אל תשאירו לרגע האחרון והשוו ללוח של הקהילה.</string>
     <string name="kl_note_litvish">הזמנים לפי מנהג אשכנז: משלושה ימים אחרי המולד עד חצי החודש, לא בליל שבת ויום טוב; באב — אחרי תשעה באב, בתשרי — אחרי יום כיפור. התייעצו עם רב הקהילה.</string>
     <string name="kl_note_sefardi">הזמנים לפי מנהג הספרדים: משבעה עד חמישה עשר ימים אחרי המולד, לא בליל שבת ויום טוב; באב — אחרי תשעה באב, בתשרי — אחרי יום כיפור. התייעצו עם רב הקהילה.</string>
+    <string name="mev_title">שבת מברכים</string>
+    <string name="mev_bless">מברכים את החודש: %1$s</string>
+    <string name="mev_molad">המולד: %1$s, %2$s ו־%3$s</string>
+    <string name="mev_rc">ראש חודש: %1$s</string>
+    <string name="mev_note">המולד — כפי שמכריזים בבית הכנסת: לפי שעון ירושלים (חלק — 1/18 דקה).</string>
+    <string name="mev_tehillim">במנהג חב״ד, בשבת מברכים אומרים את כל ספר התהלים לפני תפילת שחרית.</string>
+    <string name="tool_moon">ירח</string>
+    <string name="tool_kashrut">6 שעות</string>
+    <string name="tool_kashrut_until">חלבי מ־%1$s</string>
+    <plurals name="chalakim">
+        <item quantity="one">חלק %d</item>
+        <item quantity="two">%d חלקים</item>
+        <item quantity="other">%d חלקים</item>
+    </plurals>
 </resources>

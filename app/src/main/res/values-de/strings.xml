@@ -233,4 +233,17 @@
     <string name="note_acc">Berechnet nach den Koordinaten der Stadt, auf 1–2 Minuten genau: Warte nicht bis zur letzten Minute und vergleiche mit dem Kalender deiner Gemeinde.</string>
     <string name="kl_note_litvish">Die Zeiten folgen dem aschkenasischen Brauch: ab 3 Tagen nach dem Molad bis zur Mitte des Monats, nicht am Vorabend von Schabbat und Jom Tow; im Aw — nach Tischa beAw, im Tischri — nach Jom Kippur. Frag den Rabbiner deiner Gemeinde.</string>
     <string name="kl_note_sefardi">Die Zeiten folgen dem sefardischen Brauch: von 7 bis 15 Tagen nach dem Molad, nicht am Vorabend von Schabbat und Jom Tow; im Aw — nach Tischa beAw, im Tischri — nach Jom Kippur. Frag den Rabbiner deiner Gemeinde.</string>
+    <string name="mev_title">Schabbat Mewarchim</string>
+    <string name="mev_bless">Der neue Monat wird gesegnet: %1$s</string>
+    <string name="mev_molad">Molad: %1$s, %2$s und %3$s</string>
+    <string name="mev_rc">Rosch Chodesch: %1$s</string>
+    <string name="mev_note">Der Molad wird so angegeben, wie man ihn in der Synagoge ankündigt — nach Jerusalemer Zeit (ein «Teil», Chelek, ist 1/18 Minute).</string>
+    <string name="mev_tehillim">Nach dem Brauch von Chabad sagt man am Schabbat Mewarchim vor dem Morgengebet das ganze Buch Tehillim.</string>
+    <string name="tool_moon">Mond</string>
+    <string name="tool_kashrut">6 Stunden</string>
+    <string name="tool_kashrut_until">milchig ab %1$s</string>
+    <plurals name="chalakim">
+        <item quantity="one">%d Teil</item>
+        <item quantity="other">%d Teile</item>
+    </plurals>
 </resources>
