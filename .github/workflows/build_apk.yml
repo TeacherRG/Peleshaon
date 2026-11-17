@@ -3,12 +3,6 @@ name: Build Pele Shaon APK
 # Manual trigger only: avoid spending runner minutes on each review commit.
 on:
   workflow_dispatch:
-  # Single controlled Beta3 validation push; restore manual-only immediately afterward.
-  push:
-    branches:
-      - fixes/independent-beta
-    paths:
-      - .github/workflows/build_apk.yml
 
 permissions:
   contents: read
