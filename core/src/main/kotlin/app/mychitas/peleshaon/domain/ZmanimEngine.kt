@@ -148,7 +148,8 @@ object ZmanimEngine {
             isNextJewishDayAfterSunset = isAfterSunset,
             jewishDateHebrew = hebStr,
             jewishDateTranslit = translitStr,
-            isPolarAnomaly = items.isEmpty(),
+            isPolarAnomaly = items.none { it.type == ZmanType.SUNRISE } ||
+                items.none { it.type == ZmanType.SUNSET },
             items = items,
             candleLighting = todaySunset.minusMinutes(CANDLE_MIN),
             tzeitShabbat = havdalahOf(todayCal, zoneId) ?: todaySunset.plusMinutes(END_MIN)

@@ -103,6 +103,7 @@
     <string name="alarm_no_next">No rings in the next three weeks.</string>
     <string name="alarm_no_days">Choose at least one day of the week.</string>
     <string name="alarm_skip">%1$s — no ring: %2$s</string>
+    <string name="why_unknown">astronomical boundary unknown</string>
     <string name="why_yom_tov">festival</string>
     <string name="why_yom_kippur">Yom Kippur</string>
     <string name="why_chol_hamoed">Chol HaMoed</string>

@@ -135,7 +135,7 @@ class AlarmRingActivity : ComponentActivity() {
                     Spacer(modifier = Modifier.height(24.dp))
 
                     // «Проверить звук» — без «Отложить»
-                    if (!test) OutlinedButton(
+                    if (!test && alarmType != app.mychitas.peleshaon.Prefs.KASHRUT) OutlinedButton(
                         onClick = {
                             controlAlarm(AlarmRingService.ACTION_SNOOZE)
                         },

@@ -103,6 +103,7 @@
     <string name="alarm_no_next">В ближайшие три недели звонков нет.</string>
     <string name="alarm_no_days">Выберите хотя бы один день недели.</string>
     <string name="alarm_skip">%1$s — без звонка: %2$s</string>
+    <string name="why_unknown">астрономическая граница неизвестна</string>
     <string name="why_yom_tov">праздник</string>
     <string name="why_yom_kippur">Йом Кипур</string>
     <string name="why_chol_hamoed">Хол ґа-моэд</string>

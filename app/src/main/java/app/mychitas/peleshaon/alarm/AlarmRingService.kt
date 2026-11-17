@@ -30,13 +30,19 @@ class AlarmRingService : Service() {
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         if (intent?.action == ACTION_STOP) {
-            if (matchesSession(intent)) stopSelf()
+            if (activeSession == null || matchesSession(intent)) stopSelf()
             return START_NOT_STICKY
         }
         if (intent?.action == ACTION_SNOOZE) {
             if (matchesSession(intent)) {
                 val type = activeType ?: return START_NOT_STICKY
-                AlarmScheduler.scheduleExactAlarm(this, java.time.ZonedDateTime.now().plusMinutes(5), type, isSnooze = true)
+                // Kashrut is a one-shot timer. Its original expiry clears state,
+                // so snoozing it would silently disappear on the next re-schedule.
+                if (type != app.mychitas.peleshaon.Prefs.KASHRUT) {
+                    AlarmScheduler.scheduleExactAlarm(this, java.time.ZonedDateTime.now().plusMinutes(5), type, isSnooze = true)
+                }
+                stopSelf()
+            } else if (activeSession == null) {
                 stopSelf()
             }
             return START_NOT_STICKY
@@ -96,7 +102,8 @@ class AlarmRingService : Service() {
             .setContentIntent(fullScreenPendingIntent)
             .setOngoing(true)
             .addAction(0, getString(R.string.btn_stop), action(ACTION_STOP, 2002))
-            .apply { if (!test) addAction(0, getString(R.string.btn_snooze_5), action(ACTION_SNOOZE, 2003)) }
+            .apply { if (!test && alarmType != app.mychitas.peleshaon.Prefs.KASHRUT)
+                addAction(0, getString(R.string.btn_snooze_5), action(ACTION_SNOOZE, 2003)) }
             .build()
 
         val fgsType = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {

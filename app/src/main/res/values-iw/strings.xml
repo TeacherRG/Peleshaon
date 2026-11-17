@@ -103,6 +103,7 @@
     <string name="alarm_no_next">בשלושת השבועות הקרובים אין צלצולים.</string>
     <string name="alarm_no_days">בחרו לפחות יום אחד בשבוע.</string>
     <string name="alarm_skip">%1$s — בלי צלצול: %2$s</string>
+    <string name="why_unknown">זמן אסטרונומי אינו ידוע</string>
     <string name="why_yom_tov">חג</string>
     <string name="why_yom_kippur">יום כיפור</string>
     <string name="why_chol_hamoed">חול המועד</string>

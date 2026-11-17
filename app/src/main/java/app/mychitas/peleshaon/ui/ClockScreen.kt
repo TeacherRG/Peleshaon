@@ -778,6 +778,7 @@ private fun AlarmSheet(
                             "yom_kippur" -> R.string.why_yom_kippur
                             "chol_hamoed" -> R.string.why_chol_hamoed
                             "shabbat" -> R.string.why_shabbat
+                            "unknown" -> R.string.why_unknown
                             else -> R.string.why_yom_tov
                         }
                         Text(stringResource(R.string.alarm_skip, dayText(s.at.toLocalDate()), stringResource(why)), color = ClockColors.Muted, fontSize = 13.sp)

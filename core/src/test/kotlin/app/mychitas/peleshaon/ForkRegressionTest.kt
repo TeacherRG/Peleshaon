@@ -1,5 +1,6 @@
 package app.mychitas.peleshaon
 
+import app.mychitas.peleshaon.alarm.ShabbatGuard
 import app.mychitas.peleshaon.alarm.AlarmRules
 import app.mychitas.peleshaon.alarm.AlarmSpec
 import app.mychitas.peleshaon.domain.Minhag
@@ -31,6 +32,17 @@ class ForkRegressionTest {
         }
         assertTrue(distinct.size > 1, "Selected community should change the Shma deadline")
     }
+    @Test fun polarHolyDayDoesNotInventClockTimeBoundaries() {
+        val city = app.mychitas.peleshaon.domain.CityOption(
+            "polar-test", "Longyearbyen", "Лонгйир", null,
+            78.2232, 15.6267, "Arctic/Longyearbyen", false
+        )
+        val noonFriday = LocalDate.of(2027, 6, 25).atTime(12, 0).atZone(city.zone())
+        val quiet = ShabbatGuard.checkMoment(noonFriday, city.name, city.lat, city.lon, city.zone(), false, false)
+        assertTrue(quiet.isQuietTime)
+        assertEquals("unknown", quiet.reasonKey)
+    }
+
     @Test fun selectedCitiesAndTimeZoneAreConsistent() {
         assertEquals("Europe/Kiev", cityForZone(ZoneId.of("Europe/Kyiv")).id)
         assertEquals("Mumbai", cityById("Asia/Kolkata")?.name)

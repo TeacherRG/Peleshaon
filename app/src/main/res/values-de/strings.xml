@@ -103,6 +103,7 @@
     <string name="alarm_no_next">In den nächsten drei Wochen klingelt der Wecker nicht.</string>
     <string name="alarm_no_days">Wähle mindestens einen Wochentag.</string>
     <string name="alarm_skip">%1$s — kein Klingeln: %2$s</string>
+    <string name="why_unknown">astronomische Zeitgrenze unbekannt</string>
     <string name="why_yom_tov">Feiertag</string>
     <string name="why_yom_kippur">Jom Kippur</string>
     <string name="why_chol_hamoed">Chol HaMoed</string>
