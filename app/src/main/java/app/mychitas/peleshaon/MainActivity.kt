@@ -46,6 +46,8 @@ class MainActivity : ComponentActivity() {
             navigationBarStyle = SystemBarStyle.dark(android.graphics.Color.TRANSPARENT)
         )
         super.onCreate(savedInstanceState)
+        // язык из «Настроек»: и для текстов, и для дат, названий месяцев, городов (они берут язык по умолчанию)
+        java.util.Locale.setDefault(resources.configuration.locales[0])
         ClockTheme.load(this)
         AlarmScheduler.rescheduleAllFromPrefs(this)
         MoonReminder.schedule(this)

@@ -120,7 +120,7 @@ private val HHMM: DateTimeFormatter = DateTimeFormatter.ofPattern("HH:mm")
 @Composable
 fun ClockScreen(onNightScreen: () -> Unit, onIntro: () -> Unit = {}, onMoon: () -> Unit = {}) {
     val context = LocalContext.current
-    val locale = Locale.getDefault()
+    val locale = androidx.compose.ui.platform.LocalConfiguration.current.locales[0]
 
     var now by remember { mutableStateOf(ZonedDateTime.now()) }
     LaunchedEffect(Unit) {
@@ -175,7 +175,7 @@ fun ClockScreen(onNightScreen: () -> Unit, onIntro: () -> Unit = {}, onMoon: () 
         ) {
             // ---- шапка: город, дата, «Как считаем»
             Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-                Chip(onClick = { panel = Panel.CITY }, modifier = Modifier.widthIn(max = 150.dp)) {
+                Chip(onClick = { panel = Panel.CITY }, modifier = Modifier.widthIn(max = 124.dp)) {
                     Text("📍", fontSize = 14.sp)
                     Text(city.title(locale), maxLines = 1, overflow = TextOverflow.Ellipsis, fontWeight = FontWeight.Bold, fontSize = 14.sp, color = ClockColors.Ink)
                     Text("▾", fontSize = 12.sp, color = ClockColors.TcheletDeep)
@@ -198,14 +198,15 @@ fun ClockScreen(onNightScreen: () -> Unit, onIntro: () -> Unit = {}, onMoon: () 
                         Text("${jd.day}", color = ClockColors.GoldDeep, fontSize = 28.sp, fontWeight = FontWeight.ExtraBold, lineHeight = 30.sp)
                         Spacer(Modifier.width(5.dp))
                         Text(
-                            jewishMonthName(jd, locale) + "  " + jd.year,
+                            jewishMonthName(jd, locale),
                             color = ClockColors.GoldDeep, fontSize = 18.sp, fontWeight = FontWeight.Bold,
                             maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.weight(1f, fill = false).padding(bottom = 3.dp)
                         )
                         Text(" ▾", fontSize = 12.sp, color = ClockColors.TcheletDeep, modifier = Modifier.padding(bottom = 5.dp))
                     }
                     Text(
-                        day.jewishDateHebrew + " · " + cityNow.format(DateTimeFormatter.ofPattern("EEE, d MMMM", locale)),
+                        // год — в еврейской дате буквами; гражданская — коротко, чтобы строка помещалась
+                        day.jewishDateHebrew + " · " + cityNow.format(DateTimeFormatter.ofPattern("EEE d MMM", locale)),
                         color = ClockColors.Ink2, fontSize = 12.sp, textAlign = TextAlign.Center, maxLines = 1, overflow = TextOverflow.Ellipsis
                     )
                     if (day.isNextJewishDayAfterSunset) Text(stringResource(R.string.evening), color = ClockColors.Muted, fontSize = 11.sp, textAlign = TextAlign.Center)
@@ -214,7 +215,7 @@ fun ClockScreen(onNightScreen: () -> Unit, onIntro: () -> Unit = {}, onMoon: () 
                 Chip(onClick = { panel = Panel.SETTINGS }, round = true) {
                     Text("⚙", fontSize = 17.sp, color = ClockColors.TcheletDeep)
                 }
-                Spacer(Modifier.width(6.dp))
+                Spacer(Modifier.width(4.dp))
                 Chip(onClick = { panel = Panel.INFO }, round = true) {
                     Text("?", fontWeight = FontWeight.Bold, fontSize = 17.sp, color = ClockColors.TcheletDeep)
                 }
@@ -392,8 +393,9 @@ private fun PopCard(
     val past = !e.at.isAfter(now)
     Surface(
         shape = RoundedCornerShape(16.dp),
-        color = Color(0xF20C1430),
+        color = ClockColors.SheetBg.copy(alpha = 0.97f),
         border = BorderStroke(1.dp, ClockColors.Line),
+        shadowElevation = 6.dp,
         modifier = modifier
     ) {
         Column {
@@ -461,7 +463,7 @@ private fun SheetColumn(content: @Composable () -> Unit) {
 
 @Composable
 internal fun CitySheet(city: CityOption, auto: Boolean, title: Boolean = true, onPick: (CityOption?) -> Unit) {
-    val locale = Locale.getDefault()
+    val locale = androidx.compose.ui.platform.LocalConfiguration.current.locales[0]
     var q by remember { mutableStateOf("") }
     val list = remember(q) { if (q.isBlank()) CITIES.sortedBy { it.title(locale) } else findCities(q, 30) }
     Column(modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp).padding(bottom = 16.dp)) {
@@ -560,7 +562,7 @@ private fun AlarmSheet(
     onDeleted: () -> Unit = {}
 ) {
     val context = LocalContext.current
-    val locale = Locale.getDefault()
+    val locale = androidx.compose.ui.platform.LocalConfiguration.current.locales[0]
     val study = type == Prefs.TORAH
     val custom = type.startsWith("C")
     var spec by remember { mutableStateOf(Prefs.alarm(context, type)) }
