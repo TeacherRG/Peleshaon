@@ -145,8 +145,8 @@ fun ClockScreen(
     var version by remember { mutableIntStateOf(0) }
     val bump: () -> Unit = { version++ }
 
-    val city = remember(version) { Prefs.city(context) }
-    val auto = remember(version) { Prefs.chosenCity(context) == null }
+    val city = remember(version, now.zone) { Prefs.city(context) }
+    val auto = remember(version, now.zone) { Prefs.chosenCity(context) == null }
     var marks by remember { mutableStateOf(Prefs.marks(context)) }
     var tziruf by remember { mutableStateOf(Prefs.tziruf(context)) }
     var panel by rememberSaveable { mutableStateOf<Panel?>(null) }

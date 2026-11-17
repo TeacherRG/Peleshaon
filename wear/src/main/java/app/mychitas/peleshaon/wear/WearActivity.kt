@@ -74,7 +74,7 @@ fun WearApp() {
     }
 
     // Город — по часовому поясу часов (без геолокации)
-    val city = remember { cityForZone(ZoneId.systemDefault()) }
+    val city = remember(now.zone) { cityForZone(ZoneId.systemDefault()) }
     val zone = city.zone()
     val cityNow = now.withZoneSameInstant(zone)
     val day = remember(city, cityNow.truncatedTo(ChronoUnit.MINUTES)) {
