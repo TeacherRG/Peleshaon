@@ -21,6 +21,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import app.mychitas.peleshaon.alarm.AlarmScheduler
 import app.mychitas.peleshaon.live.Live
+import app.mychitas.peleshaon.moon.MoonReminder
+import app.mychitas.peleshaon.ui.MoonCompass
 import app.mychitas.peleshaon.ui.ClockScreen
 import app.mychitas.peleshaon.ui.NightFace
 import app.mychitas.peleshaon.ui.Onboarding
@@ -37,18 +39,37 @@ class MainActivity : ComponentActivity() {
         )
         super.onCreate(savedInstanceState)
         AlarmScheduler.rescheduleAllFromPrefs(this)
-        setContent { PeleShaonApp() }
+        MoonReminder.schedule(this)
+        // компас переводит экран в портрет — активность пересоздаётся, а компас должен остаться открытым
+        openMoon.value = savedInstanceState?.getBoolean("moon")
+            ?: (intent?.getBooleanExtra(MoonReminder.EXTRA_OPEN, false) == true)
+        setContent { PeleShaonApp(openMoon) }
+    }
+
+    // уведомление «Кидуш Левана сегодня» — сразу экран-компас
+    private val openMoon = mutableStateOf(false)
+
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+        outState.putBoolean("moon", openMoon.value)
+    }
+
+    override fun onNewIntent(intent: android.content.Intent) {
+        super.onNewIntent(intent)
+        setIntent(intent)
+        if (intent.getBooleanExtra(MoonReminder.EXTRA_OPEN, false)) openMoon.value = true
     }
 
     // Город, подписи, «Сочетание Имени» могли поменяться — виджеты и уведомление подхватят
     override fun onStop() {
         super.onStop()
         Live.update(this)
+        MoonReminder.schedule(this)
     }
 }
 
 @Composable
-fun PeleShaonApp() {
+fun PeleShaonApp(openMoon: androidx.compose.runtime.MutableState<Boolean>) {
     val context = LocalContext.current
     var night by remember { mutableStateOf(false) }
     // Знакомство — при первом запуске (разрешение на уведомления просит его шаг про будильники, с объяснением)
@@ -61,6 +82,9 @@ fun PeleShaonApp() {
             Live.update(context)
             intro = false
         })
+    } else if (openMoon.value) {
+        // экран-компас Кидуш Левана
+        MoonCompass(onClose = { openMoon.value = false })
     } else if (night) {
         // Ночной экран у кровати: тёмный, экран не гаснет, нажатие — назад
         DisposableEffect(Unit) {
@@ -76,6 +100,6 @@ fun PeleShaonApp() {
         BackHandler { night = false }
         NightFace(Modifier.fillMaxSize().background(Color.Black).clickable { night = false })
     } else {
-        ClockScreen(onNightScreen = { night = true }, onIntro = { intro = true })
+        ClockScreen(onNightScreen = { night = true }, onIntro = { intro = true }, onMoon = { openMoon.value = true })
     }
 }

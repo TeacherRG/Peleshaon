@@ -185,4 +185,23 @@
     <string name="obh_icon">The phone does not always put the icon of a new app on the home screen by itself — especially when the app is installed not from Google Play. One tap — and the icon is there.</string>
     <string name="obh_widgets_t">Widgets — the clock without opening the app</string>
     <string name="obh_widgets">Two widgets: a large one — the day clock with the time and the next zman, and a small one — only the Jewish date (after sunset — already the next day). Tap — and it goes on the home screen.</string>
+    <string name="kl_title">Kiddush Levana</string>
+    <string name="kl_moon">Moon in the %1$s (%2$d°), %3$d° high</string>
+    <string name="kl_below">The moon is below the horizon — wait until it rises</string>
+    <string name="kl_face">Face %1$s (%2$d°)</string>
+    <string name="kl_ahead">The moon is right in front of you — look up %1$d°</string>
+    <string name="kl_left">Turn left by %1$d°</string>
+    <string name="kl_right">Turn right by %1$d°</string>
+    <string name="kl_illum">%1$d%% lit</string>
+    <string name="kl_until">Can be said until %1$s</string>
+    <string name="kl_not_tonight">Kiddush Levana is not said tonight — the compass still shows where the moon is.</string>
+    <string name="kl_hold">Hold the phone flat, or upright in front of you — then the arrow follows the camera. The silver arrow points to the moon.</string>
+    <string name="kl_calibrate">The compass is inaccurate: wave the phone in a figure eight, away from metal.</string>
+    <string name="kl_nosensor">This phone has no compass: face the side of the world written above.</string>
+    <string name="kl_remind">Remind me on suitable evenings</string>
+    <string name="kl_remind_note">One quiet notification after nightfall (after Shabbat and Yom Tov — after they end), only when the moon is up. Never on Shabbat or Yom Tov.</string>
+    <string name="kl_note">Times follow Chabad custom: from 7 days after the molad to the middle of the month, not on the eve of Shabbat or Yom Tov; in Av — after Tisha B’Av, in Tishrei — after Yom Kippur. Ask your community rabbi.</string>
+    <string name="kl_notif_title">Kiddush Levana tonight</string>
+    <string name="kl_channel">Kiddush Levana</string>
+    <string name="kl_help">🌙 Kiddush Levana: on suitable evenings a moon pill appears under the dial — tap it for the moon compass.</string>
 </resources>

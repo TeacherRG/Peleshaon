@@ -185,4 +185,23 @@
     <string name="obh_icon">הטלפון לא תמיד מוסיף בעצמו את הסמל של יישום חדש למסך הבית — בעיקר כשהיישום לא הותקן מ־Google Play. לחיצה אחת — והסמל במקומו.</string>
     <string name="obh_widgets_t">ווידג׳טים — השעון בלי לפתוח את היישום</string>
     <string name="obh_widgets">שני ווידג׳טים: גדול — שעון היום עם השעה והזמן הקרוב, וקטן — רק התאריך העברי (אחרי השקיעה — כבר של היום הבא). לחיצה — והוא במסך הבית.</string>
+    <string name="kl_title">קידוש לבנה</string>
+    <string name="kl_moon">הירח ב%1$s (%2$d°), בגובה %3$d°</string>
+    <string name="kl_below">הירח מתחת לאופק — המתינו עד שיזרח</string>
+    <string name="kl_face">עמדו עם הפנים ל%1$s (%2$d°)</string>
+    <string name="kl_ahead">הירח ממש מולכם — הרימו את המבט %1$d°</string>
+    <string name="kl_left">פנו שמאלה %1$d°</string>
+    <string name="kl_right">פנו ימינה %1$d°</string>
+    <string name="kl_illum">מואר %1$d%%</string>
+    <string name="kl_until">אפשר עד %1$s</string>
+    <string name="kl_not_tonight">הערב אין אומרים קידוש לבנה — המצפן בכל זאת מראה היכן הירח.</string>
+    <string name="kl_hold">החזיקו את הטלפון שטוח, או זקוף לפניכם — אז החץ עוקב אחרי המצלמה. החץ הכסוף מצביע על הירח.</string>
+    <string name="kl_calibrate">המצפן אינו מדויק: הניעו את הטלפון בצורת שמונה, הרחק ממתכת.</string>
+    <string name="kl_nosensor">בטלפון אין מצפן: עמדו עם הפנים לכיוון הכתוב למעלה.</string>
+    <string name="kl_remind">להזכיר בערבים המתאימים</string>
+    <string name="kl_remind_note">התראה שקטה אחת אחרי צאת הכוכבים (אחרי שבת ויום טוב — אחרי צאתם), רק כשהירח נראה. לעולם לא בשבת וביום טוב.</string>
+    <string name="kl_note">הזמנים לפי מנהג חב״ד: משבעה ימים אחרי המולד עד חצי החודש, לא בליל שבת ויום טוב; באב — אחרי תשעה באב, בתשרי — אחרי יום כיפור. התייעצו עם רב הקהילה.</string>
+    <string name="kl_notif_title">קידוש לבנה הערב</string>
+    <string name="kl_channel">קידוש לבנה</string>
+    <string name="kl_help">🌙 קידוש לבנה: בערבים המתאימים מופיעה מתחת לשעון שורה עם סהר — לחצו עליה ויפתח מצפן הירח.</string>
 </resources>

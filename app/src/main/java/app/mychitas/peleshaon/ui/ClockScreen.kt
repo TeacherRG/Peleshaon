@@ -83,6 +83,7 @@ import app.mychitas.peleshaon.domain.CityOption
 import app.mychitas.peleshaon.domain.Dial
 import app.mychitas.peleshaon.domain.ZmanType
 import app.mychitas.peleshaon.domain.ZmanimEngine
+import app.mychitas.peleshaon.domain.KiddushLevanaRules
 import app.mychitas.peleshaon.domain.findCities
 import app.mychitas.peleshaon.live.Live
 import kotlinx.coroutines.delay
@@ -113,7 +114,7 @@ private val HHMM: DateTimeFormatter = DateTimeFormatter.ofPattern("HH:mm")
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ClockScreen(onNightScreen: () -> Unit, onIntro: () -> Unit = {}) {
+fun ClockScreen(onNightScreen: () -> Unit, onIntro: () -> Unit = {}, onMoon: () -> Unit = {}) {
     val context = LocalContext.current
     val locale = Locale.getDefault()
 
@@ -262,7 +263,11 @@ fun ClockScreen(onNightScreen: () -> Unit, onIntro: () -> Unit = {}) {
                     )
                 }
             }
-            if (pop == null && !day.isPolarAnomaly) {
+            // Кидуш Левана: в подходящий вечер — плашка с полумесяцем вместо подсказки; нажатие — лунный компас
+            val kl = remember(city, minute) { runCatching { KiddushLevanaRules.now(cityNow, city) }.getOrNull() }
+            if (pop == null && kl != null) {
+                MoonPill(kl, onClick = onMoon)
+            } else if (pop == null && !day.isPolarAnomaly) {
                 Text(stringResource(R.string.hint), color = ClockColors.Muted, fontSize = 12.sp, textAlign = TextAlign.Center)
             }
 
@@ -782,6 +787,7 @@ private fun InfoSheet(onNightScreen: () -> Unit, onIntro: () -> Unit, onPrivacy:
         Note(stringResource(R.string.note))
         Note(stringResource(R.string.shabbat_note))
         Note(stringResource(R.string.alarm_note))
+        Note(stringResource(R.string.kl_help))
         TzirufMore()
         Button(onClick = onNightScreen, colors = ButtonDefaults.buttonColors(containerColor = ClockColors.Surface)) {
             Text("🌙  " + stringResource(R.string.night_screen), color = ClockColors.Ink)

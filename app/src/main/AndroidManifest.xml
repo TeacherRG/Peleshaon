@@ -65,6 +65,11 @@
             </intent-filter>
         </receiver>
 
+        <!-- Напоминание о Кидуш Левана (по желанию) -->
+        <receiver
+            android:name=".moon.MoonReminderReceiver"
+            android:exported="false" />
+
         <!-- Виджеты и уведомление «Ближайшее время». Виджеты — exported: рабочие столы некоторых телефонов
              (ColorOS, MIUI) ищут виджеты сами и пропускают закрытые; APPWIDGET_UPDATE шлёт только система. -->
         <receiver

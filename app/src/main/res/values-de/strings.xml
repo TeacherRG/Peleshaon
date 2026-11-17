@@ -185,4 +185,23 @@
     <string name="obh_icon">Das Telefon legt das Symbol einer neuen App nicht immer selbst auf den Startbildschirm — vor allem, wenn sie nicht aus Google Play installiert wurde. Ein Tipp — und das Symbol ist da.</string>
     <string name="obh_widgets_t">Widgets — die Uhr, ohne die App zu öffnen</string>
     <string name="obh_widgets">Zwei Widgets: ein großes — die Tagesuhr mit Uhrzeit und nächster Zeit, ein kleines — nur das jüdische Datum (nach Sonnenuntergang schon vom nächsten Tag). Tippe — und es kommt auf den Startbildschirm.</string>
+    <string name="kl_title">Kiddusch Lewana</string>
+    <string name="kl_moon">Mond im %1$s (%2$d°), Höhe %3$d°</string>
+    <string name="kl_below">Der Mond ist unter dem Horizont — warte, bis er aufgeht</string>
+    <string name="kl_face">Stell dich nach %1$s (%2$d°)</string>
+    <string name="kl_ahead">Der Mond ist genau vor dir — schau %1$d° nach oben</string>
+    <string name="kl_left">Dreh dich %1$d° nach links</string>
+    <string name="kl_right">Dreh dich %1$d° nach rechts</string>
+    <string name="kl_illum">%1$d %% beleuchtet</string>
+    <string name="kl_until">Möglich bis %1$s</string>
+    <string name="kl_not_tonight">Heute Abend sagt man Kiddusch Lewana nicht — der Kompass zeigt trotzdem, wo der Mond ist.</string>
+    <string name="kl_hold">Halte das Telefon flach oder aufrecht vor dich — dann folgt der Pfeil der Kamera. Der silberne Pfeil zeigt zum Mond.</string>
+    <string name="kl_calibrate">Der Kompass ist ungenau: Beweg das Telefon in einer Acht, weg von Metall.</string>
+    <string name="kl_nosensor">Dieses Telefon hat keinen Kompass: Stell dich in die Himmelsrichtung, die oben steht.</string>
+    <string name="kl_remind">An passenden Abenden erinnern</string>
+    <string name="kl_remind_note">Eine leise Mitteilung nach dem Erscheinen der Sterne (nach Schabbat und Jom Tow — nach ihrem Ende), nur wenn der Mond zu sehen ist. Nie an Schabbat und Jom Tow.</string>
+    <string name="kl_note">Die Zeiten folgen dem Brauch von Chabad: ab 7 Tagen nach dem Molad bis zur Mitte des Monats, nicht am Vorabend von Schabbat und Jom Tow; im Aw — nach Tischa beAw, im Tischri — nach Jom Kippur. Frag den Rabbiner deiner Gemeinde.</string>
+    <string name="kl_notif_title">Kiddusch Lewana heute</string>
+    <string name="kl_channel">Kiddusch Lewana</string>
+    <string name="kl_help">🌙 Kiddusch Lewana: an passenden Abenden erscheint unter dem Zifferblatt eine Mondzeile — tippe darauf für den Mondkompass.</string>
 </resources>
