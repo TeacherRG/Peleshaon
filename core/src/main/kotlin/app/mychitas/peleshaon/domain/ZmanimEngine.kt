@@ -107,12 +107,14 @@ object ZmanimEngine {
     @Volatile
     var candleOffsetOverride: Long? = null
 
+    fun localCandleMinutesFor(cityName: String): Long = when (cityName.lowercase(java.util.Locale.ROOT)) {
+        "jerusalem" -> 40L
+        "haifa", "zikhron yaakov", "zichron yaakov" -> 30L
+        else -> CANDLE_MIN
+    }
+
     fun candleMinutesFor(cityName: String): Long =
-        candleOffsetOverride ?: when (cityName.lowercase(java.util.Locale.ROOT)) {
-            "jerusalem" -> 40L
-            "haifa", "zikhron yaakov", "zichron yaakov" -> 30L
-            else -> CANDLE_MIN
-        }
+        candleOffsetOverride ?: localCandleMinutesFor(cityName)
 
     fun candleLightingOn(date: LocalDate, city: CityOption): ZonedDateTime? =
         sunsetOf(date, city)?.minusMinutes(candleMinutesFor(city.name))

@@ -72,20 +72,6 @@ class AlarmRingActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O_MR1) {
-            setShowWhenLocked(true)
-            setTurnScreenOn(true)
-            val km = getSystemService(Context.KEYGUARD_SERVICE) as KeyguardManager
-            km.requestDismissKeyguard(this, null)
-        } else {
-            @Suppress("DEPRECATION")
-            window.addFlags(
-                WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED or
-                        WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON or
-                        WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON
-            )
-        }
-
         val alarmType = intent.getStringExtra(AlarmScheduler.EXTRA_ALARM_TYPE) ?: "TORAH"
         val test = intent.getBooleanExtra(AlarmScheduler.EXTRA_TEST, false)
         val wakeModeName = intent.getStringExtra("wake_mode") ?: WakeMode.SOUND_AND_LIGHT.name
@@ -93,6 +79,17 @@ class AlarmRingActivity : ComponentActivity() {
         val useLight = wakeMode != WakeMode.SOUND_ONLY
 
         if (useLight) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O_MR1) {
+                setShowWhenLocked(true)
+                setTurnScreenOn(true)
+                val km = getSystemService(Context.KEYGUARD_SERVICE) as KeyguardManager
+                km.requestDismissKeyguard(this, null)
+            } else {
+                @Suppress("DEPRECATION")
+                window.addFlags(WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED or
+                    WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON or
+                    WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+            }
             window.attributes = window.attributes.apply {
                 screenBrightness = 1.0f
             }

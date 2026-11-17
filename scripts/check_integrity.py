@@ -3,6 +3,7 @@
 from __future__ import annotations
 from pathlib import Path
 import sys
+import re
 import xml.etree.ElementTree as ET
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -26,6 +27,25 @@ def resource_keys(folder: str, module: str = "app") -> set[str]:
     check(len(keys) == len(set(keys)), f"Duplicate resource keys in {module}/{folder}")
     return set(keys)
 
+def format_args(text: str) -> list[tuple[int, str]]:
+    # Android resources permit numbered arguments and implicit %s/%d; normalize both.
+    out: list[tuple[int, str]] = []
+    for match in re.finditer(r"%(?:([1-9][0-9]*)\\$)?([sdf])", text):
+        out.append((int(match.group(1)) if match.group(1) else len(out) + 1, match.group(2)))
+    return sorted(out)
+
+def check_format_args(module: str) -> None:
+    base = ROOT / module / "src" / "main" / "res"
+    defs = {}
+    for locale in LOCALES:
+        root = ET.parse(base / locale / "strings.xml").getroot()
+        defs[locale] = {node.get("name"): format_args("".join(node.itertext()))
+                        for node in root if node.tag == "string"}
+    for locale in LOCALES[1:]:
+        for key, arguments in defs["values"].items():
+            check(defs[locale][key] == arguments,
+                  f"{module}/{locale}/{key}: format arguments differ from default")
+
 def main() -> None:
     resources = {folder: resource_keys(folder) for folder in LOCALES}
     for folder in LOCALES[1:]:
@@ -33,12 +53,14 @@ def main() -> None:
         extra = resources[folder] - resources["values"]
         check(not missing and not extra,
               f"{folder}: missing={sorted(missing)}, extra={sorted(extra)}")
+    check_format_args("app")
     wear_resources = {folder: resource_keys(folder, "wear") for folder in LOCALES}
     for folder in LOCALES[1:]:
         missing = wear_resources["values"] - wear_resources[folder]
         extra = wear_resources[folder] - wear_resources["values"]
         check(not missing and not extra,
               f"wear/{folder}: missing={sorted(missing)}, extra={sorted(extra)}")
+    check_format_args("wear")
     for module in ("app", "wear"):
         gradle = read(f"{module}/build.gradle.kts")
         check('applicationId = "app.mychitas.peleshaon.beta"' in gradle,
@@ -59,10 +81,16 @@ def main() -> None:
     scheduler = read("app/src/main/java/app/mychitas/peleshaon/alarm/AlarmScheduler.kt")
     check("includeSnooze = true" in scheduler and "AlarmClockInfo(triggerMillis, showIntent)" in scheduler,
           "Alarm cancel/showIntent regression")
+    check("Prefs.kashrutHours" not in scheduler and "KashrutPolicy.deadline" in scheduler,
+          "Kashrut must always use exactly six hours")
     service = read("app/src/main/java/app/mychitas/peleshaon/alarm/AlarmRingService.kt")
     check("private var activeSession:" in service and "EXTRA_SESSION" in service and
           "startActivity(fullScreenIntent)" not in service and "pendingAlarms.enqueue(" in service,
           "Ringing-session isolation or background launch regression")
+    check("private fun isQuietNow" in service and "nextQuietStart" in service,
+          "Shabbat protection missing in the ringing service")
+    check("getQuietStart(today, cityName, lat, lon, zoneId, earlyShabbatMinutes)" in guard,
+          "Early Friday silence not used by ShabbatGuard")
     cal = read("app/src/main/java/app/mychitas/peleshaon/ui/CalendarSheet.kt")
     check("ZmanimEngine.havdalahOn(d.date, city)" in cal and
           "CandleTransition.BEFORE_SUNSET" in cal and
@@ -71,6 +99,8 @@ def main() -> None:
     check("fun candleMinutesFor(cityName: String)" in engine,
           "Local candle-minute policy missing")
     wear = read("wear/src/main/java/app/mychitas/peleshaon/wear/WearActivity.kt")
+    check("WatchRing(cityNow, half, halfItems, next)" in wear,
+          "Wear halachic half-day ring regression")
     check("selectedCommunity" in wear and "selectedCity" in wear,
           "Wear OS independent community/city selectors are missing")
     print(f"OK: phone {len(resources['values'])} keys, Wear {len(wear_resources['values'])} keys × {len(LOCALES)} languages")

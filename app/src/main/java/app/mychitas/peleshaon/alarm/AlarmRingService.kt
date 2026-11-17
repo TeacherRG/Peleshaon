@@ -126,7 +126,7 @@ class AlarmRingService : Service() {
             .setContentText(getString(R.string.app_name))
             .setPriority(NotificationCompat.PRIORITY_MAX)
             .setCategory(NotificationCompat.CATEGORY_ALARM)
-            .setFullScreenIntent(fullScreenPendingIntent, true)
+            .setFullScreenIntent(fullScreenPendingIntent, wakeMode != WakeMode.SOUND_ONLY)
             .setContentIntent(fullScreenPendingIntent)
             .setOngoing(true)
             .addAction(0, getString(R.string.btn_stop), action(ACTION_STOP, 2002))

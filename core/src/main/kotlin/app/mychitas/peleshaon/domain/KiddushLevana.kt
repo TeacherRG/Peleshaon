@@ -160,6 +160,7 @@ object KiddushLevanaRules {
         // вечер после Шабата / праздника: до их исхода — ещё нельзя
         if (ShabbatGuard.checkMoment(now, city.name, city.lat, city.lon, city.zone(), city.isIsrael, false).isQuietTime) return null
         val moon = MoonTracker.position(now, city.lat, city.lon)
+        if (moon.altitude < 5.0) return null // no positive blessing prompt for a low or hidden Moon
         return KiddushLevanaNow(ZmanimEngine.jewishDay(evening.plusDays(1), city.isIsrael), end, moon)
     }
 
@@ -171,7 +172,7 @@ object KiddushLevanaRules {
         val zone = city.zone()
         var day = now.withZoneSameInstant(zone).toLocalDate()
         repeat(40) {
-            val at = reminderOn(day, city)
+            val at = reminderOn(day, city, now)
             if (at != null && at.isAfter(now)) return at
             day = day.plusDays(1)
         }
@@ -179,7 +180,7 @@ object KiddushLevanaRules {
     }
 
     /** Когда напомнить в вечер этого гражданского дня; нельзя или Луны не видно — null. */
-    fun reminderOn(evening: LocalDate, city: CityOption): ZonedDateTime? {
+    fun reminderOn(evening: LocalDate, city: CityOption, notBefore: ZonedDateTime? = null): ZonedDateTime? {
         if (!eveningAllowed(evening, city)) return null
         val zone = city.zone()
         val items = ZmanimEngine.itemsOf(evening, city)
@@ -193,9 +194,9 @@ object KiddushLevanaRules {
         val (start, end) = window(evening.plusDays(1), city)
         if (at.isBefore(start)) {
             // окно открывается этой ночью позже — напомнить, когда откроется, если ещё темно
-            if (start.isAfter(sunset.plusHours(6))) return null
             at = start.withSecond(0).withNano(0).plusMinutes(1)
         }
+        if (notBefore != null && !at.isAfter(notBefore)) at = notBefore.plusMinutes(1)
         if (!at.isBefore(end)) return null
         // A low Moon at nightfall can rise later. Scan the rest of the same
         // night rather than skipping it; never assume astronomical visibility.

@@ -58,6 +58,23 @@ class MoonAndPolarRegressionTest {
         assertEquals(ZmanimEngine.itemsOf(date, city), result.items)
     }
 
+    @Test fun remainingNightIsSearchedWithoutASixHourSunsetCutoff() {
+        val start = LocalDate.of(2026, 11, 1)
+        var checked = 0
+        for (n in 0L..60L) {
+            val day = start.plusDays(n)
+            val sunset = ZmanimEngine.sunsetOf(day, vienna) ?: continue
+            val later = sunset.plusHours(7)
+            val sunrise = ZmanimEngine.itemsOf(day.plusDays(1), vienna)
+                .firstOrNull { it.type == ZmanType.SUNRISE }?.exactTime ?: continue
+            if (!later.isBefore(sunrise)) continue
+            val result = KiddushLevanaRules.reminderOn(day, vienna, later)
+            assertTrue(result == null || result.isAfter(later))
+            checked++
+        }
+        assertTrue(checked > 0)
+    }
+
     @Test fun jerusalemCustomCandleOffsetAffectsQuietWindow() {
         val friday = LocalDate.of(2026, 11, 20)
         val sunset = assertNotNull(ZmanimEngine.sunsetOf(friday, jerusalem))

@@ -66,6 +66,9 @@ object Prefs {
 
     fun city(context: Context): CityOption = chosenCity(context) ?: cityForZone(ZoneId.systemDefault())
 
+    /** Automatic matching by a time zone is approximate until a city is confirmed. */
+    fun cityUnconfirmed(context: Context): Boolean = chosenCity(context) == null
+
     fun setCity(context: Context, city: CityOption?) {
         of(context).edit().apply {
             if (city == null) remove("city_id") else putString("city_id", city.id)

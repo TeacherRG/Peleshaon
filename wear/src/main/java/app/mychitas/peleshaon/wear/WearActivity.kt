@@ -42,6 +42,7 @@ import app.mychitas.peleshaon.domain.Minhag
 import app.mychitas.peleshaon.domain.cityById
 import java.util.Locale
 import androidx.wear.compose.material.Text
+import app.mychitas.peleshaon.domain.Half
 import app.mychitas.peleshaon.domain.ZmanItem
 import app.mychitas.peleshaon.domain.ZmanType
 import app.mychitas.peleshaon.domain.ZmanimEngine
@@ -99,7 +100,9 @@ fun WearApp() {
         ZmanimEngine.calculateForMoment(cityNow, city.name, city.lat, city.lon, 0.0, zone, city.isIsrael)
     }
     val res = LocalContext.current.resources
-    val next = day.items.firstOrNull { it.exactTime.isAfter(cityNow) }
+    val half = remember(city, cityNow.truncatedTo(ChronoUnit.MINUTES), community) { ZmanimEngine.halfOf(cityNow, city) }
+    val halfItems = remember(half, city, community) { half?.let { ZmanimEngine.halfItems(it, city) } ?: emptyList() }
+    val next = halfItems.firstOrNull { it.exactTime.isAfter(cityNow) }
     val candles = day.candleLighting?.takeIf {
         cityNow.dayOfWeek == DayOfWeek.FRIDAY && it.isAfter(cityNow)
     }
@@ -181,7 +184,7 @@ fun WearApp() {
                     modifier = Modifier.fillMaxWidth().aspectRatio(1f),
                     contentAlignment = Alignment.Center
                 ) {
-                    WatchRing(cityNow, day.items, next)
+                    WatchRing(cityNow, half, halfItems, next)
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
                         Text(cityNow.format(HHMM), color = Color.White, fontSize = 34.sp, fontWeight = FontWeight.Bold)
                         if (next != null) {
@@ -210,7 +213,7 @@ fun WearApp() {
             if (candles != null) {
                 item { ZmanRow(res.getString(R.string.candles), candles.format(HHMM), Gold, passed = false) }
             }
-            items(day.items) { z ->
+            items(halfItems) { z ->
                 ZmanRow(
                     label = res.getString(shortLabel(z.type)),
                     time = z.roundedTime.format(HHMM),
@@ -241,11 +244,11 @@ fun WearApp() {
 
 /** Обод часов: 12 штрихов, точки времён дня, дуга от «сейчас» до ближайшего времени. */
 @Composable
-private fun WatchRing(now: ZonedDateTime, items: List<ZmanItem>, next: ZmanItem?) {
+private fun WatchRing(now: ZonedDateTime, half: Half?, items: List<ZmanItem>, next: ZmanItem?) {
     Canvas(modifier = Modifier.fillMaxSize().padding(6.dp)) {
         val c = Offset(size.width / 2f, size.height / 2f)
         val r = size.minDimension / 2f * 0.9f
-        fun angle(t: ZonedDateTime) = ((t.hour % 12) + t.minute / 60.0) * 30.0 - 90.0
+        fun angle(t: ZonedDateTime) = (half?.frac(t) ?: 0.0) * 360.0 - 90.0
         fun at(deg: Double, rr: Float) = Offset(
             c.x + rr * cos(deg * PI / 180).toFloat(),
             c.y + rr * sin(deg * PI / 180).toFloat()
@@ -261,15 +264,15 @@ private fun WatchRing(now: ZonedDateTime, items: List<ZmanItem>, next: ZmanItem?
             )
         }
 
-        // Дуга «осталось» — если ближайшее время в пределах 12 часов
-        if (next != null) {
-            val minutes = ChronoUnit.MINUTES.between(now, next.exactTime)
-            if (minutes in 1..719) {
+        // The phone and Wear use the same 12 proportional hours of the current half.
+        if (half != null && next != null) {
+            val sweep = (half.frac(next.exactTime) - half.frac(now)) * 360.0
+            if (sweep > 0.0 && sweep <= 360.0) {
                 val start = angle(now).toFloat()
                 drawArc(
                     color = (if (next.type.isDeadline) Gold else Tchelet).copy(alpha = 0.8f),
                     startAngle = start,
-                    sweepAngle = minutes / 2f,
+                    sweepAngle = sweep.toFloat(),
                     useCenter = false,
                     topLeft = Offset(c.x - r, c.y - r),
                     size = Size(r * 2, r * 2),
@@ -279,7 +282,7 @@ private fun WatchRing(now: ZonedDateTime, items: List<ZmanItem>, next: ZmanItem?
         }
 
         // Точки времён дня, прошедшие — бледнее, ближайшее — крупнее
-        items.forEach { z ->
+        items.filter { half != null }.forEach { z ->
             val passed = !z.exactTime.isAfter(now)
             val color = (if (z.type.isDeadline) Gold else Tchelet).copy(alpha = if (passed) 0.3f else 1f)
             val big = z == next
@@ -287,7 +290,7 @@ private fun WatchRing(now: ZonedDateTime, items: List<ZmanItem>, next: ZmanItem?
         }
 
         // Стрелка «сейчас»
-        drawLine(Color.White, at(angle(now), r * 0.78f), at(angle(now), r * 1.0f), strokeWidth = 2.5.dp.toPx(), cap = StrokeCap.Round)
+        if (half != null) drawLine(Color.White, at(angle(now), r * 0.78f), at(angle(now), r * 1.0f), strokeWidth = 2.5.dp.toPx(), cap = StrokeCap.Round)
     }
 }
 
