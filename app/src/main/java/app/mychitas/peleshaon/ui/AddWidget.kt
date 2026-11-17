@@ -17,6 +17,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import app.mychitas.peleshaon.R
+import app.mychitas.peleshaon.live.PinIcon
 import app.mychitas.peleshaon.live.PinWidget
 
 /** Кнопки «Поставить на главный экран»: циферблат и строка. Рабочий стол не умеет — подсказка, как вручную. */
@@ -39,5 +40,21 @@ fun AddWidgetButtons() {
         } else {
             Text(stringResource(R.string.widget_add_manual), color = ClockColors.Muted, fontSize = 14.sp)
         }
+    }
+}
+
+/** Кнопка «Поставить значок приложения на главный экран». Рабочий стол не умеет — подсказка, как вручную. */
+@Composable
+fun AddIconButton() {
+    val context = LocalContext.current
+    val can = remember { PinIcon.supported(context) }
+    if (can) {
+        Button(
+            onClick = { PinIcon.request(context) },
+            colors = ButtonDefaults.buttonColors(containerColor = ClockColors.Gold),
+            modifier = Modifier.fillMaxWidth()
+        ) { Text("📲  " + stringResource(R.string.icon_add), color = ClockColors.SheetBg, fontWeight = FontWeight.Bold) }
+    } else {
+        Text(stringResource(R.string.icon_add_manual), color = ClockColors.Muted, fontSize = 14.sp)
     }
 }

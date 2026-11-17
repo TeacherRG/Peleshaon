@@ -29,3 +29,26 @@ object PinWidget {
             m.getAppWidgetIds(ComponentName(context, LineWidget::class.java)).size
     }
 }
+
+/**
+ * Значок приложения на главный экран. Телефон ставит его сам не всегда: часто только для приложений из Google Play,
+ * а при установке APK — нет. Ярлык с тем же значком и названием открывает приложение, как обычный значок.
+ */
+object PinIcon {
+    fun supported(context: Context): Boolean =
+        context.getSystemService(android.content.pm.ShortcutManager::class.java)?.isRequestPinShortcutSupported == true
+
+    fun request(context: Context): Boolean {
+        val sm = context.getSystemService(android.content.pm.ShortcutManager::class.java) ?: return false
+        if (!sm.isRequestPinShortcutSupported) return false
+        val open = android.content.Intent(context, app.mychitas.peleshaon.MainActivity::class.java)
+            .setAction(android.content.Intent.ACTION_MAIN)
+            .addCategory(android.content.Intent.CATEGORY_LAUNCHER)
+        val info = android.content.pm.ShortcutInfo.Builder(context, "pele-home")
+            .setShortLabel(context.getString(app.mychitas.peleshaon.R.string.app_name))
+            .setIcon(android.graphics.drawable.Icon.createWithResource(context, app.mychitas.peleshaon.R.mipmap.ic_launcher))
+            .setIntent(open)
+            .build()
+        return runCatching { sm.requestPinShortcut(info, null) }.getOrDefault(false)
+    }
+}

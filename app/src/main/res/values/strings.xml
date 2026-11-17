@@ -179,4 +179,10 @@
     <string name="widget_add_face">Put the day dial on the home screen</string>
     <string name="widget_add_line">Put the «next time» line</string>
     <string name="widget_add_manual">Your home screen cannot add widgets from an app. Long-press an empty spot on the home screen → «Widgets» → find «Pele Shaon» (if it is not there, restart the phone once after installing).</string>
+    <string name="icon_add">Put the app icon on the home screen</string>
+    <string name="icon_add_manual">Your home screen cannot add the icon from the app. Open the list of all apps, hold «Pele Shaon» and drag it to the home screen.</string>
+    <string name="obh_t">Pele Shaon on the home screen</string>
+    <string name="obh_icon">The phone does not always put the icon of a new app on the home screen by itself — especially when the app is installed not from Google Play. One tap — and the icon is there.</string>
+    <string name="obh_widgets_t">Widgets — the clock without opening the app</string>
+    <string name="obh_widgets">The day dial with the time and the next zman, or a single line «next time» with a countdown. They update by themselves; the dial shows the hour of the day or night and the Jewish date.</string>
 </resources>

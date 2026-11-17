@@ -778,6 +778,7 @@ private fun InfoSheet(onNightScreen: () -> Unit, onIntro: () -> Unit, onPrivacy:
             Text("🌙  " + stringResource(R.string.night_screen), color = ClockColors.Ink)
         }
         HorizontalDivider(color = ClockColors.Line)
+        AddIconButton()
         Note(stringResource(R.string.ob5_l1))
         AddWidgetButtons()
         Note(stringResource(R.string.ob5_l2))

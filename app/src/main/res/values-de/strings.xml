@@ -179,4 +179,10 @@
     <string name="widget_add_face">Tageszifferblatt auf den Startbildschirm</string>
     <string name="widget_add_line">Zeile «nächste Zeit» hinzufügen</string>
     <string name="widget_add_manual">Dein Startbildschirm kann keine Widgets aus der App hinzufügen. Lange auf eine freie Stelle drücken → «Widgets» → «Pele Schaon» (fehlt es, das Telefon nach der Installation einmal neu starten).</string>
+    <string name="icon_add">App-Symbol auf den Startbildschirm</string>
+    <string name="icon_add_manual">Dein Startbildschirm kann das Symbol nicht aus der App hinzufügen. Öffne die Liste aller Apps, halte «Pele Schaon» gedrückt und ziehe es auf den Startbildschirm.</string>
+    <string name="obh_t">Pele Schaon auf den Startbildschirm</string>
+    <string name="obh_icon">Das Telefon legt das Symbol einer neuen App nicht immer selbst auf den Startbildschirm — vor allem, wenn sie nicht aus Google Play installiert wurde. Ein Tipp — und das Symbol ist da.</string>
+    <string name="obh_widgets_t">Widgets — die Uhr, ohne die App zu öffnen</string>
+    <string name="obh_widgets">Das Tageszifferblatt mit Uhrzeit und nächster Zeit oder eine Zeile «nächste Zeit» mit Countdown. Sie aktualisieren sich selbst; das Zifferblatt zeigt die Stunde des Tages oder der Nacht und das jüdische Datum.</string>
 </resources>
