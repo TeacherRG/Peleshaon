@@ -204,4 +204,19 @@
     <string name="kl_notif_title">Кидуш Левана сегодня</string>
     <string name="kl_channel">Кидуш Левана</string>
     <string name="kl_help">🌙 Кидуш Левана: в подходящие вечера под циферблатом появляется плашка с полумесяцем — нажмите, откроется лунный компас.</string>
+    <string name="theme_t">Тема</string>
+    <string name="theme_auto">Авто</string>
+    <string name="theme_light">Светлая</string>
+    <string name="theme_dark">Тёмная</string>
+    <string name="theme_note">«Авто»: днём (от восхода до заката в вашем городе) — светлая, ночью — тёмная. Ночной экран и виджеты — всегда тёмные.</string>
+    <string name="kashrut_title">Прошло 6 часов — можно молочное</string>
+    <string name="kashrut_t">Мясное → молочное: 6 часов</string>
+    <string name="kashrut_until">Молочное — с %1$s</string>
+    <string name="kashrut_cancel">Отменить</string>
+    <string name="kashrut_start">Я поел(а) мясное — напомнить через 6 часов</string>
+    <string name="kashrut_note">Один звонок через 6 часов после нажатия (обычай — ждать 6 часов между мясным и молочным; сверяйтесь с раввином). В Шабат и Йом Тов не звонит.</string>
+    <string name="alarm_n">Будильник %1$d</string>
+    <string name="alarms_more">Ещё будильники</string>
+    <string name="alarm_add">Добавить будильник</string>
+    <string name="alarm_delete">Удалить этот будильник</string>
 </resources>

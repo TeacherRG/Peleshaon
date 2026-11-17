@@ -43,29 +43,30 @@ import kotlin.math.min
 import kotlin.math.sin
 
 /*
- * Цвета страницы «Часы» сайта Нифлаот (.clk2 — всегда тёмная, на звёздном небе).
+ * Цвета страницы «Часы» сайта Нифлаот: тёмные — ночное небо (.clk2), светлые — день (владелец, 18.11.2026: «светлую тему —
+ * автоматически по времени дня»). Тема — `ClockTheme`; виджеты, ночной экран и заставка — всегда тёмные.
  */
 object ClockColors {
-    val Ink = Color(0xFFEEF0F7)
-    val Ink2 = Color(0xFFC9CFE3)
-    val Muted = Color(0xFF9AA4C4)
-    val Surface = Color(0x9E0C1430)          // rgba(12,20,48,.62)
-    val SheetBg = Color(0xFF0B1532)
-    val Line = Color(0x38D6BE82)             // rgba(214,190,130,.22)
-    val Tchelet = Color(0xFF8FB3E8)
-    val TcheletDeep = Color(0xFF9CC0F0)
-    val Gold = Color(0xFFD9B66A)
-    val GoldDeep = Color(0xFFE2BF72)
-    val Ok = Color(0xFF6BCB94)
-    val Bad = Color(0xFFF2867D)
-    val Plum = Color(0xFF9C7BD6)
-    val Hand = Color(0xFFFF7A6E)
-    val BigTime = Color(0xFFF4F1E8)
-    val Seconds = Color(0xFFB9C2DE)
-    val TzirufC = Color(0xFFE8C97E)
-    val RimFill = Color(0x8C080E24)          // rgba(8,14,36,.55)
-    val RimStroke = Color(0x59D6BE82)        // rgba(214,190,130,.35)
-    val DotStroke = Color(0xFF0B1532)
+    val Ink: Color get() = if (ClockTheme.light) Color(0xFF16233F) else Color(0xFFEEF0F7)
+    val Ink2: Color get() = if (ClockTheme.light) Color(0xFF34415F) else Color(0xFFC9CFE3)
+    val Muted: Color get() = if (ClockTheme.light) Color(0xFF5D6886) else Color(0xFF9AA4C4)
+    val Surface: Color get() = if (ClockTheme.light) Color(0xC7FFFFFF) else Color(0x9E0C1430)
+    val SheetBg: Color get() = if (ClockTheme.light) Color(0xFFF8F3E8) else Color(0xFF0B1532)
+    val Line: Color get() = if (ClockTheme.light) Color(0x4D9C7A2E) else Color(0x38D6BE82)
+    val Tchelet: Color get() = if (ClockTheme.light) Color(0xFF2C5BA0) else Color(0xFF8FB3E8)
+    val TcheletDeep: Color get() = if (ClockTheme.light) Color(0xFF24508F) else Color(0xFF9CC0F0)
+    val Gold: Color get() = if (ClockTheme.light) Color(0xFFB0832A) else Color(0xFFD9B66A)
+    val GoldDeep: Color get() = if (ClockTheme.light) Color(0xFF8E6A1C) else Color(0xFFE2BF72)
+    val Ok: Color get() = if (ClockTheme.light) Color(0xFF23804F) else Color(0xFF6BCB94)
+    val Bad: Color get() = if (ClockTheme.light) Color(0xFFC2412F) else Color(0xFFF2867D)
+    val Plum: Color get() = if (ClockTheme.light) Color(0xFF6A4AA8) else Color(0xFF9C7BD6)
+    val Hand: Color get() = if (ClockTheme.light) Color(0xFFD23F2A) else Color(0xFFFF7A6E)
+    val BigTime: Color get() = if (ClockTheme.light) Color(0xFF16233F) else Color(0xFFF4F1E8)
+    val Seconds: Color get() = if (ClockTheme.light) Color(0xFF5D6886) else Color(0xFFB9C2DE)
+    val TzirufC: Color get() = if (ClockTheme.light) Color(0xFF9A6E18) else Color(0xFFE8C97E)
+    val RimFill: Color get() = if (ClockTheme.light) Color(0xA6FFFFFF) else Color(0x8C080E24)
+    val RimStroke: Color get() = if (ClockTheme.light) Color(0x809C7A2E) else Color(0x59D6BE82)
+    val DotStroke: Color get() = if (ClockTheme.light) Color(0xFFFFFFFF) else Color(0xFF0B1532)
 }
 
 /** Цвет точки времени дня — как `COLOR` на сайте. */
@@ -137,8 +138,6 @@ fun BigFace(
     onPick: ((String?, Float, Float) -> Unit)? = null
 ) {
     val dots = remember(events, half) { place(events, half) }
-    // подписанные времена — раздвинуты по ободу, чтобы не налезали
-    val labelled = remember(dots) { labelsOf(dots) }
 
     val tap = if (onPick != null) Modifier.pointerInput(dots) {
         detectTapGestures { o ->
@@ -161,7 +160,7 @@ fun BigFace(
         translate((size.width - side) / 2f, (size.height - side) / 2f) {
             scale(k, k, pivot = Offset.Zero) {
                 translate(-BOX_MIN, -BOX_MIN) {
-                    drawFace(now, zone, ring, dots, labelled, active, tziruf, k, hourLabel = hourLabel)
+                    drawFace(now, zone, ring, dots, labelsOf(dots, now), active, tziruf, k, hourLabel = hourLabel)
                 }
             }
         }
@@ -236,8 +235,7 @@ private fun DrawScope.drawFace(
 
     for ((d, turn) in labelled) {
         val pos = polar(turn, 68.0)
-        val past = !d.e.at.isAfter(now)
-        text(d.e.at.withZoneSameInstant(zone).format(HHMM), pos.x, pos.y, 8.4f, d.e.color.copy(alpha = if (past) 0.45f else 1f))
+        text(d.e.at.withZoneSameInstant(zone).format(HHMM), pos.x, pos.y, 8.4f, d.e.color)
     }
 
     for (d in dots) {
@@ -260,9 +258,13 @@ private fun DrawScope.drawFace(
     if (hourLabel != null) text(hourLabel, 100f, if (showTime) 131f else 124f, 9f, ClockColors.Muted)
 }
 
-/** Подписанные времена — раздвинуты по ободу, чтобы не налезали. */
-private fun labelsOf(dots: List<DotPlace>): List<Pair<DotPlace, Double>> {
-    val l = dots.filter { it.e.label }.sortedBy { it.turn }
+/**
+ * Подписанные времена — только ещё не наступившие (владелец, 18.11.2026: «цифры прошедших зманим не нужны, нужны следующих»):
+ * выбранные на циферблате и всегда ближайшее; раздвинуты по ободу, чтобы не налезали.
+ */
+private fun labelsOf(dots: List<DotPlace>, now: ZonedDateTime): List<Pair<DotPlace, Double>> {
+    val next = dots.filter { it.e.at.isAfter(now) }.minByOrNull { it.e.at }
+    val l = dots.filter { it.e.at.isAfter(now) && (it.e.label || it === next) }.sortedBy { it.turn }
     val turns = l.map { it.turn }.toMutableList()
     for (i in 1 until turns.size) turns[i] = max(turns[i], turns[i - 1] + 0.045)
     return l.zip(turns)
@@ -281,18 +283,18 @@ fun renderFace(
     events: List<FaceEvent>,
     tziruf: Boolean,
     hourLabel: String? = null
-): android.graphics.Bitmap {
+): android.graphics.Bitmap = ClockTheme.dark {
     val bmp = ImageBitmap(sizePx, sizePx)
     val k = sizePx / BOX
     val dots = place(events, half)
     CanvasDrawScope().draw(Density(1f), LayoutDirection.Ltr, androidx.compose.ui.graphics.Canvas(bmp), Size(sizePx.toFloat(), sizePx.toFloat())) {
         scale(k, k, pivot = Offset.Zero) {
             translate(-BOX_MIN, -BOX_MIN) {
-                drawFace(now, zone, ring, dots, labelsOf(dots), null, tziruf, k, showTime = false, hourLabel = hourLabel)
+                drawFace(now, zone, ring, dots, labelsOf(dots, now), null, tziruf, k, showTime = false, hourLabel = hourLabel)
             }
         }
     }
-    return bmp.asAndroidBitmap()
+    bmp.asAndroidBitmap()
 }
 
 /**

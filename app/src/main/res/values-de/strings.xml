@@ -204,4 +204,19 @@
     <string name="kl_notif_title">Kiddusch Lewana heute</string>
     <string name="kl_channel">Kiddusch Lewana</string>
     <string name="kl_help">🌙 Kiddusch Lewana: an passenden Abenden erscheint unter dem Zifferblatt eine Mondzeile — tippe darauf für den Mondkompass.</string>
+    <string name="theme_t">Design</string>
+    <string name="theme_auto">Automatisch</string>
+    <string name="theme_light">Hell</string>
+    <string name="theme_dark">Dunkel</string>
+    <string name="theme_note">Automatisch: tagsüber (von Sonnenaufgang bis Sonnenuntergang in deiner Stadt) hell, nachts dunkel. Nachtbildschirm und Widgets sind immer dunkel.</string>
+    <string name="kashrut_title">6 Stunden sind vorbei — jetzt ist Milchiges erlaubt</string>
+    <string name="kashrut_t">Fleischig → milchig: 6 Stunden</string>
+    <string name="kashrut_until">Milchiges ab %1$s</string>
+    <string name="kashrut_cancel">Abbrechen</string>
+    <string name="kashrut_start">Ich habe Fleischiges gegessen — in 6 Stunden erinnern</string>
+    <string name="kashrut_note">Ein Wecker 6 Stunden nach dem Tippen (der Brauch ist, 6 Stunden zwischen Fleischigem und Milchigem zu warten; frag deinen Rabbiner). An Schabbat und Jom Tow klingelt er nicht.</string>
+    <string name="alarm_n">Wecker %1$d</string>
+    <string name="alarms_more">Weitere Wecker</string>
+    <string name="alarm_add">Wecker hinzufügen</string>
+    <string name="alarm_delete">Diesen Wecker löschen</string>
 </resources>

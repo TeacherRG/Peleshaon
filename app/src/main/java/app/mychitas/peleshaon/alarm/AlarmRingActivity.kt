@@ -50,6 +50,7 @@ class AlarmRingActivity : ComponentActivity() {
         }
 
         val alarmType = intent.getStringExtra(AlarmScheduler.EXTRA_ALARM_TYPE) ?: "TORAH"
+        val test = intent.getBooleanExtra(AlarmScheduler.EXTRA_TEST, false)
         val wakeModeName = intent.getStringExtra("wake_mode") ?: WakeMode.SOUND_AND_LIGHT.name
         val wakeMode = WakeMode.valueOf(wakeModeName)
         val useLight = wakeMode != WakeMode.SOUND_ONLY
@@ -61,7 +62,7 @@ class AlarmRingActivity : ComponentActivity() {
         }
 
         val appLang = when (Locale.getDefault().language) {
-            "ru" -> "ru"
+            "ru", "uk", "be" -> "ru"
             "de" -> "de"
             "iw", "he" -> "he"
             else -> "en"
@@ -97,13 +98,10 @@ class AlarmRingActivity : ComponentActivity() {
                     )
 
                     Text(
-                        text = if (alarmType == "TORAH") {
-                            stringResource(R.string.torah_alarm_title)
-                        } else {
-                            stringResource(R.string.morning_alarm_title)
-                        },
+                        text = alarmTitle(this@AlarmRingActivity, alarmType),
                         fontSize = 24.sp,
-                        color = textColor
+                        color = textColor,
+                        textAlign = androidx.compose.ui.text.style.TextAlign.Center
                     )
 
                     if (alarmType == "TORAH") {
@@ -131,7 +129,8 @@ class AlarmRingActivity : ComponentActivity() {
 
                     Spacer(modifier = Modifier.height(24.dp))
 
-                    OutlinedButton(
+                    // «Проверить звук» — без «Отложить»
+                    if (!test) OutlinedButton(
                         onClick = {
                             AlarmScheduler.scheduleExactAlarm(
                                 context = this@AlarmRingActivity,
@@ -147,7 +146,7 @@ class AlarmRingActivity : ComponentActivity() {
                     }
 
                     Button(
-                        onClick = { stopAlarm() },
+                        onClick = { stopAlarm(); goHome() },
                         modifier = Modifier.fillMaxWidth().height(56.dp),
                         colors = ButtonDefaults.buttonColors(containerColor = GoldAccent)
                     ) {
@@ -166,6 +165,14 @@ class AlarmRingActivity : ComponentActivity() {
     private fun stopAlarm() {
         stopService(Intent(this, AlarmRingService::class.java))
         finish()
+    }
+
+    /** После «Стоп» — на главный экран приложения (владелец, 18.11.2026). */
+    private fun goHome() {
+        startActivity(
+            Intent(this, app.mychitas.peleshaon.MainActivity::class.java)
+                .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP)
+        )
     }
 
     private fun openUrl(url: String) {

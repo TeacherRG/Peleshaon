@@ -18,6 +18,11 @@ object Prefs {
     const val NAME = "pele_prefs"
     const val MORNING = "MORNING"
     const val TORAH = "TORAH"
+    /** таймер «мясное → молочное»: один звонок через 6 часов */
+    const val KASHRUT = "KASHRUT"
+    /** свои будильники — «C1», «C2»… (владелец, 18.11.2026: «возможность добавить будильники») */
+    const val MAX_CUSTOM = 10
+    const val KASHRUT_HOURS = 6L
 
     fun of(context: Context): SharedPreferences = context.getSharedPreferences(NAME, Context.MODE_PRIVATE)
 
@@ -50,20 +55,20 @@ object Prefs {
 
     // ---- будильники
 
-    private fun prefix(type: String) = if (type == MORNING) "morning" else "torah"
+    private fun prefix(type: String) = when (type) { MORNING -> "morning"; TORAH -> "torah"; else -> type.lowercase() }
 
     fun alarm(context: Context, type: String): AlarmSpec {
         val p = of(context)
         val k = prefix(type)
-        val morning = type == MORNING
+        val morning = type != TORAH
         val days = p.getString("${k}_days", null)
             ?.split(',')?.mapNotNull { it.trim().toIntOrNull() }?.filter { it in 0..6 }?.toSet()
             ?: if (morning) (0..6).toSet() else AlarmSpec.WEEKDAYS
         return AlarmSpec(
             on = p.getBoolean("${k}_enabled", false),
-            byShma = morning && p.getBoolean("${k}_by_shma", true),
-            hour = p.getInt("${k}_hour", if (morning) 6 else 20),
-            minute = p.getInt("${k}_minute", if (morning) 30 else 0),
+            byShma = morning && p.getBoolean("${k}_by_shma", type == MORNING),
+            hour = p.getInt("${k}_hour", if (type == MORNING) 6 else if (morning) 7 else 20),
+            minute = p.getInt("${k}_minute", if (type == MORNING) 30 else 0),
             before = p.getInt("${k}_offset_shma", 30),
             days = days,
             chm = p.getBoolean("chm_$type", p.getBoolean("mute_chol_hamoed", false))
@@ -89,4 +94,32 @@ object Prefs {
 
     fun setWakeMode(context: Context, type: String, mode: WakeMode) =
         of(context).edit().putString("wake_mode_$type", mode.name).apply()
+
+    // ---- свои будильники
+
+    fun customAlarms(context: Context): List<String> =
+        of(context).getString("custom_alarms", "")!!.split(',').filter { it.matches(Regex("C\\d+")) }
+
+    /** Новый будильник: по умолчанию включён, 7:00, все дни. Больше `MAX_CUSTOM` — null. */
+    fun addCustomAlarm(context: Context): String? {
+        val list = customAlarms(context)
+        if (list.size >= MAX_CUSTOM) return null
+        val n = (1..99).first { "C$it" !in list }
+        val id = "C$n"
+        of(context).edit().putString("custom_alarms", (list + id).joinToString(",")).apply()
+        setAlarm(context, id, alarm(context, id).copy(on = true))
+        return id
+    }
+
+    fun removeCustomAlarm(context: Context, id: String) {
+        of(context).edit().putString("custom_alarms", customAlarms(context).filter { it != id }.joinToString(",")).apply()
+    }
+
+    /** Номер будильника для подписи: «Будильник 2» (основной — первый). */
+    fun customNumber(id: String): Int = (id.removePrefix("C").toIntOrNull() ?: 0) + 1
+
+    // ---- мясное → молочное: когда можно молочное (мс), 0 — таймер не идёт
+
+    fun kashrutAt(context: Context): Long = of(context).getLong("kashrut_at", 0L)
+    fun setKashrutAt(context: Context, at: Long) = of(context).edit().putLong("kashrut_at", at).apply()
 }

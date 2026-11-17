@@ -71,12 +71,7 @@ fun Onboarding(onDone: () -> Unit) {
     BackHandler(enabled = step > 0) { step-- }
 
     Box(modifier = Modifier.fillMaxSize().background(Color(0xFF060B1E))) {
-        Image(
-            painter = painterResource(R.drawable.clock_bg),
-            contentDescription = null,
-            contentScale = ContentScale.Crop,
-            modifier = Modifier.fillMaxSize()
-        )
+        ClockBackground()
         Column(modifier = Modifier.fillMaxSize().safeDrawingPadding().padding(horizontal = 20.dp, vertical = 12.dp)) {
             Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
                 Spacer(Modifier.weight(1f))
