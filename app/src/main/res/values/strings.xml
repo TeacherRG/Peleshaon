@@ -135,9 +135,9 @@
     <string name="ob2_other">Choose another city</string>
     <string name="ob2_later">You can change the city at any time — the button with its name at the top of the screen.</string>
     <string name="ob3_t">How to read the dial</string>
-    <string name="ob3_l1">The circle is the whole day: noon at the top, midnight at the bottom.</string>
-    <string name="ob3_l2">Gold dashes are the day, blue ones the night. Each dash is a quarter of a halachic hour, so in winter the day\'s dashes are thinner than the night\'s.</string>
-    <string name="ob3_l3">Past dashes glow, the red one is «now».</string>
+    <string name="ob3_l1">The circle is half a day — the 12 halachic hours of the day (sun) or of the night (moon). It starts and ends at the top.</string>
+    <string name="ob3_l2">Gold is the day, blue the night. Each dash is a quarter of a halachic hour; every fourth, longer one starts an hour.</string>
+    <string name="ob3_l3">Past dashes glow; the short red hand is «now».</string>
     <string name="ob3_l4">Dots on the rim are the times of the day. Tap a dot to see what it is and how long until it.</string>
     <string name="ob3_l5">At the bottom of the screen — Shabbat, the alarms and the list of all times.</string>
     <string name="ob4_t">Alarms that keep Shabbat</string>

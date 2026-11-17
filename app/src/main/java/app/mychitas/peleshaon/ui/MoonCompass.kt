@@ -289,7 +289,8 @@ private fun askNotifications(context: Context, ask: () -> Unit) {
 
 /** Стороны света на розе: буквы языка телефона и под ними — на иврите. */
 private fun cardinal(i: Int): String = when (Locale.getDefault().language) {
-    "ru", "uk", "be" -> listOf("С", "В", "Ю", "З")[i]
+    "uk" -> listOf("Пн", "Сх", "Пд", "Зх")[i]
+    "ru", "be" -> listOf("С", "В", "Ю", "З")[i]
     "de" -> listOf("N", "O", "S", "W")[i]
     "iw", "he" -> listOf("צפון", "מזרח", "דרום", "מערב")[i]
     else -> listOf("N", "E", "S", "W")[i]

@@ -135,9 +135,9 @@
     <string name="ob2_other">Andere Stadt wählen</string>
     <string name="ob2_later">Die Stadt kannst du jederzeit ändern — mit dem Knopf mit ihrem Namen oben.</string>
     <string name="ob3_t">So liest du das Zifferblatt</string>
-    <string name="ob3_l1">Der Kreis ist der ganze Tag: Mittag oben, Mitternacht unten.</string>
-    <string name="ob3_l2">Goldene Striche sind der Tag, blaue die Nacht. Jeder Strich ist eine Viertel halachische Stunde — im Winter sind die Tagesstriche deshalb dünner.</string>
-    <string name="ob3_l3">Vergangene Striche leuchten, der rote ist «jetzt».</string>
+    <string name="ob3_l1">Der Kreis ist ein halber Tag — die 12 halachischen Stunden des Tages (Sonne) oder der Nacht (Mond). Anfang und Ende sind oben.</string>
+    <string name="ob3_l2">Gold ist der Tag, Blau die Nacht. Jeder Strich ist eine Viertel halachische Stunde; jeder vierte, längere beginnt eine Stunde.</string>
+    <string name="ob3_l3">Vergangene Striche leuchten, der kurze rote Zeiger ist «jetzt».</string>
     <string name="ob3_l4">Punkte am Rand sind die Zeiten des Tages. Tippe auf einen Punkt — dann siehst du, was es ist und wie lange es noch dauert.</string>
     <string name="ob3_l5">Unten auf dem Bildschirm — Schabbat, die Wecker und die Liste aller Zeiten.</string>
     <string name="ob4_t">Wecker, die den Schabbat halten</string>

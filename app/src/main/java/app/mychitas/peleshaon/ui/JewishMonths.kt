@@ -10,13 +10,15 @@ import java.util.Locale
  */
 private val RU = listOf("нисана", "ияра", "сивана", "тамуза", "ава", "элула", "тишрея", "хешвана", "кислева", "тевета", "швата", "адара", "адара II")
 private val EN = listOf("Nisan", "Iyar", "Sivan", "Tammuz", "Av", "Elul", "Tishrei", "Cheshvan", "Kislev", "Tevet", "Shevat", "Adar", "Adar II")
+private val UK = listOf("нісана", "іяра", "сівана", "тамуза", "ава", "елула", "тішрея", "хешвана", "кіслева", "тевета", "швата", "адара", "адара II")
 private val DE = listOf("Nissan", "Ijar", "Siwan", "Tammus", "Aw", "Elul", "Tischri", "Cheschwan", "Kislew", "Tewet", "Schwat", "Adar", "Adar II")
 private val HE = listOf("בניסן", "באייר", "בסיון", "בתמוז", "באב", "באלול", "בתשרי", "בחשוון", "בכסלו", "בטבת", "בשבט", "באדר", "באדר ב׳")
 
 fun jewishMonthName(d: JewishDay, locale: Locale = Locale.getDefault()): String {
     val lang = locale.language
     val list = when (lang) {
-        "ru", "uk", "be" -> RU
+        "uk" -> UK
+        "ru", "be" -> RU
         "de" -> DE
         "iw", "he" -> HE
         else -> EN
@@ -24,7 +26,8 @@ fun jewishMonthName(d: JewishDay, locale: Locale = Locale.getDefault()): String 
     val name = list[(d.month - 1).coerceIn(0, 12)]
     // в високосный год — адар I
     if (d.leap && d.month == 12) return when (lang) {
-        "ru", "uk", "be" -> "адара I"
+        "ru", "be" -> "адара I"
+        "uk" -> "адара I"
         "iw", "he" -> "באדר א׳"
         else -> "Adar I"
     }
