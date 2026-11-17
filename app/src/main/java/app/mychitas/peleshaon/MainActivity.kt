@@ -104,7 +104,7 @@ class MainActivity : ComponentActivity() {
     // Город, подписи, «Сочетание Имени» могли поменяться — виджеты и уведомление подхватят
     override fun onStop() {
         super.onStop()
-        Live.update(this)
+        Live.updateAsync(this)
         MoonReminder.schedule(this)
     }
 }
@@ -129,7 +129,7 @@ fun PeleShaonApp(
         Onboarding(onDone = {
             Prefs.of(context).edit().putBoolean("onboarded", true).apply()
             AlarmScheduler.rescheduleAllFromPrefs(context)
-            Live.update(context)
+            Live.updateAsync(context)
             intro = false
         })
     } else if (openMoon.value != null) {

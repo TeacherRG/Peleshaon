@@ -363,7 +363,7 @@ fun ClockScreen(
                     ClockTheme.refresh(context)
                     AlarmScheduler.rescheduleAllFromPrefs(context)
                     app.mychitas.peleshaon.moon.MoonReminder.schedule(context)
-                    app.mychitas.peleshaon.live.Live.update(context)
+                    app.mychitas.peleshaon.live.Live.updateAsync(context)
                     pop = null
                     bump()
                     panel = null
@@ -1175,7 +1175,7 @@ private fun SettingsSheet(onChange: () -> Unit) {
                             }
                             (host as? android.app.Activity)?.recreate()
                         }
-                        app.mychitas.peleshaon.live.Live.update(context)
+                        app.mychitas.peleshaon.live.Live.updateAsync(context)
                     },
                     label = { Text(if (t.isEmpty()) stringResource(R.string.lang_system) else AppLang.label(t), fontSize = 13.sp) },
                     colors = chipColors()
@@ -1211,7 +1211,7 @@ private fun SettingsSheet(onChange: () -> Unit) {
                         Prefs.setCandleOffset(context, offset)
                         ZmanimEngine.candleOffsetOverride = offset
                         AlarmScheduler.rescheduleAllFromPrefs(context)
-                        app.mychitas.peleshaon.live.Live.update(context)
+                        app.mychitas.peleshaon.live.Live.updateAsync(context)
                         onChange()
                     },
                     label = {
@@ -1243,7 +1243,7 @@ private fun SettingsSheet(onChange: () -> Unit) {
                     // будильник «до конца Шма», покой в Шабат, напоминание о Кидуш Левана, виджеты — по новой общине
                     AlarmScheduler.rescheduleAllFromPrefs(context)
                     app.mychitas.peleshaon.moon.MoonReminder.schedule(context)
-                    app.mychitas.peleshaon.live.Live.update(context)
+                    app.mychitas.peleshaon.live.Live.updateAsync(context)
                     onChange()
                 },
                 shape = RoundedCornerShape(12.dp),

@@ -177,7 +177,7 @@ class BootReceiver : BroadcastReceiver() {
         app.mychitas.peleshaon.domain.ZmanimEngine.minhag = Prefs.minhag(context)
         app.mychitas.peleshaon.domain.ZmanimEngine.candleOffsetOverride = Prefs.candleOffset(context)
         AlarmScheduler.rescheduleAllFromPrefs(context)
-        app.mychitas.peleshaon.live.Live.update(context)
+        app.mychitas.peleshaon.live.Live.updateAsync(context)
         app.mychitas.peleshaon.moon.MoonReminder.schedule(context)
     }
 }
