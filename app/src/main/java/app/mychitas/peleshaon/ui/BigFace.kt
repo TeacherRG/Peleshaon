@@ -202,8 +202,10 @@ private fun DrawScope.drawFace(
         // короткая стрелка «сейчас» — у самого обода
         drawLine(ClockColors.Hand, polar(ring.progress, 72.0), polar(ring.progress, 85.0), strokeWidth = 2.6f, cap = StrokeCap.Round)
         // внутри вверху — солнце днём, луна ночью
-        translate(100f, 56f) {
-            scale(1.15f, 1.15f, pivot = Offset.Zero) {
+        // в виджете время — поверх картинки и крупнее: солнце / луна выше и чуть меньше, под подписью у верхней точки
+        translate(100f, if (showTime) 56f else 47f) {
+            val sc = if (showTime) 1.15f else 0.95f
+            scale(sc, sc, pivot = Offset.Zero) {
                 if (ring.day) {
                     drawCircle(ClockColors.Gold, radius = 4.5f, center = Offset.Zero)
                     for (i in 0 until 8) rotate(i * 45f, pivot = Offset.Zero) {
@@ -282,8 +284,9 @@ fun renderFace(
     ring: Ring?,
     events: List<FaceEvent>,
     tziruf: Boolean,
-    hourLabel: String? = null
-): android.graphics.Bitmap = ClockTheme.dark {
+    hourLabel: String? = null,
+    light: Boolean = false
+): android.graphics.Bitmap = ClockTheme.render(light) {
     val bmp = ImageBitmap(sizePx, sizePx)
     val k = sizePx / BOX
     val dots = place(events, half)
