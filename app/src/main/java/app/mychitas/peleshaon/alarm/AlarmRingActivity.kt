@@ -57,7 +57,7 @@ class AlarmRingActivity : ComponentActivity() {
         val alarmType = intent.getStringExtra(AlarmScheduler.EXTRA_ALARM_TYPE) ?: "TORAH"
         val test = intent.getBooleanExtra(AlarmScheduler.EXTRA_TEST, false)
         val wakeModeName = intent.getStringExtra("wake_mode") ?: WakeMode.SOUND_AND_LIGHT.name
-        val wakeMode = WakeMode.valueOf(wakeModeName)
+        val wakeMode = runCatching { WakeMode.valueOf(wakeModeName) }.getOrDefault(WakeMode.SOUND_AND_LIGHT)
         val useLight = wakeMode != WakeMode.SOUND_ONLY
 
         if (useLight) {

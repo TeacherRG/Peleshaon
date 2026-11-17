@@ -145,7 +145,7 @@ fun ClockScreen(onNightScreen: () -> Unit, onIntro: () -> Unit = {}, onMoon: () 
     var tziruf by remember { mutableStateOf(Prefs.tziruf(context)) }
     var panel by rememberSaveable { mutableStateOf<Panel?>(null) }
     // свой будильник, открытый в окне (C1, C2…)
-    var editAlarm by remember { mutableStateOf(Prefs.MORNING) }
+    var editAlarm by rememberSaveable { mutableStateOf(Prefs.MORNING) }
     var pop by remember { mutableStateOf<Triple<String, Float, Float>?>(null) }
 
     val zone = city.zone()
@@ -308,9 +308,10 @@ fun ClockScreen(onNightScreen: () -> Unit, onIntro: () -> Unit = {}, onMoon: () 
             // ближайший из будильников (основной и свои); идёт таймер «мясное → молочное» — он
             val nextWake = remember(version, city, minute) {
                 val k = Prefs.kashrutAt(context)
-                if (k > System.currentTimeMillis()) java.time.Instant.ofEpochMilli(k).atZone(zone)
-                else (listOf(Prefs.MORNING) + Prefs.customAlarms(context))
-                    .mapNotNull { AlarmRules.nextRing(Prefs.alarm(context, it), cityNow, city) }.minOrNull()
+                val kashrut = if (k > System.currentTimeMillis()) listOf(java.time.Instant.ofEpochMilli(k).atZone(zone))
+                    else emptyList()
+                (kashrut + (listOf(Prefs.MORNING) + Prefs.customAlarms(context))
+                    .mapNotNull { AlarmRules.nextRing(Prefs.alarm(context, it), cityNow, city) }).minOrNull()
             }
             val nextStudy = remember(version, city, minute) { AlarmRules.nextRing(Prefs.alarm(context, Prefs.TORAH), cityNow, city) }
             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -337,6 +338,7 @@ fun ClockScreen(onNightScreen: () -> Unit, onIntro: () -> Unit = {}, onMoon: () 
             when (open) {
                 Panel.CITY -> CitySheet(city, auto) { chosen ->
                     Prefs.setCity(context, chosen)
+                    ClockTheme.refresh(context)
                     AlarmScheduler.rescheduleAllFromPrefs(context)
                     pop = null
                     bump()

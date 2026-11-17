@@ -108,8 +108,11 @@ fun CalendarSheet(city: CityOption, now: ZonedDateTime) {
                 val a = first.date
                 val b = month.last().date
                 val fmt = DateTimeFormatter.ofPattern("LLLL", locale)
-                val range = if (a.month == b.month) "${a.format(fmt)} ${a.year}"
-                else "${a.format(fmt)} — ${b.format(fmt)} ${b.year}"
+                val range = when {
+                    a.month == b.month && a.year == b.year -> "${a.format(fmt)} ${a.year}"
+                    a.year != b.year -> "${a.format(DateTimeFormatter.ofPattern("LLLL yyyy", locale))} — ${b.format(DateTimeFormatter.ofPattern("LLLL yyyy", locale))}"
+                    else -> "${a.format(fmt)} — ${b.format(fmt)} ${b.year}"
+                }
                 Text(range, fontSize = 13.sp, color = ClockColors.Ink2)
             }
             NavButton("›", stringResource(R.string.cal_next)) {

@@ -202,7 +202,19 @@ fun MoonCompass(onClose: () -> Unit, startMoon: Boolean = true) {
     // режим: Луна (Кидуш Левана) или Йерушалаим (куда молиться)
     var moonMode by rememberSaveable { mutableStateOf(startMoon) }
     val jer = remember(city) { jerusalemBearing(city.lat, city.lon) }
-    val askNotif = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { }
+    val askNotif = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { allowed ->
+        remind = allowed
+        MoonReminder.setOn(context, allowed)
+    }
+    val setRemind: (Boolean) -> Unit = { enabled ->
+        if (enabled && Build.VERSION.SDK_INT >= 33 &&
+            context.checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
+            askNotif.launch(Manifest.permission.POST_NOTIFICATIONS)
+        } else {
+            remind = enabled
+            MoonReminder.setOn(context, enabled)
+        }
+    }
 
     Box(modifier = Modifier.fillMaxSize().background(Color(0xFF060B1E))) {
         ClockBackground()
@@ -279,17 +291,13 @@ fun MoonCompass(onClose: () -> Unit, startMoon: Boolean = true) {
                 modifier = Modifier.fillMaxWidth().widthIn(max = 460.dp)) {
                 Column(Modifier.padding(14.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
                     Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth().clickable {
-                        remind = !remind
-                        if (remind) askNotifications(context) { askNotif.launch(Manifest.permission.POST_NOTIFICATIONS) }
-                        MoonReminder.setOn(context, remind)
+                        setRemind(!remind)
                     }) {
                         Text(stringResource(R.string.kl_remind), color = ClockColors.Ink, fontWeight = FontWeight.SemiBold, modifier = Modifier.weight(1f))
                         Switch(
                             checked = remind,
                             onCheckedChange = {
-                                remind = it
-                                if (it) askNotifications(context) { askNotif.launch(Manifest.permission.POST_NOTIFICATIONS) }
-                                MoonReminder.setOn(context, it)
+                                setRemind(it)
                             },
                             colors = SwitchDefaults.colors(checkedThumbColor = ClockColors.SheetBg, checkedTrackColor = ClockColors.Gold)
                         )

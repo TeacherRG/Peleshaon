@@ -41,7 +41,8 @@ class AlarmRingService : Service() {
         val test = intent?.getBooleanExtra(AlarmScheduler.EXTRA_TEST, false) == true
         val prefs = getSharedPreferences("pele_prefs", Context.MODE_PRIVATE)
         val wakeModeName = prefs.getString("wake_mode_$alarmType", WakeMode.SOUND_AND_LIGHT.name)
-        val wakeMode = WakeMode.valueOf(wakeModeName ?: WakeMode.SOUND_AND_LIGHT.name)
+        val wakeMode = runCatching { WakeMode.valueOf(wakeModeName ?: "") }
+            .getOrDefault(WakeMode.SOUND_AND_LIGHT)
         val useVibration = prefs.getBoolean("vibrate_$alarmType", true)
 
         createNotificationChannel()
@@ -81,12 +82,12 @@ class AlarmRingService : Service() {
             ServiceInfo.FOREGROUND_SERVICE_TYPE_MEDIA_PLAYBACK
         } else 0
         ServiceCompat.startForeground(this, 3001, notification, fgsType)
-        startActivity(fullScreenIntent)
+        // Android 10+ blocks arbitrary background Activity launches; full-screen notification owns the launch.
 
         if (wakeMode != WakeMode.LIGHT_ONLY) {
             startCrescendoAudio()
         }
-        if (useVibration) {
+        if (useVibration && wakeMode != WakeMode.LIGHT_ONLY) {
             startVibration()
         }
 

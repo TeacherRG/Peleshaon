@@ -15,6 +15,7 @@ import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -99,9 +100,9 @@ class MainActivity : ComponentActivity() {
 @Composable
 fun PeleShaonApp(openMoon: androidx.compose.runtime.MutableState<String?>) {
     val context = LocalContext.current
-    var night by remember { mutableStateOf(false) }
+    var night by rememberSaveable { mutableStateOf(false) }
     // Знакомство — при первом запуске (разрешение на уведомления просит его шаг про будильники, с объяснением)
-    var intro by remember { mutableStateOf(!Prefs.of(context).getBoolean("onboarded", false)) }
+    var intro by rememberSaveable { mutableStateOf(!Prefs.of(context).getBoolean("onboarded", false)) }
 
     if (intro) {
         Onboarding(onDone = {

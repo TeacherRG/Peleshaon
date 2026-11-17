@@ -240,7 +240,8 @@ object Live {
         val at = if (atNext != null && atNext < fiveMin) atNext else fiveMin
         val am = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
         // RTC без пробуждения: обновится, когда телефон проснётся
-        am.setWindow(AlarmManager.RTC, at, 30_000L, tickIntent(context))
+        // Android 12+ guarantees no sub-10-minute exactness for inexact alarms.
+        am.setWindow(AlarmManager.RTC, at, 10 * 60_000L, tickIntent(context))
     }
 
     private fun cancelTick(context: Context) {
