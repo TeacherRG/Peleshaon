@@ -160,14 +160,50 @@ class AlarmReceiver : BroadcastReceiver() {
             val serviceIntent = Intent(context, AlarmRingService::class.java).apply {
                 putExtra(AlarmScheduler.EXTRA_ALARM_TYPE, alarmType)
             }
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                context.startForegroundService(serviceIntent)
-            } else {
-                context.startService(serviceIntent)
+            try {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                    context.startForegroundService(serviceIntent)
+                } else {
+                    context.startService(serviceIntent)
+                }
+            } catch (e: RuntimeException) {
+                // Inexact alarms are not guaranteed an FGS background-start exception.
+                // Never crash the receiver or claim that the alarm actually rang.
+                android.util.Log.e("PeleShaon.Alarm", "Alarm service launch blocked", e)
+                notifyAlarmStartFailure(context, alarmType)
             }
         }
 
         AlarmScheduler.rescheduleAllFromPrefs(context)
+    }
+
+    private fun notifyAlarmStartFailure(context: Context, alarmType: String) {
+        val nm = context.getSystemService(Context.NOTIFICATION_SERVICE) as android.app.NotificationManager
+        val channel = "pele_alarm_fallback"
+        val localized = app.mychitas.peleshaon.AppLang.wrap(context)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            nm.createNotificationChannel(android.app.NotificationChannel(
+                channel, localized.getString(app.mychitas.peleshaon.R.string.alarm_fallback_channel),
+                android.app.NotificationManager.IMPORTANCE_HIGH
+            ))
+        }
+        val pending = PendingIntent.getActivity(
+            context, AlarmScheduler.requestCode(alarmType, false),
+            Intent(context, MainActivity::class.java)
+                .putExtra(AlarmScheduler.EXTRA_SHOW_ALARM_TYPE, alarmType)
+                .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP),
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
+        val notification = androidx.core.app.NotificationCompat.Builder(localized, channel)
+            .setSmallIcon(android.R.drawable.ic_lock_idle_alarm)
+            .setContentTitle(localized.getString(app.mychitas.peleshaon.R.string.alarm_fallback_title))
+            .setContentText(localized.getString(app.mychitas.peleshaon.R.string.alarm_fallback_message))
+            .setPriority(androidx.core.app.NotificationCompat.PRIORITY_HIGH)
+            .setCategory(androidx.core.app.NotificationCompat.CATEGORY_ALARM)
+            .setAutoCancel(true)
+            .setContentIntent(pending).build()
+        runCatching { nm.notify(4000 + AlarmScheduler.requestCode(alarmType, false), notification) }
+            .onFailure { android.util.Log.e("PeleShaon.Alarm", "Alarm fallback notification unavailable", it) }
     }
 }
 

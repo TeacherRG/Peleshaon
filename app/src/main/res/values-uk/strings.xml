@@ -209,6 +209,9 @@
     <string name="candle_offset_local">За містом</string>
     <string name="candle_offset_minutes">%1$d хв</string>
     <string name="candle_offset_note">Типово: Єрусалим — 40 хв, Хайфа — 30 хв, інші міста — 18 хв. Звірте звичай своєї громади.</string>
+    <string name="alarm_fallback_channel">Проблема запуску будильника</string>
+    <string name="alarm_fallback_title">Будильник не запустився</string>
+    <string name="alarm_fallback_message">Android обмежив запуск служби. Відкрийте застосунок і перевірте дозволи будильників та сповіщень.</string>
     <string name="theme_t">Тема</string>
     <string name="theme_auto">Авто</string>
     <string name="theme_light">Світла</string>

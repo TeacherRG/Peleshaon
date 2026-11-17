@@ -209,6 +209,9 @@
     <string name="candle_offset_local">לפי העיר</string>
     <string name="candle_offset_minutes">%1$d דק׳</string>
     <string name="candle_offset_note">ברירת מחדל: ירושלים 40 דקות, חיפה 30 דקות, ערים אחרות 18 דקות. יש לברר את מנהג המקום עם הרב.</string>
+    <string name="alarm_fallback_channel">בעיה בהפעלת השעון המעורר</string>
+    <string name="alarm_fallback_title">השעון המעורר לא הופעל</string>
+    <string name="alarm_fallback_message">Android חסם את השירות. יש לבדוק הרשאות שעון מעורר והתראות.</string>
     <string name="theme_t">ערכת נושא</string>
     <string name="theme_auto">אוטומטי</string>
     <string name="theme_light">בהירה</string>
