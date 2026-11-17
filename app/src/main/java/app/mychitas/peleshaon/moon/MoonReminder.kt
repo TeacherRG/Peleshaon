@@ -70,7 +70,7 @@ object MoonReminder {
     fun schedule(context: Context) {
         val am = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
         am.cancel(pending(context))
-        if (!isOn(context)) return
+        if (!isOn(context) || Prefs.cityUnmatched(context)) return
         val at = runCatching { KiddushLevanaRules.nextReminder(ZonedDateTime.now(), Prefs.city(context)) }.getOrNull() ?: return
         am.setWindow(AlarmManager.RTC_WAKEUP, at.toInstant().toEpochMilli(), 10 * 60_000L, pending(context))
     }
@@ -88,25 +88,26 @@ object MoonReminder {
         val city = Prefs.city(context)
         val now = ZonedDateTime.now(city.zone())
         val kl = runCatching { KiddushLevanaRules.now(now, city) }.getOrNull()
-        if (isOn(context) && kl != null && kl.moon.aboveHorizon) notify(context, kl.moon, kl.end)
+        if (isOn(context) && kl != null && kl.moon.altitude >= 5.0) notify(context, kl.moon, kl.end)
         schedule(context)
     }
 
     private fun notify(context: Context, m: MoonPosition, end: ZonedDateTime) {
+        val localized = app.mychitas.peleshaon.AppLang.wrap(context)
         val nm = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             nm.createNotificationChannel(
-                NotificationChannel(CHANNEL, context.getString(R.string.kl_channel), NotificationManager.IMPORTANCE_LOW).apply {
+                NotificationChannel(CHANNEL, localized.getString(R.string.kl_channel), NotificationManager.IMPORTANCE_LOW).apply {
                     setShowBadge(false)
                     setSound(null, null)
                     enableVibration(false)
                 }
             )
         }
-        val text = moonLine(context, m) + " · " + context.getString(R.string.kl_until, untilText(end))
+        val text = moonLine(localized, m) + " · " + localized.getString(R.string.kl_until, untilText(end))
         val n = NotificationCompat.Builder(context, CHANNEL)
             .setSmallIcon(R.drawable.ic_stat_clock)
-            .setContentTitle(context.getString(R.string.kl_notif_title))
+            .setContentTitle(localized.getString(R.string.kl_notif_title))
             .setContentText(text)
             .setStyle(NotificationCompat.BigTextStyle().bigText(text))
             .setSilent(true)

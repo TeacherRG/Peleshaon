@@ -167,7 +167,7 @@ private fun StepCity(onConfirm: () -> Unit) {
     }
     if (!choosing) {
         Row(horizontalArrangement = Arrangement.spacedBy(10.dp), modifier = Modifier.fillMaxWidth()) {
-            Button(onClick = onConfirm, colors = ButtonDefaults.buttonColors(containerColor = ClockColors.Surface), modifier = Modifier.weight(1f)) {
+            Button(onClick = { Prefs.setCity(context, city); onConfirm() }, colors = ButtonDefaults.buttonColors(containerColor = ClockColors.Surface), modifier = Modifier.weight(1f)) {
                 Text("✓ " + stringResource(R.string.ob2_ok), color = ClockColors.Ink)
             }
             OutlinedButton(onClick = { choosing = true }, border = BorderStroke(1.dp, ClockColors.Line), modifier = Modifier.weight(1f)) {

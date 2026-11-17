@@ -7,11 +7,13 @@ import android.content.Context
 import android.content.Intent
 import android.os.Build
 import app.mychitas.peleshaon.Prefs
+import app.mychitas.peleshaon.MainActivity
 import java.time.ZonedDateTime
 
 object AlarmScheduler {
 
     const val EXTRA_ALARM_TYPE = "alarm_type"
+    const val EXTRA_SHOW_ALARM_TYPE = "show_alarm_type"
     const val EXTRA_IS_SNOOZE = "is_snooze"
     /** «Проверить звук»: без «Отложить» */
     const val EXTRA_TEST = "is_test"
@@ -50,12 +52,27 @@ object AlarmScheduler {
         )
 
         val triggerMillis = triggerTime.toInstant().toEpochMilli()
-        val clockInfo = AlarmManager.AlarmClockInfo(triggerMillis, pendingIntent)
+        // Системный значок будильника должен открывать приложение, а не запускать звонок.
+        val showIntent = PendingIntent.getActivity(
+            context, requestCode,
+            Intent(context, MainActivity::class.java).apply {
+                putExtra(EXTRA_SHOW_ALARM_TYPE, alarmType)
+                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP)
+            },
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
+        val clockInfo = AlarmManager.AlarmClockInfo(triggerMillis, showIntent)
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
             if (alarmManager.canScheduleExactAlarms()) {
-                alarmManager.setAlarmClock(clockInfo, pendingIntent)
+                try {
+                    alarmManager.setAlarmClock(clockInfo, pendingIntent)
+                } catch (_: SecurityException) {
+                    // Permission can be revoked between the check and the schedule call.
+                    alarmManager.setAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, triggerMillis, pendingIntent)
+                }
             } else {
+                // Inexact fallback: the Permissions screen must warn about possible delay.
                 alarmManager.setAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, triggerMillis, pendingIntent)
             }
         } else {
@@ -63,41 +80,51 @@ object AlarmScheduler {
         }
     }
 
-    fun cancelAlarm(context: Context, alarmType: String) {
+    /** Снимает обычный звонок и при необходимости его отложенный экземпляр. */
+    fun cancelAlarm(context: Context, alarmType: String, includeSnooze: Boolean = false) {
         val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
-        val intent = Intent(context, AlarmReceiver::class.java)
-        val requestCode = requestCode(alarmType, false)
-        val pendingIntent = PendingIntent.getBroadcast(
-            context,
-            requestCode,
-            intent,
-            PendingIntent.FLAG_NO_CREATE or PendingIntent.FLAG_IMMUTABLE
-        )
-        if (pendingIntent != null) {
-            alarmManager.cancel(pendingIntent)
+        for (snooze in if (includeSnooze) listOf(false, true) else listOf(false)) {
+            val pendingIntent = PendingIntent.getBroadcast(
+                context, requestCode(alarmType, snooze),
+                Intent(context, AlarmReceiver::class.java),
+                PendingIntent.FLAG_NO_CREATE or PendingIntent.FLAG_IMMUTABLE
+            )
+            if (pendingIntent != null) alarmManager.cancel(pendingIntent)
         }
     }
 
     /** Следующие звонки всех будильников — по настройкам и городу; нет звонка — будильник снят. И таймер «мясное → молочное». */
     fun rescheduleAllFromPrefs(context: Context) {
+        if (Prefs.cityUnmatched(context)) {
+            for (type in listOf(Prefs.MORNING, Prefs.TORAH) + Prefs.customAlarms(context) + Prefs.KASHRUT)
+                cancelAlarm(context, type, includeSnooze = true)
+            return
+        }
         val city = Prefs.city(context)
         val now = ZonedDateTime.now(city.zone())
+        val early = Prefs.earlyShabbatMinutes(context)
         for (type in listOf(Prefs.MORNING, Prefs.TORAH) + Prefs.customAlarms(context)) {
-            val next = AlarmRules.nextRing(Prefs.alarm(context, type), now, city)
-            if (next != null) scheduleExactAlarm(context, next, type) else cancelAlarm(context, type)
+            val spec = Prefs.alarm(context, type)
+            val next = AlarmRules.nextRing(spec, now, city, early)
+            if (next != null) scheduleExactAlarm(context, next, type)
+            else cancelAlarm(context, type, includeSnooze = !spec.on || spec.days.isEmpty())
         }
         val k = Prefs.kashrutAt(context)
-        if (k > System.currentTimeMillis()) {
-            scheduleExactAlarm(context, java.time.Instant.ofEpochMilli(k).atZone(city.zone()), Prefs.KASHRUT)
+        if (k > 0L) {
+            // Never discard an overdue one-shot event before its receiver acknowledges it.
+            // Re-arm a missed delivery shortly after now instead of silently losing it.
+            val whenMs = maxOf(k, System.currentTimeMillis() + 2_000L)
+            scheduleExactAlarm(context, java.time.Instant.ofEpochMilli(whenMs).atZone(city.zone()), Prefs.KASHRUT)
         } else {
-            if (k != 0L) Prefs.setKashrutAt(context, 0L)
-            cancelAlarm(context, Prefs.KASHRUT)
+            cancelAlarm(context, Prefs.KASHRUT, includeSnooze = true)
         }
     }
 
     /** Мясное съедено: напомнить через 6 часов. */
     fun startKashrut(context: Context) {
-        Prefs.setKashrutAt(context, System.currentTimeMillis() + Prefs.KASHRUT_HOURS * 3_600_000L)
+        Prefs.clearKashrutReset(context)
+        Prefs.setKashrutDeferred(context, false)
+        Prefs.setKashrutAt(context, KashrutPolicy.deadline(System.currentTimeMillis()))
         rescheduleAllFromPrefs(context)
     }
 
@@ -108,10 +135,7 @@ object AlarmScheduler {
 
     /** Убрать свой будильник: снять звонок и его отложенный. */
     fun removeCustom(context: Context, id: String) {
-        cancelAlarm(context, id)
-        val am = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
-        PendingIntent.getBroadcast(context, requestCode(id, true), Intent(context, AlarmReceiver::class.java),
-            PendingIntent.FLAG_NO_CREATE or PendingIntent.FLAG_IMMUTABLE)?.let { am.cancel(it) }
+        cancelAlarm(context, id, includeSnooze = true)
         Prefs.removeCustomAlarm(context, id)
     }
 }
@@ -119,10 +143,19 @@ object AlarmScheduler {
 class AlarmReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent) {
         val alarmType = intent.getStringExtra(AlarmScheduler.EXTRA_ALARM_TYPE) ?: Prefs.MORNING
+        if (Prefs.cityUnmatched(context)) {
+            AlarmScheduler.cancelAlarm(context, alarmType, includeSnooze = true)
+            return
+        }
         val city = Prefs.city(context)
         // таймер «мясное → молочное» — один раз
         if (alarmType.startsWith("C") && alarmType !in Prefs.customAlarms(context)) return
-        if (alarmType == Prefs.KASHRUT && !intent.getBooleanExtra(AlarmScheduler.EXTRA_IS_SNOOZE, false)) Prefs.setKashrutAt(context, 0L)
+        if (alarmType != Prefs.KASHRUT && !Prefs.alarm(context, alarmType).on) {
+            AlarmScheduler.cancelAlarm(context, alarmType, includeSnooze = true)
+            return
+        }
+        if (alarmType == Prefs.KASHRUT &&
+            (Prefs.kashrutAt(context) <= 0L || Prefs.kashrutAt(context) > System.currentTimeMillis() + 2_000L)) return
         // Последняя проверка в момент звонка: Шабат, Йом Тов, Йом Кипур (и Хол ґа-моэд по галочке) — молчим
         val quietStatus = ShabbatGuard.checkMoment(
             moment = ZonedDateTime.now(city.zone()),
@@ -131,28 +164,75 @@ class AlarmReceiver : BroadcastReceiver() {
             lon = city.lon,
             zoneId = city.zone(),
             isIsrael = city.isIsrael,
-            muteCholHamoed = Prefs.alarm(context, alarmType).chm
+            muteCholHamoed = Prefs.alarm(context, alarmType).chm,
+            earlyShabbatMinutes = Prefs.earlyShabbatMinutes(context)
         )
 
+        if (quietStatus.isQuietTime && alarmType == Prefs.KASHRUT) {
+            // The six hours elapsed, but an audible reminder during Shabbat/Yom Tov is forbidden.
+            // Preserve this fact for the user to see after the quiet period.
+            Prefs.setKashrutAt(context, 0L)
+            Prefs.setKashrutDeferred(context, true)
+        }
         if (!quietStatus.isQuietTime) {
+            if (alarmType == Prefs.KASHRUT) Prefs.setKashrutAt(context, 0L)
             val serviceIntent = Intent(context, AlarmRingService::class.java).apply {
                 putExtra(AlarmScheduler.EXTRA_ALARM_TYPE, alarmType)
             }
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                context.startForegroundService(serviceIntent)
-            } else {
-                context.startService(serviceIntent)
+            try {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                    context.startForegroundService(serviceIntent)
+                } else {
+                    context.startService(serviceIntent)
+                }
+            } catch (e: RuntimeException) {
+                // Inexact alarms are not guaranteed an FGS background-start exception.
+                // Never crash the receiver or claim that the alarm actually rang.
+                android.util.Log.e("PeleShaon.Alarm", "Alarm service launch blocked", e)
+                notifyAlarmStartFailure(context, alarmType)
             }
         }
 
         AlarmScheduler.rescheduleAllFromPrefs(context)
     }
+
+    private fun notifyAlarmStartFailure(context: Context, alarmType: String) {
+        val nm = context.getSystemService(Context.NOTIFICATION_SERVICE) as android.app.NotificationManager
+        val channel = "pele_alarm_fallback"
+        val localized = app.mychitas.peleshaon.AppLang.wrap(context)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            nm.createNotificationChannel(android.app.NotificationChannel(
+                channel, localized.getString(app.mychitas.peleshaon.R.string.alarm_fallback_channel),
+                android.app.NotificationManager.IMPORTANCE_HIGH
+            ))
+        }
+        val pending = PendingIntent.getActivity(
+            context, AlarmScheduler.requestCode(alarmType, false),
+            Intent(context, MainActivity::class.java)
+                .putExtra(AlarmScheduler.EXTRA_SHOW_ALARM_TYPE, alarmType)
+                .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP),
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
+        val notification = androidx.core.app.NotificationCompat.Builder(localized, channel)
+            .setSmallIcon(android.R.drawable.ic_lock_idle_alarm)
+            .setContentTitle(localized.getString(app.mychitas.peleshaon.R.string.alarm_fallback_title))
+            .setContentText(localized.getString(app.mychitas.peleshaon.R.string.alarm_fallback_message))
+            .setPriority(androidx.core.app.NotificationCompat.PRIORITY_HIGH)
+            .setCategory(androidx.core.app.NotificationCompat.CATEGORY_ALARM)
+            .setAutoCancel(true)
+            .setContentIntent(pending).build()
+        runCatching { nm.notify(4000 + AlarmScheduler.requestCode(alarmType, false), notification) }
+            .onFailure { android.util.Log.e("PeleShaon.Alarm", "Alarm fallback notification unavailable", it) }
+    }
 }
 
 class BootReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent) {
+        app.mychitas.peleshaon.AppLang.applyToProcess(context.applicationContext)
+        app.mychitas.peleshaon.domain.ZmanimEngine.minhag = Prefs.minhag(context)
+        app.mychitas.peleshaon.domain.ZmanimEngine.candleOffsetOverride = Prefs.candleOffset(context)
         AlarmScheduler.rescheduleAllFromPrefs(context)
-        app.mychitas.peleshaon.live.Live.update(context)
+        app.mychitas.peleshaon.live.Live.updateAsync(context)
         app.mychitas.peleshaon.moon.MoonReminder.schedule(context)
     }
 }

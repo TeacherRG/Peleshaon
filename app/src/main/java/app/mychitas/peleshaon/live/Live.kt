@@ -85,6 +85,7 @@ private fun hourLabel(context: Context, s: LiveState): String? =
  * Будильник для этого — не будящий (RTC): пока экран выключен, телефон не просыпается; включили — всё сразу свежее.
  */
 object Live {
+    private val worker = java.util.concurrent.Executors.newSingleThreadExecutor()
     private const val CHANNEL = "pele_live"
     private const val NOTIF_ID = 4001
     private const val TICK = "app.mychitas.peleshaon.LIVE_TICK"
@@ -103,8 +104,19 @@ object Live {
         update(context)
     }
 
-    /** Обновить всё (виджеты, уведомление) и назначить следующее обновление. */
-    fun update(context: Context) {
+    /** Keep bitmap rendering off the BroadcastReceiver/main thread. */
+    fun updateAsync(context: Context, pending: BroadcastReceiver.PendingResult? = null) {
+        val app = context.applicationContext
+        worker.execute {
+            try { update(app) }
+            catch (e: Exception) { android.util.Log.e("PeleShaon.Live", "Widget refresh failed", e) }
+            finally { pending?.finish() }
+        }
+    }
+
+    /** Runs on the single shared background worker. */
+    fun update(source: Context) {
+        val context = app.mychitas.peleshaon.AppLang.wrap(source)
         val ids = widgetIds(context)
         val notif = notificationOn(context)
         if (ids.isEmpty() && !notif) {
@@ -240,7 +252,8 @@ object Live {
         val at = if (atNext != null && atNext < fiveMin) atNext else fiveMin
         val am = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
         // RTC без пробуждения: обновится, когда телефон проснётся
-        am.setWindow(AlarmManager.RTC, at, 30_000L, tickIntent(context))
+        // Android 12+ guarantees no sub-10-minute exactness for inexact alarms.
+        am.setWindow(AlarmManager.RTC, at, 10 * 60_000L, tickIntent(context))
     }
 
     private fun cancelTick(context: Context) {
@@ -252,6 +265,6 @@ object Live {
 /** Плановое обновление, смена времени, часового пояса, перезагрузка. */
 class LiveReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent) {
-        Live.update(context)
+        Live.updateAsync(context, goAsync())
     }
 }

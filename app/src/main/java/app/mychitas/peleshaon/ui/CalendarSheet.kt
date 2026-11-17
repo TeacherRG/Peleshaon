@@ -43,6 +43,7 @@ import app.mychitas.peleshaon.R
 import app.mychitas.peleshaon.domain.CalDay
 import app.mychitas.peleshaon.domain.CalEvent
 import app.mychitas.peleshaon.domain.CalKind
+import app.mychitas.peleshaon.domain.CandleTransition
 import app.mychitas.peleshaon.domain.CityOption
 import app.mychitas.peleshaon.domain.JewishCal
 import app.mychitas.peleshaon.domain.ZmanType
@@ -81,11 +82,13 @@ fun CalendarSheet(city: CityOption, now: ZonedDateTime) {
     val locale = Locale.getDefault()
     val zone = city.zone()
     // после заката — уже завтрашний еврейский день
-    val today = remember(now.toLocalDate()) {
-        val t = now.withZoneSameInstant(zone)
-        val set = ZmanimEngine.sunsetOf(t.toLocalDate(), city)
-        if (set != null && !t.isBefore(set)) t.toLocalDate().plusDays(1) else t.toLocalDate()
+    val localNow = now.withZoneSameInstant(zone)
+    val sunsetToday = remember(city, localNow.toLocalDate()) {
+        ZmanimEngine.sunsetOf(localNow.toLocalDate(), city)
     }
+    // Re-evaluate against cached sunset at every clock tick, not just each minute.
+    val today = if (sunsetToday != null && !localNow.isBefore(sunsetToday))
+        localNow.toLocalDate().plusDays(1) else localNow.toLocalDate()
     var anchor by remember { mutableStateOf(today) }
     var selected by remember { mutableStateOf(today) }
     val month = remember(anchor, city) { JewishCal.monthOf(anchor, city.isIsrael) }
@@ -108,8 +111,11 @@ fun CalendarSheet(city: CityOption, now: ZonedDateTime) {
                 val a = first.date
                 val b = month.last().date
                 val fmt = DateTimeFormatter.ofPattern("LLLL", locale)
-                val range = if (a.month == b.month) "${a.format(fmt)} ${a.year}"
-                else "${a.format(fmt)} — ${b.format(fmt)} ${b.year}"
+                val range = when {
+                    a.month == b.month && a.year == b.year -> "${a.format(fmt)} ${a.year}"
+                    a.year != b.year -> "${a.format(DateTimeFormatter.ofPattern("LLLL yyyy", locale))} — ${b.format(DateTimeFormatter.ofPattern("LLLL yyyy", locale))}"
+                    else -> "${a.format(fmt)} — ${b.format(fmt)} ${b.year}"
+                }
                 Text(range, fontSize = 13.sp, color = ClockColors.Ink2)
             }
             NavButton("›", stringResource(R.string.cal_next)) {
@@ -290,14 +296,27 @@ private fun DayDetails(d: CalDay, city: CityOption, locale: Locale) {
             // свечи: канун Шабата или Йом Това — за 18 мин до заката; между двумя святыми днями — после выхода звёзд
             val sunset = items[ZmanType.SUNSET]?.exactTime
             if (d.candles && sunset != null) {
-                if (d.holy) {
-                    items[ZmanType.TZAIT]?.let { TimeRow("🕯️", stringResource(R.string.cal_candles_after), it.roundedTime.withZoneSameInstant(zone).format(HHMM), ClockColors.GoldDeep) }
-                } else {
-                    TimeRow("🕯️", stringResource(R.string.z_t_candles), sunset.minusMinutes(ZmanimEngine.CANDLE_MIN).withZoneSameInstant(zone).format(HHMM), ClockColors.GoldDeep)
+                when (JewishCal.candleTransition(d.date, city.isIsrael)) {
+                    CandleTransition.BEFORE_SUNSET -> {
+                        ZmanimEngine.candleLightingOn(d.date, city)?.let {
+                            TimeRow("🕯️", stringResource(R.string.z_t_candles),
+                                it.withZoneSameInstant(zone).format(HHMM), ClockColors.GoldDeep)
+                        }
+                    }
+                    CandleTransition.AFTER_NIGHTFALL -> {
+                        ZmanimEngine.havdalahOn(d.date, city)?.let {
+                            TimeRow("🕯️", stringResource(R.string.cal_candles_after),
+                                it.withZoneSameInstant(zone).format(HHMM), ClockColors.GoldDeep)
+                        }
+                    }
+                    CandleTransition.NONE -> Unit
                 }
             }
-            if (d.holy && !next.holy && sunset != null) {
-                TimeRow("✨", stringResource(R.string.z_t_havdalah), sunset.plusMinutes(ZmanimEngine.END_MIN).withZoneSameInstant(zone).format(HHMM), ClockColors.GoldDeep)
+            if (d.holy && !next.holy) {
+                ZmanimEngine.havdalahOn(d.date, city)?.let {
+                    TimeRow("✨", stringResource(R.string.z_t_havdalah),
+                        it.withZoneSameInstant(zone).format(HHMM), ClockColors.GoldDeep)
+                }
             }
             for (t in listOf(ZmanType.SUNRISE, ZmanType.SOF_ZMAN_SHMA, ZmanType.SOF_ZMAN_TFILA, ZmanType.SUNSET, ZmanType.TZAIT)) {
                 val it = items[t] ?: continue

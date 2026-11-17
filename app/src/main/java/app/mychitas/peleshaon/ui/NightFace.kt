@@ -43,7 +43,7 @@ fun NightFace(modifier: Modifier = Modifier) {
             delay(1000L - System.currentTimeMillis() % 1000L)
         }
     }
-    val city = remember { Prefs.city(context) }
+    val city = remember(now.zone) { Prefs.city(context) }
     val marks = remember { Prefs.marks(context) }
     val tziruf = remember { Prefs.tziruf(context) }
     val zone = city.zone()

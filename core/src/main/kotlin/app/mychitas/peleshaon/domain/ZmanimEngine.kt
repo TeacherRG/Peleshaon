@@ -103,6 +103,26 @@ object ZmanimEngine {
     @Volatile
     var minhag: Minhag = Minhag.CHABAD
 
+    /** null = city default; a user's minhag may override local practice. */
+    @Volatile
+    var candleOffsetOverride: Long? = null
+
+    fun localCandleMinutesFor(cityName: String): Long = when (cityName.lowercase(java.util.Locale.ROOT)) {
+        "jerusalem" -> 40L
+        "haifa", "zikhron yaakov", "zichron yaakov" -> 30L
+        else -> CANDLE_MIN
+    }
+
+    fun candleMinutesFor(cityName: String): Long =
+        candleOffsetOverride ?: localCandleMinutesFor(cityName)
+
+    fun candleLightingOn(date: LocalDate, city: CityOption): ZonedDateTime? =
+        sunsetOf(date, city)?.minusMinutes(candleMinutesFor(city.name))
+
+    /** When sunrise is missing, a known sunset still fixes the transition of the Jewish date. */
+    fun dateAfterKnownSunset(date: LocalDate, moment: ZonedDateTime, sunset: ZonedDateTime?): LocalDate =
+        if (sunset != null && !moment.isBefore(sunset)) date.plusDays(1) else date
+
     fun calculateForMoment(
         now: ZonedDateTime,
         cityName: String,
@@ -118,16 +138,21 @@ object ZmanimEngine {
         val todaySunrise = todayCal.sunrise?.toZoned(zoneId)
 
         if (todaySunrise == null || todaySunset == null) {
-            val (hebStr, translitStr) = getJewishDateStrings(today, isIsrael)
+            val targetDate = dateAfterKnownSunset(today, now, todaySunset)
+            val targetCal = if (targetDate != today)
+                buildCalendar(targetDate, cityName, lat, lon, elevation, zoneId) else todayCal
+            val (hebStr, translitStr) = getJewishDateStrings(targetDate, isIsrael)
+            // Some phenomena are still computable in polar twilight, even when
+            // sunrise or sunset is undefined. Do not hide surviving valid values.
             return DayZmanimResult(
-                date = today,
-                isNextJewishDayAfterSunset = false,
+                date = targetDate,
+                isNextJewishDayAfterSunset = targetDate != today,
                 jewishDateHebrew = hebStr,
                 jewishDateTranslit = translitStr,
                 isPolarAnomaly = true,
-                items = emptyList(),
-                candleLighting = null,
-                tzeitShabbat = null
+                items = extractZmanim(targetCal, zoneId),
+                candleLighting = todaySunset?.minusMinutes(candleMinutesFor(cityName)),
+                tzeitShabbat = havdalahOf(todayCal, zoneId)
             )
         }
 
@@ -148,10 +173,11 @@ object ZmanimEngine {
             isNextJewishDayAfterSunset = isAfterSunset,
             jewishDateHebrew = hebStr,
             jewishDateTranslit = translitStr,
-            isPolarAnomaly = items.isEmpty(),
+            isPolarAnomaly = items.none { it.type == ZmanType.SUNRISE } ||
+                items.none { it.type == ZmanType.SUNSET },
             items = items,
-            candleLighting = todaySunset.minusMinutes(CANDLE_MIN),
-            tzeitShabbat = havdalahOf(todayCal, zoneId) ?: todaySunset.plusMinutes(END_MIN)
+            candleLighting = todaySunset.minusMinutes(candleMinutesFor(cityName)),
+            tzeitShabbat = havdalahOf(todayCal, zoneId)
         )
     }
 
@@ -159,10 +185,16 @@ object ZmanimEngine {
     fun sunsetOf(date: LocalDate, city: CityOption): ZonedDateTime? =
         buildCalendar(date, city.name, city.lat, city.lon, 0.0, city.zone()).sunset?.toZoned(city.zone())
 
-    /** Конец времени Шма календарного дня (округлён вниз). */
+    /** Конец времени Шма по выбранной общине (округлён вниз). */
     fun shmaOf(date: LocalDate, city: CityOption): ZonedDateTime? =
-        buildCalendar(date, city.name, city.lat, city.lon, 0.0, city.zone()).sofZmanShmaBaalHatanya
-            ?.toZoned(city.zone())?.truncatedTo(ChronoUnit.MINUTES)
+        shmaFrom(cal(date, city))?.toZoned(city.zone())?.truncatedTo(ChronoUnit.MINUTES)
+
+    /** Общая формула для будильников и отображаемых времён. */
+    private fun shmaFrom(cal: ComplexZmanimCalendar): Date? = when (minhag) {
+        Minhag.CHABAD -> cal.sofZmanShmaBaalHatanya
+        Minhag.LITVISH -> cal.sofZmanShmaGRA
+        Minhag.SEFARDI -> cal.sofZmanShmaMGA72MinutesZmanis
+    }
 
     /**
      * Шабат этой недели: с воскресенья по пятницу — ближайший; в субботу — сегодняшний, пока он не вышел;
@@ -175,7 +207,7 @@ object ZmanimEngine {
         else ((DayOfWeek.FRIDAY.value - today.dayOfWeek.value + 7) % 7).toLong()
         fun span(fri: LocalDate) = ShabbatTimes(
             friday = fri,
-            candles = sunsetOf(fri, city)?.minusMinutes(CANDLE_MIN),
+            candles = candleLightingOn(fri, city),
             havdalah = havdalahOn(fri.plusDays(1), city)
         )
         val sh = span(today.plusDays(back))
@@ -252,11 +284,7 @@ object ZmanimEngine {
         val rawMap = listOf(
             ZmanType.ALOT to alotOf(cal),
             ZmanType.SUNRISE to cal.sunrise,
-            ZmanType.SOF_ZMAN_SHMA to when (minhag) {
-                Minhag.CHABAD -> cal.sofZmanShmaBaalHatanya
-                Minhag.LITVISH -> cal.sofZmanShmaGRA
-                Minhag.SEFARDI -> cal.sofZmanShmaMGA72MinutesZmanis
-            },
+            ZmanType.SOF_ZMAN_SHMA to shmaFrom(cal),
             ZmanType.SOF_ZMAN_TFILA to if (chabad) cal.sofZmanTfilaBaalHatanya else cal.sofZmanTfilaGRA,
             ZmanType.CHATZOT to cal.chatzos,
             ZmanType.MINCHA_GEDOLA to if (chabad) cal.minchaGedolaBaalHatanya else cal.minchaGedola,
@@ -265,9 +293,7 @@ object ZmanimEngine {
             ZmanType.TZAIT to tzeitOf(cal)
         )
 
-        // Летом на севере солнце не опускается на 16,1° — рассвета нет; остальное без восхода и заката не считается
-        if (rawMap.any { it.second == null && it.first != ZmanType.ALOT }) return emptyList()
-
+        // Сохраняем доступные времена даже при отсутствии отдельного астрономического события.
         return rawMap.mapNotNull { (type, dateObj) ->
             val zdt = dateObj?.toZoned(zoneId) ?: return@mapNotNull null
             val truncated = zdt.truncatedTo(ChronoUnit.MINUTES)

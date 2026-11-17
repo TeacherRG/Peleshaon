@@ -3,11 +3,13 @@ package app.mychitas.peleshaon
 import android.content.Context
 import android.content.SharedPreferences
 import app.mychitas.peleshaon.alarm.AlarmSpec
+import app.mychitas.peleshaon.alarm.KashrutPolicy
 import app.mychitas.peleshaon.alarm.WakeMode
 import app.mychitas.peleshaon.domain.CityOption
 import app.mychitas.peleshaon.domain.ZmanType
 import app.mychitas.peleshaon.domain.cityById
 import app.mychitas.peleshaon.domain.cityForZone
+import app.mychitas.peleshaon.domain.cityMatchForZone
 import java.time.ZoneId
 
 /**
@@ -22,7 +24,39 @@ object Prefs {
     const val KASHRUT = "KASHRUT"
     /** свои будильники — «C1», «C2»… (владелец, 18.11.2026: «возможность добавить будильники») */
     const val MAX_CUSTOM = 10
-    const val KASHRUT_HOURS = 6L
+    const val KASHRUT_HOURS = KashrutPolicy.WAIT_HOURS
+
+    /** The old absolute deadline has no start timestamp; never assume it was six hours. */
+    fun migrateKashrut(context: Context) {
+        val p = of(context)
+        val version = p.getInt("kashrut_policy_version", 0)
+        if (version >= KashrutPolicy.POLICY_VERSION) return
+        val reset = KashrutPolicy.resetLegacyTimer(version, p.getLong("kashrut_at", 0L))
+        p.edit().apply {
+            if (reset) {
+                putLong("kashrut_at", 0L)
+                putBoolean("kashrut_timer_reset", true)
+            }
+            remove("kashrut_hours")
+            putInt("kashrut_policy_version", KashrutPolicy.POLICY_VERSION)
+        }.commit()
+    }
+
+    fun kashrutTimerWasReset(context: Context): Boolean = of(context).getBoolean("kashrut_timer_reset", false)
+    fun clearKashrutReset(context: Context) { of(context).edit().putBoolean("kashrut_timer_reset", false).apply() }
+    fun kashrutDeferred(context: Context): Boolean = of(context).getBoolean("kashrut_deferred", false)
+    fun setKashrutDeferred(context: Context, on: Boolean) {
+        of(context).edit().putBoolean("kashrut_deferred", on).apply()
+    }
+
+    /** Extra silence before Friday candle lighting (not a change to calendar or candle time). */
+    fun earlyShabbatMinutes(context: Context): Long =
+        of(context).getInt("early_shabbat_quiet", 0).takeIf { it in setOf(0, 15, 30, 45, 60) }?.toLong() ?: 0L
+
+    fun setEarlyShabbatMinutes(context: Context, minutes: Long) {
+        require(minutes in setOf(0L, 15L, 30L, 45L, 60L))
+        of(context).edit().putInt("early_shabbat_quiet", minutes.toInt()).apply()
+    }
 
     fun of(context: Context): SharedPreferences = context.getSharedPreferences(NAME, Context.MODE_PRIVATE)
 
@@ -32,6 +66,13 @@ object Prefs {
     fun chosenCity(context: Context): CityOption? = cityById(of(context).getString("city_id", null))
 
     fun city(context: Context): CityOption = chosenCity(context) ?: cityForZone(ZoneId.systemDefault())
+
+    /** Automatic matching by a time zone is approximate until a city is confirmed. */
+    fun cityUnconfirmed(context: Context): Boolean = chosenCity(context) == null
+
+    /** If neither a manual city nor a timezone match exists, do not schedule religious alarms. */
+    fun cityUnmatched(context: Context): Boolean =
+        chosenCity(context) == null && cityMatchForZone(ZoneId.systemDefault()) == null
 
     fun setCity(context: Context, city: CityOption?) {
         of(context).edit().apply {
@@ -107,12 +148,21 @@ object Prefs {
         val n = (1..99).first { "C$it" !in list }
         val id = "C$n"
         of(context).edit().putString("custom_alarms", (list + id).joinToString(",")).apply()
-        setAlarm(context, id, alarm(context, id).copy(on = true))
+        // An ID can be reused: initialize every field rather than inheriting deleted values.
+        setAlarm(context, id, AlarmSpec(on = true, byShma = false, hour = 7, minute = 0,
+            before = 30, days = (0..6).toSet(), chm = false))
+        setWakeMode(context, id, WakeMode.SOUND_AND_LIGHT)
         return id
     }
 
     fun removeCustomAlarm(context: Context, id: String) {
-        of(context).edit().putString("custom_alarms", customAlarms(context).filter { it != id }.joinToString(",")).apply()
+        val key = prefix(id)
+        val editor = of(context).edit()
+            .putString("custom_alarms", customAlarms(context).filter { it != id }.joinToString(","))
+            .remove("chm_$id").remove("wake_mode_$id").remove("vibrate_$id")
+        for (suffix in listOf("enabled", "by_shma", "hour", "minute", "offset_shma", "days"))
+            editor.remove("${key}_$suffix")
+        editor.apply()
     }
 
     /** Номер будильника для подписи: «Будильник 2» (основной — первый). */
@@ -128,6 +178,15 @@ object Prefs {
     fun minhag(context: Context): app.mychitas.peleshaon.domain.Minhag =
         runCatching { app.mychitas.peleshaon.domain.Minhag.valueOf(of(context).getString("minhag", null) ?: "") }
             .getOrDefault(app.mychitas.peleshaon.domain.Minhag.CHABAD)
+
+    /** null uses city custom (Jerusalem 40m, Haifa 30m, other cities 18m). */
+    fun candleOffset(context: Context): Long? =
+        of(context).getInt("candle_offset", -1).takeIf { it in setOf(18, 20, 30, 40) }?.toLong()
+
+    fun setCandleOffset(context: Context, minutes: Long?) {
+        val value = minutes?.toInt()?.takeIf { it in setOf(18, 20, 30, 40) } ?: -1
+        of(context).edit().putInt("candle_offset", value).apply()
+    }
 
     fun setMinhag(context: Context, m: app.mychitas.peleshaon.domain.Minhag) =
         of(context).edit().putString("minhag", m.name).apply()

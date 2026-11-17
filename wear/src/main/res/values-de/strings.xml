@@ -15,4 +15,15 @@
     <string name="dur_m">%d Min.</string>
     <string name="candles">Kerzen</string>
     <string name="polar">Heute kein Auf- oder Untergang</string>
+    <string name="wear_city">Stadt</string>
+    <string name="wear_community">Gemeinde</string>
+    <string name="wear_candle_title">Kerzenzeit</string>
+    <string name="wear_back">← Zurück</string>
+    <string name="wear_auto_city">Auto (nur Zeitzone)</string>
+    <string name="wear_local_candles">Nach Ort</string>
+    <string name="wear_candle_min">%1$d Min.</string>
+    <string name="wear_chabad">Chabad</string>
+    <string name="wear_litvish">Litauisch</string>
+    <string name="wear_sefardi">Sephardisch</string>
+    <string name="wear_standalone_note">Eigenständige Einstellungen; keine Synchronisierung mit dem Handy.</string>
 </resources>

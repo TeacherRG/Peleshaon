@@ -3,6 +3,9 @@ package app.mychitas.peleshaon.alarm
 import android.app.KeyguardManager
 import android.content.Context
 import android.content.Intent
+import android.content.BroadcastReceiver
+import android.content.IntentFilter
+import androidx.core.content.ContextCompat
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
@@ -31,6 +34,35 @@ import java.time.format.DateTimeFormatter
 import java.util.Locale
 
 class AlarmRingActivity : ComponentActivity() {
+    private val finishedReceiver = object : BroadcastReceiver() {
+        override fun onReceive(context: Context, received: Intent) {
+            if (received.getStringExtra(AlarmRingService.EXTRA_SESSION) ==
+                intent.getStringExtra(AlarmRingService.EXTRA_SESSION)) finish()
+        }
+    }
+    private var listening = false
+
+    override fun onStart() {
+        super.onStart()
+        ContextCompat.registerReceiver(this, finishedReceiver,
+            IntentFilter(AlarmRingService.ACTION_SESSION_FINISHED), ContextCompat.RECEIVER_NOT_EXPORTED)
+        listening = true
+    }
+
+    override fun onResume() {
+        super.onResume()
+        val token = intent.getStringExtra(AlarmRingService.EXTRA_SESSION)
+        if (token == null || AlarmRingService.currentSessionId != token) finish()
+    }
+
+    override fun onStop() {
+        if (listening) {
+            unregisterReceiver(finishedReceiver)
+            listening = false
+        }
+        super.onStop()
+    }
+
     // язык, выбранный в «Настройках» (до Android 13 — здесь)
     override fun attachBaseContext(newBase: android.content.Context) {
         super.attachBaseContext(app.mychitas.peleshaon.AppLang.wrap(newBase))
@@ -40,27 +72,24 @@ class AlarmRingActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O_MR1) {
-            setShowWhenLocked(true)
-            setTurnScreenOn(true)
-            val km = getSystemService(Context.KEYGUARD_SERVICE) as KeyguardManager
-            km.requestDismissKeyguard(this, null)
-        } else {
-            @Suppress("DEPRECATION")
-            window.addFlags(
-                WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED or
-                        WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON or
-                        WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON
-            )
-        }
-
         val alarmType = intent.getStringExtra(AlarmScheduler.EXTRA_ALARM_TYPE) ?: "TORAH"
         val test = intent.getBooleanExtra(AlarmScheduler.EXTRA_TEST, false)
         val wakeModeName = intent.getStringExtra("wake_mode") ?: WakeMode.SOUND_AND_LIGHT.name
-        val wakeMode = WakeMode.valueOf(wakeModeName)
+        val wakeMode = runCatching { WakeMode.valueOf(wakeModeName) }.getOrDefault(WakeMode.SOUND_AND_LIGHT)
         val useLight = wakeMode != WakeMode.SOUND_ONLY
 
         if (useLight) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O_MR1) {
+                setShowWhenLocked(true)
+                setTurnScreenOn(true)
+                val km = getSystemService(Context.KEYGUARD_SERVICE) as KeyguardManager
+                km.requestDismissKeyguard(this, null)
+            } else {
+                @Suppress("DEPRECATION")
+                window.addFlags(WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED or
+                    WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON or
+                    WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+            }
             window.attributes = window.attributes.apply {
                 screenBrightness = 1.0f
             }
@@ -135,15 +164,9 @@ class AlarmRingActivity : ComponentActivity() {
                     Spacer(modifier = Modifier.height(24.dp))
 
                     // «Проверить звук» — без «Отложить»
-                    if (!test) OutlinedButton(
+                    if (!test && alarmType != app.mychitas.peleshaon.Prefs.KASHRUT) OutlinedButton(
                         onClick = {
-                            AlarmScheduler.scheduleExactAlarm(
-                                context = this@AlarmRingActivity,
-                                triggerTime = ZonedDateTime.now().plusMinutes(5),
-                                alarmType = alarmType,
-                                isSnooze = true
-                            )
-                            stopAlarm()
+                            controlAlarm(AlarmRingService.ACTION_SNOOZE)
                         },
                         modifier = Modifier.fillMaxWidth().height(52.dp)
                     ) {
@@ -151,7 +174,11 @@ class AlarmRingActivity : ComponentActivity() {
                     }
 
                     Button(
-                        onClick = { stopAlarm(); goHome() },
+                        onClick = {
+                            val anotherPending = AlarmRingService.hasQueuedAlarms
+                            stopAlarm()
+                            if (!anotherPending) goHome()
+                        },
                         modifier = Modifier.fillMaxWidth().height(56.dp),
                         colors = ButtonDefaults.buttonColors(containerColor = GoldAccent)
                     ) {
@@ -167,10 +194,17 @@ class AlarmRingActivity : ComponentActivity() {
         }
     }
 
-    private fun stopAlarm() {
-        stopService(Intent(this, AlarmRingService::class.java))
+    private fun controlAlarm(action: String) {
+        // Direct stopService would allow an outdated Activity to stop a newer alarm.
+        startService(
+            Intent(this, AlarmRingService::class.java).setAction(action)
+                .putExtra(AlarmRingService.EXTRA_SESSION, intent.getStringExtra(AlarmRingService.EXTRA_SESSION))
+                .putExtra(AlarmScheduler.EXTRA_ALARM_TYPE, intent.getStringExtra(AlarmScheduler.EXTRA_ALARM_TYPE))
+        )
         finish()
     }
+
+    private fun stopAlarm() = controlAlarm(AlarmRingService.ACTION_STOP)
 
     /** После «Стоп» — на главный экран приложения (владелец, 18.11.2026). */
     private fun goHome() {
@@ -178,6 +212,12 @@ class AlarmRingActivity : ComponentActivity() {
             Intent(this, app.mychitas.peleshaon.MainActivity::class.java)
                 .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP)
         )
+    }
+
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        setIntent(intent)
+        recreate()
     }
 
     private fun openUrl(url: String) {

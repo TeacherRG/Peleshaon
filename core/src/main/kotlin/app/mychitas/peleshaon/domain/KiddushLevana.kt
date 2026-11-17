@@ -153,9 +153,14 @@ object KiddushLevanaRules {
         if (!eveningAllowed(evening, city)) return null
         val (start, end) = window(evening.plusDays(1), city)
         if (now.isBefore(start) || !now.isBefore(end)) return null
+        // The period after sunset is not yet night; require the selected tzeit calculation.
+        val tzeit = ZmanimEngine.itemsOf(evening, city)
+            .firstOrNull { it.type == ZmanType.TZAIT }?.exactTime ?: return null
+        if (now.isBefore(tzeit)) return null
         // вечер после Шабата / праздника: до их исхода — ещё нельзя
         if (ShabbatGuard.checkMoment(now, city.name, city.lat, city.lon, city.zone(), city.isIsrael, false).isQuietTime) return null
         val moon = MoonTracker.position(now, city.lat, city.lon)
+        if (moon.altitude < 5.0) return null // no positive blessing prompt for a low or hidden Moon
         return KiddushLevanaNow(ZmanimEngine.jewishDay(evening.plusDays(1), city.isIsrael), end, moon)
     }
 
@@ -167,6 +172,7 @@ object KiddushLevanaRules {
         val zone = city.zone()
         var day = now.withZoneSameInstant(zone).toLocalDate()
         repeat(40) {
+            // At most one notification per evening; never re-arm the same night each minute.
             val at = reminderOn(day, city)
             if (at != null && at.isAfter(now)) return at
             day = day.plusDays(1)
@@ -189,10 +195,21 @@ object KiddushLevanaRules {
         val (start, end) = window(evening.plusDays(1), city)
         if (at.isBefore(start)) {
             // окно открывается этой ночью позже — напомнить, когда откроется, если ещё темно
-            if (start.isAfter(sunset.plusHours(6))) return null
             at = start.withSecond(0).withNano(0).plusMinutes(1)
         }
         if (!at.isBefore(end)) return null
-        return if (MoonTracker.position(at, city.lat, city.lon).altitude >= 5.0) at else null
+        // A low Moon at nightfall can rise later. Scan the rest of the same
+        // night rather than skipping it; never assume astronomical visibility.
+        val sunrise = ZmanimEngine.itemsOf(evening.plusDays(1), city)
+            .firstOrNull { it.type == ZmanType.SUNRISE }?.exactTime ?: return null
+        val stop = minOf(sunrise, end)
+        var candidate = at
+        while (candidate.isBefore(stop)) {
+            val permitted = !ShabbatGuard.checkMoment(candidate, city.name, city.lat, city.lon, zone,
+                city.isIsrael, false).isQuietTime
+            if (permitted && MoonTracker.position(candidate, city.lat, city.lon).altitude >= 5.0) return candidate
+            candidate = candidate.plusMinutes(10)
+        }
+        return null
     }
 }

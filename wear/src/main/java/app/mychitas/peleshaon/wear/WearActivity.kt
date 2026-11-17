@@ -36,7 +36,13 @@ import androidx.wear.compose.foundation.lazy.ScalingLazyColumn
 import androidx.wear.compose.foundation.lazy.items
 import androidx.wear.compose.foundation.lazy.rememberScalingLazyListState
 import androidx.wear.compose.material.MaterialTheme
+import androidx.wear.compose.material.Chip
+import app.mychitas.peleshaon.domain.CITIES
+import app.mychitas.peleshaon.domain.Minhag
+import app.mychitas.peleshaon.domain.cityById
+import java.util.Locale
 import androidx.wear.compose.material.Text
+import app.mychitas.peleshaon.domain.Half
 import app.mychitas.peleshaon.domain.ZmanItem
 import app.mychitas.peleshaon.domain.ZmanType
 import app.mychitas.peleshaon.domain.ZmanimEngine
@@ -73,20 +79,99 @@ fun WearApp() {
         }
     }
 
-    // Город — по часовому поясу часов (без геолокации)
-    val city = remember { cityForZone(ZoneId.systemDefault()) }
+    // Standalone configuration: phone preferences are not silently assumed.
+    val context = LocalContext.current
+    val prefs = remember { context.getSharedPreferences("wear_prefs", android.content.Context.MODE_PRIVATE) }
+    var selectedCity by remember { mutableStateOf(prefs.getString("city_id", "") ?: "") }
+    var selectedCommunity by remember { mutableStateOf(prefs.getString("minhag", "CHABAD") ?: "CHABAD") }
+    var candleMinutes by remember { mutableStateOf(prefs.getInt("candle_minutes", -1)) }
+    var settingsMode by remember { mutableStateOf(0) }
+    val community = remember(selectedCommunity) {
+        runCatching { Minhag.valueOf(selectedCommunity) }.getOrDefault(Minhag.CHABAD)
+    }
+    val city = remember(now.zone, selectedCity) {
+        cityById(selectedCity) ?: cityForZone(ZoneId.systemDefault())
+    }
     val zone = city.zone()
     val cityNow = now.withZoneSameInstant(zone)
-    val day = remember(cityNow.toLocalDate(), cityNow.hour) {
+    val day = remember(city, cityNow.truncatedTo(ChronoUnit.MINUTES), community, candleMinutes) {
+        ZmanimEngine.minhag = community
+        ZmanimEngine.candleOffsetOverride = candleMinutes.takeIf { it in setOf(18, 20, 30, 40) }?.toLong()
         ZmanimEngine.calculateForMoment(cityNow, city.name, city.lat, city.lon, 0.0, zone, city.isIsrael)
     }
     val res = LocalContext.current.resources
-    val next = day.items.firstOrNull { it.exactTime.isAfter(cityNow) }
+    val half = remember(city, cityNow.truncatedTo(ChronoUnit.MINUTES), community) { ZmanimEngine.halfOf(cityNow, city) }
+    val halfItems = remember(half, city, community) { half?.let { ZmanimEngine.halfItems(it, city) } ?: emptyList() }
+    val next = halfItems.firstOrNull { it.exactTime.isAfter(cityNow) }
     val candles = day.candleLighting?.takeIf {
         cityNow.dayOfWeek == DayOfWeek.FRIDAY && it.isAfter(cityNow)
     }
 
     MaterialTheme {
+        if (settingsMode == 1) {
+            ScalingLazyColumn(
+                modifier = Modifier.fillMaxSize().background(Color.Black),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                item {
+                    Chip(onClick = { settingsMode = 0 }, modifier = Modifier.fillMaxWidth(),
+                        label = { Text(context.getString(R.string.wear_back)) })
+                }
+                item {
+                    Chip(onClick = {
+                        selectedCity = ""
+                        prefs.edit().remove("city_id").apply()
+                        settingsMode = 0
+                    }, modifier = Modifier.fillMaxWidth(),
+                        label = { Text(context.getString(R.string.wear_auto_city)) })
+                }
+                items(CITIES) { option ->
+                    Chip(onClick = {
+                        selectedCity = option.id
+                        prefs.edit().putString("city_id", option.id).apply()
+                        settingsMode = 0
+                    }, modifier = Modifier.fillMaxWidth(),
+                        label = { Text(option.title(Locale.getDefault())) })
+                }
+            }
+        } else if (settingsMode == 2) {
+            ScalingLazyColumn(modifier = Modifier.fillMaxSize().background(Color.Black),
+                horizontalAlignment = Alignment.CenterHorizontally) {
+                item {
+                    Chip(onClick = { settingsMode = 0 }, modifier = Modifier.fillMaxWidth(),
+                        label = { Text(context.getString(R.string.wear_back)) })
+                }
+                items(Minhag.entries) { option ->
+                    val label = when (option) {
+                        Minhag.CHABAD -> R.string.wear_chabad
+                        Minhag.LITVISH -> R.string.wear_litvish
+                        Minhag.SEFARDI -> R.string.wear_sefardi
+                    }
+                    Chip(onClick = {
+                        selectedCommunity = option.name
+                        prefs.edit().putString("minhag", option.name).apply()
+                        settingsMode = 0
+                    }, modifier = Modifier.fillMaxWidth(), label = { Text(context.getString(label)) })
+                }
+            }
+        } else if (settingsMode == 3) {
+            ScalingLazyColumn(modifier = Modifier.fillMaxSize().background(Color.Black),
+                horizontalAlignment = Alignment.CenterHorizontally) {
+                item {
+                    Chip(onClick = { settingsMode = 0 }, modifier = Modifier.fillMaxWidth(),
+                        label = { Text(context.getString(R.string.wear_back)) })
+                }
+                items(listOf(-1, 18, 20, 30, 40)) { minutes ->
+                    Chip(onClick = {
+                        candleMinutes = minutes
+                        prefs.edit().putInt("candle_minutes", minutes).apply()
+                        settingsMode = 0
+                    }, modifier = Modifier.fillMaxWidth(),
+                        label = { Text(if (minutes == -1) context.getString(R.string.wear_local_candles)
+                            else context.getString(R.string.wear_candle_min, minutes)) })
+                }
+            }
+        } else {
         val listState = rememberScalingLazyListState()
         ScalingLazyColumn(
             modifier = Modifier.fillMaxSize().background(Color.Black),
@@ -99,7 +184,7 @@ fun WearApp() {
                     modifier = Modifier.fillMaxWidth().aspectRatio(1f),
                     contentAlignment = Alignment.Center
                 ) {
-                    WatchRing(cityNow, day.items, next)
+                    WatchRing(cityNow, half, halfItems, next)
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
                         Text(cityNow.format(HHMM), color = Color.White, fontSize = 34.sp, fontWeight = FontWeight.Bold)
                         if (next != null) {
@@ -128,7 +213,7 @@ fun WearApp() {
             if (candles != null) {
                 item { ZmanRow(res.getString(R.string.candles), candles.format(HHMM), Gold, passed = false) }
             }
-            items(day.items) { z ->
+            items(halfItems) { z ->
                 ZmanRow(
                     label = res.getString(shortLabel(z.type)),
                     time = z.roundedTime.format(HHMM),
@@ -136,17 +221,34 @@ fun WearApp() {
                     passed = !z.exactTime.isAfter(cityNow)
                 )
             }
+            item {
+                Chip(onClick = { settingsMode = 1 }, modifier = Modifier.fillMaxWidth(),
+                    label = { Text(context.getString(R.string.wear_city) + ": " + city.title(Locale.getDefault())) })
+            }
+            item {
+                Chip(onClick = { settingsMode = 2 }, modifier = Modifier.fillMaxWidth(),
+                    label = { Text(context.getString(R.string.wear_community) + ": " + selectedCommunity) })
+            }
+            item {
+                Chip(onClick = { settingsMode = 3 }, modifier = Modifier.fillMaxWidth(),
+                    label = { Text(context.getString(R.string.wear_candle_title)) })
+            }
+            item {
+                Text(context.getString(R.string.wear_standalone_note),
+                    color = Color.Gray, fontSize = 11.sp, textAlign = TextAlign.Center)
+            }
+        }
         }
     }
 }
 
 /** Обод часов: 12 штрихов, точки времён дня, дуга от «сейчас» до ближайшего времени. */
 @Composable
-private fun WatchRing(now: ZonedDateTime, items: List<ZmanItem>, next: ZmanItem?) {
+private fun WatchRing(now: ZonedDateTime, half: Half?, items: List<ZmanItem>, next: ZmanItem?) {
     Canvas(modifier = Modifier.fillMaxSize().padding(6.dp)) {
         val c = Offset(size.width / 2f, size.height / 2f)
         val r = size.minDimension / 2f * 0.9f
-        fun angle(t: ZonedDateTime) = ((t.hour % 12) + t.minute / 60.0) * 30.0 - 90.0
+        fun angle(t: ZonedDateTime) = (half?.frac(t) ?: 0.0) * 360.0 - 90.0
         fun at(deg: Double, rr: Float) = Offset(
             c.x + rr * cos(deg * PI / 180).toFloat(),
             c.y + rr * sin(deg * PI / 180).toFloat()
@@ -162,15 +264,15 @@ private fun WatchRing(now: ZonedDateTime, items: List<ZmanItem>, next: ZmanItem?
             )
         }
 
-        // Дуга «осталось» — если ближайшее время в пределах 12 часов
-        if (next != null) {
-            val minutes = ChronoUnit.MINUTES.between(now, next.exactTime)
-            if (minutes in 1..719) {
+        // The phone and Wear use the same 12 proportional hours of the current half.
+        if (half != null && next != null) {
+            val sweep = (half.frac(next.exactTime) - half.frac(now)) * 360.0
+            if (sweep > 0.0 && sweep <= 360.0) {
                 val start = angle(now).toFloat()
                 drawArc(
                     color = (if (next.type.isDeadline) Gold else Tchelet).copy(alpha = 0.8f),
                     startAngle = start,
-                    sweepAngle = minutes / 2f,
+                    sweepAngle = sweep.toFloat(),
                     useCenter = false,
                     topLeft = Offset(c.x - r, c.y - r),
                     size = Size(r * 2, r * 2),
@@ -180,7 +282,7 @@ private fun WatchRing(now: ZonedDateTime, items: List<ZmanItem>, next: ZmanItem?
         }
 
         // Точки времён дня, прошедшие — бледнее, ближайшее — крупнее
-        items.forEach { z ->
+        items.filter { half != null }.forEach { z ->
             val passed = !z.exactTime.isAfter(now)
             val color = (if (z.type.isDeadline) Gold else Tchelet).copy(alpha = if (passed) 0.3f else 1f)
             val big = z == next
@@ -188,7 +290,7 @@ private fun WatchRing(now: ZonedDateTime, items: List<ZmanItem>, next: ZmanItem?
         }
 
         // Стрелка «сейчас»
-        drawLine(Color.White, at(angle(now), r * 0.78f), at(angle(now), r * 1.0f), strokeWidth = 2.5.dp.toPx(), cap = StrokeCap.Round)
+        if (half != null) drawLine(Color.White, at(angle(now), r * 0.78f), at(angle(now), r * 1.0f), strokeWidth = 2.5.dp.toPx(), cap = StrokeCap.Round)
     }
 }
 

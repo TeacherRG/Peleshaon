@@ -15,4 +15,15 @@
     <string name="dur_m">%d דק׳</string>
     <string name="candles">הדלקת נרות</string>
     <string name="polar">היום אין זריחה או שקיעה</string>
+    <string name="wear_city">עיר</string>
+    <string name="wear_community">קהילה</string>
+    <string name="wear_candle_title">זמן הדלקת נרות</string>
+    <string name="wear_back">← חזרה</string>
+    <string name="wear_auto_city">אוטומטי (לפי אזור זמן)</string>
+    <string name="wear_local_candles">לפי העיר</string>
+    <string name="wear_candle_min">%1$d דקות</string>
+    <string name="wear_chabad">חב״ד</string>
+    <string name="wear_litvish">ליטאי</string>
+    <string name="wear_sefardi">ספרדי</string>
+    <string name="wear_standalone_note">ההגדרות בשעון נפרדות, ללא סנכרון עם הטלפון.</string>
 </resources>

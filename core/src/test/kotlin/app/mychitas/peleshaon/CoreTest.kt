@@ -95,7 +95,7 @@ class CoreTest {
 
     @Test
     fun citiesAsOnTheSite() {
-        assertEquals(196, CITIES.size)
+        assertEquals(197, CITIES.size)
         assertEquals(CITIES.size, CITIES.map { it.id }.toSet().size)
         CITIES.forEach { assertNotNull(app.mychitas.peleshaon.domain.resolveZone(it.zoneId), it.zoneId) }
         assertEquals("Вена", cityForZone(ZoneId.of("Europe/Vienna")).nameRu)

@@ -12,8 +12,8 @@ android {
         applicationId = "app.mychitas.peleshaon"
         minSdk = 26
         targetSdk = 35
-        versionCode = 1
-        versionName = "1.0.0-alpha1"
+        versionCode = 2
+        versionName = "1.0.0-beta3"
     }
 
     // Один ключ для всех тестовых сборок: иначе каждая сборка на GitHub подписана новым ключом,

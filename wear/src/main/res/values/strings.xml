@@ -15,4 +15,15 @@
     <string name="dur_m">%d min</string>
     <string name="candles">Candles</string>
     <string name="polar">No sunrise or sunset today</string>
+    <string name="wear_city">City</string>
+    <string name="wear_community">Community</string>
+    <string name="wear_candle_title">Candle-lighting offset</string>
+    <string name="wear_back">← Back</string>
+    <string name="wear_auto_city">Auto (time zone only)</string>
+    <string name="wear_local_candles">Local custom</string>
+    <string name="wear_candle_min">%1$d min</string>
+    <string name="wear_chabad">Chabad</string>
+    <string name="wear_litvish">Litvish</string>
+    <string name="wear_sefardi">Sephardi</string>
+    <string name="wear_standalone_note">Standalone settings; phone preferences are not synced.</string>
 </resources>

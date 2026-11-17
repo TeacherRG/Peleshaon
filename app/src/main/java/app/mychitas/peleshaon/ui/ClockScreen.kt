@@ -59,6 +59,7 @@ import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -78,6 +79,7 @@ import app.mychitas.peleshaon.Prefs
 import app.mychitas.peleshaon.R
 import app.mychitas.peleshaon.alarm.AlarmRingService
 import app.mychitas.peleshaon.alarm.AlarmRules
+import app.mychitas.peleshaon.alarm.ShabbatGuard
 import app.mychitas.peleshaon.alarm.AlarmScheduler
 import app.mychitas.peleshaon.alarm.AlarmSpec
 import app.mychitas.peleshaon.alarm.WakeMode
@@ -123,7 +125,13 @@ private val HHMM: DateTimeFormatter = DateTimeFormatter.ofPattern("HH:mm")
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ClockScreen(onNightScreen: () -> Unit, onIntro: () -> Unit = {}, onMoon: () -> Unit = {}, onCompass: () -> Unit = {}) {
+fun ClockScreen(
+    onNightScreen: () -> Unit,
+    onIntro: () -> Unit = {},
+    onMoon: () -> Unit = {},
+    onCompass: () -> Unit = {},
+    requestedAlarm: androidx.compose.runtime.MutableState<String?>? = null
+) {
     val context = LocalContext.current
     val locale = androidx.compose.ui.platform.LocalConfiguration.current.locales[0]
 
@@ -138,14 +146,30 @@ fun ClockScreen(onNightScreen: () -> Unit, onIntro: () -> Unit = {}, onMoon: () 
     var version by remember { mutableIntStateOf(0) }
     val bump: () -> Unit = { version++ }
 
-    val city = remember(version) { Prefs.city(context) }
-    val auto = remember(version) { Prefs.chosenCity(context) == null }
+    val city = remember(version, now.zone) { Prefs.city(context) }
+    val auto = remember(version, now.zone) { Prefs.chosenCity(context) == null }
     var marks by remember { mutableStateOf(Prefs.marks(context)) }
     var tziruf by remember { mutableStateOf(Prefs.tziruf(context)) }
-    var panel by remember { mutableStateOf<Panel?>(null) }
+    var panel by rememberSaveable { mutableStateOf<Panel?>(null) }
     // свой будильник, открытый в окне (C1, C2…)
-    var editAlarm by remember { mutableStateOf(Prefs.MORNING) }
+    var editAlarm by rememberSaveable { mutableStateOf(Prefs.MORNING) }
     var pop by remember { mutableStateOf<Triple<String, Float, Float>?>(null) }
+    LaunchedEffect(requestedAlarm?.value) {
+        val id = requestedAlarm?.value
+        if (id != null) {
+            when (id) {
+                Prefs.MORNING -> panel = Panel.WAKE
+                Prefs.TORAH -> panel = Panel.STUDY
+                else -> {
+                    if (id in Prefs.customAlarms(context)) {
+                        editAlarm = id
+                        panel = Panel.CUSTOM
+                    } else panel = Panel.WAKE
+                }
+            }
+            requestedAlarm.value = null
+        }
+    }
 
     val zone = city.zone()
     val cityNow = now.withZoneSameInstant(zone)
@@ -178,6 +202,10 @@ fun ClockScreen(onNightScreen: () -> Unit, onIntro: () -> Unit = {}, onMoon: () 
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(6.dp)
         ) {
+            if (Prefs.cityUnmatched(context)) {
+                Text(stringResource(R.string.city_unmatched_warning), color = ClockColors.Bad,
+                    fontSize = 12.sp, modifier = Modifier.clickable { panel = Panel.CITY })
+            }
             // ---- шапка: город, дата, «Как считаем»
             Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
                 Chip(onClick = { panel = Panel.CITY }, modifier = Modifier.widthIn(max = 124.dp)) {
@@ -307,11 +335,12 @@ fun ClockScreen(onNightScreen: () -> Unit, onIntro: () -> Unit = {}, onMoon: () 
             // ближайший из будильников (основной и свои); идёт таймер «мясное → молочное» — он
             val nextWake = remember(version, city, minute) {
                 val k = Prefs.kashrutAt(context)
-                if (k > System.currentTimeMillis()) java.time.Instant.ofEpochMilli(k).atZone(zone)
-                else (listOf(Prefs.MORNING) + Prefs.customAlarms(context))
-                    .mapNotNull { AlarmRules.nextRing(Prefs.alarm(context, it), cityNow, city) }.minOrNull()
+                val kashrut = if (k > System.currentTimeMillis()) listOf(java.time.Instant.ofEpochMilli(k).atZone(zone))
+                    else emptyList()
+                (kashrut + (listOf(Prefs.MORNING) + Prefs.customAlarms(context))
+                    .mapNotNull { AlarmRules.nextRing(Prefs.alarm(context, it), cityNow, city, Prefs.earlyShabbatMinutes(context)) }).minOrNull()
             }
-            val nextStudy = remember(version, city, minute) { AlarmRules.nextRing(Prefs.alarm(context, Prefs.TORAH), cityNow, city) }
+            val nextStudy = remember(version, city, minute) { AlarmRules.nextRing(Prefs.alarm(context, Prefs.TORAH), cityNow, city, Prefs.earlyShabbatMinutes(context)) }
             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 DockTool("🕯️", stringResource(R.string.dock_shabbat),
                     (if (shabbatOn) sh.havdalah else sh.candles)?.let(wdTime) ?: "—", Modifier.weight(1f), live = shabbatOn) { panel = Panel.SHABBAT }
@@ -336,7 +365,10 @@ fun ClockScreen(onNightScreen: () -> Unit, onIntro: () -> Unit = {}, onMoon: () 
             when (open) {
                 Panel.CITY -> CitySheet(city, auto) { chosen ->
                     Prefs.setCity(context, chosen)
+                    ClockTheme.refresh(context)
                     AlarmScheduler.rescheduleAllFromPrefs(context)
+                    app.mychitas.peleshaon.moon.MoonReminder.schedule(context)
+                    app.mychitas.peleshaon.live.Live.updateAsync(context)
                     pop = null
                     bump()
                     panel = null
@@ -354,8 +386,13 @@ fun ClockScreen(onNightScreen: () -> Unit, onIntro: () -> Unit = {}, onMoon: () 
                     onToggle = { type ->
                         marks = if (type in marks) marks - type else marks + type
                         Prefs.setMarks(context, marks)
+                        app.mychitas.peleshaon.live.Live.updateAsync(context)
                     },
-                    onTziruf = { tziruf = it; Prefs.setTziruf(context, it) })
+                    onTziruf = {
+                        tziruf = it
+                        Prefs.setTziruf(context, it)
+                        app.mychitas.peleshaon.live.Live.updateAsync(context)
+                    })
                 Panel.INFO -> InfoSheet(onNightScreen = { panel = null; onNightScreen() }, onIntro = { panel = null; onIntro() }, onPrivacy = { panel = Panel.PRIVACY })
                 Panel.PRIVACY -> PrivacySheet()
                 Panel.CALENDAR -> CalendarSheet(city, cityNow)
@@ -581,6 +618,7 @@ private fun ShabbatSheet(
 /** 7-й час ночи Шабата: с … до … — в этот час не делают кидуш. */
 @Composable
 private fun SeventhHour(friday: LocalDate, city: CityOption, now: ZonedDateTime) {
+    if (ZmanimEngine.minhag != Minhag.CHABAD) return
     val h = remember(friday, city) { ZmanimEngine.seventhHourOfShabbatNight(friday, city) }
     if (!now.isBefore(h.second)) return
     val z = city.zone()
@@ -672,8 +710,8 @@ private fun AlarmSheet(
     val pickTime = {
         TimePickerDialog(context, { _, h, m -> change(spec.copy(hour = h, minute = m, byShma = false)) }, spec.hour, spec.minute, true).show()
     }
-    val next = AlarmRules.nextRing(spec, now, city)
-    val skips = AlarmRules.skipped(spec, now, city)
+    val next = AlarmRules.nextRing(spec, now, city, Prefs.earlyShabbatMinutes(context))
+    val skips = AlarmRules.skipped(spec, now, city, earlyShabbatMinutes = Prefs.earlyShabbatMinutes(context))
     val timeText = String.format(Locale.ROOT, "%02d:%02d", spec.hour, spec.minute)
 
     SheetColumn {
@@ -775,6 +813,7 @@ private fun AlarmSheet(
                             "yom_kippur" -> R.string.why_yom_kippur
                             "chol_hamoed" -> R.string.why_chol_hamoed
                             "shabbat" -> R.string.why_shabbat
+                            "unknown" -> R.string.why_unknown
                             else -> R.string.why_yom_tov
                         }
                         Text(stringResource(R.string.alarm_skip, dayText(s.at.toLocalDate()), stringResource(why)), color = ClockColors.Muted, fontSize = 13.sp)
@@ -826,7 +865,7 @@ private fun MoreAlarms(city: CityOption, now: ZonedDateTime, onOpen: (String) ->
                 Column(Modifier.weight(1f)) {
                     Text(stringResource(R.string.alarm_n, Prefs.customNumber(id)), color = ClockColors.Muted, fontSize = 12.sp)
                     Text(time, color = ClockColors.Ink, fontWeight = FontWeight.Bold, fontSize = 20.sp)
-                    val next = if (spec.on) AlarmRules.nextRing(spec, now, city) else null
+                    val next = if (spec.on) AlarmRules.nextRing(spec, now, city, Prefs.earlyShabbatMinutes(context)) else null
                     if (next != null) Text(next.format(DateTimeFormatter.ofPattern("EEE d MMM, HH:mm", Locale.getDefault())), color = ClockColors.Ink2, fontSize = 12.sp)
                 }
                 Switch(
@@ -863,8 +902,17 @@ private fun KashrutCard(onChange: () -> Unit) {
     var at by remember { mutableStateOf(Prefs.kashrutAt(context)) }
     val running = at > System.currentTimeMillis()
     Text("🍖 → 🥛  " + stringResource(R.string.kashrut_t), fontWeight = FontWeight.Bold, color = ClockColors.Ink)
+    Text(stringResource(R.string.kashrut_interval), color = ClockColors.Muted, fontSize = 13.sp)
+    if (Prefs.kashrutTimerWasReset(context)) Note(stringResource(R.string.kashrut_timer_reset))
+    if (Prefs.kashrutDeferred(context)) {
+        val city = Prefs.city(context)
+        val silent = ShabbatGuard.checkMoment(java.time.ZonedDateTime.now(city.zone()), city.name,
+            city.lat, city.lon, city.zone(), city.isIsrael, false,
+            Prefs.earlyShabbatMinutes(context)).isQuietTime
+        if (!silent) Note(stringResource(R.string.kashrut_deferred))
+    }
     if (running) {
-        val t = java.time.Instant.ofEpochMilli(at).atZone(java.time.ZoneId.systemDefault())
+        val t = java.time.Instant.ofEpochMilli(at).atZone(Prefs.city(context).zone())
         Text(stringResource(R.string.kashrut_until, t.format(DateTimeFormatter.ofPattern("HH:mm"))), color = ClockColors.GoldDeep, fontWeight = FontWeight.Bold)
         OutlinedButton(
             onClick = { AlarmScheduler.stopKashrut(context); at = 0L; onChange() },
@@ -1112,6 +1160,10 @@ private fun SettingsSheet(onChange: () -> Unit) {
     val context = LocalContext.current
     SheetColumn {
         SheetTitle(stringResource(R.string.settings))
+        if (Prefs.cityUnconfirmed(context)) {
+            Note(stringResource(if (Prefs.cityUnmatched(context)) R.string.city_unmatched_warning
+                else R.string.city_unconfirmed_warning))
+        }
 
         // язык
         Text(stringResource(R.string.lang_t), fontWeight = FontWeight.Bold, color = ClockColors.Ink)
@@ -1125,8 +1177,17 @@ private fun SettingsSheet(onChange: () -> Unit) {
                         lang = t
                         AppLang.set(context, t)
                         // окно — заново, уже на новом языке
-                        (context as? android.app.Activity)?.recreate()
-                        app.mychitas.peleshaon.live.Live.update(context)
+                        // Android 13+ normally recreates Activity via LocaleManager.
+                        // Some ColorOS variants need manual recreation for resource refresh.
+                        if (android.os.Build.VERSION.SDK_INT < 33 ||
+                            android.os.Build.MANUFACTURER.lowercase() in setOf("oppo", "realme", "oneplus")) {
+                            var host: Context = context
+                            while (host is android.content.ContextWrapper && host !is android.app.Activity) {
+                                host = host.baseContext
+                            }
+                            (host as? android.app.Activity)?.recreate()
+                        }
+                        app.mychitas.peleshaon.live.Live.updateAsync(context)
                     },
                     label = { Text(if (t.isEmpty()) stringResource(R.string.lang_system) else AppLang.label(t), fontSize = 13.sp) },
                     colors = chipColors()
@@ -1141,13 +1202,67 @@ private fun SettingsSheet(onChange: () -> Unit) {
             for ((m, label) in listOf(ClockTheme.AUTO to R.string.theme_auto, ClockTheme.LIGHT to R.string.theme_light, ClockTheme.DARK to R.string.theme_dark)) {
                 FilterChip(
                     selected = ClockTheme.mode == m,
-                    onClick = { ClockTheme.set(context, m) },
+                    onClick = {
+                        ClockTheme.set(context, m)
+                        app.mychitas.peleshaon.live.Live.updateAsync(context)
+                    },
                     label = { Text(stringResource(label), fontSize = 13.sp) },
                     colors = chipColors()
                 )
             }
         }
         Note(stringResource(R.string.theme_note))
+        HorizontalDivider(color = ClockColors.Line)
+
+        // Local candle-lighting practice is independent of the community's zmanim profile.
+        Text(stringResource(R.string.candle_offset_title), fontWeight = FontWeight.Bold, color = ClockColors.Ink)
+        var candleSetting by remember { mutableStateOf(Prefs.candleOffset(context)) }
+        FlowRow(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+            for (offset in listOf<Long?>(null, 18L, 20L, 30L, 40L)) {
+                FilterChip(
+                    selected = candleSetting == offset,
+                    onClick = {
+                        candleSetting = offset
+                        Prefs.setCandleOffset(context, offset)
+                        ZmanimEngine.candleOffsetOverride = offset
+                        AlarmScheduler.rescheduleAllFromPrefs(context)
+                        app.mychitas.peleshaon.live.Live.updateAsync(context)
+                        onChange()
+                    },
+                    label = {
+                        Text(if (offset == null) stringResource(R.string.candle_offset_local)
+                            else stringResource(R.string.candle_offset_minutes, offset.toInt()), fontSize = 12.sp)
+                    },
+                    colors = chipColors()
+                )
+            }
+        }
+        Note(stringResource(R.string.candle_offset_note))
+        val localCandleMinutes = ZmanimEngine.localCandleMinutesFor(Prefs.city(context).name)
+        if (candleSetting != null && candleSetting!! < localCandleMinutes) {
+            Note(stringResource(R.string.candle_offset_warning))
+        }
+        HorizontalDivider(color = ClockColors.Line)
+
+        // Earlier silence is separate from actual candle lighting and calendar calculations.
+        Text(stringResource(R.string.shabbat_quiet_early_title), fontWeight = FontWeight.Bold, color = ClockColors.Ink)
+        var earlyQuiet by remember { mutableStateOf(Prefs.earlyShabbatMinutes(context)) }
+        FlowRow(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+            for (minutes in listOf(0L, 15L, 30L, 45L, 60L)) {
+                FilterChip(
+                    selected = earlyQuiet == minutes,
+                    onClick = {
+                        earlyQuiet = minutes
+                        Prefs.setEarlyShabbatMinutes(context, minutes)
+                        AlarmScheduler.rescheduleAllFromPrefs(context)
+                        onChange()
+                    },
+                    label = { Text(stringResource(R.string.shabbat_quiet_early_choice, minutes.toInt()), fontSize = 12.sp) },
+                    colors = chipColors()
+                )
+            }
+        }
+        Note(stringResource(R.string.shabbat_quiet_early_note))
         HorizontalDivider(color = ClockColors.Line)
 
         // община
@@ -1168,7 +1283,7 @@ private fun SettingsSheet(onChange: () -> Unit) {
                     // будильник «до конца Шма», покой в Шабат, напоминание о Кидуш Левана, виджеты — по новой общине
                     AlarmScheduler.rescheduleAllFromPrefs(context)
                     app.mychitas.peleshaon.moon.MoonReminder.schedule(context)
-                    app.mychitas.peleshaon.live.Live.update(context)
+                    app.mychitas.peleshaon.live.Live.updateAsync(context)
                     onChange()
                 },
                 shape = RoundedCornerShape(12.dp),

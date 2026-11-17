@@ -1,0 +1,29 @@
+<resources>
+    <string name="app_name">Пеле Шаон</string>
+    <string name="zs_alot">Світанок</string>
+    <string name="zs_sunrise">Схід сонця</string>
+    <string name="zs_shma">Шма</string>
+    <string name="zs_tfila">Тфіла</string>
+    <string name="zs_chatzot">Полудень</string>
+    <string name="zs_mincha">Мінха ґд.</string>
+    <string name="zs_plag">Плаг</string>
+    <string name="zs_sunset">Захід сонця</string>
+    <string name="zs_tzait">Зірки</string>
+    <string name="left">залишилося %s</string>
+    <string name="in_time">через %s</string>
+    <string name="dur_hm">%1$d год %2$d хв</string>
+    <string name="dur_m">%d хв</string>
+    <string name="candles">Свічки</string>
+    <string name="polar">Сьогодні немає сходу або заходу сонця</string>
+    <string name="wear_city">Місто</string>
+    <string name="wear_community">Громада</string>
+    <string name="wear_candle_title">Час свічок</string>
+    <string name="wear_back">← Назад</string>
+    <string name="wear_auto_city">Авто (лише часовий пояс)</string>
+    <string name="wear_local_candles">За містом</string>
+    <string name="wear_candle_min">%1$d хв</string>
+    <string name="wear_chabad">Хабад</string>
+    <string name="wear_litvish">Литовська</string>
+    <string name="wear_sefardi">Сефардська</string>
+    <string name="wear_standalone_note">Налаштування годинника окремі; з телефоном не синхронізуються.</string>
+</resources>

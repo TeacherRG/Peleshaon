@@ -16,5 +16,7 @@ class UkTest {
         assertEquals("Вена", cityById("Europe/Vienna")!!.title(Locale("ru")))
         assertTrue(findCities("Відень").any { it.id == "Europe/Vienna" })
         assertTrue(findCities("Харків").isNotEmpty())
+        assertTrue(findCities("Ві").any { it.id == "Europe/Vienna" })
+        assertTrue(findCities("Ірк").any { it.id == "Asia/Irkutsk" })
     }
 }
