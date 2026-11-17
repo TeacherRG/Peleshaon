@@ -36,6 +36,8 @@ import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CheckboxDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.ModalBottomSheet
@@ -105,7 +107,7 @@ import java.util.Locale
 import kotlin.math.roundToInt
 
 /** Окно поверх часов: город, Шабат, два будильника, все времена, «Как считаем». */
-private enum class Panel { SETTINGS, KASHRUT, CITY, SHABBAT, WAKE, STUDY, CUSTOM, TIMES, INFO, PRIVACY, CALENDAR }
+private enum class Panel { SETTINGS, CITY, SHABBAT, WAKE, STUDY, CUSTOM, TIMES, INFO, PRIVACY, CALENDAR }
 
 /** «осталось / через N ч M мин» — как на сайте: минуты вверх, больше суток — дни и часы. */
 private fun until(context: Context, now: ZonedDateTime, at: ZonedDateTime, deadline: Boolean): String {
@@ -121,7 +123,7 @@ private val HHMM: DateTimeFormatter = DateTimeFormatter.ofPattern("HH:mm")
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ClockScreen(onNightScreen: () -> Unit, onIntro: () -> Unit = {}, onMoon: () -> Unit = {}) {
+fun ClockScreen(onNightScreen: () -> Unit, onIntro: () -> Unit = {}, onMoon: () -> Unit = {}, onCompass: () -> Unit = {}) {
     val context = LocalContext.current
     val locale = androidx.compose.ui.platform.LocalConfiguration.current.locales[0]
 
@@ -215,12 +217,25 @@ fun ClockScreen(onNightScreen: () -> Unit, onIntro: () -> Unit = {}, onMoon: () 
                     if (day.isNextJewishDayAfterSunset) Text(stringResource(R.string.evening), color = ClockColors.Muted, fontSize = 11.sp, textAlign = TextAlign.Center)
                 }
                 }
-                Chip(onClick = { panel = Panel.SETTINGS }, round = true) {
-                    Text("⚙", fontSize = 17.sp, color = ClockColors.TcheletDeep)
-                }
-                Spacer(Modifier.width(4.dp))
-                Chip(onClick = { panel = Panel.INFO }, round = true) {
-                    Text("?", fontWeight = FontWeight.Bold, fontSize = 17.sp, color = ClockColors.TcheletDeep)
+                // меню: компас, настройки, помощь (владелец, 18.11.2026)
+                Box {
+                    var menu by remember { mutableStateOf(false) }
+                    Chip(onClick = { menu = true }, round = true) {
+                        Text("☰", fontSize = 18.sp, color = ClockColors.TcheletDeep)
+                    }
+                    DropdownMenu(expanded = menu, onDismissRequest = { menu = false }, containerColor = ClockColors.SheetBg) {
+                        for ((icon, label, act) in listOf<Triple<String, Int, () -> Unit>>(
+                            Triple("🧭", R.string.menu_compass, onCompass),
+                            Triple("⚙", R.string.settings, { panel = Panel.SETTINGS }),
+                            Triple("?", R.string.help, { panel = Panel.INFO })
+                        )) {
+                            DropdownMenuItem(
+                                leadingIcon = { Text(icon, fontSize = 18.sp, color = ClockColors.TcheletDeep) },
+                                text = { Text(stringResource(label), color = ClockColors.Ink, fontSize = 16.sp) },
+                                onClick = { menu = false; act() }
+                            )
+                        }
+                    }
                 }
             }
 
@@ -286,22 +301,6 @@ fun ClockScreen(onNightScreen: () -> Unit, onIntro: () -> Unit = {}, onMoon: () 
             } else if (pop == null && !day.isPolarAnomaly) {
                 Text(stringResource(R.string.hint), color = ClockColors.Muted, fontSize = 12.sp, textAlign = TextAlign.Center)
             }
-            // всегда под рукой: лунный компас и таймер «мясное → молочное»
-            if (pop == null) Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                Chip(onClick = onMoon) {
-                    Text("🌙", fontSize = 14.sp)
-                    Text(stringResource(R.string.tool_moon), fontWeight = FontWeight.Bold, fontSize = 13.sp, color = ClockColors.Ink)
-                }
-                val k = remember(version, minute) { Prefs.kashrutAt(context) }
-                Chip(onClick = { panel = Panel.KASHRUT }) {
-                    Text("🍖→🥛", fontSize = 13.sp)
-                    Text(
-                        if (k > System.currentTimeMillis()) stringResource(R.string.tool_kashrut_until, java.time.Instant.ofEpochMilli(k).atZone(zone).format(HHMM))
-                        else stringResource(R.string.tool_kashrut),
-                        fontWeight = FontWeight.Bold, fontSize = 13.sp, color = ClockColors.Ink
-                    )
-                }
-            }
 
             // ---- кнопки внизу: Шабат · Будильник · Учёба · Времена
             val off = stringResource(R.string.off2)
@@ -351,7 +350,7 @@ fun ClockScreen(onNightScreen: () -> Unit, onIntro: () -> Unit = {}, onMoon: () 
                     onOpen = { id -> editAlarm = id; panel = Panel.CUSTOM },
                     onDeleted = { bump(); panel = Panel.WAKE }
                 ) } }
-                Panel.TIMES -> TimesSheet(day.items, day.isNextJewishDayAfterSunset, cityNow, zone, marks, tziruf, dayText,
+                Panel.TIMES -> TimesSheet(city, day.items, day.isNextJewishDayAfterSunset, cityNow, zone, marks, tziruf, dayText,
                     onToggle = { type ->
                         marks = if (type in marks) marks - type else marks + type
                         Prefs.setMarks(context, marks)
@@ -361,7 +360,6 @@ fun ClockScreen(onNightScreen: () -> Unit, onIntro: () -> Unit = {}, onMoon: () 
                 Panel.PRIVACY -> PrivacySheet()
                 Panel.CALENDAR -> CalendarSheet(city, cityNow)
                 Panel.SETTINGS -> SettingsSheet(onChange = bump)
-                Panel.KASHRUT -> SheetColumn { KashrutCard(bump) }
             }
         }
     }
@@ -571,10 +569,30 @@ private fun ShabbatSheet(
                 Text(at?.let(wdTime) ?: stringResource(R.string.no_sun), fontWeight = FontWeight.Bold, color = ClockColors.Gold)
             }
         }
+        SeventhHour(sh.friday, city, now)
         Note(stringResource(R.string.shabbat_note))
         JewishCal.mevarchim(sh.friday, city.isIsrael)?.let { m ->
             HorizontalDivider(color = ClockColors.Line)
             MevarchimBlock(m)
+        }
+    }
+}
+
+/** 7-й час ночи Шабата: с … до … — в этот час не делают кидуш. */
+@Composable
+private fun SeventhHour(friday: LocalDate, city: CityOption, now: ZonedDateTime) {
+    val h = remember(friday, city, ZmanimEngine.minhag) { ZmanimEngine.seventhHourOfShabbatNight(friday, city) } ?: return
+    if (!now.isBefore(h.second)) return
+    val z = city.zone()
+    Surface(shape = RoundedCornerShape(12.dp), color = ClockColors.Bad.copy(alpha = 0.10f), border = BorderStroke(1.dp, ClockColors.Bad.copy(alpha = 0.5f)), modifier = Modifier.fillMaxWidth()) {
+        Row(Modifier.padding(horizontal = 12.dp, vertical = 8.dp), verticalAlignment = Alignment.CenterVertically) {
+            Text("🍷", fontSize = 20.sp, modifier = Modifier.padding(end = 10.dp))
+            Column(Modifier.weight(1f)) {
+                Text(stringResource(R.string.h7_t), color = ClockColors.Ink, fontWeight = FontWeight.Bold, fontSize = 14.sp)
+                Text(stringResource(R.string.h7_note), color = ClockColors.Muted, fontSize = 12.sp)
+            }
+            Text(h.first.withZoneSameInstant(z).format(HHMM) + "–" + h.second.withZoneSameInstant(z).format(HHMM),
+                color = ClockColors.Bad, fontWeight = FontWeight.Bold)
         }
     }
 }
@@ -904,6 +922,7 @@ private fun LinkButton(text: String, route: String, modifier: Modifier) {
 
 @Composable
 private fun TimesSheet(
+    city: CityOption,
     items: List<app.mychitas.peleshaon.domain.ZmanItem>,
     tomorrow: Boolean,
     now: ZonedDateTime,
@@ -919,6 +938,13 @@ private fun TimesSheet(
     SheetColumn {
         SheetTitle(stringResource(R.string.times_title))
         if (tomorrow) Text(stringResource(R.string.tomorrow, dayText(now.toLocalDate().plusDays(1))), color = ClockColors.GoldDeep, fontSize = 13.sp)
+        // в пятницу (и ночью Шабата до восхода) — 7-й час ночи, когда не делают кидуш
+        val fri = when (now.dayOfWeek) {
+            java.time.DayOfWeek.FRIDAY -> now.toLocalDate()
+            java.time.DayOfWeek.SATURDAY -> now.toLocalDate().minusDays(1).takeIf { now.hour < 12 }
+            else -> null
+        }
+        fri?.let { SeventhHour(it, city, now) }
         Column {
             for (z in items) {
                 val past = !z.roundedTime.isAfter(now)

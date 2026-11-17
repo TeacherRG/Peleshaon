@@ -148,7 +148,7 @@
     <string name="ob5_t">Часы — и вне приложения</string>
     <string name="ob5_l1">Виджеты: долгое нажатие на рабочем столе → «Виджеты» → «Пеле Шаон». Большой — часы, маленький — только еврейская дата.</string>
     <string name="ob5_l2">Уведомление с отсчётом до ближайшего времени — включается в окне «Времена». Его видно на экране блокировки.</string>
-    <string name="ob5_l3">Ночью у кровати: «?» → «Ночной экран». При зарядке — заставка: Настройки телефона → Экран → Заставка → «Пеле Шаон».</string>
+    <string name="ob5_l3">Ночью у кровати: «☰» → «Помощь» → «Ночной экран». При зарядке — заставка: Настройки телефона → Экран → Заставка → «Пеле Шаон».</string>
     <string name="legend_t">Как читать циферблат</string>
     <string name="help">Помощь</string>
     <string name="alarm_how_note">Свет — экран плавно светлеет, как рассвет; «Только свет» будит без звука.</string>
@@ -239,13 +239,19 @@
     <string name="mev_rc">Рош Ходеш: %1$s</string>
     <string name="mev_note">Молад — как его объявляют в синагоге: по времени Йерушалаима («часть», хелек, — 1/18 минуты).</string>
     <string name="mev_tehillim">По обычаю Хабада в Шабат мевархим до утренней молитвы читают всю книгу Теґилим.</string>
-    <string name="tool_moon">Луна</string>
-    <string name="tool_kashrut">6 часов</string>
-    <string name="tool_kashrut_until">молочное с %1$s</string>
     <plurals name="chalakim">
         <item quantity="one">%d часть</item>
         <item quantity="few">%d части</item>
         <item quantity="many">%d частей</item>
         <item quantity="other">%d части</item>
     </plurals>
+    <string name="h7_t">7-й час ночи Шабата — без кидуша</string>
+    <string name="h7_note">По обычаю в 7-й час ночи (ночь от заката до восхода делится на 12) не делают кидуш. Сверьтесь с раввином.</string>
+    <string name="menu_compass">Компас</string>
+    <string name="compass_jerusalem">Йерушалаим</string>
+    <string name="compass_moon">Луна</string>
+    <string name="jer_ahead">Йерушалаим прямо перед вами</string>
+    <string name="jer_dir">Йерушалаим: %1$s (%2$d°) · %3$s км</string>
+    <string name="jer_hold">Держите телефон горизонтально или стоя перед собой — тогда стрелка следует за камерой. Золотая стрелка показывает на Йерушалаим.</string>
+    <string name="jer_note">Молятся лицом к Йерушалаиму, к месту Храма (Брахот 30а; Шулхан арух, Орах хаим 94:1). Направление — по кратчайшему пути на шаре (дуга большого круга); многие общины молятся просто на восток или юго-восток — как принято у вас, спросите раввина.</string>
 </resources>

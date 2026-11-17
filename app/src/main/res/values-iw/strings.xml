@@ -148,7 +148,7 @@
     <string name="ob5_t">השעון גם מחוץ ליישום</string>
     <string name="ob5_l1">ווידג׳טים: לחיצה ארוכה על מסך הבית ← «ווידג׳טים» ← «פלא שעון». גדול — השעון, קטן — רק התאריך העברי.</string>
     <string name="ob5_l2">התראה עם ספירה לאחור לזמן הקרוב — מפעילים בחלון «זמנים». היא מוצגת במסך הנעילה.</string>
-    <string name="ob5_l3">בלילה ליד המיטה: «?» ← «מסך לילה». בזמן טעינה — שומר מסך: הגדרות ← תצוגה ← שומר מסך ← «פלא שעון».</string>
+    <string name="ob5_l3">בלילה ליד המיטה: «☰» ← «עזרה» ← «מסך לילה». בזמן טעינה — שומר מסך: הגדרות ← תצוגה ← שומר מסך ← «פלא שעון».</string>
     <string name="legend_t">איך קוראים את השעון</string>
     <string name="help">עזרה</string>
     <string name="alarm_how_note">אור — המסך מתבהר לאט, כמו שחר; «אור בלבד» מעיר בלי צליל.</string>
@@ -239,12 +239,18 @@
     <string name="mev_rc">ראש חודש: %1$s</string>
     <string name="mev_note">המולד — כפי שמכריזים בבית הכנסת: לפי שעון ירושלים (חלק — 1/18 דקה).</string>
     <string name="mev_tehillim">במנהג חב״ד, בשבת מברכים אומרים את כל ספר התהלים לפני תפילת שחרית.</string>
-    <string name="tool_moon">ירח</string>
-    <string name="tool_kashrut">6 שעות</string>
-    <string name="tool_kashrut_until">חלבי מ־%1$s</string>
     <plurals name="chalakim">
         <item quantity="one">חלק %d</item>
         <item quantity="two">%d חלקים</item>
         <item quantity="other">%d חלקים</item>
     </plurals>
+    <string name="h7_t">השעה השביעית של ליל שבת — בלי קידוש</string>
+    <string name="h7_note">נוהגים שלא לקדש בשעה השביעית של הלילה (הלילה מהשקיעה עד הזריחה מתחלק ל־12). התייעצו עם רב.</string>
+    <string name="menu_compass">מצפן</string>
+    <string name="compass_jerusalem">ירושלים</string>
+    <string name="compass_moon">ירח</string>
+    <string name="jer_ahead">ירושלים ממש מולכם</string>
+    <string name="jer_dir">ירושלים: %1$s (%2$d°) · %3$s ק״מ</string>
+    <string name="jer_hold">החזיקו את הטלפון שטוח, או זקוף לפניכם — אז החץ עוקב אחרי המצלמה. החץ הזהוב מצביע על ירושלים.</string>
+    <string name="jer_note">מתפללים כנגד ירושלים, מקום המקדש (ברכות ל ע״א; שולחן ערוך, אורח חיים צד, א). הכיוון — בדרך הקצרה ביותר על כדור הארץ (מעגל גדול); קהילות רבות מתפללות פשוט למזרח או לדרום־מזרח — נהגו כמנהג הקהילה ושאלו רב.</string>
 </resources>

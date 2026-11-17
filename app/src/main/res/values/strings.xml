@@ -148,7 +148,7 @@
     <string name="ob5_t">The clock outside the app too</string>
     <string name="ob5_l1">Widgets: long-press the home screen → «Widgets» → «Pele Shaon». A large one — the clock, a small one — only the Jewish date.</string>
     <string name="ob5_l2">A notification with a countdown to the next time — turn it on in «Times». It shows on the lock screen.</string>
-    <string name="ob5_l3">At night by the bed: «?» → «Bedside night screen». While charging — a screen saver: phone Settings → Display → Screen saver → «Pele Shaon».</string>
+    <string name="ob5_l3">At night by the bed: «☰» → «Help» → «Bedside night screen». While charging — a screen saver: phone Settings → Display → Screen saver → «Pele Shaon».</string>
     <string name="legend_t">How to read the dial</string>
     <string name="help">Help</string>
     <string name="alarm_how_note">Light — the screen slowly brightens, like dawn; «Light only» wakes you without sound.</string>
@@ -239,11 +239,17 @@
     <string name="mev_rc">Rosh Chodesh: %1$s</string>
     <string name="mev_note">The molad is given as it is announced in the synagogue — in Jerusalem time (a «part», chelek, is 1/18 of a minute).</string>
     <string name="mev_tehillim">By Chabad custom, on Shabbat Mevarchim the whole book of Tehillim is said before the morning prayer.</string>
-    <string name="tool_moon">Moon</string>
-    <string name="tool_kashrut">6 hours</string>
-    <string name="tool_kashrut_until">dairy at %1$s</string>
     <plurals name="chalakim">
         <item quantity="one">%d part</item>
         <item quantity="other">%d parts</item>
     </plurals>
+    <string name="h7_t">7th hour of Shabbat night — no Kiddush</string>
+    <string name="h7_note">By custom Kiddush is not made in the 7th hour of the night (the night from sunset to sunrise is divided into 12). Ask your rabbi.</string>
+    <string name="menu_compass">Compass</string>
+    <string name="compass_jerusalem">Jerusalem</string>
+    <string name="compass_moon">Moon</string>
+    <string name="jer_ahead">Jerusalem is right in front of you</string>
+    <string name="jer_dir">Jerusalem: %1$s (%2$d°) · %3$s km</string>
+    <string name="jer_hold">Hold the phone flat, or upright in front of you — then the arrow follows the camera. The gold arrow points to Jerusalem.</string>
+    <string name="jer_note">We pray facing Jerusalem, the place of the Temple (Berachot 30a; Shulchan Aruch, Orach Chaim 94:1). The direction is the shortest path on the globe (a great circle); many communities simply face east or south-east — follow your community and ask your rabbi.</string>
 </resources>

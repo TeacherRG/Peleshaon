@@ -148,7 +148,7 @@
     <string name="ob5_t">Die Uhr auch außerhalb der App</string>
     <string name="ob5_l1">Widgets: lange auf den Startbildschirm drücken → «Widgets» → «Pele Schaon». Ein großes — die Uhr, ein kleines — nur das jüdische Datum.</string>
     <string name="ob5_l2">Eine Benachrichtigung mit Countdown zur nächsten Zeit — einschalten unter «Zeiten». Sie erscheint auf dem Sperrbildschirm.</string>
-    <string name="ob5_l3">Nachts am Bett: «?» → «Nachtbildschirm». Beim Laden — Bildschirmschoner: Einstellungen → Display → Bildschirmschoner → «Pele Schaon».</string>
+    <string name="ob5_l3">Nachts am Bett: «☰» → «Hilfe» → «Nachtbildschirm». Beim Laden — Bildschirmschoner: Einstellungen → Display → Bildschirmschoner → «Pele Schaon».</string>
     <string name="legend_t">So liest du das Zifferblatt</string>
     <string name="help">Hilfe</string>
     <string name="alarm_how_note">Licht — der Bildschirm wird langsam hell wie die Morgendämmerung; «Nur Licht» weckt ohne Ton.</string>
@@ -239,11 +239,17 @@
     <string name="mev_rc">Rosch Chodesch: %1$s</string>
     <string name="mev_note">Der Molad wird so angegeben, wie man ihn in der Synagoge ankündigt — nach Jerusalemer Zeit (ein «Teil», Chelek, ist 1/18 Minute).</string>
     <string name="mev_tehillim">Nach dem Brauch von Chabad sagt man am Schabbat Mewarchim vor dem Morgengebet das ganze Buch Tehillim.</string>
-    <string name="tool_moon">Mond</string>
-    <string name="tool_kashrut">6 Stunden</string>
-    <string name="tool_kashrut_until">milchig ab %1$s</string>
     <plurals name="chalakim">
         <item quantity="one">%d Teil</item>
         <item quantity="other">%d Teile</item>
     </plurals>
+    <string name="h7_t">7. Stunde der Schabbatnacht — kein Kiddusch</string>
+    <string name="h7_note">Nach dem Brauch macht man in der 7. Stunde der Nacht keinen Kiddusch (die Nacht von Sonnenuntergang bis Sonnenaufgang wird in 12 geteilt). Frag deinen Rabbiner.</string>
+    <string name="menu_compass">Kompass</string>
+    <string name="compass_jerusalem">Jerusalem</string>
+    <string name="compass_moon">Mond</string>
+    <string name="jer_ahead">Jerusalem liegt genau vor dir</string>
+    <string name="jer_dir">Jerusalem: %1$s (%2$d°) · %3$s km</string>
+    <string name="jer_hold">Halte das Telefon flach oder aufrecht vor dich — dann folgt der Pfeil der Kamera. Der goldene Pfeil zeigt nach Jerusalem.</string>
+    <string name="jer_note">Man betet in Richtung Jerusalem, zum Ort des Tempels (Berachot 30a; Schulchan Aruch, Orach Chajim 94:1). Die Richtung ist der kürzeste Weg auf der Erdkugel (Großkreis); viele Gemeinden beten einfach nach Osten oder Südosten — richte dich nach deiner Gemeinde und frag deinen Rabbiner.</string>
 </resources>

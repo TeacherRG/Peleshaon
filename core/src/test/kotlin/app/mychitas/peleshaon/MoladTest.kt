@@ -37,4 +37,16 @@ class MoladTest {
         assertTrue(7 !in found, "тишрей не благословляют")
         assertTrue(found.size in 11..12, "$found")
     }
+
+    @Test
+    fun seventhHourOfShabbatNight() {
+        val vienna = app.mychitas.peleshaon.domain.cityById("Europe/Vienna")!!
+        val fri = LocalDate.of(2026, 11, 20)
+        val (a, b) = app.mychitas.peleshaon.domain.ZmanimEngine.seventhHourOfShabbatNight(fri, vienna)!!
+        val set = app.mychitas.peleshaon.domain.ZmanimEngine.sunsetOf(fri, vienna)!!
+        // зимой ночь в Вене ≈ 15 ч: 7-й час начинается около полуночи и длится больше часа
+        assertTrue(a.isAfter(set.plusHours(6)) && a.isBefore(set.plusHours(9)), "$a")
+        val min = java.time.Duration.between(a, b).toMinutes()
+        assertTrue(min in 70..85, "$min мин")
+    }
 }

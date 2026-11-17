@@ -299,6 +299,20 @@ object ZmanimEngine {
         Minhag.SEFARDI -> cal.tzais72Zmanis?.toZoned(zone)
     }?.let { if (it.second > 0 || it.nano > 0) it.withSecond(0).withNano(0).plusMinutes(1) else it }
 
+    /**
+     * 7-й галахический час ночи Шабата (с пятницы на субботу): ночь — от заката пятницы до восхода субботы, делится на 12;
+     * в этот час, по обычаю, не делают кидуш (владелец, 18.11.2026: «7-й час запрета кидуша — во временах пятницы»).
+     * Нет заката или восхода — null.
+     */
+    fun seventhHourOfShabbatNight(friday: LocalDate, city: CityOption): Pair<ZonedDateTime, ZonedDateTime>? {
+        val set = sunsetOf(friday, city) ?: return null
+        val rise = cal(friday.plusDays(1), city).sunrise?.toZoned(city.zone()) ?: return null
+        val len = rise.toInstant().toEpochMilli() - set.toInstant().toEpochMilli()
+        if (len <= 0) return null
+        fun at(k: Int) = set.plusNanos(len * k / 12 * 1_000_000)
+        return at(6) to at(7)
+    }
+
     /** Исход Шабата / праздника этого календарного дня в городе. */
     fun havdalahOn(date: LocalDate, city: CityOption): ZonedDateTime? = havdalahOf(cal(date, city), city.zone())
 
