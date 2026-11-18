@@ -1,22 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Маленький виджет: еврейская дата — день числом крупно, рядом месяц и день недели; фон прозрачный. -->
+<!-- Маленький виджет: еврейская дата — день числом крупно, рядом месяц и день недели. -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/w_root"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@android:color/transparent"
+    android:background="@drawable/widget_date_pill_dark"
     android:gravity="center"
     android:orientation="horizontal"
-    android:padding="4dp">
+    android:paddingHorizontal="20dp"
+    android:paddingVertical="6dp">
 
     <TextView
         android:id="@+id/w_day"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:includeFontPadding="false"
-        android:shadowColor="#99000000"
-        android:shadowDy="1"
-        android:shadowRadius="4"
         android:text="7"
         android:textColor="#E2BF72"
         android:textSize="46sp"
@@ -33,9 +31,6 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:maxLines="1"
-            android:shadowColor="#99000000"
-            android:shadowDy="1"
-            android:shadowRadius="4"
             android:text="кислева"
             android:textColor="#F4F1E8"
             android:textSize="18sp"
@@ -46,9 +41,6 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:maxLines="1"
-            android:shadowColor="#99000000"
-            android:shadowDy="1"
-            android:shadowRadius="4"
             android:text="вторник"
             android:textColor="#C9CFE3"
             android:textSize="14sp" />

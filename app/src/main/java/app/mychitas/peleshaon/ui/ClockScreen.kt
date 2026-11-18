@@ -131,7 +131,8 @@ fun ClockScreen(
     onIntro: () -> Unit = {},
     onMoon: () -> Unit = {},
     onCompass: () -> Unit = {},
-    requestedAlarm: androidx.compose.runtime.MutableState<String?>? = null
+    requestedAlarm: androidx.compose.runtime.MutableState<String?>? = null,
+    requestedCalendar: androidx.compose.runtime.MutableState<Int>? = null
 ) {
     val context = LocalContext.current
     val locale = androidx.compose.ui.platform.LocalConfiguration.current.locales[0]
@@ -166,6 +167,10 @@ fun ClockScreen(
                         editAlarm = id
                         panel = Panel.CUSTOM
                     } else panel = Panel.WAKE
+                }
+                if ((requestedCalendar?.value ?: 0) > 0) androidx.compose.runtime.SideEffect {
+                    panel = Panel.CALENDAR
+                    requestedCalendar?.value = 0
                 }
             }
             requestedAlarm.value = null

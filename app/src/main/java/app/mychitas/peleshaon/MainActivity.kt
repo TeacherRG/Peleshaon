@@ -36,6 +36,10 @@ import app.mychitas.peleshaon.ui.Onboarding
  * Шабат и два будильника, которые молчат в Шабат и праздники.
  */
 class MainActivity : ComponentActivity() {
+    companion object {
+        const val EXTRA_OPEN_CALENDAR = "app.mychitas.peleshaon.OPEN_CALENDAR"
+    }
+
     // язык, выбранный в «Настройках»
     override fun attachBaseContext(newBase: android.content.Context) {
         super.attachBaseContext(app.mychitas.peleshaon.AppLang.wrap(newBase))
@@ -58,7 +62,12 @@ class MainActivity : ComponentActivity() {
             ?: if (intent?.getBooleanExtra(MoonReminder.EXTRA_OPEN, false) == true) "moon" else null
         openAlarm.value = savedInstanceState?.getString("alarm_panel")
             ?: intent?.getStringExtra(AlarmScheduler.EXTRA_SHOW_ALARM_TYPE)
+        openCalendar.value = if (intent?.getBooleanExtra(EXTRA_OPEN_CALENDAR, false) == true) 1 else 0
         if (openAlarm.value != null) openMoon.value = null
+        if (openCalendar.value > 0) {
+            openAlarm.value = null
+            openMoon.value = null
+        }
         setContent {
             // тема: днём светлая, ночью тёмная (или как выбрано) — и значки строки состояния под неё
             LaunchedEffect(Unit) {
@@ -73,7 +82,7 @@ class MainActivity : ComponentActivity() {
                 else SystemBarStyle.dark(android.graphics.Color.TRANSPARENT)
                 enableEdgeToEdge(statusBarStyle = bars, navigationBarStyle = bars)
             }
-            PeleShaonApp(openMoon, openAlarm)
+            PeleShaonApp(openMoon, openAlarm, openCalendar)
         }
     }
 
@@ -81,6 +90,7 @@ class MainActivity : ComponentActivity() {
     // компас: "moon" — Луна, "jer" — Йерушалаим, null — закрыт
     private val openMoon = mutableStateOf<String?>(null)
     private val openAlarm = mutableStateOf<String?>(null)
+    private val openCalendar = mutableStateOf(0)
 
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
@@ -99,6 +109,11 @@ class MainActivity : ComponentActivity() {
             openMoon.value = null
             openAlarm.value = it
         }
+        if (intent.getBooleanExtra(EXTRA_OPEN_CALENDAR, false)) {
+            openMoon.value = null
+            openAlarm.value = null
+            openCalendar.value++
+        }
     }
 
     // Город, подписи, «Сочетание Имени» могли поменяться — виджеты и уведомление подхватят
@@ -112,7 +127,8 @@ class MainActivity : ComponentActivity() {
 @Composable
 fun PeleShaonApp(
     openMoon: androidx.compose.runtime.MutableState<String?>,
-    openAlarm: androidx.compose.runtime.MutableState<String?>
+    openAlarm: androidx.compose.runtime.MutableState<String?>,
+    openCalendar: androidx.compose.runtime.MutableState<Int>
 ) {
     val context = LocalContext.current
     var night by rememberSaveable { mutableStateOf(false) }
@@ -120,6 +136,10 @@ fun PeleShaonApp(
     var intro by rememberSaveable { mutableStateOf(!Prefs.of(context).getBoolean("onboarded", false)) }
     LaunchedEffect(openAlarm.value) {
         if (openAlarm.value != null) {
+            night = false
+            intro = false
+        }
+        if (openCalendar.value > 0) androidx.compose.runtime.SideEffect {
             night = false
             intro = false
         }
@@ -151,6 +171,7 @@ fun PeleShaonApp(
         NightFace(Modifier.fillMaxSize().background(Color.Black).clickable { night = false })
     } else {
         ClockScreen(onNightScreen = { night = true }, onIntro = { intro = true },
-            onMoon = { openMoon.value = "moon" }, onCompass = { openMoon.value = "jer" }, requestedAlarm = openAlarm)
+            onMoon = { openMoon.value = "moon" }, onCompass = { openMoon.value = "jer" },
+            requestedAlarm = openAlarm, requestedCalendar = openCalendar)
     }
 }

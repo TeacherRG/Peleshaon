@@ -167,6 +167,12 @@ fun BigFace(
     }
 }
 
+private fun widgetEventColor(id: String): Color = when (id) {
+    CANDLES, ZmanType.SUNSET.name -> Color(0xFFF0715E)
+    HAVDALAH, ZmanType.TZAIT.name, ZmanType.ALOT.name, ZmanType.SOF_ZMAN_SHMA.name -> Color(0xFF93C5FD)
+    else -> Color(0xFFE2C07D)
+}
+
 private fun DrawScope.drawFace(
     now: ZonedDateTime,
     zone: ZoneId,
@@ -177,11 +183,25 @@ private fun DrawScope.drawFace(
     tziruf: Boolean,
     k: Float,
     showTime: Boolean = true,
-    hourLabel: String? = null
+    hourLabel: String? = null,
+    widgetStyle: Boolean = false
 ) {
     val c = Offset(100f, 100f)
-    drawCircle(ClockColors.RimFill, radius = 99f, center = c)
-    drawCircle(ClockColors.RimStroke, radius = 99f, center = c, style = Stroke(0.5f))
+    val rimFill = if (widgetStyle) {
+        if (ClockTheme.light) Color(0xDCF8FAFC) else Color(0xD612151C)
+    } else ClockColors.RimFill
+    val rimStroke = if (widgetStyle) {
+        if (ClockTheme.light) Color(0x1F0F172A) else Color(0x24FFFFFF)
+    } else ClockColors.RimStroke
+    if (widgetStyle) {
+        val shadow = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+            color = android.graphics.Color.WHITE
+            setShadowLayer(24f / k, 0f, 8f / k, 0x3D000000)
+        }
+        drawContext.canvas.nativeCanvas.drawCircle(100f, 100f, 99f, shadow)
+    }
+    drawCircle(rimFill, radius = 99f, center = c)
+    drawCircle(rimStroke, radius = 99f, center = c, style = Stroke(if (widgetStyle) 1f / k else 0.5f))
 
     if (ring != null) {
         // 48 штрихов половины суток: прошедшие горят, будущие бледные, «сейчас» — красный (владелец, 17.11.2026)
@@ -189,10 +209,15 @@ private fun DrawScope.drawFace(
         for (d in ring.dashes) {
             val from = polar(d.turn, if (d.hour) 82.0 else 86.0)
             val to = polar(d.turn, if (d.state == DashState.NOW) 99.0 else 96.0)
-            val color = if (d.state == DashState.NOW) ClockColors.Hand
-            else lerp(ClockColors.Tchelet, ClockColors.Gold, d.light.toFloat())
+            val color = when {
+                d.state == DashState.NOW && widgetStyle -> Color(0xFFF0715E)
+                d.state == DashState.NOW -> ClockColors.Hand
+                widgetStyle -> (if (ClockTheme.light) Color(0xFF0F172A) else Color.White)
+                    .copy(alpha = 0.22f)
+                else -> lerp(ClockColors.Tchelet, ClockColors.Gold, d.light.toFloat())
+            }
             drawLine(
-                color = color.copy(alpha = if (d.state == DashState.OFF) 0.16f else 1f),
+                color = if (widgetStyle || d.state == DashState.NOW) color else color.copy(alpha = if (d.state == DashState.OFF) 0.16f else 1f),
                 start = from,
                 end = to,
                 strokeWidth = (slot * when (d.state) { DashState.NOW -> 1.4; DashState.LIT -> 1.0; DashState.OFF -> 0.7 }).toFloat(),
@@ -212,7 +237,7 @@ private fun DrawScope.drawFace(
                         drawLine(ClockColors.Gold, Offset(0f, -7f), Offset(0f, -9.5f), strokeWidth = 1.6f, cap = StrokeCap.Round)
                     }
                 } else {
-                    drawPath(MOON, ClockColors.Tchelet)
+                    drawPath(MOON, if (widgetStyle) Color(0xFFF8FAFC) else ClockColors.Tchelet)
                 }
             }
         }
@@ -237,20 +262,28 @@ private fun DrawScope.drawFace(
 
     for ((d, turn) in labelled) {
         val pos = polar(turn, 68.0)
-        text(d.e.at.withZoneSameInstant(zone).format(HHMM), pos.x, pos.y, 8.4f, d.e.color)
+        text(
+            d.e.at.withZoneSameInstant(zone).format(HHMM), pos.x, pos.y, 8.4f,
+            if (widgetStyle) Color(0x99A0AEC0) else d.e.color
+        )
     }
 
     for (d in dots) {
         val past = !d.e.at.isAfter(now)
         val on = d.e.id == active
-        if (on) drawCircle(d.e.color.copy(alpha = 0.8f), radius = 8.5f, center = d.pos, style = Stroke(1.4f))
+        val eventColor = if (widgetStyle) widgetEventColor(d.e.id) else d.e.color
+        if (on) drawCircle(eventColor.copy(alpha = 0.8f), radius = 8.5f, center = d.pos, style = Stroke(1.4f))
         val r = if (on) 6.2f else if (d.e.label) 5f else 3.6f
-        drawCircle(d.e.color.copy(alpha = if (past) 0.45f else 1f), radius = r, center = d.pos)
-        drawCircle(ClockColors.DotStroke, radius = r, center = d.pos, style = Stroke(1.8f))
+        drawCircle(eventColor.copy(alpha = if (past) 0.45f else 1f), radius = r, center = d.pos)
+        val dotStroke = if (widgetStyle) Color(0xFF12151C) else ClockColors.DotStroke
+        drawCircle(dotStroke, radius = r, center = d.pos, style = Stroke(if (widgetStyle) 1f / k else 1.8f))
     }
 
     if (tziruf && ring != null) {
-        text(Dial.TZIRUFIM[ring.hour], 100f, 154f, 22f, ClockColors.TzirufC)
+        val labelColor = if (widgetStyle) {
+            if (ClockTheme.light) Color(0xFF8E6A1C) else Color(0xFFE2C07D)
+        } else ClockColors.TzirufC
+        text(Dial.TZIRUFIM[ring.hour], 100f, if (widgetStyle) 160f else 154f, 22f, labelColor, bold = !widgetStyle)
     }
     if (showTime) {
         val t = now.withZoneSameInstant(zone)
@@ -288,12 +321,18 @@ fun renderFace(
     light: Boolean = false
 ): android.graphics.Bitmap = ClockTheme.render(light) {
     val bmp = ImageBitmap(sizePx, sizePx)
-    val k = sizePx / BOX
+    val insetPx = 34f
+    val k = (sizePx - 2f * insetPx) / BOX
     val dots = place(events, half)
     CanvasDrawScope().draw(Density(1f), LayoutDirection.Ltr, androidx.compose.ui.graphics.Canvas(bmp), Size(sizePx.toFloat(), sizePx.toFloat())) {
-        scale(k, k, pivot = Offset.Zero) {
-            translate(-BOX_MIN, -BOX_MIN) {
-                drawFace(now, zone, ring, dots, labelsOf(dots, now), null, tziruf, k, showTime = false, hourLabel = hourLabel)
+        translate(insetPx, insetPx) {
+            scale(k, k, pivot = Offset.Zero) {
+                translate(-BOX_MIN, -BOX_MIN) {
+                    drawFace(
+                        now, zone, ring, dots, labelsOf(dots, now), null, tziruf, k,
+                        showTime = false, hourLabel = hourLabel, widgetStyle = true
+                    )
+                }
             }
         }
     }

@@ -64,9 +64,15 @@ object ClockTheme {
         try { return block() } finally { renderTheme.set(prev) }
     }
 
-    /** Тема виджетов: как выбрано; «Авто» — светлая с восхода до заката (владелец, 18.11.2026: «днём — не для тёмного времени»). */
-    fun widgetLight(context: Context, day: Boolean?): Boolean =
-        when (Prefs.of(context).getString("theme", AUTO)) { LIGHT -> true; DARK -> false; else -> day == true }
+    /** Тема виджетов: явный выбор из настроек или системная светлая/тёмная тема в режиме «Авто». */
+    fun widgetLight(context: Context): Boolean =
+        when (Prefs.of(context).getString("theme", AUTO)) {
+            LIGHT -> true
+            DARK -> false
+            else -> (context.resources.configuration.uiMode and
+                android.content.res.Configuration.UI_MODE_NIGHT_MASK) !=
+                android.content.res.Configuration.UI_MODE_NIGHT_YES
+        }
 }
 
 /** Фон экранов: ночью — звёздное небо, днём — светлое небо. */
