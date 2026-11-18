@@ -79,6 +79,22 @@ object ZmanimService {
         community: Minhag,
         candleMinutes: Long
     ): ZmanimSnapshot {
+        // Chabad.org: when summer twilight never reaches -16.9 degrees,
+        // alos begins at the lowest point of the *previous* night.
+        // SolarMidnight is calculated at the END of its calendar date, so
+        // use the previous civil date. Never turn polar night into false dawn.
+        val chabadDawnByDegrees = if (community == Minhag.CHABAD) calendar.alosBaalHatanya else null
+        val solarMidnightDawn = if (community == Minhag.CHABAD &&
+            chabadDawnByDegrees == null &&
+            calendar.sunrise != null && calendar.sunset != null) {
+            ComprehensiveZmanimCalendar(calendar.geoLocation).apply {
+                localDate = calendar.localDate.minusDays(1)
+            }.solarMidnight?.takeIf {
+                it.atZone(calendar.geoLocation.zoneId).toLocalDate() == calendar.localDate
+            }
+        } else null
+        val actualDawn = chabadDawnByDegrees ?: solarMidnightDawn
+
         val ordinary = when (community) {
             Minhag.CHABAD -> calendar.tzaisBaalHatanya
             Minhag.LITVISH -> calendar.tzaisGeonim8Point5Degrees
@@ -90,7 +106,9 @@ object ZmanimService {
         }
         val methods = when (community) {
             Minhag.CHABAD -> mapOf(
-                "dawn" to "chabad.alos.16_9deg",
+                "dawn" to (if (solarMidnightDawn != null)
+                    "chabad.alos.solar_midnight_when_16_9deg_unreachable"
+                    else "chabad.alos.16_9deg"),
                 "ordinaryTzait" to "chabad.tzait.6deg",
                 "shabbatEnd" to "chabad.havdalah.8_5deg",
                 "shema" to "baal_hatanya.shema"
@@ -110,7 +128,7 @@ object ZmanimService {
         }
         return ZmanimSnapshot(
             dawn = when (community) {
-                Minhag.CHABAD -> calendar.alosBaalHatanya
+                Minhag.CHABAD -> actualDawn
                 Minhag.LITVISH -> calendar.alos16Point1Degrees
                 Minhag.SEFARDI -> calendar.alos72Zmanis
             },

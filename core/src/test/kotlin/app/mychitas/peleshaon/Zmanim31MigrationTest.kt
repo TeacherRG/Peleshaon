@@ -115,6 +115,47 @@ class Zmanim31MigrationTest {
             ZmanimConfig(tromso, Minhag.CHABAD)).shabbatEnd)
     }
 
+    @Test fun chabadSummerAlosFallsBackToPreviousSolarMidnight() {
+        val summer = LocalDate.of(2026, 6, 19)
+        for (id in listOf("Europe/Berlin", "Europe/Vilnius", "Europe/London")) {
+            val city = requireNotNull(cityById(id))
+            val raw = ZmanimService.buildCalendar(summer, city.name,
+                city.lat, city.lon, 0.0, city.zone())
+            assertNull(raw.alosBaalHatanya, "$id must exercise the missing-angle branch")
+            val expected = ZmanimService.buildCalendar(summer.minusDays(1),
+                city.name, city.lat, city.lon, 0.0, city.zone()).solarMidnight
+            val snap = ZmanimService.calculate(summer, ZmanimConfig(city, Minhag.CHABAD))
+            assertNotNull(expected)
+            assertEquals(expected, snap.dawn, "$id: previous night lower solar transit")
+            assertEquals("chabad.alos.solar_midnight_when_16_9deg_unreachable",
+                snap.methodIds["dawn"])
+            assertTrue(snap.dawn!!.isBefore(requireNotNull(snap.sunrise)))
+        }
+    }
+
+    @Test fun normalWinterAlosStillUses16Point9Degrees() {
+        val winter = LocalDate.of(2026, 11, 20)
+        for (id in listOf("Europe/Berlin", "Europe/Vilnius", "Europe/London")) {
+            val city = requireNotNull(cityById(id))
+            val cal = ZmanimService.buildCalendar(winter, city.name, city.lat,
+                city.lon, 0.0, city.zone())
+            val snap = ZmanimService.calculate(winter, ZmanimConfig(city, Minhag.CHABAD))
+            assertEquals(cal.alosBaalHatanya, snap.dawn)
+            assertEquals("chabad.alos.16_9deg", snap.methodIds["dawn"])
+        }
+    }
+
+    @Test fun missingNightfallAndShabbatEndAreNotInvented() {
+        val yakutsk = requireNotNull(cityById("Asia/Yakutsk"))
+        val june = LocalDate.of(2026, 6, 19)
+        val snap = ZmanimService.calculate(june, ZmanimConfig(yakutsk, Minhag.CHABAD))
+        assertNull(snap.ordinaryTzait, "No fabricated 6-degree nightfall")
+        // An absent 8.5-degree event remains absent; no fixed-minute substitute.
+        val saturday = ZmanimService.calculate(june.plusDays(1),
+            ZmanimConfig(yakutsk, Minhag.CHABAD))
+        assertNull(saturday.shabbatEnd)
+    }
+
     @Test fun deadlinesAreNeverDisplayedAfterTheirExactMoment() {
         val date = LocalDate.of(2026, 11, 20)
         val exact = ZmanimEngine.itemsOf(date, berlin)
