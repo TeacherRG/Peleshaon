@@ -82,7 +82,7 @@ object ZmanimService {
         val ordinary = when (community) {
             Minhag.CHABAD -> calendar.tzaisBaalHatanya
             Minhag.LITVISH -> calendar.tzaisGeonim8Point5Degrees
-            Minhag.SEFARDI -> calendar.zmanisBasedOffset(13.5 / 60.0)
+            Minhag.SEFARDI -> calendar.getZmanisBasedOffset(13.5 / 60.0)
         }
         val exit = when (community) {
             Minhag.CHABAD, Minhag.LITVISH -> calendar.tzaisGeonim8Point5Degrees
