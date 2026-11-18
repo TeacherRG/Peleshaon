@@ -633,7 +633,7 @@ internal fun CitySheet(city: CityOption, auto: Boolean, title: Boolean = true, o
                         fontWeight = if (c.id == city.id) FontWeight.Bold else FontWeight.Normal
                     )
                     Column(horizontalAlignment = Alignment.End) {
-                        Text(c.oblastUk ?: c.zoneId.substringAfter('/').replace('_', ' '), fontSize = 12.sp, color = ClockColors.Muted)
+                        Text(c.oblastTitle(locale) ?: c.zoneId.substringAfter('/').replace('_', ' '), fontSize = 12.sp, color = ClockColors.Muted)
                         if ((c.title(locale) to c.oblastUk) in repeatedLabels) {
                             Text(String.format(java.util.Locale.US, "%.4f, %.4f", c.lat, c.lon),
                                 fontSize = 11.sp, color = ClockColors.Muted)

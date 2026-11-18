@@ -44,7 +44,7 @@ REGION_MAP = {"43":"01", "30":"80", "40":"85"}
 def normalize(value):
     value = unicodedata.normalize("NFKD", value.casefold())
     value = "".join(ch for ch in value if not unicodedata.combining(ch))
-    return re.sub(r"[^a-z0-9]", "", value)
+    return "".join(c for c in value if c.isalnum())
 def romanize(value):
     return normalize("".join(UK_LATIN.get(ch, ch) for ch in value.casefold()))
 def score_names(a, b):

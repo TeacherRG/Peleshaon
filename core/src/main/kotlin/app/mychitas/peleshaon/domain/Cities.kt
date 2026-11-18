@@ -21,13 +21,17 @@ data class CityOption(
     val oblastUk: String? = null,
     val aliases: List<String> = emptyList()
 ) {
-    /** Имя на языке интерфейса (иврита в списке нет — английское). */
+    /** Attested place names, with phonetic (not official!) fallback for Hebrew. */
     fun title(locale: Locale = Locale.getDefault()): String = when (locale.language) {
         "uk" -> nameUk ?: UK_CITY[nameRu] ?: nameRu
-        "ru", "be" -> nameRu
+        "ru", "be" -> if (id.startsWith("ua:") && nameRu == name && nameUk != null) nameUk else nameRu
         "de" -> nameDe ?: name
+        "he", "iw" -> PlaceLabels.hebrew(this)
         else -> name
     }
+
+    fun oblastTitle(locale: Locale = Locale.getDefault()): String? =
+        oblastUk?.let { PlaceLabels.region(it, locale) }
 
     /** Часовой пояс; имя, которого нет в базе устройства, — пояс с тем же временем, в крайнем случае — устройства. */
     fun zone(): ZoneId = resolveZone(zoneId) ?: ZoneId.systemDefault()
@@ -301,7 +305,7 @@ fun findCities(query: String, max: Int = 12): List<CityOption> {
     val n = norm(query)
     if (n.isEmpty()) return emptyList()
     return CITIES.mapNotNull { c ->
-        val names = (listOfNotNull(c.nameRu, c.name, c.nameDe, c.nameUk, UK_CITY[c.nameRu]) + c.aliases).map(::norm)
+        val names = (listOfNotNull(c.nameRu, c.name, c.nameDe, c.nameUk, UK_CITY[c.nameRu], PlaceLabels.hebrew(c)) + c.aliases).map(::norm)
         var best = 9
         for (s in names) {
             best = minOf(best, when {
