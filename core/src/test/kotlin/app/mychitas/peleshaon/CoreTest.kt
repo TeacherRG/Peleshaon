@@ -52,7 +52,7 @@ class CoreTest {
         assertEquals(ZmanType.entries.size, r.items.size)
         r.items.zipWithNext().forEach { (a, b) -> assertTrue(a.exactTime.isBefore(b.exactTime), "${a.type} < ${b.type}") }
         assertEquals(LocalTime.of(9, 18), r.time(ZmanType.SOF_ZMAN_SHMA)!!.roundedTime.toLocalTime())
-        // «не позже» и восход — вниз, остальное — вверх
+        // Предельные времена — вниз, начало события (включая восход) — вверх
         for (z in r.items) {
             val down = z.roundedTime.isAfter(z.exactTime).not()
             if (z.type.roundDown) assertTrue(down, "${z.type} вниз") else assertTrue(!z.roundedTime.isBefore(z.exactTime), "${z.type} вверх")
@@ -84,7 +84,14 @@ class CoreTest {
                     val f = half.frac(now)
                     assertTrue(f >= 0 && f < 1, "${city.id} $now: «сейчас» вне своей половины")
                     for (it in ZmanimEngine.halfItems(half, city)) {
-                        assertTrue(it.roundedTime.isAfter(half.start) && !it.roundedTime.isAfter(half.end), "${city.id} $now: ${it.type} вне половины")
+                        // Membership is based on the exact event. Sunrise is a boundary
+                        // event, and its safe display rounding can fall after the night's end.
+                        assertTrue(it.exactTime.isAfter(half.start) && !it.exactTime.isAfter(half.end),
+                            "${city.id} $now: ${it.type} outside its exact half")
+                        if (it.type == ZmanType.SUNRISE) {
+                            assertTrue(!it.roundedTime.isBefore(it.exactTime),
+                                "${city.id} $now: sunrise must never display before its actual instant")
+                        }
                     }
                     Dial.ring(now, half)
                 }
