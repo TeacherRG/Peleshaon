@@ -139,9 +139,9 @@ object JewishCal {
         if (ZmanimEngine.minhag == Minhag.CHABAD) for ((m, d, key) in CHABAD) if (jc.jewishMonth == m && jc.jewishDayOfMonth == d) ev += CalEvent(CalKind.CHABAD, key)
         if (date.dayOfWeek == java.time.DayOfWeek.SATURDAY) {
             val p = jc.parshah
-            if (p != JewishCalendar.Parsha.NONE) ev += CalEvent(CalKind.PARSHA, "parsha_${p.name}")
+            if (p != JewishCalendar.Parshah.NONE) ev += CalEvent(CalKind.PARSHA, "parsha_${p.name}")
             val sp = jc.specialShabbos
-            if (sp != JewishCalendar.Parsha.NONE) ev += CalEvent(CalKind.SPECIAL_SHABBAT, "special_${sp.name}")
+            if (sp != JewishCalendar.Parshah.NONE) ev += CalEvent(CalKind.SPECIAL_SHABBAT, "special_${sp.name}")
             mevarchim(date, isIsrael)?.let { ev += CalEvent(CalKind.SPECIAL_SHABBAT, "mevarchim", it.month, it.leap) }
         }
         val jd = JewishDay(jc.jewishDayOfMonth, jc.jewishMonth, jc.isJewishLeapYear, jc.jewishYear)

@@ -1218,7 +1218,7 @@ private fun SettingsSheet(onChange: () -> Unit) {
         Text(stringResource(R.string.candle_offset_title), fontWeight = FontWeight.Bold, color = ClockColors.Ink)
         var candleSetting by remember { mutableStateOf(Prefs.candleOffset(context)) }
         FlowRow(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-            for (offset in listOf<Long?>(null, 18L, 20L, 30L, 40L)) {
+            for (offset in listOf<Long?>(null, 18L, 20L, 22L, 30L, 40L)) {
                 FilterChip(
                     selected = candleSetting == offset,
                     onClick = {

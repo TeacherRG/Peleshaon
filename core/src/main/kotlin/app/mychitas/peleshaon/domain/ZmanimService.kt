@@ -128,7 +128,10 @@ object ZmanimService {
             sunset = calendar.sunset,
             ordinaryTzait = ordinary,
             shabbatEnd = exit,
-            candleLighting = calendar.sunset?.minus(Duration.ofMinutes(candleMinutes)),
+            candleLighting = if (candleMinutes in setOf(18L, 20L, 22L, 30L, 40L)) {
+                calendar.candleLightingOffset = candleMinutes.toDouble()
+                calendar.candleLighting
+            } else null,
             methodIds = methods
         )
     }
