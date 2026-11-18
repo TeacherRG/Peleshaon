@@ -297,4 +297,7 @@
     <string name="city_required_for_halacha">Для розрахунку галахічного часу оберіть місто</string>
     <string name="polar_nightfall_undefined">Вихід зірок неможливо надійно розрахувати для цієї широти й дати. Уточніть час у місцевого рабина.</string>
     <string name="polar_shabbat_undefined">Завершення Шабату або свята тут неможливо надійно розрахувати. Не вважайте Шабат завершеним; уточніть час у місцевого рабина.</string>
+    <string name="cal_misheyakir">Мішеякір — таліт і тфілін</string>
+    <string name="cal_mincha_ketana">Мінха ктана</string>
+    <string name="cal_biur_chametz">Останній час спалення хамецу</string>
 </resources>

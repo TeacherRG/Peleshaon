@@ -295,4 +295,7 @@
     <string name="city_required_for_halacha">To calculate halachic times, select a city</string>
     <string name="polar_nightfall_undefined">Nightfall cannot be determined reliably at this latitude and date. Consult your local rabbi.</string>
     <string name="polar_shabbat_undefined">Shabbat or festival end cannot be determined reliably here. Do not assume Shabbat has ended; consult your local rabbi.</string>
+    <string name="cal_misheyakir">Earliest tallit and tefillin (Misheyakir)</string>
+    <string name="cal_mincha_ketana">Mincha Ketana</string>
+    <string name="cal_biur_chametz">Last time to burn chametz</string>
 </resources>

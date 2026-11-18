@@ -296,4 +296,7 @@
     <string name="city_required_for_halacha">לחישוב הזמנים ההלכתיים בחרו עיר</string>
     <string name="polar_nightfall_undefined">לא ניתן לחשב באופן מהימן את צאת הכוכבים בקו רוחב זה ובתאריך זה. יש לפנות לרב המקומי.</string>
     <string name="polar_shabbat_undefined">לא ניתן לחשב באופן מהימן את צאת השבת או החג כאן. אין להניח שהשבת הסתיימה; יש לפנות לרב המקומי.</string>
+    <string name="cal_misheyakir">משיכיר – זמן טלית ותפילין</string>
+    <string name="cal_mincha_ketana">מנחה קטנה</string>
+    <string name="cal_biur_chametz">סוף זמן ביעור חמץ</string>
 </resources>
