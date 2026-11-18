@@ -97,6 +97,12 @@ class AllCityZmanimAuditTest {
                             e.roundedTime.isBefore(e.exactTime))
                             issues += "rounded_earliest_early_${e.type}"
                     }
+                    // Chabad summer rule: if dawn never reaches -16.9° but
+                    // actual sunrise and sunset exist, solar midnight MUST
+                    // supply a dawn. Prevent the old 172 missing cases
+                    // (including Kazan/Kirov on the preceding civil date).
+                    if (dawn == null && rise != null && set != null)
+                        issues += "chabad_dawn_missing_with_sunrise_and_sunset"
                     if (rise != null && set != null && !rise.isBefore(set))
                         issues += "sunrise_not_before_sunset"
                     if (dawn != null && rise != null && !dawn.isBefore(rise))
