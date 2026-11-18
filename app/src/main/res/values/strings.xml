@@ -208,7 +208,7 @@
     <string name="candle_offset_title">Candle-lighting offset</string>
     <string name="candle_offset_local">Local custom</string>
     <string name="candle_offset_minutes">%1$d min</string>
-    <string name="candle_offset_note">Defaults: Jerusalem 40 min, Haifa 30 min, other cities 18 min. Check your local practice and ask your rabbi.</string>
+    <string name="candle_offset_note">Defaults: Jerusalem 40 min, Haifa 30 min, Tel Aviv 22 min, most other cities 18 min. Follow local practice and ask your rabbi.</string>
     <string name="alarm_fallback_channel">Alarm delivery problem</string>
     <string name="alarm_fallback_title">Alarm could not start</string>
     <string name="alarm_fallback_message">Android restricted the alarm service. Open the app and check its alarm and notification permissions.</string>

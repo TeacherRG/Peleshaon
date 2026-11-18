@@ -208,7 +208,7 @@
     <string name="candle_offset_title">Время до заката для свечей</string>
     <string name="candle_offset_local">По городу</string>
     <string name="candle_offset_minutes">%1$d мин</string>
-    <string name="candle_offset_note">По умолчанию: Иерусалим — 40 мин, Хайфа — 30 мин, другие города — 18 мин. Уточните обычай своей общины.</string>
+    <string name="candle_offset_note">По умолчанию: Иерусалим — 40 мин, Хайфа — 30 мин, Тель-Авив — 22 мин, большинство других городов — 18 мин. Уточните обычай общины.</string>
     <string name="alarm_fallback_channel">Проблема доставки будильника</string>
     <string name="alarm_fallback_title">Будильник не запустился</string>
     <string name="alarm_fallback_message">Android ограничил запуск службы. Откройте приложение и проверьте разрешения будильников и уведомлений.</string>

@@ -208,7 +208,7 @@
     <string name="candle_offset_title">Kerzen vor Sonnenuntergang</string>
     <string name="candle_offset_local">Ortsüblich</string>
     <string name="candle_offset_minutes">%1$d Min.</string>
-    <string name="candle_offset_note">Standard: Jerusalem 40 Min., Haifa 30 Min., andere Städte 18 Min. Örtlichen Brauch mit dem Rabbiner klären.</string>
+    <string name="candle_offset_note">Standard: Jerusalem 40 Min., Haifa 30 Min., Tel Aviv 22 Min., die meisten anderen Städte 18 Min. Örtlichen Brauch mit dem Rabbiner klären.</string>
     <string name="alarm_fallback_channel">Wecker konnte nicht starten</string>
     <string name="alarm_fallback_title">Weckerstart fehlgeschlagen</string>
     <string name="alarm_fallback_message">Android hat den Wecker-Dienst blockiert. Bitte Alarm- und Benachrichtigungsrechte prüfen.</string>
