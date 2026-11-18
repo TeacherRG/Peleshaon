@@ -291,4 +291,5 @@
     <string name="city_timezone_notice">יש לוודא את השעה המקומית בפועל, במיוחד באזורים כבושים.</string>
     <string name="city_manual_name">שם המקום</string>
     <string name="city_manual_israel">שימוש בלוח חגי ישראל (אחרת חו״ל)</string>
+    <string name="city_auto_unconfirmed_warning">המיקום משוער לפי אזור הזמן בלבד. יש לבחור מיקום מדויק לזמני היום.</string>
 </resources>

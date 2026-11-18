@@ -205,6 +205,9 @@ fun ClockScreen(
             if (Prefs.cityUnmatched(context)) {
                 Text(stringResource(R.string.city_unmatched_warning), color = ClockColors.Bad,
                     fontSize = 12.sp, modifier = Modifier.clickable { panel = Panel.CITY })
+            } else if (auto) {
+                Text(stringResource(R.string.city_auto_unconfirmed_warning), color = ClockColors.Bad,
+                    fontSize = 12.sp, modifier = Modifier.clickable { panel = Panel.CITY })
             }
             // ---- шапка: город, дата, «Как считаем»
             Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {

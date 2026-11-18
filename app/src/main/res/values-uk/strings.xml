@@ -292,4 +292,5 @@
     <string name="city_timezone_notice">Перевірте фактичний місцевий час, особливо на окупованих територіях.</string>
     <string name="city_manual_name">Назва населеного пункту</string>
     <string name="city_manual_israel">Використовувати календар свят Ізраїлю (інакше діаспори)</string>
+    <string name="city_auto_unconfirmed_warning">Місто визначено приблизно за часовим поясом. Оберіть точне місце для правильних релігійних часів.</string>
 </resources>
