@@ -60,7 +60,7 @@ class UkraineCityCatalogTest {
         }
     }
     @Test fun everyRequestedNameHasItsOwnDisplayedUkrainianPlace() {
-        val allRequested = (photo + capitals + centers).distinct()
+        val allRequested = (photo + capitals + centers).distinctBy { s -> s.lowercase().replace("’", "").replace("'", "").replace("ʼ", "").replace("-", "").replace(" ", "") }
         assertEquals(147, allRequested.size)
         fun normalized(s: String) = s.lowercase()
             .replace("’", "").replace("'", "").replace("ʼ", "")

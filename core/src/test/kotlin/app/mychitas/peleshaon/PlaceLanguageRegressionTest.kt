@@ -91,7 +91,7 @@ class PlaceLanguageRegressionTest {
     @Test fun keyUkrainianNamesAndCoordinatesRemainStable() {
         val city=requireNotNull(cityById("ua:71:kamianka"))
         assertEquals("Кам’янка", city.title(Locale("uk")))
-        assertEquals("Кам’янка", city.title(Locale("ru")))
+        assertEquals("Каменка", city.title(Locale("ru")),"Russian equivalent must not be confused with Ukrainian")
         assertEquals(49.0318,city.lat)
         assertEquals(32.10396,city.lon)
     }
