@@ -243,7 +243,7 @@
     <string name="minhag_chabad">Chabad</string>
     <string name="minhag_litvish">Lithuanian (Ashkenazi)</string>
     <string name="minhag_sefardi">Sephardi</string>
-    <string name="minhag_d_chabad">Times according to the Alter Rebbe (Baal HaTanya), as in Chabad calendars. Shabbat ends 50 minutes after sunset. Kiddush Levana from 7 days after the molad. The calendar shows the Chabad dates.</string>
+    <string name="minhag_d_chabad">Times according to the Alter Rebbe (Baal HaTanya), as in Chabad calendars. Shabbat ends when the sun reaches 8.5° below the horizon. Kiddush Levana from 7 days after the molad. The calendar shows the Chabad dates.</string>
     <string name="minhag_d_litvish">Times according to the Vilna Gaon (GRA): Shema and the morning prayer are counted from sunrise to sunset; nightfall and the end of Shabbat — when the sun is 8.5° below the horizon. Kiddush Levana from 3 days after the molad.</string>
     <string name="minhag_d_sefardi">Application calculation profile: dawn 72 proportional minutes before sunrise, Shema by Magen Avraham, morning prayer by GRA, nightfall after 13.5 proportional minutes, and Shabbat end by Rabbeinu Tam (72 proportional minutes). These methods do not define every Sephardi community.</string>
     <string name="minhag_note">Day times, Shabbat end, alarms and Moon reminders follow the selected profile. Candle-lighting depends on the city and any override. Ask your community rabbi.</string>

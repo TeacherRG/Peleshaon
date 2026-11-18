@@ -243,7 +243,7 @@
     <string name="minhag_chabad">Chabad</string>
     <string name="minhag_litvish">Litauisch (aschkenasisch)</string>
     <string name="minhag_sefardi">Sefardisch</string>
-    <string name="minhag_d_chabad">Zeiten nach dem Alter Rebbe (Baal HaTanja), wie in den Kalendern von Chabad. Schabbat endet 50 Minuten nach Sonnenuntergang. Kiddusch Lewana ab 7 Tagen nach dem Molad. Im Kalender stehen die Chabad-Daten.</string>
+    <string name="minhag_d_chabad">Zeiten nach dem Alter Rebbe (Baal HaTanja), wie in den Kalendern von Chabad. Schabbat endet, wenn die Sonne 8,5° unter dem Horizont steht. Kiddusch Lewana ab 7 Tagen nach dem Molad. Im Kalender stehen die Chabad-Daten.</string>
     <string name="minhag_d_litvish">Zeiten nach dem Wilnaer Gaon (GRA): Schma und Morgengebet werden von Sonnenaufgang bis Sonnenuntergang gerechnet; Erscheinen der Sterne und Schabbatende — wenn die Sonne 8,5° unter dem Horizont steht. Kiddusch Lewana ab 3 Tagen nach dem Molad.</string>
     <string name="minhag_d_sefardi">Berechnungsprofil der App: Morgendämmerung 72 proportionale Minuten vor Sonnenaufgang, Schema nach Magen Awraham, Morgengebet nach GRA, Nachtbeginn nach 13,5 proportionalen Minuten, Schabbatende nach Rabbenu Tam (72 proportionale Minuten). Das ist keine einheitliche Regel für alle sephardischen Gemeinden.</string>
     <string name="minhag_note">Tageszeiten, Schabbatende, Wecker und Monderinnerungen folgen dem ausgewählten Profil. Die Kerzenzeit hängt von Ort und Einstellung ab. Bitte den Rabbiner fragen.</string>

@@ -74,7 +74,7 @@ data class Half(
 /** Еврейская дата числами: день, месяц (как в KosherJava: нисан — 1 … адар — 12, адар II — 13), високосный ли год, год. */
 data class JewishDay(val day: Int, val month: Int, val leap: Boolean, val year: Int)
 
-/** Шабат этой недели: зажигание свечей (пятница, закат − 18 мин) и исход (суббота, закат + 50 мин). */
+/** Шабат этой недели: свечи по местному обычаю до заката и исход по углу 8,5° (профиль Хабада). */
 data class ShabbatTimes(
     val friday: LocalDate,
     val candles: ZonedDateTime?,
