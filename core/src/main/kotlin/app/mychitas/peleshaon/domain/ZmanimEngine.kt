@@ -238,7 +238,9 @@ object ZmanimEngine {
         val mid = Instant.ofEpochMilli((half.start.toInstant().toEpochMilli() + half.end.toInstant().toEpochMilli()) / 2).atZone(zone).toLocalDate()
         val seen = mutableSetOf<ZmanType>()
         return (-1L..1L).flatMap { n -> extractZmanim(cal(mid.plusDays(n), city), zone) }
-            .filter { it.roundedTime.isAfter(half.start) && !it.roundedTime.isAfter(half.end) && seen.add(it.type) }
+            // Membership belongs to exact astronomical events; display rounding may shift
+            // sunrise one minute past the boundary and must not move it into daytime.
+            .filter { it.exactTime.isAfter(half.start) && !it.exactTime.isAfter(half.end) && seen.add(it.type) }
             .sortedBy { it.roundedTime }
     }
 
