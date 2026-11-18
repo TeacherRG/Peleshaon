@@ -5,6 +5,8 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -40,6 +42,7 @@ import androidx.wear.compose.material.Chip
 import app.mychitas.peleshaon.domain.CITIES
 import app.mychitas.peleshaon.domain.Minhag
 import app.mychitas.peleshaon.domain.cityById
+import app.mychitas.peleshaon.domain.findCities
 import java.util.Locale
 import androidx.wear.compose.material.Text
 import app.mychitas.peleshaon.domain.Half
@@ -86,6 +89,7 @@ fun WearApp() {
     var selectedCommunity by remember { mutableStateOf(prefs.getString("minhag", "CHABAD") ?: "CHABAD") }
     var candleMinutes by remember { mutableStateOf(prefs.getInt("candle_minutes", -1)) }
     var settingsMode by remember { mutableStateOf(0) }
+    var cityQuery by remember { mutableStateOf("") }
     val community = remember(selectedCommunity) {
         runCatching { Minhag.valueOf(selectedCommunity) }.getOrDefault(Minhag.CHABAD)
     }
@@ -96,7 +100,7 @@ fun WearApp() {
     val cityNow = now.withZoneSameInstant(zone)
     val day = remember(city, cityNow.truncatedTo(ChronoUnit.MINUTES), community, candleMinutes) {
         ZmanimEngine.minhag = community
-        ZmanimEngine.candleOffsetOverride = candleMinutes.takeIf { it in setOf(18, 20, 30, 40) }?.toLong()
+        ZmanimEngine.candleOffsetOverride = candleMinutes.takeIf { it in setOf(18, 20, 22, 30, 40) }?.toLong()
         ZmanimEngine.calculateForMoment(cityNow, city.name, city.lat, city.lon, 0.0, zone, city.isIsrael)
     }
     val res = LocalContext.current.resources
@@ -125,13 +129,27 @@ fun WearApp() {
                     }, modifier = Modifier.fillMaxWidth(),
                         label = { Text(context.getString(R.string.wear_auto_city)) })
                 }
-                items(CITIES) { option ->
+                item {
+                    BasicTextField(
+                        value = cityQuery,
+                        onValueChange = { cityQuery = it },
+                        singleLine = true,
+                        textStyle = TextStyle(color = Gold, fontSize = 14.sp),
+                        modifier = Modifier.fillMaxWidth().padding(12.dp),
+                        decorationBox = { inner ->
+                            if (cityQuery.isBlank()) Text(context.getString(R.string.wear_city))
+                            inner()
+                        }
+                    )
+                }
+                items(if (cityQuery.isBlank()) CITIES.take(60) else findCities(cityQuery, 100)) { option ->
                     Chip(onClick = {
                         selectedCity = option.id
                         prefs.edit().putString("city_id", option.id).apply()
                         settingsMode = 0
                     }, modifier = Modifier.fillMaxWidth(),
-                        label = { Text(option.title(Locale.getDefault())) })
+                        label = { Text(option.title(Locale.getDefault()) +
+                            (option.oblastUk?.let { " · $it" } ?: "")) })
                 }
             }
         } else if (settingsMode == 2) {

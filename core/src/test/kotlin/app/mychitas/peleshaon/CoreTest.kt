@@ -102,7 +102,7 @@ class CoreTest {
 
     @Test
     fun citiesAsOnTheSite() {
-        assertEquals(197, CITIES.size)
+        assertTrue(CITIES.size >= 1000, "Extended offline catalog must preserve original 197 cities")
         assertEquals(CITIES.size, CITIES.map { it.id }.toSet().size)
         CITIES.forEach { assertNotNull(app.mychitas.peleshaon.domain.resolveZone(it.zoneId), it.zoneId) }
         assertEquals("Вена", cityForZone(ZoneId.of("Europe/Vienna")).nameRu)

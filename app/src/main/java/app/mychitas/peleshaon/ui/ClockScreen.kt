@@ -562,7 +562,7 @@ internal fun CitySheet(city: CityOption, auto: Boolean, title: Boolean = true, o
                         color = if (c.id == city.id && !auto) ClockColors.Gold else ClockColors.Ink,
                         fontWeight = if (c.id == city.id) FontWeight.Bold else FontWeight.Normal
                     )
-                    Text(c.zoneId.substringAfter('/').replace('_', ' '), fontSize = 12.sp, color = ClockColors.Muted)
+                    Text(c.oblastUk ?: c.zoneId.substringAfter('/').replace('_', ' '), fontSize = 12.sp, color = ClockColors.Muted)
                 }
                 HorizontalDivider(color = ClockColors.Line)
             }

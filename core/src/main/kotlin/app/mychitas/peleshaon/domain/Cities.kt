@@ -16,11 +16,14 @@ data class CityOption(
     val lat: Double,
     val lon: Double,
     val zoneId: String,
-    val isIsrael: Boolean
+    val isIsrael: Boolean,
+    val nameUk: String? = null,
+    val oblastUk: String? = null,
+    val aliases: List<String> = emptyList()
 ) {
     /** Имя на языке интерфейса (иврита в списке нет — английское). */
     fun title(locale: Locale = Locale.getDefault()): String = when (locale.language) {
-        "uk" -> UK_CITY[nameRu] ?: nameRu
+        "uk" -> nameUk ?: UK_CITY[nameRu] ?: nameRu
         "ru", "be" -> nameRu
         "de" -> nameDe ?: name
         else -> name
@@ -30,7 +33,7 @@ data class CityOption(
     fun zone(): ZoneId = resolveZone(zoneId) ?: ZoneId.systemDefault()
 }
 
-val CITIES: List<CityOption> = listOf(
+private val LEGACY_CITIES: List<CityOption> = listOf(
     CityOption("Asia/Jerusalem", "Jerusalem", "Иерусалим", null, 31.78, 35.22, "Asia/Jerusalem", true),
     CityOption("Asia/Tel_Aviv", "Tel Aviv", "Тель-Авив", null, 32.08, 34.78, "Asia/Tel_Aviv", true),
     CityOption("Asia/Hebron", "Hebron", "Хеврон", null, 31.53, 35.1, "Asia/Hebron", true),
@@ -231,6 +234,26 @@ val CITIES: List<CityOption> = listOf(
     CityOption("rio", "Rio de Janeiro", "Рио-де-Жанейро", null, -22.91, -43.17, "America/Sao_Paulo", false),
 )
 
+private val UKRAINE_LEGACY_ALIASES: Map<String, List<String>> = mapOf(
+    "Europe/Simferopol" to listOf("Сімферополь", "Симферополь"),
+    "uman" to listOf("Умань", "Uman"),
+    "dnipro" to listOf("Дніпро", "Днепр"),
+    "kharkiv" to listOf("Харків"),
+    "Europe/Kiev" to listOf("Київ"),
+    "lviv" to listOf("Львів"),
+    "odesa" to listOf("Одеса", "Одесса"),
+    "vinnytsia" to listOf("Вінниця"),
+    "zaporizhzhia" to listOf("Запоріжжя"),
+)
+
+/** Retain all previously saved CityOption ids when expanding the offline database. */
+val CITIES: List<CityOption> by lazy {
+    LEGACY_CITIES.map { city ->
+        val extra = UKRAINE_LEGACY_ALIASES[city.id].orEmpty()
+        if (extra.isEmpty()) city else city.copy(aliases = (city.aliases + extra).distinct())
+    } + UKRAINE_IMPORTED_CITIES
+}
+
 /** Прежнее имя — для старых настроек и кода, который его ждёт. */
 val DEFAULT_CITIES: List<CityOption> get() = CITIES
 
@@ -264,6 +287,7 @@ fun cityForZone(zone: ZoneId = ZoneId.systemDefault()): CityOption =
 /** Город по id или по прежнему английскому имени. */
 fun cityById(id: String?): CityOption? =
     if (id == null) null else CITIES.find { it.id == id } ?: CITIES.find { it.name == id }
+        ?: CITIES.filter { c -> c.aliases.any { norm(it) == norm(id) } }.singleOrNull()
 
 private fun norm(s: String): String =
     Normalizer.normalize(s.lowercase(), Normalizer.Form.NFD)
@@ -277,7 +301,7 @@ fun findCities(query: String, max: Int = 12): List<CityOption> {
     val n = norm(query)
     if (n.isEmpty()) return emptyList()
     return CITIES.mapNotNull { c ->
-        val names = listOfNotNull(c.nameRu, c.name, c.nameDe, UK_CITY[c.nameRu]).map(::norm)
+        val names = (listOfNotNull(c.nameRu, c.name, c.nameDe, c.nameUk, UK_CITY[c.nameRu]) + c.aliases).map(::norm)
         var best = 9
         for (s in names) {
             best = minOf(best, when {

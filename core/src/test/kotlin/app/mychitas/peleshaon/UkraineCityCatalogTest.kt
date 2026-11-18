@@ -1,0 +1,61 @@
+package app.mychitas.peleshaon
+
+import app.mychitas.peleshaon.domain.*
+import java.time.ZoneId
+import java.time.LocalDate
+import kotlin.test.*
+
+class UkraineCityCatalogTest {
+    private val photo = listOf("Балта", "Бар", "Баранівка", "Баришівка", "Бахмач", "Берегове", "Бершадь", "Бобринець", "Богуслав", "Болград", "Борислав", "Бориспіль", "Бородянка", "Боярка", "Брацлав", "Бровари", "Буча", "Васильків", "Вижниця", "Вишгород", "Вишневе", "Вознесенськ", "Ворзель", "Гайсин", "Глухів", "Гнівань", "Горішні Плавні", "Городня", "Городок", "Гостомель", "Дрогобич", "Дубно", "Дунаївці", "Жашків", "Жмеринка", "Звенигородка", "Звягель", "Знам’янка", "Золотоноша", "Іванків", "Ізмаїл", "Ізяслав", "Ірпінь", "Калуш", "Кам’янець-Подільський", "Кам’янка", "Канів", "Кварцитне", "Коломия", "Конотоп", "Коростень", "Коростишів", "Корсунь-Шевченківський", "Костянтинівка", "Краматорськ", "Кролевець", "Лохвиця", "Лубни", "Луцьк", "Макарів", "Марганець", "Миргород", "Мукачево", "Немирів", "Нетішин", "Ніжин", "Нікополь", "Новомиргород", "Ободівка", "Овруч", "Олевськ", "Олександрія", "Павлоград", "Переяслав", "Пирятин", "Подільськ", "Покров", "Полонне", "Прилуки", "Радомишль", "Рахів", "Рокитне", "Ромни", "Самар", "Сарни", "Сквира", "Славута", "Слов’янськ", "Сміла", "Старокостянтинів", "Стрий", "Тальне", "Тараща", "Тернівка", "Тернопіль", "Тиврів", "Тростянець", "Трускавець", "Тульчин", "Тячів", "Умань", "Фастів", "Хмільник", "Хотин", "Хуст", "Черняхів", "Чортків", "Шепетівка", "Шостка", "Шпола", "Яготин")
+    private val capitals = listOf("Вінниця", "Луцьк", "Дніпро", "Донецьк", "Житомир", "Ужгород", "Запоріжжя", "Івано-Франківськ", "Київ", "Кропивницький", "Луганськ", "Львів", "Миколаїв", "Одеса", "Полтава", "Рівне", "Суми", "Тернопіль", "Харків", "Херсон", "Хмельницький", "Черкаси", "Чернівці", "Чернігів", "Сімферополь", "Севастополь")
+    private val centers = listOf("Кам'янське", "Умань", "Гадяч", "Бердичів", "Меджибіж", "Біла Церква", "Кременчук", "Кривий Ріг", "Маріуполь", "Мелітополь", "Макіївка", "Лисичанськ", "Сіверськодонецьк", "Бахмут", "Слов'янськ", "Мукачево", "Ізмаїл", "Ніжин", "Краматорськ", "Хуст", "Конотоп", "Ромни", "Нікополь", "Самар", "Павлоград", "Дрогобич", "Коростень", "Овруч", "Глухів", "Кропивницький", "Сімферополь", "Севастополь")
+
+    @Test fun all111NamesFromPhotoAreSearchable() {
+        assertEquals(111, photo.size)
+        photo.forEach { assertTrue(findCities(it, 250).isNotEmpty(), "Missing photo: $it") }
+    }
+    @Test fun allAdministrativeCentersIncludingOccupiedAreSearchable() {
+        capitals.forEach { assertTrue(findCities(it, 250).isNotEmpty(), "Missing center: $it") }
+    }
+    @Test fun keyJewishCentersAreSearchable() {
+        centers.forEach { assertTrue(findCities(it, 250).isNotEmpty(), "Missing Jewish point: $it") }
+    }
+    @Test fun kamianskeIsIndependentFromDnipro() {
+        val kam = findCities("Кам'янське", 100).single { it.oblastUk == "Дніпропетровська область" }
+        val dni = requireNotNull(cityById("dnipro"))
+        assertEquals(kam.id, findCities("Днепродзержинск", 100).first().id)
+        assertTrue(kotlin.math.abs(kam.lat - 48.51134) < 0.02)
+        assertTrue(kotlin.math.abs(kam.lon - 34.6021) < 0.02)
+        assertTrue(kotlin.math.abs(kam.lon - dni.lon) > 0.35)
+        assertNotEquals(ZmanimEngine.sunsetOf(LocalDate.of(2026,11,20), kam)?.toInstant(),
+            ZmanimEngine.sunsetOf(LocalDate.of(2026,11,20), dni)?.toInstant())
+    }
+    @Test fun renamedCitiesRemainSearchable() {
+        for ((modern,old) in mapOf(
+            "Самар" to "Новомосковськ",
+            "Звягель" to "Новоград-Волинський",
+            "Переяслав" to "Переяслав-Хмельницький",
+            "Кварцитне" to "Першотравневе",
+            "Кропивницький" to "Кировоград",
+            "Покров" to "Орджонікідзе"
+        )) {
+            val newIds = findCities(modern,250).map { it.id }.toSet()
+            assertTrue(findCities(old,250).any { it.id in newIds }, "$old != $modern")
+        }
+    }
+    @Test fun allCityIdsAndTimezonesValid() {
+        assertTrue(CITIES.size>1000)
+        assertEquals(CITIES.size, CITIES.map{it.id}.distinct().size)
+        CITIES.forEach {
+            assertTrue(it.lat in -90.0..90.0 && it.lon in -180.0..180.0)
+            assertNotNull(resolveZone(it.zoneId))
+        }
+        assertEquals("Europe/Kiev", cityById("Europe/Kiev")?.id)
+        assertNotNull(cityById("Europe/Berlin"))
+    }
+    @Test fun duplicatesRequireRegionDisambiguation() {
+        val r = findCities("Рокитне",250).mapNotNull {it.oblastUk}.distinct()
+        assertTrue(r.size>=2)
+        assertTrue(findCities("Городок",250).mapNotNull{it.oblastUk}.distinct().size>=2)
+    }
+}
