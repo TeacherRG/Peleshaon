@@ -63,6 +63,17 @@ jobs:
           path: core/build/reports/chabad-engine-probe.tsv
           if-no-files-found: error
 
+      - name: Export full 337-place astronomical audit
+        uses: actions/upload-artifact@v5
+        if: always()
+        with:
+          name: peleshaon-all-337-zmanim
+          path: |
+            core/build/reports/all-337-zmanim-by-date.tsv
+            core/build/reports/all-337-zmanim-city-summary.tsv
+            core/build/reports/all-337-zmanim-audit-summary.txt
+          if-no-files-found: warn
+
       - name: Privacy promise — no internet permission
         # Политика конфиденциальности (niflaot.mychitas.app/peleshaon/privacy/) обещает: приложение не выходит в интернет.
         # Если разрешение INTERNET появилось (например, его принесла библиотека) — сначала поправить политику.
