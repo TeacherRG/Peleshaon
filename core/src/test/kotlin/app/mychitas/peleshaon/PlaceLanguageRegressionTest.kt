@@ -60,6 +60,34 @@ class PlaceLanguageRegressionTest {
             assertTrue(requireNotNull(location.oblastTitle(Locale("he"))).any { it in '\u05D0'..'\u05EA' })
         }
     }
+    @Test fun catalogLocalizationEvidenceEqualsActualFiveRuntimeTitles() {
+        val file = sequenceOf(
+            java.io.File("../qa/approved_city_localizations.tsv"),
+            java.io.File("qa/approved_city_localizations.tsv")
+        ).firstOrNull { it.isFile } ?: error("Missing versioned five-language QA matrix")
+        val lines = file.readLines(Charsets.UTF_8).filter { it.isNotBlank() }
+        assertEquals(338, lines.size, "337 cities plus one header are required")
+        val headers = lines.first().split('\t')
+        val ix = mapOf(
+            "id" to 0, "name_uk" to 3, "name_ru" to 4,
+            "name_en" to 5, "name_de" to 6, "name_he" to 7
+        )
+        for ((key, position) in ix) assertEquals(key, headers[position])
+        val seen = mutableSetOf<String>()
+        for (line in lines.drop(1)) {
+            val row = line.split('\t')
+            val id = row[0]
+            assertTrue(seen.add(id), "Duplicated QA entry: " + id)
+            val place = requireNotNull(cityById(id)) { "QA matrix has removed city: " + id }
+            for ((tag, column) in listOf("uk" to 3, "ru" to 4,
+                    "en" to 5, "de" to 6, "he" to 7)) {
+                assertEquals(row[column], place.title(Locale.forLanguageTag(tag)),
+                    "Locale " + tag + " must match its audited displayed form for " + id)
+            }
+        }
+        assertEquals(CITIES.size, seen.size)
+    }
+
     @Test fun keyUkrainianNamesAndCoordinatesRemainStable() {
         val city=requireNotNull(cityById("ua:71:kamianka"))
         assertEquals("Кам’янка", city.title(Locale("uk")))
