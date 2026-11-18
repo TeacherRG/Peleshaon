@@ -47,3 +47,8 @@ tro | 2026-09-18 | 06:08 | 19:05 | 02:06 | 20:07 | 20:38
 tro | 2026-12-18 | -- | -- | 06:39 | 13:52 | 14:42
 
 Minutes are rounded for reporting; automated comparison uses tolerance to independent astronomical calculations. `--` means the event was not found for that calendar date; no date/time was fabricated.
+
+## Separate holiday and derived-time checks
+- Unit regression `IndependentHolidayAndDayFractionsTest` tests the published calendar distinction: **3 October 2026** Shmini Atzeret/Simchat Torah in Israel, **4 October 2026** additional Simchat Torah in the Diaspora; **21 September 2026** Yom Kippur is a quiet day in both jurisdictions. Sources: https://www.chabad.org/library/article_cdo/aid/753891/jewish/Shemini-Atzeret-Simchat-Torah-Reference-Guide-2026.htm and https://www.hebcal.com/holidays/2026 .
+- For Jerusalem and Berlin in four seasons, test proportional Baal Hatanya day fractions for Shema 3/12, Tfila 4/12, Chatzot 6/12, Mincha Gedola 6.5/12 and Plag Hamincha 10.75/12; max 10 min tolerance. This checks formula selection, but not the community's adoption of each method.
+- Note: 10-minute regression guards are designed to detect gross errors; they do not certify minute-perfect times for community practice. Litvish/Sephardi selected methods and polar halakhic fallback remain subject to qualified religious review.
