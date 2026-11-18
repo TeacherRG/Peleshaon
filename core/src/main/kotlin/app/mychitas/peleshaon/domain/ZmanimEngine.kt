@@ -75,7 +75,7 @@ data class Half(
 /** Еврейская дата числами: день, месяц (как в KosherJava: нисан — 1 … адар — 12, адар II — 13), високосный ли год, год. */
 data class JewishDay(val day: Int, val month: Int, val leap: Boolean, val year: Int)
 
-/** Шабат этой недели: зажигание свечей (пятница, закат − 18 мин) и исход (суббота, закат + 50 мин). */
+/** Шабат этой недели: зажигание свечей (пятница, закат − 18 мин) и исход при солнце на 8,5° ниже горизонта. */
 data class ShabbatTimes(
     val friday: LocalDate,
     val candles: ZonedDateTime?,
@@ -87,7 +87,7 @@ data class ShabbatTimes(
 /**
  * Община — по ней считаются времена дня, исход Шабата, Кидуш Левана и даты календаря (владелец, 18.11.2026:
  * «выбор общины: Хабад, литовская, сефардская — даты и зманим автоматически подстроятся»). Раввином не проверено.
- * - `CHABAD` — по Алтер Ребе (Бааль ґа-Тания), как в календарях Хабада; исход Шабата — закат + 50 мин.
+ * - `CHABAD` — по Алтер Ребе (Бааль ґа-Тания), как в календарях Хабада; выход звёзд и исход Шабата — солнце на 8,5° под горизонтом.
  * - `LITVISH` — по Виленскому Гаону (ГРА): «Шма» и молитва — от восхода до заката; выход звёзд и исход Шабата — солнце на 8,5° под горизонтом.
  * - `SEFARDI` — по раву Овадье Йосефу («Ялкут Йосеф»): рассвет — 72 «временные» минуты, «Шма» — по Маген Авраґаму, молитва — по ГРА,
  *   выход звёзд — 13,5 «временной» минуты после заката, исход Шабата — по Рабейну Таму (72 «временные» минуты).
@@ -97,6 +97,7 @@ enum class Minhag { CHABAD, LITVISH, SEFARDI }
 object ZmanimEngine {
 
     const val CANDLE_MIN = 18L
+    /** Legacy fixed offset; Chabad nightfall is calculated astronomically. */
     const val END_MIN = 50L
 
     /** Община приложения; ставится при запуске и в «Настройках». */
@@ -308,7 +309,7 @@ object ZmanimEngine {
 
     /** Выход звёзд по общине. */
     private fun tzeitOf(cal: ComplexZmanimCalendar): Date? = when (minhag) {
-        Minhag.CHABAD -> cal.tzaisBaalHatanya
+        Minhag.CHABAD -> cal.tzaisGeonim8Point5Degrees
         Minhag.LITVISH -> cal.tzaisGeonim8Point5Degrees
         Minhag.SEFARDI -> {
             // 13,5 «временной» минуты после заката (рав Овадья Йосеф)
@@ -318,10 +319,9 @@ object ZmanimEngine {
         }
     }
 
-    /** Исход Шабата и праздника по общине: Хабад — закат + 50 мин, литовская — 8,5°, сефардская — Рабейну Там (72 «временные» мин). */
+    /** Исход Шабата и праздника по общине: Хабад и литовская — 8,5°, сефардская — Рабейну Там (72 «временные» мин). */
     private fun havdalahOf(cal: ComplexZmanimCalendar, zone: ZoneId): ZonedDateTime? = when (minhag) {
-        Minhag.CHABAD -> cal.sunset?.toZoned(zone)?.plusMinutes(END_MIN)
-        Minhag.LITVISH -> cal.tzaisGeonim8Point5Degrees?.toZoned(zone)
+        Minhag.CHABAD, Minhag.LITVISH -> tzeitOf(cal)?.toZoned(zone)
         Minhag.SEFARDI -> cal.tzais72Zmanis?.toZoned(zone)
     }?.let { if (it.second > 0 || it.nano > 0) it.withSecond(0).withNano(0).plusMinutes(1) else it }
 
