@@ -31,7 +31,13 @@ data class ZmanimSnapshot(
     val ordinaryTzait: Instant?,
     val shabbatEnd: Instant?,
     val candleLighting: Instant?,
-    val methodIds: Map<String, String>
+    val methodIds: Map<String, String>,
+    /** Chabad.org: earliest tallis / tefillin, solar depression 10.2 degrees. */
+    val misheyakir: Instant?,
+    /** 9.5 proportional hours into the true Baal Hatanya day. */
+    val minchaKetana: Instant?,
+    /** Only on Erev Pesach; null on ordinary days. */
+    val sofZmanBiurChametz: Instant?
 )
 
 /**
@@ -102,6 +108,17 @@ object ZmanimService {
         } else null
         val actualDawn = chabadDawnByDegrees ?: solarMidnightDawn
 
+        // Chabad.org's chatzos is half-way between the *true* Baal Hatanya
+        // sunrise and sunset (solar center -1.583 degrees), not solar transit.
+        // The hidden true boundaries are not the published practical hanetz/shkiah.
+        val trueRise = if (community == Minhag.CHABAD)
+            calendar.getSunriseOffsetByDegrees(91.583) else null
+        val trueSet = if (community == Minhag.CHABAD)
+            calendar.getSunsetOffsetByDegrees(91.583) else null
+        val chabadMidday = if (trueRise != null && trueSet != null && trueSet.isAfter(trueRise))
+            trueRise.plusNanos(Duration.between(trueRise, trueSet).toNanos() / 2L)
+        else null
+
         val ordinary = when (community) {
             Minhag.CHABAD -> calendar.tzaisBaalHatanya
             Minhag.LITVISH -> calendar.tzaisGeonim8Point5Degrees
@@ -146,7 +163,7 @@ object ZmanimService {
                 Minhag.SEFARDI -> calendar.sofZmanShmaMGA72MinutesZmanis
             },
             tfila = if (community == Minhag.CHABAD) calendar.sofZmanTfilaBaalHatanya else calendar.sofZmanTfilaGRA,
-            chatzot = calendar.chatzosHayom,
+            chatzot = if (community == Minhag.CHABAD) chabadMidday else calendar.chatzosHayom,
             // Revisit the 30-minute threshold with an approved community policy; do not silently decide it.
             minchaGedola = if (community == Minhag.CHABAD) calendar.minchaGedolaBaalHatanya else calendar.minchaGedolaGRA,
             plagHamincha = if (community == Minhag.CHABAD) calendar.plagHaminchaBaalHatanya else calendar.plagHaminchaGRA,
@@ -157,7 +174,11 @@ object ZmanimService {
                 calendar.candleLightingOffset = candleMinutes.toDouble()
                 calendar.candleLighting
             } else null,
-            methodIds = methods
+            methodIds = methods,
+            misheyakir = if (community == Minhag.CHABAD) calendar.misheyakir10Point2Degrees else null,
+            minchaKetana = if (community == Minhag.CHABAD) calendar.minchaKetanaBaalHatanya else null,
+            sofZmanBiurChametz = if (community == Minhag.CHABAD)
+                calendar.sofZmanBiurChametzBaalHatanya else null
         )
     }
 }
