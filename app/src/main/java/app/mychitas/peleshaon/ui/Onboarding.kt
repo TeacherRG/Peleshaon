@@ -138,8 +138,15 @@ private fun Body(text: String) {
 @Composable
 private fun LiveDial(modifier: Modifier) {
     val context = LocalContext.current
-    val s = remember { LiveState.of(context) }
-    BigFace(now = s.now, zone = s.city.zone(), half = s.half, ring = s.ring, events = s.events, active = null, tziruf = false, modifier = modifier)
+    if (Prefs.chosenCity(context) == null) {
+        Box(modifier, contentAlignment = Alignment.Center) {
+            Text("🕒", fontSize = 56.sp, color = ClockColors.Gold)
+        }
+    } else {
+        val s = remember(Prefs.chosenCity(context)) { LiveState.of(context) }
+        BigFace(now = s.now, zone = s.city.zone(), half = s.half, ring = s.ring,
+            events = s.events, active = null, tziruf = false, modifier = modifier)
+    }
 }
 
 @Composable
@@ -155,20 +162,26 @@ private fun StepCity(onConfirm: () -> Unit) {
     val context = LocalContext.current
     var choosing by remember { mutableStateOf(false) }
     var version by remember { mutableIntStateOf(0) }
-    val city = remember(version) { Prefs.city(context) }
-    val auto = remember(version) { Prefs.chosenCity(context) == null }
+    val chosen = remember(version) { Prefs.chosenCity(context) }
+    val city = remember(version) { Prefs.city(context) } // only for the city-picker preview
+    val auto = chosen == null
     Title(R.string.ob2_t)
     Body(stringResource(R.string.ob2_b))
     Surface(shape = RoundedCornerShape(16.dp), color = ClockColors.Surface, border = BorderStroke(1.dp, ClockColors.Line), modifier = Modifier.fillMaxWidth()) {
         Column(Modifier.padding(16.dp), horizontalAlignment = Alignment.CenterHorizontally) {
-            Text("📍 " + city.title(Locale.getDefault()), fontWeight = FontWeight.Bold, fontSize = 22.sp, color = ClockColors.Gold, textAlign = TextAlign.Center)
+            Text("📍 " + (chosen?.title(Locale.getDefault()) ?: stringResource(R.string.city_choose)),
+                fontWeight = FontWeight.Bold, fontSize = 22.sp,
+                color = ClockColors.Gold, textAlign = TextAlign.Center)
             if (auto) Text(stringResource(R.string.city_auto), fontSize = 13.sp, color = ClockColors.Muted)
         }
     }
     if (!choosing) {
         Row(horizontalArrangement = Arrangement.spacedBy(10.dp), modifier = Modifier.fillMaxWidth()) {
-            Button(onClick = { Prefs.setCity(context, city); onConfirm() }, colors = ButtonDefaults.buttonColors(containerColor = ClockColors.Surface), modifier = Modifier.weight(1f)) {
-                Text("✓ " + stringResource(R.string.ob2_ok), color = ClockColors.Ink)
+            if (chosen != null) {
+                Button(onClick = onConfirm, colors = ButtonDefaults.buttonColors(containerColor = ClockColors.Surface),
+                    modifier = Modifier.weight(1f)) {
+                    Text("✓ " + stringResource(R.string.ob2_ok), color = ClockColors.Ink)
+                }
             }
             OutlinedButton(onClick = { choosing = true }, border = BorderStroke(1.dp, ClockColors.Line), modifier = Modifier.weight(1f)) {
                 Text(stringResource(R.string.ob2_other), color = ClockColors.TcheletDeep, textAlign = TextAlign.Center)
@@ -233,25 +246,14 @@ private fun Swatch(colors: List<Color>) {
 
 @Composable
 private fun StepAlarms() {
-    val context = LocalContext.current
-    fun granted() = Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU ||
-        ContextCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS) == PackageManager.PERMISSION_GRANTED
-    var ok by remember { mutableStateOf(granted()) }
-    val launcher = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { ok = granted() }
-
+    // Permissions are NOT requested merely by looking at onboarding.
+    // An active alarm shows the permission controls in AlarmSheet.
     Text("⏰", fontSize = 48.sp)
     Title(R.string.ob4_t)
     Body(stringResource(R.string.ob4_b))
     Body(stringResource(R.string.ob4_perm))
-    if (ok) {
-        Text("✓ " + stringResource(R.string.ob4_notif_ok), color = ClockColors.Ok, fontWeight = FontWeight.Bold)
-    } else {
-        Button(
-            onClick = { launcher.launch(Manifest.permission.POST_NOTIFICATIONS) },
-            colors = ButtonDefaults.buttonColors(containerColor = ClockColors.Gold)
-        ) { Text(stringResource(R.string.ob4_notif), color = ClockColors.SheetBg, fontWeight = FontWeight.Bold) }
-    }
 }
+
 
 @Composable
 private fun StepHome() {

@@ -60,7 +60,7 @@ object Prefs {
 
     fun of(context: Context): SharedPreferences = context.getSharedPreferences(NAME, Context.MODE_PRIVATE)
 
-    // ---- город: выбранный вручную, иначе — по часовому поясу телефона
+    // ---- город: religious calculations require an explicit valid city selection
 
     /** Saved user selection, with optional explicit civil-time zone. */
     fun chosenCity(context: Context): CityOption? {
@@ -93,9 +93,8 @@ object Prefs {
     fun citySelectionObsolete(context: Context): Boolean =
         of(context).getString("city_id", null) != null && chosenCity(context) == null
 
-    fun cityUnmatched(context: Context): Boolean =
-        citySelectionObsolete(context) ||
-            (chosenCity(context) == null && cityMatchForZone(ZoneId.systemDefault()) == null)
+    // Timezone can display ordinary clock time only; never authorize religious events.
+    fun cityUnmatched(context: Context): Boolean = chosenCity(context) == null
 
     fun setCity(context: Context, city: CityOption?) {
         of(context).edit().apply {

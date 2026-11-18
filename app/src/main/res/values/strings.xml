@@ -291,4 +291,6 @@
     <string name="city_manual_name">Location name</string>
     <string name="city_manual_israel">Apply Israel holiday calendar (otherwise diaspora)</string>
     <string name="city_auto_unconfirmed_warning">City estimated from phone time zone. Select your exact location for reliable religious times.</string>
+    <string name="city_choose">Select city</string>
+    <string name="city_required_for_halacha">To calculate halachic times, select a city</string>
 </resources>

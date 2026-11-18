@@ -171,6 +171,12 @@ fun ClockScreen(
         }
     }
 
+    // Stop BEFORE invoking any geographical, Shabbat, Jewish-day rollover or moon calculations.
+    // Saved invalid/missing city must not be replaced by a timezone-derived religious city.
+    if (auto) {
+        NoCityClockScreen(now = now, onIntro = onIntro, onNightScreen = onNightScreen, onChanged = bump)
+        return
+    }
     val zone = city.zone()
     val cityNow = now.withZoneSameInstant(zone)
     val minute = cityNow.truncatedTo(ChronoUnit.MINUTES)
@@ -400,6 +406,93 @@ fun ClockScreen(
                 Panel.PRIVACY -> PrivacySheet()
                 Panel.CALENDAR -> CalendarSheet(city, cityNow)
                 Panel.SETTINGS -> SettingsSheet(onChange = bump)
+            }
+        }
+    }
+}
+
+
+/** Ordinary local clock; calendar dates only until the user explicitly selects a city. */
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun NoCityClockScreen(
+    now: ZonedDateTime,
+    onIntro: () -> Unit,
+    onNightScreen: () -> Unit,
+    onChanged: () -> Unit
+) {
+    val context = LocalContext.current
+    val locale = androidx.compose.ui.platform.LocalConfiguration.current.locales[0]
+    var panel by rememberSaveable { mutableStateOf<Panel?>(null) }
+    Box(Modifier.fillMaxSize().background(Color(0xFF060B1E))) {
+        ClockBackground()
+        Column(
+            Modifier.fillMaxSize().safeDrawingPadding().padding(horizontal = 12.dp, vertical = 8.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+                Chip(onClick = { panel = Panel.CITY }, modifier = Modifier.widthIn(max = 165.dp)) {
+                    Text("📍")
+                    Text(stringResource(R.string.city_choose), color = ClockColors.Ink,
+                        fontSize = 13.sp, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                    Text("▾", color = ClockColors.TcheletDeep)
+                }
+                Surface(
+                    onClick = { panel = Panel.CALENDAR },
+                    shape = RoundedCornerShape(16.dp),
+                    color = ClockColors.Surface,
+                    border = BorderStroke(1.dp, ClockColors.Line),
+                    modifier = Modifier.weight(1f).padding(horizontal = 6.dp)
+                ) {
+                    Text("📅 " + now.format(DateTimeFormatter.ofPattern("d MMM yyyy", locale)),
+                        modifier = Modifier.padding(9.dp), textAlign = TextAlign.Center,
+                        color = ClockColors.GoldDeep, fontWeight = FontWeight.Bold)
+                }
+                Chip(onClick = { panel = Panel.SETTINGS }, round = true) {
+                    Text("☰", color = ClockColors.TcheletDeep, fontSize = 18.sp)
+                }
+            }
+            Surface(
+                color = ClockColors.Surface,
+                shape = RoundedCornerShape(12.dp),
+                border = BorderStroke(1.dp, ClockColors.Line),
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text(stringResource(R.string.city_required_for_halacha),
+                    color = ClockColors.GoldDeep, textAlign = TextAlign.Center, fontSize = 13.sp,
+                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 9.dp))
+            }
+            Box(Modifier.weight(1f).fillMaxWidth(), contentAlignment = Alignment.Center) {
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    Text(now.format(DateTimeFormatter.ofPattern("HH:mm:ss")),
+                        color = ClockColors.GoldDeep, fontWeight = FontWeight.Bold, fontSize = 48.sp)
+                    Text(now.format(DateTimeFormatter.ofPattern("EEEE, d MMMM yyyy", locale)),
+                        color = ClockColors.Ink, fontSize = 16.sp, textAlign = TextAlign.Center)
+                }
+            }
+        }
+    }
+    if (panel != null) {
+        val state = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+        ModalBottomSheet(onDismissRequest = { panel = null }, sheetState = state,
+            containerColor = ClockColors.SheetBg, contentColor = ClockColors.Ink) {
+            when (panel) {
+                Panel.CITY -> CitySheet(Prefs.city(context), true) { chosen ->
+                    Prefs.setCity(context, chosen)
+                    AlarmScheduler.rescheduleAllFromPrefs(context)
+                    app.mychitas.peleshaon.moon.MoonReminder.schedule(context)
+                    Live.updateAsync(context)
+                    panel = null
+                    onChanged()
+                }
+                Panel.CALENDAR -> CalendarNoCity(now.toLocalDate())
+                Panel.SETTINGS -> SettingsSheet(onChange = onChanged)
+                Panel.INFO -> InfoSheet(onNightScreen = { panel = null; onNightScreen() },
+                    onIntro = { panel = null; onIntro() }, onPrivacy = { panel = Panel.PRIVACY })
+                Panel.PRIVACY -> PrivacySheet()
+                else -> Text(stringResource(R.string.city_required_for_halacha),
+                    modifier = Modifier.padding(24.dp), color = ClockColors.Ink)
             }
         }
     }
@@ -1289,6 +1382,8 @@ private fun SettingsSheet(onChange: () -> Unit) {
         }
         Note(stringResource(R.string.theme_note))
         HorizontalDivider(color = ClockColors.Line)
+        // There is no valid coordinate context for geographically sensitive settings.
+        if (Prefs.chosenCity(context) == null) return@SheetColumn
 
         // Local candle-lighting practice is independent of the community's zmanim profile.
         Text(stringResource(R.string.candle_offset_title), fontWeight = FontWeight.Bold, color = ClockColors.Ink)

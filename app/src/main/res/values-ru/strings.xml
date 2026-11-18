@@ -293,4 +293,6 @@
     <string name="city_manual_name">Название населённого пункта</string>
     <string name="city_manual_israel">Использовать календарь праздников Израиля (иначе диаспоры)</string>
     <string name="city_auto_unconfirmed_warning">Город определён приблизительно по часовому поясу. Выберите точное место для правильных религиозных времён.</string>
+    <string name="city_choose">Выберите город</string>
+    <string name="city_required_for_halacha">Для расчёта галахического времени выберите город</string>
 </resources>

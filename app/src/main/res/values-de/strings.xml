@@ -291,4 +291,6 @@
     <string name="city_manual_name">Ortsname</string>
     <string name="city_manual_israel">Israelischen Feiertagskalender verwenden (sonst Diaspora)</string>
     <string name="city_auto_unconfirmed_warning">Ort aus der Zeitzone nur geschätzt. Für verlässliche religiöse Zeiten bitte den genauen Ort wählen.</string>
+    <string name="city_choose">Stadt auswählen</string>
+    <string name="city_required_for_halacha">Wählen Sie eine Stadt, um die halachischen Zeiten zu berechnen</string>
 </resources>

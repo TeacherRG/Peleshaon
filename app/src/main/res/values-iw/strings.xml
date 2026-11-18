@@ -292,4 +292,6 @@
     <string name="city_manual_name">שם המקום</string>
     <string name="city_manual_israel">שימוש בלוח חגי ישראל (אחרת חו״ל)</string>
     <string name="city_auto_unconfirmed_warning">המיקום משוער לפי אזור הזמן בלבד. יש לבחור מיקום מדויק לזמני היום.</string>
+    <string name="city_choose">בחרו עיר</string>
+    <string name="city_required_for_halacha">לחישוב הזמנים ההלכתיים בחרו עיר</string>
 </resources>
