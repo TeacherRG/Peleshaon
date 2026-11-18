@@ -15,7 +15,7 @@ kotlin {
 
 dependencies {
     // Расчёт зманим по методу Алтер Ребе (KosherJava)
-    api("com.kosherjava:zmanim:2.5.0")
+    api("com.kosherjava:zmanim:3.1.0")
     testImplementation(kotlin("test"))
 }
 

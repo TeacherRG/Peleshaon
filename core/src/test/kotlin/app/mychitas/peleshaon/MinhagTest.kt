@@ -50,8 +50,9 @@ class MinhagTest {
         val sat = LocalDate.of(2026, 11, 21)
         ZmanimEngine.minhag = Minhag.CHABAD
         val ch = ZmanimEngine.havdalahOn(sat, vienna)!!
-        val sunset = ZmanimEngine.sunsetOf(sat, vienna)!!
-        assertTrue(ch.isAfter(sunset.plusMinutes(49)) && ch.isBefore(sunset.plusMinutes(52)), "Хабад: закат + 50")
+        val tzait = ZmanimEngine.itemsOf(sat, vienna)
+            .single { it.type == ZmanType.TZAIT }.exactTime
+        assertTrue(ch.isAfter(tzait), "Havdalah is later than ordinary Chabad tzait")
         ZmanimEngine.minhag = Minhag.SEFARDI
         assertTrue(ZmanimEngine.havdalahOn(sat, vienna)!!.isAfter(ch), "Рабейну Там позже")
         // даты Хабада — только у Хабада

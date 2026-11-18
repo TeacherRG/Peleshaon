@@ -212,7 +212,7 @@
     <string name="candle_offset_title">Kerzen vor Sonnenuntergang</string>
     <string name="candle_offset_local">Ortsüblich</string>
     <string name="candle_offset_minutes">%1$d Min.</string>
-    <string name="candle_offset_note">Standard: Jerusalem 40 Min., Haifa 30 Min., andere Städte 18 Min. Örtlichen Brauch mit dem Rabbiner klären.</string>
+    <string name="candle_offset_note">Standard: Jerusalem 40 Min., Haifa 30 Min., Tel Aviv 22 Min., die meisten anderen Städte 18 Min. Örtlichen Brauch mit dem Rabbiner klären.</string>
     <string name="alarm_fallback_channel">Wecker konnte nicht starten</string>
     <string name="alarm_fallback_title">Weckerstart fehlgeschlagen</string>
     <string name="alarm_fallback_message">Android hat den Wecker-Dienst blockiert. Bitte Alarm- und Benachrichtigungsrechte prüfen.</string>
@@ -247,7 +247,7 @@
     <string name="minhag_chabad">Chabad</string>
     <string name="minhag_litvish">Litauisch (aschkenasisch)</string>
     <string name="minhag_sefardi">Sefardisch</string>
-    <string name="minhag_d_chabad">Zeiten nach dem Alter Rebbe (Baal HaTanja), wie in den Kalendern von Chabad. Schabbat endet 50 Minuten nach Sonnenuntergang. Kiddusch Lewana ab 7 Tagen nach dem Molad. Im Kalender stehen die Chabad-Daten.</string>
+    <string name="minhag_d_chabad">Zeiten nach dem Alter Rebbe (Baal HaTanja), wie in den Kalendern von Chabad. Schabbat endet, wenn die Sonne 8,5° unter dem Horizont steht. Kiddusch Lewana ab 7 Tagen nach dem Molad. Im Kalender stehen die Chabad-Daten.</string>
     <string name="minhag_d_litvish">Zeiten nach dem Wilnaer Gaon (GRA): Schma und Morgengebet werden von Sonnenaufgang bis Sonnenuntergang gerechnet; Erscheinen der Sterne und Schabbatende — wenn die Sonne 8,5° unter dem Horizont steht. Kiddusch Lewana ab 3 Tagen nach dem Molad.</string>
     <string name="minhag_d_sefardi">Berechnungsprofil der App: Morgendämmerung 72 proportionale Minuten vor Sonnenaufgang, Schema nach Magen Awraham, Morgengebet nach GRA, Nachtbeginn nach 13,5 proportionalen Minuten, Schabbatende nach Rabbenu Tam (72 proportionale Minuten). Das ist keine einheitliche Regel für alle sephardischen Gemeinden.</string>
     <string name="minhag_note">Tageszeiten, Schabbatende, Wecker und Monderinnerungen folgen dem ausgewählten Profil. Die Kerzenzeit hängt von Ort und Einstellung ab. Bitte den Rabbiner fragen.</string>
@@ -283,4 +283,23 @@
     <string name="home_open">App-Einstellungen öffnen</string>
     <string name="home_status">Widgets der App auf dem Handy: %1$d von 2 · Startbildschirm: %2$s · %3$s, Android %4$s</string>
     <string name="pin_done">Fertig — schau auf den Startbildschirm</string>
+    <string name="city_manual_toggle">Ort über Koordinaten hinzufügen</string>
+    <string name="city_manual_lat">Breitengrad (−90 bis 90)</string>
+    <string name="city_manual_lon">Längengrad (−180 bis 180)</string>
+    <string name="city_manual_zone">IANA-Zeitzone, z. B. Europe/Kyiv</string>
+    <string name="city_manual_apply">Koordinaten speichern</string>
+    <string name="city_manual_invalid">Bitte Ortsname, gültige Koordinaten und Zeitzone eingeben.</string>
+    <string name="city_zone_override">Andere lokale Zeitzone wählen</string>
+    <string name="city_zone_apply">Zeitzone übernehmen</string>
+    <string name="city_timezone_notice">Die tatsächliche Ortszeit prüfen, besonders in besetzten Gebieten.</string>
+    <string name="city_manual_name">Ortsname</string>
+    <string name="city_manual_israel">Israelischen Feiertagskalender verwenden (sonst Diaspora)</string>
+    <string name="city_auto_unconfirmed_warning">Ort aus der Zeitzone nur geschätzt. Für verlässliche religiöse Zeiten bitte den genauen Ort wählen.</string>
+    <string name="city_choose">Stadt auswählen</string>
+    <string name="city_required_for_halacha">Wählen Sie eine Stadt, um die halachischen Zeiten zu berechnen</string>
+    <string name="polar_nightfall_undefined">Der Sterneaufgang kann für diesen Breitengrad und dieses Datum nicht zuverlässig berechnet werden. Fragen Sie Ihren Rabbiner.</string>
+    <string name="polar_shabbat_undefined">Das Ende von Schabbat oder Feiertagen kann hier nicht zuverlässig berechnet werden. Gehen Sie nicht vom Schabbatende aus; fragen Sie Ihren Rabbiner.</string>
+    <string name="cal_misheyakir">Misheyakir – früheste Zeit für Tallit und Tefillin</string>
+    <string name="cal_mincha_ketana">Mincha Ketana</string>
+    <string name="cal_biur_chametz">Letzte Zeit zum Verbrennen von Chametz</string>
 </resources>

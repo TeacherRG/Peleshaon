@@ -5,6 +5,8 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -40,13 +42,13 @@ import androidx.wear.compose.material.Chip
 import app.mychitas.peleshaon.domain.CITIES
 import app.mychitas.peleshaon.domain.Minhag
 import app.mychitas.peleshaon.domain.cityById
+import app.mychitas.peleshaon.domain.findCities
 import java.util.Locale
 import androidx.wear.compose.material.Text
 import app.mychitas.peleshaon.domain.Half
 import app.mychitas.peleshaon.domain.ZmanItem
 import app.mychitas.peleshaon.domain.ZmanType
 import app.mychitas.peleshaon.domain.ZmanimEngine
-import app.mychitas.peleshaon.domain.cityForZone
 import kotlinx.coroutines.delay
 import java.time.DayOfWeek
 import java.time.ZoneId
@@ -86,24 +88,29 @@ fun WearApp() {
     var selectedCommunity by remember { mutableStateOf(prefs.getString("minhag", "CHABAD") ?: "CHABAD") }
     var candleMinutes by remember { mutableStateOf(prefs.getInt("candle_minutes", -1)) }
     var settingsMode by remember { mutableStateOf(0) }
+    var cityQuery by remember { mutableStateOf("") }
     val community = remember(selectedCommunity) {
         runCatching { Minhag.valueOf(selectedCommunity) }.getOrDefault(Minhag.CHABAD)
     }
-    val city = remember(now.zone, selectedCity) {
-        cityById(selectedCity) ?: cityForZone(ZoneId.systemDefault())
-    }
-    val zone = city.zone()
+    val city = remember(selectedCity) { cityById(selectedCity.takeIf { it.isNotBlank() }) }
+    val zone = city?.zone() ?: ZoneId.systemDefault()
     val cityNow = now.withZoneSameInstant(zone)
     val day = remember(city, cityNow.truncatedTo(ChronoUnit.MINUTES), community, candleMinutes) {
-        ZmanimEngine.minhag = community
-        ZmanimEngine.candleOffsetOverride = candleMinutes.takeIf { it in setOf(18, 20, 30, 40) }?.toLong()
-        ZmanimEngine.calculateForMoment(cityNow, city.name, city.lat, city.lon, 0.0, zone, city.isIsrael)
+        city?.let {
+            ZmanimEngine.minhag = community
+            ZmanimEngine.candleOffsetOverride = candleMinutes.takeIf { n -> n in setOf(18, 20, 22, 30, 40) }?.toLong()
+            ZmanimEngine.calculateForMoment(cityNow, it.name, it.lat, it.lon, 0.0, zone, it.isIsrael)
+        }
     }
     val res = LocalContext.current.resources
-    val half = remember(city, cityNow.truncatedTo(ChronoUnit.MINUTES), community) { ZmanimEngine.halfOf(cityNow, city) }
-    val halfItems = remember(half, city, community) { half?.let { ZmanimEngine.halfItems(it, city) } ?: emptyList() }
+    val half = remember(city, cityNow.truncatedTo(ChronoUnit.MINUTES), community) {
+        city?.let { ZmanimEngine.halfOf(cityNow, it) }
+    }
+    val halfItems = remember(half, city, community) {
+        if (half == null || city == null) emptyList() else ZmanimEngine.halfItems(half, city)
+    }
     val next = halfItems.firstOrNull { it.exactTime.isAfter(cityNow) }
-    val candles = day.candleLighting?.takeIf {
+    val candles = day?.candleLighting?.takeIf {
         cityNow.dayOfWeek == DayOfWeek.FRIDAY && it.isAfter(cityNow)
     }
 
@@ -125,13 +132,27 @@ fun WearApp() {
                     }, modifier = Modifier.fillMaxWidth(),
                         label = { Text(context.getString(R.string.wear_auto_city)) })
                 }
-                items(CITIES) { option ->
+                item {
+                    BasicTextField(
+                        value = cityQuery,
+                        onValueChange = { cityQuery = it },
+                        singleLine = true,
+                        textStyle = TextStyle(color = Gold, fontSize = 14.sp),
+                        modifier = Modifier.fillMaxWidth().padding(12.dp),
+                        decorationBox = { inner ->
+                            if (cityQuery.isBlank()) Text(context.getString(R.string.wear_city))
+                            inner()
+                        }
+                    )
+                }
+                items(if (cityQuery.isBlank()) CITIES.take(60) else findCities(cityQuery, 100)) { option ->
                     Chip(onClick = {
                         selectedCity = option.id
                         prefs.edit().putString("city_id", option.id).apply()
                         settingsMode = 0
                     }, modifier = Modifier.fillMaxWidth(),
-                        label = { Text(option.title(Locale.getDefault())) })
+                        label = { Text(option.title(Locale.getDefault()) +
+                            (option.oblastUk?.let { " · $it" } ?: "")) })
                 }
             }
         } else if (settingsMode == 2) {
@@ -204,7 +225,8 @@ fun WearApp() {
             }
             item {
                 Text(
-                    text = day.jewishDateHebrew.ifEmpty { res.getString(R.string.polar) },
+                    text = day?.jewishDateHebrew?.ifEmpty { res.getString(R.string.polar) }
+                        ?: res.getString(R.string.wear_city_warning),
                     color = Gold,
                     fontSize = 14.sp,
                     textAlign = TextAlign.Center
@@ -223,7 +245,8 @@ fun WearApp() {
             }
             item {
                 Chip(onClick = { settingsMode = 1 }, modifier = Modifier.fillMaxWidth(),
-                    label = { Text(context.getString(R.string.wear_city) + ": " + city.title(Locale.getDefault())) })
+                    label = { Text(context.getString(R.string.wear_city) + ": " +
+                        (city?.title(Locale.getDefault()) ?: context.getString(R.string.wear_select_city))) })
             }
             item {
                 Chip(onClick = { settingsMode = 2 }, modifier = Modifier.fillMaxWidth(),

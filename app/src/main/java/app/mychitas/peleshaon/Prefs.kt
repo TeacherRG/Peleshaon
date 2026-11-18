@@ -60,10 +60,25 @@ object Prefs {
 
     fun of(context: Context): SharedPreferences = context.getSharedPreferences(NAME, Context.MODE_PRIVATE)
 
-    // ---- город: выбранный вручную, иначе — по часовому поясу телефона
+    // ---- город: religious calculations require an explicit valid city selection
 
-    /** Выбранный город; null — по часовому поясу. */
-    fun chosenCity(context: Context): CityOption? = cityById(of(context).getString("city_id", null))
+    /** Saved user selection, with optional explicit civil-time zone. */
+    fun chosenCity(context: Context): CityOption? {
+        val p = of(context)
+        val id = p.getString("city_id", null) ?: return null
+        if (id == app.mychitas.peleshaon.domain.ManualLocation.ID) {
+            return app.mychitas.peleshaon.domain.ManualLocation.parse(
+                p.getString("custom_city_name", null), p.getString("custom_city_lat", null),
+                p.getString("custom_city_lon", null), p.getString("custom_city_zone", null),
+                p.getBoolean("custom_city_is_israel", false)
+            )
+        }
+        val base = cityById(id) ?: return null
+        val selectedZone = app.mychitas.peleshaon.domain.ManualLocation.zoneOrNull(
+            p.getString("city_zone_override", null)
+        ) ?: return base
+        return base.copy(zoneId = selectedZone.id)
+    }
 
     fun city(context: Context): CityOption = chosenCity(context) ?: cityForZone(ZoneId.systemDefault())
 
@@ -71,12 +86,42 @@ object Prefs {
     fun cityUnconfirmed(context: Context): Boolean = chosenCity(context) == null
 
     /** If neither a manual city nor a timezone match exists, do not schedule religious alarms. */
-    fun cityUnmatched(context: Context): Boolean =
-        chosenCity(context) == null && cityMatchForZone(ZoneId.systemDefault()) == null
+    /** A no-longer-supported saved city must NEVER turn into another city silently.
+     * Keep its stored ID until the user explicitly chooses a supported city or manual point.
+     * In this state all geographic religious alarms are held and the UI warns the user.
+     */
+    fun citySelectionObsolete(context: Context): Boolean =
+        of(context).getString("city_id", null) != null && chosenCity(context) == null
+
+    // Timezone can display ordinary clock time only; never authorize religious events.
+    fun cityUnmatched(context: Context): Boolean = chosenCity(context) == null
 
     fun setCity(context: Context, city: CityOption?) {
         of(context).edit().apply {
-            if (city == null) remove("city_id") else putString("city_id", city.id)
+            if (city == null) {
+                remove("city_id")
+                remove("city_zone_override")
+            } else if (city.id == app.mychitas.peleshaon.domain.ManualLocation.ID) {
+                requireNotNull(app.mychitas.peleshaon.domain.ManualLocation.parse(
+                    city.name, city.lat.toString(), city.lon.toString(), city.zoneId, city.isIsrael
+                )) { "Invalid manual city coordinates or time zone" }
+                putString("city_id", city.id)
+                putString("custom_city_name", city.name)
+                putString("custom_city_lat", city.lat.toString())
+                putString("custom_city_lon", city.lon.toString())
+                putString("custom_city_zone", city.zoneId)
+                putBoolean("custom_city_is_israel", city.isIsrael)
+                remove("city_zone_override")
+            } else {
+                requireNotNull(cityById(city.id)) { "Only catalog or explicit manual coordinates allowed" }
+                putString("city_id", city.id)
+                val original = cityById(city.id)!!
+                if (original.zoneId == city.zoneId) remove("city_zone_override")
+                else {
+                    requireNotNull(app.mychitas.peleshaon.domain.ManualLocation.zoneOrNull(city.zoneId))
+                    putString("city_zone_override", city.zoneId)
+                }
+            }
         }.apply()
     }
 
@@ -179,12 +224,12 @@ object Prefs {
         runCatching { app.mychitas.peleshaon.domain.Minhag.valueOf(of(context).getString("minhag", null) ?: "") }
             .getOrDefault(app.mychitas.peleshaon.domain.Minhag.CHABAD)
 
-    /** null uses city custom (Jerusalem 40m, Haifa 30m, other cities 18m). */
+    /** null = city default (Jerusalem 40m, Haifa 30m, Tel Aviv 22m, others 18m). */
     fun candleOffset(context: Context): Long? =
-        of(context).getInt("candle_offset", -1).takeIf { it in setOf(18, 20, 30, 40) }?.toLong()
+        of(context).getInt("candle_offset", -1).takeIf { it in setOf(18, 20, 22, 30, 40) }?.toLong()
 
     fun setCandleOffset(context: Context, minutes: Long?) {
-        val value = minutes?.toInt()?.takeIf { it in setOf(18, 20, 30, 40) } ?: -1
+        val value = minutes?.toInt()?.takeIf { it in setOf(18, 20, 22, 30, 40) } ?: -1
         of(context).edit().putInt("candle_offset", value).apply()
     }
 
