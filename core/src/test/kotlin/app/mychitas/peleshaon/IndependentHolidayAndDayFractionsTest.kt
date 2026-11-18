@@ -52,8 +52,12 @@ class IndependentHolidayAndDayFractionsTest {
                 LocalDate.of(2026, 9, 18), LocalDate.of(2026, 12, 18)
             )) {
                 val snap = ZmanimService.calculate(date, ZmanimConfig(city, Minhag.CHABAD))
-                val sunrise = assertNotNull(snap.sunrise)
-                val sunset = assertNotNull(snap.sunset)
+                val raw = ZmanimService.buildCalendar(date, city.name, city.lat,
+                    city.lon, 0.0, city.zone())
+                // The Alter Rebbe's proportional day uses hidden TRUE sunrise and
+                // sunset at -1.583 degrees, NOT published civil sunrise/sunset.
+                val sunrise = assertNotNull(raw.getSunriseOffsetByDegrees(91.583))
+                val sunset = assertNotNull(raw.getSunsetOffsetByDegrees(91.583))
                 val dayMillis = Duration.between(sunrise, sunset).toMillis()
                 for ((name, fraction, actual) in listOf(
                     Triple("shema", 3.0/12, snap.shema),
@@ -64,9 +68,9 @@ class IndependentHolidayAndDayFractionsTest {
                 )) {
                     val expected = sunrise.plusMillis((dayMillis * fraction).toLong())
                     val found = assertNotNull(actual, "${city.name} $date $name")
-                    val deviation = kotlin.math.abs(Duration.between(expected, found).toMinutes())
-                    assertTrue(deviation <= 10,
-                        "${city.name} $date $name deviates from Baal Hatanya solar proportion by $deviation min")
+                    val deviationMillis = kotlin.math.abs(Duration.between(expected, found).toMillis())
+                    assertTrue(deviationMillis <= 1000,
+                        "${city.name} $date $name deviates from true Baal Hatanya day by $deviationMillis ms")
                 }
             }
         }
