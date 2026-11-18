@@ -539,6 +539,10 @@ internal fun CitySheet(city: CityOption, auto: Boolean, title: Boolean = true, o
     var zoneText by remember(city.id, city.zoneId) { mutableStateOf(city.zoneId) }
     var inputError by remember { mutableStateOf(false) }
     val list = remember(q, locale) { if (q.isBlank()) CITIES.sortedBy { it.title(locale) } else findCities(q, 30) }
+    val repeatedLabels = remember(locale) {
+        CITIES.groupingBy { it.title(locale) to it.oblastUk }.eachCount()
+            .filterValues { it > 1 }.keys
+    }
     Column(modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp).padding(bottom = 16.dp)) {
         if (title) SheetTitle(stringResource(R.string.city))
         Text(
@@ -628,7 +632,13 @@ internal fun CitySheet(city: CityOption, auto: Boolean, title: Boolean = true, o
                         color = if (c.id == city.id && !auto) ClockColors.Gold else ClockColors.Ink,
                         fontWeight = if (c.id == city.id) FontWeight.Bold else FontWeight.Normal
                     )
-                    Text(c.oblastUk ?: c.zoneId.substringAfter('/').replace('_', ' '), fontSize = 12.sp, color = ClockColors.Muted)
+                    Column(horizontalAlignment = Alignment.End) {
+                        Text(c.oblastUk ?: c.zoneId.substringAfter('/').replace('_', ' '), fontSize = 12.sp, color = ClockColors.Muted)
+                        if ((c.title(locale) to c.oblastUk) in repeatedLabels) {
+                            Text(String.format(java.util.Locale.US, "%.4f, %.4f", c.lat, c.lon),
+                                fontSize = 11.sp, color = ClockColors.Muted)
+                        }
+                    }
                 }
                 HorizontalDivider(color = ClockColors.Line)
             }
