@@ -348,7 +348,7 @@ private fun uaCherkaska(): List<CityOption> = listOf(
     CityOption("ua:71:chyhyryn", "Chyhyryn", "Chyhyryn", null, 49.08376, 32.65549, "Europe/Kyiv", false, null, "Черкаська область", emptyList()),
     CityOption("ua:71:drabiv", "Drabiv", "Drabiv", null, 49.96029, 32.1407, "Europe/Kyiv", false, null, "Черкаська область", emptyList()),
     CityOption("ua:71:horodysche", "Horodyshche", "Horodyshche", null, 49.28489, 31.44513, "Europe/Kyiv", false, null, "Черкаська область", emptyList()),
-    CityOption("ua:71:kamianka", "Kamianka", "Знам’янка", null, 49.0318, 32.10396, "Europe/Kyiv", false, "Знам’янка", "Черкаська область", listOf("Знам’янка", "Кам’янка")),
+    CityOption("ua:71:kamianka", "Kamianka", "Кам’янка", null, 49.0318, 32.10396, "Europe/Kyiv", false, "Кам’янка", "Черкаська область", listOf("Кам’янка", "Каменка")),
     CityOption("ua:71:kaniv", "Kaniv", "Канів", null, 49.75182, 31.46004, "Europe/Kyiv", false, "Канів", "Черкаська область", listOf("Канів")),
     CityOption("ua:71:hrystynivka", "Khrystynivka", "Khrystynivka", null, 48.81577, 29.97703, "Europe/Kyiv", false, null, "Черкаська область", emptyList()),
     CityOption("ua:71:korsunshevchenkivskyi", "Korsun-Shevchenkivskyi", "Корсунь-Шевченківський", null, 49.41894, 31.25865, "Europe/Kyiv", false, "Корсунь-Шевченківський", "Черкаська область", listOf("Корсунь-Шевченківський")),
@@ -800,6 +800,8 @@ private fun uaKirovohradska(): List<CityOption> = listOf(
     CityOption("ua:35:novhorodka", "Novhorodka", "Novhorodka", null, 48.36506, 32.65785, "Europe/Kyiv", false, null, "Кіровоградська область", emptyList()),
     CityOption("ua:35:novoarhanhelsk", "Novoarkhanhel’s’k", "Novoarkhanhel’s’k", null, 48.65803, 30.81821, "Europe/Kyiv", false, null, "Кіровоградська область", emptyList()),
     CityOption("ua:35:novomyrhorod", "Novomyrhorod", "Новомиргород", null, 48.78105, 31.64204, "Europe/Kyiv", false, "Новомиргород", "Кіровоградська область", listOf("Новомиргород")),
+    // Visicom: https://maps.visicom.ua/i/STL1NQUKC (Znamianka, 48.71702 N, 32.65411 E)
+    CityOption("ua:35:znamianka", "Znamianka", "Знам’янка", null, 48.71702, 32.65411, "Europe/Kyiv", false, "Знам’янка", "Кіровоградська область", listOf("Знам’янка", "Знаменка", "Znamianka")),
     CityOption("ua:35:novoukrayinka", "Novoukrayinka", "Novoukrayinka", null, 48.32635, 31.52852, "Europe/Kyiv", false, null, "Кіровоградська область", emptyList()),
     CityOption("ua:35:novyystarodub", "Novyy Starodub", "Novyy Starodub", null, 48.5158, 33.17329, "Europe/Kyiv", false, null, "Кіровоградська область", emptyList()),
     CityOption("ua:35:oleksandrivka", "Oleksandrivka", "Oleksandrivka", null, 48.96336, 32.23492, "Europe/Kyiv", false, null, "Кіровоградська область", emptyList()),

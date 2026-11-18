@@ -529,11 +529,13 @@ internal fun CitySheet(city: CityOption, auto: Boolean, title: Boolean = true, o
     var q by remember { mutableStateOf("") }
     var manualOpen by remember { mutableStateOf(false) }
     var zoneOpen by remember { mutableStateOf(false) }
-    var latText by remember { mutableStateOf("") }
-    var lonText by remember { mutableStateOf("") }
+    var manualName by remember(city.id) { mutableStateOf(if (city.id == app.mychitas.peleshaon.domain.ManualLocation.ID) city.name else "") }
+    var latText by remember(city.id) { mutableStateOf(if (city.id == app.mychitas.peleshaon.domain.ManualLocation.ID) city.lat.toString() else "") }
+    var lonText by remember(city.id) { mutableStateOf(if (city.id == app.mychitas.peleshaon.domain.ManualLocation.ID) city.lon.toString() else "") }
+    var manualIsrael by remember(city.id) { mutableStateOf(city.id == app.mychitas.peleshaon.domain.ManualLocation.ID && city.isIsrael) }
     var zoneText by remember(city.id, city.zoneId) { mutableStateOf(city.zoneId) }
     var inputError by remember { mutableStateOf(false) }
-    val list = remember(q) { if (q.isBlank()) CITIES.sortedBy { it.title(locale) } else findCities(q, 30) }
+    val list = remember(q, locale) { if (q.isBlank()) CITIES.sortedBy { it.title(locale) } else findCities(q, 30) }
     Column(modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp).padding(bottom = 16.dp)) {
         if (title) SheetTitle(stringResource(R.string.city))
         Text(
@@ -561,6 +563,11 @@ internal fun CitySheet(city: CityOption, auto: Boolean, title: Boolean = true, o
         }
         if (manualOpen) {
             OutlinedTextField(
+                value = manualName, onValueChange = { manualName = it; inputError = false },
+                label = { Text(stringResource(R.string.city_manual_name)) },
+                singleLine = true, modifier = Modifier.fillMaxWidth()
+            )
+            OutlinedTextField(
                 value = latText, onValueChange = { latText = it; inputError = false },
                 label = { Text(stringResource(R.string.city_manual_lat)) },
                 singleLine = true, modifier = Modifier.fillMaxWidth()
@@ -575,8 +582,12 @@ internal fun CitySheet(city: CityOption, auto: Boolean, title: Boolean = true, o
                 label = { Text(stringResource(R.string.city_manual_zone)) },
                 singleLine = true, modifier = Modifier.fillMaxWidth()
             )
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Checkbox(checked = manualIsrael, onCheckedChange = { manualIsrael = it })
+                Text(stringResource(R.string.city_manual_israel), color = ClockColors.Ink)
+            }
             TextButton(onClick = {
-                val c = app.mychitas.peleshaon.domain.ManualLocation.parse(q, latText, lonText, zoneText)
+                val c = app.mychitas.peleshaon.domain.ManualLocation.parse(manualName, latText, lonText, zoneText, manualIsrael)
                 if (c == null) inputError = true else onPick(c)
             }) {
                 Text(stringResource(R.string.city_manual_apply), color = ClockColors.Gold)

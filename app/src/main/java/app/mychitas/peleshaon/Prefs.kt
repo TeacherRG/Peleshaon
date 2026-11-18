@@ -69,7 +69,8 @@ object Prefs {
         if (id == app.mychitas.peleshaon.domain.ManualLocation.ID) {
             return app.mychitas.peleshaon.domain.ManualLocation.parse(
                 p.getString("custom_city_name", null), p.getString("custom_city_lat", null),
-                p.getString("custom_city_lon", null), p.getString("custom_city_zone", null)
+                p.getString("custom_city_lon", null), p.getString("custom_city_zone", null),
+                p.getBoolean("custom_city_is_israel", false)
             )
         }
         val base = cityById(id) ?: return null
@@ -95,13 +96,14 @@ object Prefs {
                 remove("city_zone_override")
             } else if (city.id == app.mychitas.peleshaon.domain.ManualLocation.ID) {
                 requireNotNull(app.mychitas.peleshaon.domain.ManualLocation.parse(
-                    city.name, city.lat.toString(), city.lon.toString(), city.zoneId
+                    city.name, city.lat.toString(), city.lon.toString(), city.zoneId, city.isIsrael
                 )) { "Invalid manual city coordinates or time zone" }
                 putString("city_id", city.id)
                 putString("custom_city_name", city.name)
                 putString("custom_city_lat", city.lat.toString())
                 putString("custom_city_lon", city.lon.toString())
                 putString("custom_city_zone", city.zoneId)
+                putBoolean("custom_city_is_israel", city.isIsrael)
                 remove("city_zone_override")
             } else {
                 requireNotNull(cityById(city.id)) { "Only catalog or explicit manual coordinates allowed" }

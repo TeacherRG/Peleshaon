@@ -288,4 +288,6 @@
     <string name="city_zone_override">Use a different local time zone</string>
     <string name="city_zone_apply">Apply time zone</string>
     <string name="city_timezone_notice">Confirm the actual local clock before using religious times, especially in occupied territories.</string>
+    <string name="city_manual_name">Location name</string>
+    <string name="city_manual_israel">Apply Israel holiday calendar (otherwise diaspora)</string>
 </resources>

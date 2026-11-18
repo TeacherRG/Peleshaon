@@ -290,4 +290,6 @@
     <string name="city_zone_override">Вибрати інший місцевий часовий пояс</string>
     <string name="city_zone_apply">Застосувати часовий пояс</string>
     <string name="city_timezone_notice">Перевірте фактичний місцевий час, особливо на окупованих територіях.</string>
+    <string name="city_manual_name">Назва населеного пункту</string>
+    <string name="city_manual_israel">Використовувати календар свят Ізраїлю (інакше діаспори)</string>
 </resources>

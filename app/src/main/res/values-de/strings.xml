@@ -288,4 +288,6 @@
     <string name="city_zone_override">Andere lokale Zeitzone wählen</string>
     <string name="city_zone_apply">Zeitzone übernehmen</string>
     <string name="city_timezone_notice">Die tatsächliche Ortszeit prüfen, besonders in besetzten Gebieten.</string>
+    <string name="city_manual_name">Ortsname</string>
+    <string name="city_manual_israel">Israelischen Feiertagskalender verwenden (sonst Diaspora)</string>
 </resources>

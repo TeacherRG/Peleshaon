@@ -289,4 +289,6 @@
     <string name="city_zone_override">בחירת אזור זמן מקומי אחר</string>
     <string name="city_zone_apply">החלת אזור זמן</string>
     <string name="city_timezone_notice">יש לוודא את השעה המקומית בפועל, במיוחד באזורים כבושים.</string>
+    <string name="city_manual_name">שם המקום</string>
+    <string name="city_manual_israel">שימוש בלוח חגי ישראל (אחרת חו״ל)</string>
 </resources>

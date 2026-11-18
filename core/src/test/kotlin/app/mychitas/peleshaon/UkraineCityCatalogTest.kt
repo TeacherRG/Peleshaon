@@ -30,6 +30,22 @@ class UkraineCityCatalogTest {
         assertNotEquals(ZmanimEngine.sunsetOf(LocalDate.of(2026,11,20), kam)?.toInstant(),
             ZmanimEngine.sunsetOf(LocalDate.of(2026,11,20), dni)?.toInstant())
     }
+    @Test fun kamiankaAndZnamiankaMustBeDistinctCitiesWithVerifiedRegions() {
+        val kamianka = assertNotNull(cityById("ua:71:kamianka"))
+        val znamianka = assertNotNull(cityById("ua:35:znamianka"))
+        assertEquals("Кам’янка", kamianka.nameUk)
+        assertEquals("Черкаська область", kamianka.oblastUk)
+        assertEquals("Знам’янка", znamianka.nameUk)
+        assertEquals("Кіровоградська область", znamianka.oblastUk)
+        assertTrue(kotlin.math.abs(kamianka.lat - 49.03235) < 0.02)
+        assertTrue(kotlin.math.abs(kamianka.lon - 32.10395) < 0.02)
+        assertTrue(kotlin.math.abs(znamianka.lat - 48.71702) < 0.02)
+        assertTrue(kotlin.math.abs(znamianka.lon - 32.65411) < 0.02)
+        assertTrue(findCities("Кам’янка", 250).any { it.id == kamianka.id })
+        assertTrue(findCities("Знам’янка", 250).any { it.id == znamianka.id })
+        assertTrue(findCities("Знаменка", 250).any { it.id == znamianka.id })
+        assertTrue(findCities("Знам’янка", 250).none { it.id == kamianka.id })
+    }
     @Test fun renamedCitiesRemainSearchable() {
         for ((modern,old) in mapOf(
             "Самар" to "Новомосковськ",
