@@ -304,18 +304,26 @@ private fun DayDetails(d: CalDay, city: CityOption, locale: Locale) {
                         }
                     }
                     CandleTransition.AFTER_NIGHTFALL -> {
-                        ZmanimEngine.havdalahOn(d.date, city)?.let {
+                        val previousEnd = ZmanimEngine.havdalahOn(d.date, city)
+                        if (previousEnd != null) {
                             TimeRow("🕯️", stringResource(R.string.cal_candles_after),
-                                it.withZoneSameInstant(zone).format(HHMM), ClockColors.GoldDeep)
+                                previousEnd.withZoneSameInstant(zone).format(HHMM), ClockColors.GoldDeep)
+                        } else {
+                            Text(stringResource(R.string.polar_shabbat_undefined),
+                                color = ClockColors.Bad, fontSize = 13.sp)
                         }
                     }
                     CandleTransition.NONE -> Unit
                 }
             }
             if (d.holy && !next.holy) {
-                ZmanimEngine.havdalahOn(d.date, city)?.let {
+                val end = ZmanimEngine.havdalahOn(d.date, city)
+                if (end != null) {
                     TimeRow("✨", stringResource(R.string.z_t_havdalah),
-                        it.withZoneSameInstant(zone).format(HHMM), ClockColors.GoldDeep)
+                        end.withZoneSameInstant(zone).format(HHMM), ClockColors.GoldDeep)
+                } else {
+                    Text(stringResource(R.string.polar_shabbat_undefined),
+                        color = ClockColors.Bad, fontSize = 13.sp)
                 }
             }
             for (t in listOf(ZmanType.SUNRISE, ZmanType.SOF_ZMAN_SHMA, ZmanType.SOF_ZMAN_TFILA, ZmanType.SUNSET, ZmanType.TZAIT)) {
@@ -323,6 +331,10 @@ private fun DayDetails(d: CalDay, city: CityOption, locale: Locale) {
                 TimeRow(null, stringResource(full(t.name)), it.roundedTime.withZoneSameInstant(zone).format(HHMM), zmanColor(t))
             }
             if (items.isEmpty()) Text(stringResource(R.string.polar_short), color = ClockColors.Muted, fontSize = 13.sp)
+            else if (items[ZmanType.TZAIT] == null) {
+                Text(stringResource(R.string.polar_nightfall_undefined),
+                    color = ClockColors.Bad, fontSize = 13.sp)
+            }
         }
     }
 }

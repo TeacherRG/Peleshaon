@@ -775,6 +775,9 @@ private fun ShabbatSheet(
                 Text(at?.let(wdTime) ?: stringResource(R.string.no_sun), fontWeight = FontWeight.Bold, color = ClockColors.Gold)
             }
         }
+        if (sh.havdalah == null) {
+            Note(stringResource(R.string.polar_shabbat_undefined))
+        }
         SeventhHour(sh.friday, city, now)
         Note(stringResource(R.string.shabbat_note))
         JewishCal.mevarchim(sh.friday, city.isIsrael)?.let { m ->
@@ -1186,6 +1189,9 @@ private fun TimesSheet(
                     Checkbox(checked = on, onCheckedChange = { onToggle(z.type) }, colors = checkColors())
                 }
             }
+        }
+        if (items.none { it.type == ZmanType.TZAIT }) {
+            Note(stringResource(R.string.polar_nightfall_undefined))
         }
         Text(stringResource(R.string.on_face) + " — ✓", color = ClockColors.Muted, fontSize = 12.sp)
         HorizontalDivider(color = ClockColors.Line)

@@ -294,4 +294,6 @@
     <string name="city_auto_unconfirmed_warning">המיקום משוער לפי אזור הזמן בלבד. יש לבחור מיקום מדויק לזמני היום.</string>
     <string name="city_choose">בחרו עיר</string>
     <string name="city_required_for_halacha">לחישוב הזמנים ההלכתיים בחרו עיר</string>
+    <string name="polar_nightfall_undefined">לא ניתן לחשב באופן מהימן את צאת הכוכבים בקו רוחב זה ובתאריך זה. יש לפנות לרב המקומי.</string>
+    <string name="polar_shabbat_undefined">לא ניתן לחשב באופן מהימן את צאת השבת או החג כאן. אין להניח שהשבת הסתיימה; יש לפנות לרב המקומי.</string>
 </resources>

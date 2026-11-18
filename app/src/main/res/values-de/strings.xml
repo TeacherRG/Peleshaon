@@ -293,4 +293,6 @@
     <string name="city_auto_unconfirmed_warning">Ort aus der Zeitzone nur geschätzt. Für verlässliche religiöse Zeiten bitte den genauen Ort wählen.</string>
     <string name="city_choose">Stadt auswählen</string>
     <string name="city_required_for_halacha">Wählen Sie eine Stadt, um die halachischen Zeiten zu berechnen</string>
+    <string name="polar_nightfall_undefined">Der Sterneaufgang kann für diesen Breitengrad und dieses Datum nicht zuverlässig berechnet werden. Fragen Sie Ihren Rabbiner.</string>
+    <string name="polar_shabbat_undefined">Das Ende von Schabbat oder Feiertagen kann hier nicht zuverlässig berechnet werden. Gehen Sie nicht vom Schabbatende aus; fragen Sie Ihren Rabbiner.</string>
 </resources>

@@ -295,4 +295,6 @@
     <string name="city_auto_unconfirmed_warning">Город определён приблизительно по часовому поясу. Выберите точное место для правильных религиозных времён.</string>
     <string name="city_choose">Выберите город</string>
     <string name="city_required_for_halacha">Для расчёта галахического времени выберите город</string>
+    <string name="polar_nightfall_undefined">Выход звёзд нельзя надёжно рассчитать для этой широты и даты. Уточните время у местного раввина.</string>
+    <string name="polar_shabbat_undefined">Исход Шаббата или праздника здесь невозможно надёжно рассчитать. Не считайте Шаббат завершённым; уточните время у местного раввина.</string>
 </resources>

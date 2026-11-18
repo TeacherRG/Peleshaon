@@ -293,4 +293,6 @@
     <string name="city_auto_unconfirmed_warning">City estimated from phone time zone. Select your exact location for reliable religious times.</string>
     <string name="city_choose">Select city</string>
     <string name="city_required_for_halacha">To calculate halachic times, select a city</string>
+    <string name="polar_nightfall_undefined">Nightfall cannot be determined reliably at this latitude and date. Consult your local rabbi.</string>
+    <string name="polar_shabbat_undefined">Shabbat or festival end cannot be determined reliably here. Do not assume Shabbat has ended; consult your local rabbi.</string>
 </resources>
