@@ -134,12 +134,12 @@ fun PeleShaonApp(
     var night by rememberSaveable { mutableStateOf(false) }
     // Знакомство — при первом запуске (разрешение на уведомления просит его шаг про будильники, с объяснением)
     var intro by rememberSaveable { mutableStateOf(!Prefs.of(context).getBoolean("onboarded", false)) }
-    LaunchedEffect(openAlarm.value) {
+    LaunchedEffect(openAlarm.value, openCalendar.value) {
         if (openAlarm.value != null) {
             night = false
             intro = false
         }
-        if (openCalendar.value > 0) androidx.compose.runtime.SideEffect {
+        if (openCalendar.value > 0) {
             night = false
             intro = false
         }

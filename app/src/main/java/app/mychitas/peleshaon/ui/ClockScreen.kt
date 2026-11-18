@@ -156,7 +156,7 @@ fun ClockScreen(
     // свой будильник, открытый в окне (C1, C2…)
     var editAlarm by rememberSaveable { mutableStateOf(Prefs.MORNING) }
     var pop by remember { mutableStateOf<Triple<String, Float, Float>?>(null) }
-    LaunchedEffect(requestedAlarm?.value) {
+    LaunchedEffect(requestedAlarm?.value, requestedCalendar?.value) {
         val id = requestedAlarm?.value
         if (id != null) {
             when (id) {
@@ -168,12 +168,12 @@ fun ClockScreen(
                         panel = Panel.CUSTOM
                     } else panel = Panel.WAKE
                 }
-                if ((requestedCalendar?.value ?: 0) > 0) androidx.compose.runtime.SideEffect {
-                    panel = Panel.CALENDAR
-                    requestedCalendar?.value = 0
-                }
             }
             requestedAlarm.value = null
+        }
+        if ((requestedCalendar?.value ?: 0) > 0) {
+            panel = Panel.CALENDAR
+            requestedCalendar?.value = 0
         }
     }
 
