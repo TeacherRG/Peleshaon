@@ -88,6 +88,14 @@ def main() -> None:
     check("END_MIN" not in service31 and "sunset.plusMinutes(ZmanimEngine.END_MIN)" not in
           read("core/src/main/kotlin/app/mychitas/peleshaon/domain/KiddushLevana.kt"),
           "Fixed-minute Shabbat end fallback reintroduced")
+    # Prevent writing an Int literal where CityOption expects Kotlin Double.
+    selected = read("core/src/main/kotlin/app/mychitas/peleshaon/domain/UkraineCities.kt")
+    selected_records = re.findall(
+        r'CityOption\\("[^"]+", "[^"]+", "[^"]+", (?:null|"[^"]*"), '
+        r'(-?[0-9.]+), (-?[0-9.]+), "[^"]+", false,', selected
+    )
+    check(len(selected_records) == 140 and all("." in a and "." in b for a, b in selected_records),
+          "Selected Ukrainian place coordinates must be 140 explicit Double literals")
     migration_tests = read("core/src/test/kotlin/app/mychitas/peleshaon/Zmanim31MigrationTest.kt")
     check('cityById("Europe/Berlin")' in migration_tests and
           "sevenReferenceCitiesAcrossAllFourSeasons" in migration_tests,

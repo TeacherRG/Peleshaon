@@ -139,7 +139,7 @@ internal val UKRAINE_IMPORTED_CITIES: List<CityOption> by lazy {
     CityOption("ua:74:chernihiv", "Chernihiv", "Чернигов", "Chernihiv", 51.50551, 31.28487, "Europe/Kyiv", false, "Чернігів", "Чернігівська область", listOf("Чернігів")),
     CityOption("ua:40:sevastopol", "Sevastopol", "Севастополь", "Sewastopol", 44.58883, 33.5224, "Europe/Simferopol", false, "Севастополь", "Севастополь", listOf("Севастополь")),
     CityOption("ua:12:kamianske", "Kamianske", "Каменское", "Kamjanske", 48.51134, 34.6021, "Europe/Kyiv", false, "Кам'янське", "Дніпропетровська область", listOf("Кам'янське", "Каменское", "Днепродзержинск", "Дніпродзержинськ", "Dneprodzerzhinsk")),
-    CityOption("ua:53:hadiach", "Hadiach", "Гадяч", "Hadiach", 50.36666667, 34, "Europe/Kyiv", false, "Гадяч", "Полтавська область", listOf("Гадяч", "Hadyach", "Haditch")),
+    CityOption("ua:53:hadiach", "Hadiach", "Гадяч", "Hadiach", 50.36666667, 34.0, "Europe/Kyiv", false, "Гадяч", "Полтавська область", listOf("Гадяч", "Hadyach", "Haditch")),
     CityOption("ua:18:berdychiv", "Berdychiv", "Бердичев", "Berdytschiw", 49.89928, 28.60235, "Europe/Kyiv", false, "Бердичів", "Житомирська область", listOf("Бердичів")),
     CityOption("ua:68:medzhybizh", "Medzhybizh", "Меджибож", "Medzhybizh", 49.43748, 27.40487, "Europe/Kyiv", false, "Меджибіж", "Хмельницька область", listOf("Меджибіж")),
     CityOption("ua:32:bilacerkva", "Bila Tserkva", "Белая Церковь", "Bila Zerkwa", 49.80939, 30.11209, "Europe/Kyiv", false, "Біла Церква", "Київська область", listOf("Біла Церква")),
