@@ -51,7 +51,9 @@ class LiveState(
 ) {
     companion object {
         fun of(context: Context, at: ZonedDateTime = ZonedDateTime.now()): LiveState {
-            val city = Prefs.city(context)
+            val city = requireNotNull(Prefs.chosenCity(context)) {
+                "Religious live state requires an explicitly chosen city"
+            }
             val zone = city.zone()
             val now = at.withZoneSameInstant(zone)
             val day = ZmanimEngine.calculateForMoment(now, city.name, city.lat, city.lon, 0.0, zone, city.isIsrael)
@@ -123,6 +125,17 @@ object Live {
             cancelTick(context)
             return
         }
+        if (Prefs.chosenCity(context) == null) {
+            NotificationManagerCompat.from(context).cancel(NOTIF_ID)
+            val manager = AppWidgetManager.getInstance(context)
+            val light = ClockTheme.widgetLight(context, null)
+            for (id in manager.getAppWidgetIds(ComponentName(context, FaceWidget::class.java)))
+                manager.updateAppWidget(id, ordinaryFaceViews(context, light))
+            for (id in manager.getAppWidgetIds(ComponentName(context, DateWidget::class.java)))
+                manager.updateAppWidget(id, ordinaryDateViews(context, light))
+            if (ids.isEmpty()) cancelTick(context) else scheduleOrdinaryTick(context)
+            return
+        }
         // виджеты — по теме: «Авто» — днём светлые, ночью тёмные
         val half = runCatching { app.mychitas.peleshaon.domain.ZmanimEngine.halfOf(java.time.ZonedDateTime.now(Prefs.city(context).zone()), Prefs.city(context)) }.getOrNull()
         val light = ClockTheme.widgetLight(context, half?.day)
@@ -173,6 +186,36 @@ object Live {
 
     private fun RemoteViews.clocks(context: Context, s: LiveState, vararg ids: Int) {
         for (id in ids) setString(id, "setTimeZone", s.city.zone().id)
+    }
+
+    /** No city: no stale geographical ring; TextClock follows the device zone. */
+    private fun ordinaryFaceViews(context: Context, light: Boolean): RemoteViews {
+        val v = RemoteViews(context.packageName, R.layout.widget_face)
+        v.setImageViewBitmap(R.id.w_face,
+            android.graphics.Bitmap.createBitmap(2, 2, android.graphics.Bitmap.Config.ARGB_8888))
+        v.paint(light, R.id.w_time to INK, R.id.w_date to GOLD)
+        v.setString(R.id.w_time, "setTimeZone", java.time.ZoneId.systemDefault().id)
+        v.setTextViewText(R.id.w_date, context.getString(R.string.city_choose))
+        v.setOnClickPendingIntent(R.id.w_root, openApp(context))
+        return v
+    }
+
+    private fun ordinaryDateViews(context: Context, light: Boolean): RemoteViews {
+        val v = RemoteViews(context.packageName, R.layout.widget_date)
+        val today = java.time.LocalDate.now()
+        val loc = Locale.getDefault()
+        v.paint(light, R.id.w_day to GOLD, R.id.w_month to INK, R.id.w_weekday to INK2)
+        v.setTextViewText(R.id.w_day, today.dayOfMonth.toString())
+        v.setTextViewText(R.id.w_month, today.month.getDisplayName(java.time.format.TextStyle.FULL_STANDALONE, loc))
+        v.setTextViewText(R.id.w_weekday, today.dayOfWeek.getDisplayName(java.time.format.TextStyle.FULL_STANDALONE, loc))
+        v.setOnClickPendingIntent(R.id.w_root, openApp(context))
+        return v
+    }
+
+    private fun scheduleOrdinaryTick(context: Context) {
+        val am = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
+        am.setWindow(AlarmManager.RTC, System.currentTimeMillis() + 5 * 60_000L,
+            10 * 60_000L, tickIntent(context))
     }
 
     /** Большой виджет: циферблат дня, время города и еврейская дата; фон прозрачный. */

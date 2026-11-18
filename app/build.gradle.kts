@@ -12,7 +12,7 @@ android {
         applicationId = "app.mychitas.peleshaon"
         minSdk = 26
         targetSdk = 35
-        versionCode = 2
+        versionCode = 6
         versionName = "1.0.0-beta3"
     }
 
@@ -29,6 +29,16 @@ android {
 
     buildTypes {
         getByName("debug") {
+            signingConfig = signingConfigs.getByName("debug")
+        }
+        // Safe sideload variant: a different package ID means an old app with
+        // an incompatible signing key can remain installed with all its data.
+        // Does not share preferences or alarm schedules with the original app.
+        create("qa") {
+            initWith(getByName("debug"))
+            applicationIdSuffix = ".qa"
+            versionNameSuffix = "-parallel"
+            matchingFallbacks += listOf("debug")
             signingConfig = signingConfigs.getByName("debug")
         }
     }

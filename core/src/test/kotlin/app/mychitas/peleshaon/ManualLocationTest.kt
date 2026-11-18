@@ -40,6 +40,18 @@ class ManualLocationTest {
         assertEquals(city.lat, overridden.lat)
         assertEquals(city.lon, overridden.lon)
     }
+    @Test fun customLocationCalendarJurisdictionIsExplicitAndStable() {
+        val diaspora = assertNotNull(ManualLocation.parse("Tel Aviv custom", "32.08", "34.78", "Asia/Jerusalem"))
+        val israel = assertNotNull(ManualLocation.parse("Tel Aviv custom", "32.08", "34.78", "Asia/Jerusalem", true))
+        assertEquals(false, diaspora.isIsrael) // Legacy saved custom locations stay diaspora by default.
+        assertEquals(true, israel.isIsrael)
+        assertEquals(diaspora.lat, israel.lat)
+        assertEquals(diaspora.lon, israel.lon)
+        assertEquals(diaspora.zoneId, israel.zoneId)
+        // Civil time zones never implicitly decide the religious calendar jurisdiction.
+        val remote = assertNotNull(ManualLocation.parse("Custom in Israel", "32.08", "34.78", "Europe/Kyiv", true))
+        assertTrue(remote.isIsrael)
+    }
     @Test fun oldSavedCitiesRemainResolvable() {
         assertEquals("dnipro", cityById("dnipro")?.id)
         assertEquals("Europe/Berlin", cityById("Europe/Berlin")?.id)

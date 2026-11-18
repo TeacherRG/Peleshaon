@@ -197,6 +197,20 @@ private fun rememberHeading(lat: Double, lon: Double): Pair<Boolean, Heading?> {
 fun MoonCompass(onClose: () -> Unit, startMoon: Boolean = true) {
     val context = LocalContext.current
     BackHandler(onBack = onClose)
+    if (Prefs.chosenCity(context) == null) {
+        Box(Modifier.fillMaxSize().background(Color(0xFF060B1E)),
+            contentAlignment = Alignment.Center) {
+            Column(horizontalAlignment = Alignment.CenterHorizontally,
+                modifier = Modifier.padding(24.dp)) {
+                Text(stringResource(R.string.city_required_for_halacha),
+                    color = ClockColors.GoldDeep, textAlign = TextAlign.Center)
+                androidx.compose.material3.TextButton(onClick = onClose) {
+                    Text(stringResource(R.string.ob_back), color = ClockColors.Ink)
+                }
+            }
+        }
+        return
+    }
     // компас считает «верх экрана» — экран не поворачиваем, пока он открыт
     DisposableEffect(Unit) {
         val act = context as? Activity

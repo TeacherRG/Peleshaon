@@ -64,9 +64,11 @@ class CoreTest {
         val london = cityById("Europe/London")!!
         val june = ZonedDateTime.of(2027, 6, 21, 10, 0, 0, 0, london.zone())
         val r = ZmanimEngine.calculateForMoment(june, london.name, london.lat, london.lon, 0.0, london.zone(), false)
-        assertNull(r.time(ZmanType.ALOT))
+        // Chabad.org's solar-midnight rule now restores dawn when -16.9° is
+        // unreachable on a summer night with an actual sunrise/sunset.
+        assertNotNull(r.time(ZmanType.ALOT))
         assertNotNull(r.time(ZmanType.SOF_ZMAN_SHMA))
-        assertEquals(ZmanType.entries.size - 1, r.items.size)
+        assertEquals(ZmanType.entries.size, r.items.size)
     }
 
     @Test
@@ -102,7 +104,7 @@ class CoreTest {
 
     @Test
     fun citiesAsOnTheSite() {
-        assertTrue(CITIES.size >= 1000, "Extended offline catalog must preserve original 197 cities")
+        assertEquals(337, CITIES.size, "Keep original 197 legacy cities plus exactly 140 approved Ukrainian places")
         assertEquals(CITIES.size, CITIES.map { it.id }.toSet().size)
         CITIES.forEach { assertNotNull(app.mychitas.peleshaon.domain.resolveZone(it.zoneId), it.zoneId) }
         assertEquals("Вена", cityForZone(ZoneId.of("Europe/Vienna")).nameRu)

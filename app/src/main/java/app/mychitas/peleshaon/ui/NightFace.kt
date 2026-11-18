@@ -14,6 +14,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import app.mychitas.peleshaon.Prefs
 import app.mychitas.peleshaon.R
 import app.mychitas.peleshaon.domain.Dial
@@ -43,7 +44,15 @@ fun NightFace(modifier: Modifier = Modifier) {
             delay(1000L - System.currentTimeMillis() % 1000L)
         }
     }
-    val city = remember(now.zone) { Prefs.city(context) }
+    val chosen = remember(now.zone) { Prefs.chosenCity(context) }
+    if (chosen == null) {
+        Box(modifier = modifier, contentAlignment = androidx.compose.ui.Alignment.Center) {
+            androidx.compose.material3.Text(now.format(java.time.format.DateTimeFormatter.ofPattern("HH:mm:ss")),
+                color = androidx.compose.ui.graphics.Color.White, fontSize = 43.sp)
+        }
+        return
+    }
+    val city = chosen
     val marks = remember { Prefs.marks(context) }
     val tziruf = remember { Prefs.tziruf(context) }
     val zone = city.zone()

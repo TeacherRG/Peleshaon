@@ -19,11 +19,13 @@
     <string name="wear_community">Громада</string>
     <string name="wear_candle_title">Час свічок</string>
     <string name="wear_back">← Назад</string>
-    <string name="wear_auto_city">Авто (лише часовий пояс)</string>
+    <string name="wear_auto_city">Скинути вибір міста</string>
     <string name="wear_local_candles">За містом</string>
     <string name="wear_candle_min">%1$d хв</string>
     <string name="wear_chabad">Хабад</string>
     <string name="wear_litvish">Литовська</string>
     <string name="wear_sefardi">Сефардська</string>
     <string name="wear_standalone_note">Налаштування годинника окремі; з телефоном не синхронізуються.</string>
+    <string name="wear_city_warning">Для розрахунку галахічного часу оберіть місто</string>
+    <string name="wear_select_city">Оберіть місто</string>
 </resources>

@@ -115,6 +115,48 @@ class Zmanim31MigrationTest {
             ZmanimConfig(tromso, Minhag.CHABAD)).shabbatEnd)
     }
 
+    @Test fun chabadSummerAlosFallsBackToPreviousSolarMidnight() {
+        val summer = LocalDate.of(2026, 6, 19)
+        for (id in listOf("Europe/Berlin", "Europe/Vilnius", "Europe/London",
+            "Europe/Kirov", "kazan")) {
+            val city = requireNotNull(cityById(id))
+            val raw = ZmanimService.buildCalendar(summer, city.name,
+                city.lat, city.lon, 0.0, city.zone())
+            assertNull(raw.alosBaalHatanya, "$id must exercise the missing-angle branch")
+            val expected = ZmanimService.buildCalendar(summer.minusDays(1),
+                city.name, city.lat, city.lon, 0.0, city.zone()).solarMidnight
+            val snap = ZmanimService.calculate(summer, ZmanimConfig(city, Minhag.CHABAD))
+            assertNotNull(expected)
+            assertEquals(expected, snap.dawn, "$id: previous night lower solar transit")
+            assertEquals("chabad.alos.solar_midnight_when_16_9deg_unreachable",
+                snap.methodIds["dawn"])
+            assertTrue(snap.dawn!!.isBefore(requireNotNull(snap.sunrise)))
+        }
+    }
+
+    @Test fun normalWinterAlosStillUses16Point9Degrees() {
+        val winter = LocalDate.of(2026, 11, 20)
+        for (id in listOf("Europe/Berlin", "Europe/Vilnius", "Europe/London")) {
+            val city = requireNotNull(cityById(id))
+            val cal = ZmanimService.buildCalendar(winter, city.name, city.lat,
+                city.lon, 0.0, city.zone())
+            val snap = ZmanimService.calculate(winter, ZmanimConfig(city, Minhag.CHABAD))
+            assertEquals(cal.alosBaalHatanya, snap.dawn)
+            assertEquals("chabad.alos.16_9deg", snap.methodIds["dawn"])
+        }
+    }
+
+    @Test fun missingNightfallAndShabbatEndAreNotInvented() {
+        val yakutsk = requireNotNull(cityById("Asia/Yakutsk"))
+        val june = LocalDate.of(2026, 6, 19)
+        val snap = ZmanimService.calculate(june, ZmanimConfig(yakutsk, Minhag.CHABAD))
+        assertNull(snap.ordinaryTzait, "No fabricated 6-degree nightfall")
+        // An absent 8.5-degree event remains absent; no fixed-minute substitute.
+        val saturday = ZmanimService.calculate(june.plusDays(1),
+            ZmanimConfig(yakutsk, Minhag.CHABAD))
+        assertNull(saturday.shabbatEnd)
+    }
+
     @Test fun deadlinesAreNeverDisplayedAfterTheirExactMoment() {
         val date = LocalDate.of(2026, 11, 20)
         val exact = ZmanimEngine.itemsOf(date, berlin)
@@ -123,6 +165,43 @@ class Zmanim31MigrationTest {
         // Sunrise is the beginning of an allowed interval: do not render before it.
         val start = ZmanimEngine.itemsOf(date, berlin).first { it.type == ZmanType.SUNRISE }
         assertTrue(!start.roundedTime.isBefore(start.exactTime))
+    }
+
+    @Test fun chabadDawnAndMiddayNeverRoundLate() {
+        val simferopol = requireNotNull(cityById("Europe/Simferopol"))
+        val events = ZmanimEngine.itemsOf(LocalDate.of(2026, 11, 13), simferopol)
+        val dawn = events.first { it.type == ZmanType.ALOT }
+        val noon = events.first { it.type == ZmanType.CHATZOT }
+        assertTrue(!dawn.roundedTime.isAfter(dawn.exactTime))
+        assertTrue(!noon.roundedTime.isAfter(noon.exactTime))
+        assertEquals(java.time.LocalTime.of(6, 2), dawn.roundedTime.toLocalTime())
+        assertEquals(java.time.LocalTime.of(12, 27), noon.roundedTime.toLocalTime())
+        val sunrise = events.first { it.type == ZmanType.SUNRISE }
+        val firstMincha = events.first { it.type == ZmanType.MINCHA_GEDOLA }
+        assertTrue(!sunrise.roundedTime.isBefore(sunrise.exactTime))
+        assertTrue(!firstMincha.roundedTime.isBefore(firstMincha.exactTime))
+    }
+
+    @Test fun deadlineAndEarliestTimeRoundingAcrossSeasons() {
+        val ids = listOf("dnipro", "Europe/Berlin", "Asia/Jerusalem",
+            "Europe/Kiev", "odesa", "Europe/Simferopol")
+        val dates = listOf(LocalDate.of(2026, 3, 27), LocalDate.of(2026, 6, 19),
+            LocalDate.of(2026, 10, 30), LocalDate.of(2026, 11, 20))
+        val deadlines = setOf(ZmanType.ALOT, ZmanType.SOF_ZMAN_SHMA,
+            ZmanType.SOF_ZMAN_TFILA, ZmanType.CHATZOT, ZmanType.SUNSET)
+        val earliest = setOf(ZmanType.SUNRISE, ZmanType.MINCHA_GEDOLA,
+            ZmanType.PLAG_HAMINCHA, ZmanType.TZAIT)
+        for (id in ids) for (date in dates) {
+            val city = requireNotNull(cityById(id))
+            for (event in ZmanimEngine.itemsOf(date, city)) {
+                if (event.type in deadlines)
+                    assertTrue(!event.roundedTime.isAfter(event.exactTime),
+                        "${city.id} ${date} ${event.type} rounded after deadline")
+                if (event.type in earliest)
+                    assertTrue(!event.roundedTime.isBefore(event.exactTime),
+                        "${city.id} ${date} ${event.type} rounded before earliest event")
+            }
+        }
     }
 
     @Test fun preservingCurrentNoInternetModelAndSixHourKashrutPolicy() {

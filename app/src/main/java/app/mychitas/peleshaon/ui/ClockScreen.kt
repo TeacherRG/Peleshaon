@@ -171,6 +171,12 @@ fun ClockScreen(
         }
     }
 
+    // Stop BEFORE invoking any geographical, Shabbat, Jewish-day rollover or moon calculations.
+    // Saved invalid/missing city must not be replaced by a timezone-derived religious city.
+    if (auto) {
+        NoCityClockScreen(now = now, onIntro = onIntro, onNightScreen = onNightScreen, onChanged = bump)
+        return
+    }
     val zone = city.zone()
     val cityNow = now.withZoneSameInstant(zone)
     val minute = cityNow.truncatedTo(ChronoUnit.MINUTES)
@@ -204,6 +210,9 @@ fun ClockScreen(
         ) {
             if (Prefs.cityUnmatched(context)) {
                 Text(stringResource(R.string.city_unmatched_warning), color = ClockColors.Bad,
+                    fontSize = 12.sp, modifier = Modifier.clickable { panel = Panel.CITY })
+            } else if (auto) {
+                Text(stringResource(R.string.city_auto_unconfirmed_warning), color = ClockColors.Bad,
                     fontSize = 12.sp, modifier = Modifier.clickable { panel = Panel.CITY })
             }
             // ---- шапка: город, дата, «Как считаем»
@@ -402,6 +411,93 @@ fun ClockScreen(
     }
 }
 
+
+/** Ordinary local clock; calendar dates only until the user explicitly selects a city. */
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun NoCityClockScreen(
+    now: ZonedDateTime,
+    onIntro: () -> Unit,
+    onNightScreen: () -> Unit,
+    onChanged: () -> Unit
+) {
+    val context = LocalContext.current
+    val locale = androidx.compose.ui.platform.LocalConfiguration.current.locales[0]
+    var panel by rememberSaveable { mutableStateOf<Panel?>(null) }
+    Box(Modifier.fillMaxSize().background(Color(0xFF060B1E))) {
+        ClockBackground()
+        Column(
+            Modifier.fillMaxSize().safeDrawingPadding().padding(horizontal = 12.dp, vertical = 8.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+                Chip(onClick = { panel = Panel.CITY }, modifier = Modifier.widthIn(max = 165.dp)) {
+                    Text("📍")
+                    Text(stringResource(R.string.city_choose), color = ClockColors.Ink,
+                        fontSize = 13.sp, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                    Text("▾", color = ClockColors.TcheletDeep)
+                }
+                Surface(
+                    onClick = { panel = Panel.CALENDAR },
+                    shape = RoundedCornerShape(16.dp),
+                    color = ClockColors.Surface,
+                    border = BorderStroke(1.dp, ClockColors.Line),
+                    modifier = Modifier.weight(1f).padding(horizontal = 6.dp)
+                ) {
+                    Text("📅 " + now.format(DateTimeFormatter.ofPattern("d MMM yyyy", locale)),
+                        modifier = Modifier.padding(9.dp), textAlign = TextAlign.Center,
+                        color = ClockColors.GoldDeep, fontWeight = FontWeight.Bold)
+                }
+                Chip(onClick = { panel = Panel.SETTINGS }, round = true) {
+                    Text("☰", color = ClockColors.TcheletDeep, fontSize = 18.sp)
+                }
+            }
+            Surface(
+                color = ClockColors.Surface,
+                shape = RoundedCornerShape(12.dp),
+                border = BorderStroke(1.dp, ClockColors.Line),
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text(stringResource(R.string.city_required_for_halacha),
+                    color = ClockColors.GoldDeep, textAlign = TextAlign.Center, fontSize = 13.sp,
+                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 9.dp))
+            }
+            Box(Modifier.weight(1f).fillMaxWidth(), contentAlignment = Alignment.Center) {
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    Text(now.format(DateTimeFormatter.ofPattern("HH:mm:ss")),
+                        color = ClockColors.GoldDeep, fontWeight = FontWeight.Bold, fontSize = 48.sp)
+                    Text(now.format(DateTimeFormatter.ofPattern("EEEE, d MMMM yyyy", locale)),
+                        color = ClockColors.Ink, fontSize = 16.sp, textAlign = TextAlign.Center)
+                }
+            }
+        }
+    }
+    if (panel != null) {
+        val state = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+        ModalBottomSheet(onDismissRequest = { panel = null }, sheetState = state,
+            containerColor = ClockColors.SheetBg, contentColor = ClockColors.Ink) {
+            when (panel) {
+                Panel.CITY -> CitySheet(Prefs.city(context), true) { chosen ->
+                    Prefs.setCity(context, chosen)
+                    AlarmScheduler.rescheduleAllFromPrefs(context)
+                    app.mychitas.peleshaon.moon.MoonReminder.schedule(context)
+                    Live.updateAsync(context)
+                    panel = null
+                    onChanged()
+                }
+                Panel.CALENDAR -> CalendarNoCity(now.toLocalDate())
+                Panel.SETTINGS -> SettingsSheet(onChange = onChanged)
+                Panel.INFO -> InfoSheet(onNightScreen = { panel = null; onNightScreen() },
+                    onIntro = { panel = null; onIntro() }, onPrivacy = { panel = Panel.PRIVACY })
+                Panel.PRIVACY -> PrivacySheet()
+                else -> Text(stringResource(R.string.city_required_for_halacha),
+                    modifier = Modifier.padding(24.dp), color = ClockColors.Ink)
+            }
+        }
+    }
+}
+
 @Composable
 private fun Chip(onClick: () -> Unit, modifier: Modifier = Modifier, round: Boolean = false, content: @Composable () -> Unit) {
     Surface(
@@ -529,11 +625,17 @@ internal fun CitySheet(city: CityOption, auto: Boolean, title: Boolean = true, o
     var q by remember { mutableStateOf("") }
     var manualOpen by remember { mutableStateOf(false) }
     var zoneOpen by remember { mutableStateOf(false) }
-    var latText by remember { mutableStateOf("") }
-    var lonText by remember { mutableStateOf("") }
+    var manualName by remember(city.id) { mutableStateOf(if (city.id == app.mychitas.peleshaon.domain.ManualLocation.ID) city.name else "") }
+    var latText by remember(city.id) { mutableStateOf(if (city.id == app.mychitas.peleshaon.domain.ManualLocation.ID) city.lat.toString() else "") }
+    var lonText by remember(city.id) { mutableStateOf(if (city.id == app.mychitas.peleshaon.domain.ManualLocation.ID) city.lon.toString() else "") }
+    var manualIsrael by remember(city.id) { mutableStateOf(city.id == app.mychitas.peleshaon.domain.ManualLocation.ID && city.isIsrael) }
     var zoneText by remember(city.id, city.zoneId) { mutableStateOf(city.zoneId) }
     var inputError by remember { mutableStateOf(false) }
-    val list = remember(q) { if (q.isBlank()) CITIES.sortedBy { it.title(locale) } else findCities(q, 30) }
+    val list = remember(q, locale) { if (q.isBlank()) CITIES.sortedBy { it.title(locale) } else findCities(q, 30) }
+    val repeatedLabels = remember(locale) {
+        CITIES.groupingBy { it.title(locale) to it.oblastUk }.eachCount()
+            .filterValues { it > 1 }.keys
+    }
     Column(modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp).padding(bottom = 16.dp)) {
         if (title) SheetTitle(stringResource(R.string.city))
         Text(
@@ -561,6 +663,11 @@ internal fun CitySheet(city: CityOption, auto: Boolean, title: Boolean = true, o
         }
         if (manualOpen) {
             OutlinedTextField(
+                value = manualName, onValueChange = { manualName = it; inputError = false },
+                label = { Text(stringResource(R.string.city_manual_name)) },
+                singleLine = true, modifier = Modifier.fillMaxWidth()
+            )
+            OutlinedTextField(
                 value = latText, onValueChange = { latText = it; inputError = false },
                 label = { Text(stringResource(R.string.city_manual_lat)) },
                 singleLine = true, modifier = Modifier.fillMaxWidth()
@@ -575,8 +682,12 @@ internal fun CitySheet(city: CityOption, auto: Boolean, title: Boolean = true, o
                 label = { Text(stringResource(R.string.city_manual_zone)) },
                 singleLine = true, modifier = Modifier.fillMaxWidth()
             )
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Checkbox(checked = manualIsrael, onCheckedChange = { manualIsrael = it })
+                Text(stringResource(R.string.city_manual_israel), color = ClockColors.Ink)
+            }
             TextButton(onClick = {
-                val c = app.mychitas.peleshaon.domain.ManualLocation.parse(q, latText, lonText, zoneText)
+                val c = app.mychitas.peleshaon.domain.ManualLocation.parse(manualName, latText, lonText, zoneText, manualIsrael)
                 if (c == null) inputError = true else onPick(c)
             }) {
                 Text(stringResource(R.string.city_manual_apply), color = ClockColors.Gold)
@@ -614,7 +725,13 @@ internal fun CitySheet(city: CityOption, auto: Boolean, title: Boolean = true, o
                         color = if (c.id == city.id && !auto) ClockColors.Gold else ClockColors.Ink,
                         fontWeight = if (c.id == city.id) FontWeight.Bold else FontWeight.Normal
                     )
-                    Text(c.oblastUk ?: c.zoneId.substringAfter('/').replace('_', ' '), fontSize = 12.sp, color = ClockColors.Muted)
+                    Column(horizontalAlignment = Alignment.End) {
+                        Text(c.oblastTitle(locale) ?: c.zoneId.substringAfter('/').replace('_', ' '), fontSize = 12.sp, color = ClockColors.Muted)
+                        if ((c.title(locale) to c.oblastUk) in repeatedLabels) {
+                            Text(String.format(java.util.Locale.US, "%.4f, %.4f", c.lat, c.lon),
+                                fontSize = 11.sp, color = ClockColors.Muted)
+                        }
+                    }
                 }
                 HorizontalDivider(color = ClockColors.Line)
             }
@@ -657,6 +774,9 @@ private fun ShabbatSheet(
                 }
                 Text(at?.let(wdTime) ?: stringResource(R.string.no_sun), fontWeight = FontWeight.Bold, color = ClockColors.Gold)
             }
+        }
+        if (sh.havdalah == null) {
+            Note(stringResource(R.string.polar_shabbat_undefined))
         }
         SeventhHour(sh.friday, city, now)
         Note(stringResource(R.string.shabbat_note))
@@ -767,7 +887,7 @@ private fun AlarmSheet(
     val timeText = String.format(Locale.ROOT, "%02d:%02d", spec.hour, spec.minute)
 
     SheetColumn {
-        PermissionsCard()
+        if (spec.on) PermissionsCard()
         Row(verticalAlignment = Alignment.CenterVertically) {
             Text(
                 if (custom) stringResource(R.string.alarm_n, Prefs.customNumber(type)) else stringResource(if (study) R.string.study else R.string.alarm),
@@ -964,6 +1084,7 @@ private fun KashrutCard(onChange: () -> Unit) {
         if (!silent) Note(stringResource(R.string.kashrut_deferred))
     }
     if (running) {
+        PermissionsCard()
         val t = java.time.Instant.ofEpochMilli(at).atZone(Prefs.city(context).zone())
         Text(stringResource(R.string.kashrut_until, t.format(DateTimeFormatter.ofPattern("HH:mm"))), color = ClockColors.GoldDeep, fontWeight = FontWeight.Bold)
         OutlinedButton(
@@ -1069,6 +1190,9 @@ private fun TimesSheet(
                 }
             }
         }
+        if (items.none { it.type == ZmanType.TZAIT }) {
+            Note(stringResource(R.string.polar_nightfall_undefined))
+        }
         Text(stringResource(R.string.on_face) + " — ✓", color = ClockColors.Muted, fontSize = 12.sp)
         HorizontalDivider(color = ClockColors.Line)
         Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.clickable { onTziruf(!tziruf) }) {
@@ -1079,8 +1203,26 @@ private fun TimesSheet(
         TzirufMore()
         HorizontalDivider(color = ClockColors.Line)
         var live by remember { mutableStateOf(Live.notificationOn(context)) }
-        Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.clickable { live = !live; Live.setNotification(context, live) }) {
-            Checkbox(checked = live, onCheckedChange = { live = it; Live.setNotification(context, it) }, colors = checkColors())
+        val notificationPermission = androidx.activity.compose.rememberLauncherForActivityResult(
+            androidx.activity.result.contract.ActivityResultContracts.RequestPermission()
+        ) { granted ->
+            if (granted) {
+                live = true
+                Live.setNotification(context, true)
+            }
+        }
+        val toggleLive: (Boolean) -> Unit = { enabled ->
+            if (enabled && android.os.Build.VERSION.SDK_INT >= 33 &&
+                context.checkSelfPermission(android.Manifest.permission.POST_NOTIFICATIONS) !=
+                    android.content.pm.PackageManager.PERMISSION_GRANTED) {
+                notificationPermission.launch(android.Manifest.permission.POST_NOTIFICATIONS)
+            } else {
+                live = enabled
+                Live.setNotification(context, enabled)
+            }
+        }
+        Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.clickable { toggleLive(!live) }) {
+            Checkbox(checked = live, onCheckedChange = toggleLive, colors = checkColors())
             Text(stringResource(R.string.live_notif), color = ClockColors.Ink, fontWeight = FontWeight.SemiBold)
         }
         Note(stringResource(R.string.live_notif_note))
@@ -1265,6 +1407,8 @@ private fun SettingsSheet(onChange: () -> Unit) {
         }
         Note(stringResource(R.string.theme_note))
         HorizontalDivider(color = ClockColors.Line)
+        // There is no valid coordinate context for geographically sensitive settings.
+        if (Prefs.chosenCity(context) == null) return@SheetColumn
 
         // Local candle-lighting practice is independent of the community's zmanim profile.
         Text(stringResource(R.string.candle_offset_title), fontWeight = FontWeight.Bold, color = ClockColors.Ink)

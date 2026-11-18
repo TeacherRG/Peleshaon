@@ -208,7 +208,7 @@
     <string name="candle_offset_title">Время до заката для свечей</string>
     <string name="candle_offset_local">По городу</string>
     <string name="candle_offset_minutes">%1$d мин</string>
-    <string name="candle_offset_note">По умолчанию: Иерусалим — 40 мин, Хайфа — 30 мин, другие города — 18 мин. Уточните обычай своей общины.</string>
+    <string name="candle_offset_note">По умолчанию: Иерусалим — 40 мин, Хайфа — 30 мин, Тель-Авив — 22 мин, большинство других городов — 18 мин. Уточните обычай общины.</string>
     <string name="alarm_fallback_channel">Проблема доставки будильника</string>
     <string name="alarm_fallback_title">Будильник не запустился</string>
     <string name="alarm_fallback_message">Android ограничил запуск службы. Откройте приложение и проверьте разрешения будильников и уведомлений.</string>
@@ -243,7 +243,7 @@
     <string name="minhag_chabad">Хабад</string>
     <string name="minhag_litvish">Литовская (ашкеназская)</string>
     <string name="minhag_sefardi">Сефардская</string>
-    <string name="minhag_d_chabad">Время — по Алтер Ребе (Бааль ґа-Тания), как в календарях Хабада. Исход Шабата — через 50 минут после заката. Кидуш Левана — с 7 суток после молада. В календаре — даты Хабада.</string>
+    <string name="minhag_d_chabad">Время — по Алтер Ребе (Бааль ґа-Тания), как в календарях Хабада. Исход Шабата — когда Солнце находится на 8,5° ниже горизонта. Кидуш Левана — с 7 суток после молада. В календаре — даты Хабада.</string>
     <string name="minhag_d_litvish">Время — по Виленскому Гаону (ГРА): «Шма» и утренняя молитва считаются от восхода до заката; выход звёзд и исход Шабата — когда солнце на 8,5° под горизонтом. Кидуш Левана — с 3 суток после молада.</string>
     <string name="minhag_d_sefardi">Расчётный профиль приложения: рассвет за 72 пропорциональные минуты, Шма по Маген Аврааму, утренняя молитва по ГРА, выход звёзд через 13,5 пропорциональной минуты, исход Шабата по Рабейну Таму (72 пропорциональные минуты). Это не единая норма всех сефардских общин.</string>
     <string name="minhag_note">Времена дня, исход Шабата, будильники и напоминания о Луне зависят от выбранного профиля. Время свечей зависит от города и настроек. Уточняйте у раввина общины.</string>
@@ -290,4 +290,14 @@
     <string name="city_zone_override">Выбрать другой местный часовой пояс</string>
     <string name="city_zone_apply">Применить часовой пояс</string>
     <string name="city_timezone_notice">Проверьте фактическое местное время, особенно на оккупированных территориях.</string>
+    <string name="city_manual_name">Название населённого пункта</string>
+    <string name="city_manual_israel">Использовать календарь праздников Израиля (иначе диаспоры)</string>
+    <string name="city_auto_unconfirmed_warning">Город определён приблизительно по часовому поясу. Выберите точное место для правильных религиозных времён.</string>
+    <string name="city_choose">Выберите город</string>
+    <string name="city_required_for_halacha">Для расчёта галахического времени выберите город</string>
+    <string name="polar_nightfall_undefined">Выход звёзд нельзя надёжно рассчитать для этой широты и даты. Уточните время у местного раввина.</string>
+    <string name="polar_shabbat_undefined">Исход Шаббата или праздника здесь невозможно надёжно рассчитать. Не считайте Шаббат завершённым; уточните время у местного раввина.</string>
+    <string name="cal_misheyakir">Мишеякир — талит и тфилин</string>
+    <string name="cal_mincha_ketana">Минха ктана</string>
+    <string name="cal_biur_chametz">Срок сжигания хамеца</string>
 </resources>

@@ -7,6 +7,10 @@ import android.content.Intent
 import android.net.Uri
 import android.os.Build
 import android.provider.Settings
+import android.Manifest
+import android.content.pm.PackageManager
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -69,6 +73,9 @@ private fun openSettings(context: Context, action: String) {
 fun PermissionsCard() {
     val context = LocalContext.current
     var state by remember { mutableStateOf(readPermissions(context)) }
+    val notificationsLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { state = readPermissions(context) }
     val owner = LocalLifecycleOwner.current
     DisposableEffect(owner) {
         val observer = LifecycleEventObserver { _, event ->
@@ -99,7 +106,11 @@ fun PermissionsCard() {
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) openSettings(context, Settings.ACTION_MANAGE_APP_USE_FULL_SCREEN_INTENT)
             }
             PermissionRow(R.string.perm_notif, state.notifications) {
-                openSettings(context, Settings.ACTION_APP_NOTIFICATION_SETTINGS)
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
+                    context.checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS) !=
+                        PackageManager.PERMISSION_GRANTED)
+                    notificationsLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+                else openSettings(context, Settings.ACTION_APP_NOTIFICATION_SETTINGS)
             }
         }
     }

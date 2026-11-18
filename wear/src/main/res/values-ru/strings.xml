@@ -19,11 +19,13 @@
     <string name="wear_community">Община</string>
     <string name="wear_candle_title">Время свечей</string>
     <string name="wear_back">← Назад</string>
-    <string name="wear_auto_city">Авто (только часовой пояс)</string>
+    <string name="wear_auto_city">Сбросить выбор города</string>
     <string name="wear_local_candles">По городу</string>
     <string name="wear_candle_min">%1$d мин</string>
     <string name="wear_chabad">Хабад</string>
     <string name="wear_litvish">Литовская</string>
     <string name="wear_sefardi">Сефардская</string>
     <string name="wear_standalone_note">Настройки часов автономны; с телефона не синхронизируются.</string>
+    <string name="wear_city_warning">Для расчёта галахического времени выберите город</string>
+    <string name="wear_select_city">Выберите город</string>
 </resources>

@@ -51,9 +51,11 @@ object ClockTheme {
 
     /** День ли сейчас в городе: от восхода до заката; нет восхода / заката — 7:00–19:00. */
     fun refresh(context: Context) {
-        val city = Prefs.city(context)
-        val now = ZonedDateTime.now(city.zone())
-        dayNow = runCatching { ZmanimEngine.halfOf(now, city)?.day }.getOrNull() ?: (now.hour in 7..18)
+        val city = Prefs.chosenCity(context)
+        val now = ZonedDateTime.now(city?.zone() ?: java.time.ZoneId.systemDefault())
+        dayNow = if (city == null) now.hour in 7..18
+            else runCatching { ZmanimEngine.halfOf(now, city)?.day }.getOrNull()
+                ?: (now.hour in 7..18)
     }
 
     inline fun <T> dark(block: () -> T): T = render(false, block)

@@ -38,14 +38,48 @@ jobs:
       # One Gradle invocation shares dependency resolution and configuration
       # across tests and both APKs, avoiding duplicate runner time.
       - name: Test core and build both Beta APKs
-        run: gradle --no-daemon :core:test :app:assembleDebug :wear:assembleDebug
+        run: gradle --no-daemon :core:test :app:assembleDebug :app:assembleQa :wear:assembleDebug
+
+      - name: Validate both phone packages and upgrade version code
+        run: |
+          AAPT=$(ls "$ANDROID_HOME"/build-tools/*/aapt2 | sort -V | tail -1)
+          "$AAPT" dump badging app/build/outputs/apk/debug/app-debug.apk > /tmp/phone-package.txt
+          "$AAPT" dump badging app/build/outputs/apk/qa/app-qa.apk > /tmp/parallel-package.txt
+          "$AAPT" dump badging wear/build/outputs/apk/debug/wear-debug.apk > /tmp/wear-package.txt
+          echo "== Phone" && head -6 /tmp/phone-package.txt
+          echo "== QA parallel" && head -6 /tmp/parallel-package.txt
+          echo "== Wear" && head -6 /tmp/wear-package.txt
+          grep -q "name='app.mychitas.peleshaon' versionCode='6'" /tmp/phone-package.txt
+          grep -q "name='app.mychitas.peleshaon.qa' versionCode='6'" /tmp/parallel-package.txt
+          grep -q "name='app.mychitas.peleshaon' versionCode='6'" /tmp/wear-package.txt
+          grep -q "minSdkVersion:'26'" /tmp/phone-package.txt
+          grep -q "minSdkVersion:'26'" /tmp/parallel-package.txt
+          echo "Verified: normal update + separate QA install with independent package ID"
+
+      - name: Export exact app engine times for third-party comparison
+        uses: actions/upload-artifact@v5
+        with:
+          name: peleshaon-zmanim-internal-probe
+          path: core/build/reports/chabad-engine-probe.tsv
+          if-no-files-found: error
+
+      - name: Export full 337-place astronomical audit
+        uses: actions/upload-artifact@v5
+        if: always()
+        with:
+          name: peleshaon-all-337-zmanim
+          path: |
+            core/build/reports/all-337-zmanim-by-date.tsv
+            core/build/reports/all-337-zmanim-city-summary.tsv
+            core/build/reports/all-337-zmanim-audit-summary.txt
+          if-no-files-found: warn
 
       - name: Privacy promise — no internet permission
         # Политика конфиденциальности (niflaot.mychitas.app/peleshaon/privacy/) обещает: приложение не выходит в интернет.
         # Если разрешение INTERNET появилось (например, его принесла библиотека) — сначала поправить политику.
         run: |
           AAPT=$(ls "$ANDROID_HOME"/build-tools/*/aapt2 | sort -V | tail -1)
-          for apk in app/build/outputs/apk/debug/app-debug.apk wear/build/outputs/apk/debug/wear-debug.apk; do
+          for apk in app/build/outputs/apk/debug/app-debug.apk app/build/outputs/apk/qa/app-qa.apk wear/build/outputs/apk/debug/wear-debug.apk; do
             echo "== $apk"; "$AAPT" dump permissions "$apk"
             if "$AAPT" dump permissions "$apk" | grep -q 'android.permission.INTERNET'; then
               echo "::error::$apk requests INTERNET — the privacy policy says the app does not go online"; exit 1
@@ -75,3 +109,9 @@ jobs:
         with:
           name: PeleShaon-wear-debug
           path: wear/build/outputs/apk/debug/wear-debug.apk
+
+      - name: Upload parallel-install QA APK
+        uses: actions/upload-artifact@v5
+        with:
+          name: PeleShaon-phone-parallel-qa
+          path: app/build/outputs/apk/qa/app-qa.apk

@@ -60,7 +60,7 @@ object Prefs {
 
     fun of(context: Context): SharedPreferences = context.getSharedPreferences(NAME, Context.MODE_PRIVATE)
 
-    // ---- город: выбранный вручную, иначе — по часовому поясу телефона
+    // ---- город: religious calculations require an explicit valid city selection
 
     /** Saved user selection, with optional explicit civil-time zone. */
     fun chosenCity(context: Context): CityOption? {
@@ -69,7 +69,8 @@ object Prefs {
         if (id == app.mychitas.peleshaon.domain.ManualLocation.ID) {
             return app.mychitas.peleshaon.domain.ManualLocation.parse(
                 p.getString("custom_city_name", null), p.getString("custom_city_lat", null),
-                p.getString("custom_city_lon", null), p.getString("custom_city_zone", null)
+                p.getString("custom_city_lon", null), p.getString("custom_city_zone", null),
+                p.getBoolean("custom_city_is_israel", false)
             )
         }
         val base = cityById(id) ?: return null
@@ -85,8 +86,15 @@ object Prefs {
     fun cityUnconfirmed(context: Context): Boolean = chosenCity(context) == null
 
     /** If neither a manual city nor a timezone match exists, do not schedule religious alarms. */
-    fun cityUnmatched(context: Context): Boolean =
-        chosenCity(context) == null && cityMatchForZone(ZoneId.systemDefault()) == null
+    /** A no-longer-supported saved city must NEVER turn into another city silently.
+     * Keep its stored ID until the user explicitly chooses a supported city or manual point.
+     * In this state all geographic religious alarms are held and the UI warns the user.
+     */
+    fun citySelectionObsolete(context: Context): Boolean =
+        of(context).getString("city_id", null) != null && chosenCity(context) == null
+
+    // Timezone can display ordinary clock time only; never authorize religious events.
+    fun cityUnmatched(context: Context): Boolean = chosenCity(context) == null
 
     fun setCity(context: Context, city: CityOption?) {
         of(context).edit().apply {
@@ -95,13 +103,14 @@ object Prefs {
                 remove("city_zone_override")
             } else if (city.id == app.mychitas.peleshaon.domain.ManualLocation.ID) {
                 requireNotNull(app.mychitas.peleshaon.domain.ManualLocation.parse(
-                    city.name, city.lat.toString(), city.lon.toString(), city.zoneId
+                    city.name, city.lat.toString(), city.lon.toString(), city.zoneId, city.isIsrael
                 )) { "Invalid manual city coordinates or time zone" }
                 putString("city_id", city.id)
                 putString("custom_city_name", city.name)
                 putString("custom_city_lat", city.lat.toString())
                 putString("custom_city_lon", city.lon.toString())
                 putString("custom_city_zone", city.zoneId)
+                putBoolean("custom_city_is_israel", city.isIsrael)
                 remove("city_zone_override")
             } else {
                 requireNotNull(cityById(city.id)) { "Only catalog or explicit manual coordinates allowed" }
