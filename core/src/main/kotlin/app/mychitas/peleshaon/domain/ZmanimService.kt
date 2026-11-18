@@ -87,10 +87,17 @@ object ZmanimService {
         val solarMidnightDawn = if (community == Minhag.CHABAD &&
             chabadDawnByDegrees == null &&
             calendar.sunrise != null && calendar.sunset != null) {
-            ComprehensiveZmanimCalendar(calendar.geoLocation).apply {
+            val yesterday = ComprehensiveZmanimCalendar(calendar.geoLocation).apply {
                 localDate = calendar.localDate.minusDays(1)
-            }.solarMidnight?.takeIf {
-                it.atZone(calendar.geoLocation.zoneId).toLocalDate() == calendar.localDate
+            }
+            // Solar midnight can occur on the previous civil date where the
+            // legal zone diverges from solar time (e.g., Kirov and Kazan).
+            // Validate the physical night, not its local civil date.
+            yesterday.solarMidnight?.takeIf { candidate ->
+                val lastSunset = yesterday.sunset
+                val nextSunrise = calendar.sunrise
+                lastSunset != null && nextSunrise != null &&
+                    candidate.isAfter(lastSunset) && candidate.isBefore(nextSunrise)
             }
         } else null
         val actualDawn = chabadDawnByDegrees ?: solarMidnightDawn

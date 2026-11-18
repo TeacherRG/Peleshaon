@@ -117,7 +117,8 @@ class Zmanim31MigrationTest {
 
     @Test fun chabadSummerAlosFallsBackToPreviousSolarMidnight() {
         val summer = LocalDate.of(2026, 6, 19)
-        for (id in listOf("Europe/Berlin", "Europe/Vilnius", "Europe/London")) {
+        for (id in listOf("Europe/Berlin", "Europe/Vilnius", "Europe/London",
+            "Europe/Kirov", "kazan")) {
             val city = requireNotNull(cityById(id))
             val raw = ZmanimService.buildCalendar(summer, city.name,
                 city.lat, city.lon, 0.0, city.zone())
