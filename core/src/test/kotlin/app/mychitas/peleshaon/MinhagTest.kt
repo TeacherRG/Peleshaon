@@ -8,8 +8,10 @@ import app.mychitas.peleshaon.domain.ZmanType
 import app.mychitas.peleshaon.domain.ZmanimEngine
 import app.mychitas.peleshaon.domain.cityById
 import java.time.LocalDate
+import java.time.LocalTime
 import java.time.ZoneOffset
 import java.time.ZonedDateTime
+import java.time.temporal.ChronoUnit
 import kotlin.test.AfterTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -36,8 +38,8 @@ class MinhagTest {
         // по Маген Авраґаму «Шма» раньше, чем по ГРА; восход и закат у всех одни
         assertTrue(se.getValue(ZmanType.SOF_ZMAN_SHMA).isBefore(li.getValue(ZmanType.SOF_ZMAN_SHMA)))
         assertEquals(ch.getValue(ZmanType.SUNSET), li.getValue(ZmanType.SUNSET))
-        // выход звёзд: 8,5° — позже, чем по Алтер Ребе
-        assertTrue(li.getValue(ZmanType.TZAIT).isAfter(ch.getValue(ZmanType.TZAIT)))
+        // По Chabad.org и ГРА выход звёзд — при 8,5°.
+        assertEquals(li.getValue(ZmanType.TZAIT), ch.getValue(ZmanType.TZAIT))
         // порядок времён дня сохраняется у всех
         for (t in listOf(ch, li, se)) {
             val order = ZmanType.entries.map { t.getValue(it) }
@@ -46,12 +48,51 @@ class MinhagTest {
     }
 
     @Test
+    fun chabadTimesMatchChabadOrgForBerlinAndVienna() {
+        ZmanimEngine.minhag = Minhag.CHABAD
+        val berlin = cityById("Europe/Berlin")!!
+        val friday = LocalDate.of(2026, 11, 20)
+        val saturday = friday.plusDays(1)
+
+        assertEquals(LocalTime.of(15, 49), ZmanimEngine.candleLightingOn(friday, berlin)!!
+            .toLocalTime().truncatedTo(ChronoUnit.MINUTES))
+        assertEquals(LocalTime.of(17, 2), ZmanimEngine.havdalahOn(saturday, berlin)!!
+            .toLocalTime().truncatedTo(ChronoUnit.MINUTES))
+        assertEquals(LocalTime.of(15, 53), ZmanimEngine.candleLightingOn(friday, vienna)!!
+            .toLocalTime().truncatedTo(ChronoUnit.MINUTES))
+        assertEquals(LocalTime.of(17, 1), ZmanimEngine.havdalahOn(saturday, vienna)!!
+            .toLocalTime().truncatedTo(ChronoUnit.MINUTES))
+    }
+
+    @Test
+    fun chabadHavdalahTracksAstronomicalNightfallAcrossSeasons() {
+        ZmanimEngine.minhag = Minhag.CHABAD
+        val cities = listOf(vienna, cityById("Europe/Berlin")!!)
+        val saturdays = listOf(
+            LocalDate.of(2026, 1, 3),
+            LocalDate.of(2026, 4, 4),
+            LocalDate.of(2026, 7, 4),
+            LocalDate.of(2026, 10, 3)
+        )
+
+        for (city in cities) {
+            for (date in saturdays) {
+                val tzeit = ZmanimEngine.itemsOf(date, city)
+                    .single { it.type == ZmanType.TZAIT }.roundedTime
+                assertEquals(tzeit, ZmanimEngine.havdalahOn(date, city),
+                    "Havdalah must follow local astronomical nightfall: ${city.name} $date")
+            }
+        }
+    }
+
+    @Test
     fun havdalahAndDatesFollowTheCommunity() {
         val sat = LocalDate.of(2026, 11, 21)
         ZmanimEngine.minhag = Minhag.CHABAD
         val ch = ZmanimEngine.havdalahOn(sat, vienna)!!
-        val sunset = ZmanimEngine.sunsetOf(sat, vienna)!!
-        assertTrue(ch.isAfter(sunset.plusMinutes(49)) && ch.isBefore(sunset.plusMinutes(52)), "Хабад: закат + 50")
+        val chabadTzeit = ZmanimEngine.itemsOf(sat, vienna)
+            .single { it.type == ZmanType.TZAIT }.roundedTime
+        assertEquals(chabadTzeit, ch, "Исход Хабада совпадает с астрономическим выходом звёзд")
         ZmanimEngine.minhag = Minhag.SEFARDI
         assertTrue(ZmanimEngine.havdalahOn(sat, vienna)!!.isAfter(ch), "Рабейну Там позже")
         // даты Хабада — только у Хабада
