@@ -73,7 +73,15 @@ class IndependentEphemerisRegressionTest {
     @Test fun independentAstronomicalReferenceAcrossSevenCitiesAndFourSeasons() {
         var comparisons = 0
         for (row in cases) {
-            val (id, textDate, sunrise, sunset, dawn, ordinary, exit) = row.split("|")
+            val fields = row.split("|")
+            require(fields.size == 7) { "Incomplete independent reference row: $row" }
+            val id = fields[0]
+            val textDate = fields[1]
+            val sunrise = fields[2]
+            val sunset = fields[3]
+            val dawn = fields[4]
+            val ordinary = fields[5]
+            val exit = fields[6]
             val city = requireNotNull(locations[id])
             val date = LocalDate.parse(textDate)
             val result = ZmanimService.calculate(date, ZmanimConfig(city, Minhag.CHABAD))
