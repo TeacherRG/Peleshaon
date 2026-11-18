@@ -38,11 +38,25 @@
                     android:format12Hour="HH:mm"
                     android:format24Hour="HH:mm"
                     android:fontFeatureSettings="tnum"
+                    android:fontFamily="sans-serif-medium"
                     android:includeFontPadding="false"
+                    android:textFontWeight="600"
                     android:textColor="#F8FAFC"
                     android:textSize="28sp"
-                    android:textStyle="bold" />
+                    android:textStyle="normal" />
 
+                <TextView
+                    android:id="@+id/w_tziruf"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="10dp"
+                    android:fontFamily="sans-serif"
+                    android:includeFontPadding="false"
+                    android:maxLines="1"
+                    android:textFontWeight="400"
+                    android:textColor="#E2C07D"
+                    android:textSize="15sp"
+                    android:visibility="gone" />
             </LinearLayout>
         </FrameLayout>
 
@@ -51,7 +65,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
-            android:layout_marginTop="2dp"
+            android:layout_marginTop="12dp"
             android:background="@drawable/widget_date_pill_dark"
             android:gravity="center"
             android:maxLines="1"

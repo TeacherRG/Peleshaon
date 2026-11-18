@@ -67,6 +67,11 @@ object ClockColors {
     val RimFill: Color get() = if (ClockTheme.light) Color(0xA6FFFFFF) else Color(0x8C080E24)
     val RimStroke: Color get() = if (ClockTheme.light) Color(0x809C7A2E) else Color(0x59D6BE82)
     val DotStroke: Color get() = if (ClockTheme.light) Color(0xFFFFFFFF) else Color(0xFF0B1532)
+    val WidgetFace: Color get() = if (ClockTheme.light) Color(0xDCF8FAFC) else Color(0xD612151C)
+    val WidgetFaceStroke: Color get() = if (ClockTheme.light) Color(0x1F0F172A) else Color(0x24FFFFFF)
+    val WidgetTick: Color get() = if (ClockTheme.light) Color(0xFF0F172A) else Color.White
+    val WidgetDotStroke = Color(0xFF12151C)
+    val WidgetNow = Color(0xFFF0715E)
 }
 
 /** Цвет точки времени дня — как `COLOR` на сайте. */
@@ -187,16 +192,12 @@ private fun DrawScope.drawFace(
     widgetStyle: Boolean = false
 ) {
     val c = Offset(100f, 100f)
-    val rimFill = if (widgetStyle) {
-        if (ClockTheme.light) Color(0xDCF8FAFC) else Color(0xD612151C)
-    } else ClockColors.RimFill
-    val rimStroke = if (widgetStyle) {
-        if (ClockTheme.light) Color(0x1F0F172A) else Color(0x24FFFFFF)
-    } else ClockColors.RimStroke
+    val rimFill = if (widgetStyle) ClockColors.WidgetFace else ClockColors.RimFill
+    val rimStroke = if (widgetStyle) ClockColors.WidgetFaceStroke else ClockColors.RimStroke
     if (widgetStyle) {
         val shadow = Paint(Paint.ANTI_ALIAS_FLAG).apply {
             color = android.graphics.Color.WHITE
-            setShadowLayer(24f / k, 0f, 8f / k, 0x3D000000)
+            setShadowLayer(32f / k, 0f, 8f / k, 0x3D000000)
         }
         drawContext.canvas.nativeCanvas.drawCircle(100f, 100f, 99f, shadow)
     }
@@ -210,10 +211,9 @@ private fun DrawScope.drawFace(
             val from = polar(d.turn, if (d.hour) 82.0 else 86.0)
             val to = polar(d.turn, if (d.state == DashState.NOW) 99.0 else 96.0)
             val color = when {
-                d.state == DashState.NOW && widgetStyle -> Color(0xFFF0715E)
+                d.state == DashState.NOW && widgetStyle -> ClockColors.WidgetNow
                 d.state == DashState.NOW -> ClockColors.Hand
-                widgetStyle -> (if (ClockTheme.light) Color(0xFF0F172A) else Color.White)
-                    .copy(alpha = 0.22f)
+                widgetStyle -> ClockColors.WidgetTick.copy(alpha = 0.22f)
                 else -> lerp(ClockColors.Tchelet, ClockColors.Gold, d.light.toFloat())
             }
             drawLine(
@@ -225,10 +225,14 @@ private fun DrawScope.drawFace(
             )
         }
         // короткая стрелка «сейчас» — у самого обода
-        drawLine(ClockColors.Hand, polar(ring.progress, 72.0), polar(ring.progress, 85.0), strokeWidth = 2.6f, cap = StrokeCap.Round)
+        drawLine(
+            if (widgetStyle) ClockColors.WidgetNow else ClockColors.Hand,
+            polar(ring.progress, 72.0), polar(ring.progress, 85.0),
+            strokeWidth = 2.6f, cap = StrokeCap.Round
+        )
         // внутри вверху — солнце днём, луна ночью
         // в виджете время — поверх картинки и крупнее: солнце / луна выше и чуть меньше, под подписью у верхней точки
-        translate(100f, if (showTime) 56f else 47f) {
+        translate(100f, if (showTime) 56f else if (widgetStyle) 68f else 47f) {
             val sc = if (showTime) 1.15f else 0.95f
             scale(sc, sc, pivot = Offset.Zero) {
                 if (ring.day) {
@@ -275,15 +279,12 @@ private fun DrawScope.drawFace(
         if (on) drawCircle(eventColor.copy(alpha = 0.8f), radius = 8.5f, center = d.pos, style = Stroke(1.4f))
         val r = if (on) 6.2f else if (d.e.label) 5f else 3.6f
         drawCircle(eventColor.copy(alpha = if (past) 0.45f else 1f), radius = r, center = d.pos)
-        val dotStroke = if (widgetStyle) Color(0xFF12151C) else ClockColors.DotStroke
+        val dotStroke = if (widgetStyle) ClockColors.WidgetDotStroke else ClockColors.DotStroke
         drawCircle(dotStroke, radius = r, center = d.pos, style = Stroke(if (widgetStyle) 1f / k else 1.8f))
     }
 
-    if (tziruf && ring != null) {
-        val labelColor = if (widgetStyle) {
-            if (ClockTheme.light) Color(0xFF8E6A1C) else Color(0xFFE2C07D)
-        } else ClockColors.TzirufC
-        text(Dial.TZIRUFIM[ring.hour], 100f, if (widgetStyle) 160f else 154f, 22f, labelColor, bold = !widgetStyle)
+    if (tziruf && ring != null && !widgetStyle) {
+        text(Dial.TZIRUFIM[ring.hour], 100f, 154f, 22f, ClockColors.TzirufC)
     }
     if (showTime) {
         val t = now.withZoneSameInstant(zone)

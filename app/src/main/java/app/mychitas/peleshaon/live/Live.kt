@@ -189,6 +189,13 @@ object Live {
             if (light) R.drawable.widget_date_pill_light else R.drawable.widget_date_pill_dark
         )
         v.paint(light, R.id.w_time to INK, R.id.w_date to CREAM)
+        val ring = s.ring
+        val showTziruf = Prefs.tziruf(context) && ring != null
+        v.setViewVisibility(R.id.w_tziruf, if (showTziruf) View.VISIBLE else View.GONE)
+        if (showTziruf && ring != null) {
+            v.setTextViewText(R.id.w_tziruf, Dial.TZIRUFIM[ring.hour])
+            v.paint(light, R.id.w_tziruf to GOLD)
+        }
         v.clocks(context, s, R.id.w_time)
         v.setTextViewText(R.id.w_date, dateLine(s))
         v.setOnClickPendingIntent(R.id.w_root, openApp(context))
