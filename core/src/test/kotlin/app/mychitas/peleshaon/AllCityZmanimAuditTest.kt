@@ -127,7 +127,7 @@ class AllCityZmanimAuditTest {
                         "${city.id}\t${date}\t${issues.joinToString(";")}"
                     main += listOf(
                         city.id, log(city.name), log(city.nameUk ?: ""), log(city.nameRu),
-                        tz.id, date.toString(), tz.rules.getOffset(date.atTime(12).atZone(tz).toInstant()).id,
+                        tz.id, date.toString(), tz.rules.getOffset(date.atTime(12, 0).atZone(tz).toInstant()).id,
                         city.lat.toString(), city.lon.toString(), fri.toString(),
                         stamp(dawn, tz), stamp(rise, tz), stamp(z.shema, tz),
                         stamp(z.tfila, tz), stamp(z.chatzot, tz),
