@@ -52,8 +52,8 @@ jobs:
           grep -q "name='app.mychitas.peleshaon' versionCode='5'" /tmp/phone-package.txt
           grep -q "name='app.mychitas.peleshaon.qa' versionCode='5'" /tmp/parallel-package.txt
           grep -q "name='app.mychitas.peleshaon' versionCode='5'" /tmp/wear-package.txt
-          grep -q "sdkVersion:'26'" /tmp/phone-package.txt
-          grep -q "sdkVersion:'26'" /tmp/parallel-package.txt
+          grep -q "minSdkVersion:'26'" /tmp/phone-package.txt
+          grep -q "minSdkVersion:'26'" /tmp/parallel-package.txt
           echo "Verified: normal update + separate QA install with independent package ID"
 
       - name: Privacy promise — no internet permission
