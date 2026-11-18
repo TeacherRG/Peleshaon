@@ -46,6 +46,9 @@ jobs:
           "$AAPT" dump badging app/build/outputs/apk/debug/app-debug.apk > /tmp/phone-package.txt
           "$AAPT" dump badging app/build/outputs/apk/qa/app-qa.apk > /tmp/parallel-package.txt
           "$AAPT" dump badging wear/build/outputs/apk/debug/wear-debug.apk > /tmp/wear-package.txt
+          echo "== Phone" && head -6 /tmp/phone-package.txt
+          echo "== QA parallel" && head -6 /tmp/parallel-package.txt
+          echo "== Wear" && head -6 /tmp/wear-package.txt
           grep -q "name='app.mychitas.peleshaon' versionCode='5'" /tmp/phone-package.txt
           grep -q "name='app.mychitas.peleshaon.qa' versionCode='5'" /tmp/parallel-package.txt
           grep -q "name='app.mychitas.peleshaon' versionCode='5'" /tmp/wear-package.txt
