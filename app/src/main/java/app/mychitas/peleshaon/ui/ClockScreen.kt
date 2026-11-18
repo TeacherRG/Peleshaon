@@ -884,7 +884,7 @@ private fun AlarmSheet(
     val timeText = String.format(Locale.ROOT, "%02d:%02d", spec.hour, spec.minute)
 
     SheetColumn {
-        PermissionsCard()
+        if (spec.on) PermissionsCard()
         Row(verticalAlignment = Alignment.CenterVertically) {
             Text(
                 if (custom) stringResource(R.string.alarm_n, Prefs.customNumber(type)) else stringResource(if (study) R.string.study else R.string.alarm),
@@ -1081,6 +1081,7 @@ private fun KashrutCard(onChange: () -> Unit) {
         if (!silent) Note(stringResource(R.string.kashrut_deferred))
     }
     if (running) {
+        PermissionsCard()
         val t = java.time.Instant.ofEpochMilli(at).atZone(Prefs.city(context).zone())
         Text(stringResource(R.string.kashrut_until, t.format(DateTimeFormatter.ofPattern("HH:mm"))), color = ClockColors.GoldDeep, fontWeight = FontWeight.Bold)
         OutlinedButton(
