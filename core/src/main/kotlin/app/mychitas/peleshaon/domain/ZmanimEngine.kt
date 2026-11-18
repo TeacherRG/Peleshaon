@@ -18,11 +18,13 @@ import java.time.temporal.ChronoUnit
  * `defaultPinned` — подписаны на циферблате, пока пользователь не выбрал сам.
  */
 enum class ZmanType(val isDeadline: Boolean, val defaultPinned: Boolean, val roundDown: Boolean) {
-    ALOT(isDeadline = false, defaultPinned = false, roundDown = false),
+    // For fast days, never display the dawn threshold after its exact onset.
+    ALOT(isDeadline = false, defaultPinned = false, roundDown = true),
     SUNRISE(isDeadline = false, defaultPinned = false, roundDown = false),
     SOF_ZMAN_SHMA(isDeadline = true, defaultPinned = true, roundDown = true),
     SOF_ZMAN_TFILA(isDeadline = true, defaultPinned = true, roundDown = true),
-    CHATZOT(isDeadline = false, defaultPinned = false, roundDown = false),
+    // Chatzot also limits late Shacharit; never show a later minute.
+    CHATZOT(isDeadline = false, defaultPinned = false, roundDown = true),
     MINCHA_GEDOLA(isDeadline = false, defaultPinned = false, roundDown = false),
     PLAG_HAMINCHA(isDeadline = false, defaultPinned = false, roundDown = false),
     SUNSET(isDeadline = true, defaultPinned = true, roundDown = true),

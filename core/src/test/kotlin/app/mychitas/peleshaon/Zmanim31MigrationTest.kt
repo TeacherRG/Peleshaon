@@ -125,6 +125,43 @@ class Zmanim31MigrationTest {
         assertTrue(!start.roundedTime.isBefore(start.exactTime))
     }
 
+    @Test fun chabadDawnAndMiddayNeverRoundLate() {
+        val simferopol = requireNotNull(cityById("Europe/Simferopol"))
+        val events = ZmanimEngine.itemsOf(LocalDate.of(2026, 11, 13), simferopol)
+        val dawn = events.first { it.type == ZmanType.ALOT }
+        val noon = events.first { it.type == ZmanType.CHATZOT }
+        assertTrue(!dawn.roundedTime.isAfter(dawn.exactTime))
+        assertTrue(!noon.roundedTime.isAfter(noon.exactTime))
+        assertEquals(java.time.LocalTime.of(6, 2), dawn.roundedTime.toLocalTime())
+        assertEquals(java.time.LocalTime.of(12, 27), noon.roundedTime.toLocalTime())
+        val sunrise = events.first { it.type == ZmanType.SUNRISE }
+        val firstMincha = events.first { it.type == ZmanType.MINCHA_GEDOLA }
+        assertTrue(!sunrise.roundedTime.isBefore(sunrise.exactTime))
+        assertTrue(!firstMincha.roundedTime.isBefore(firstMincha.exactTime))
+    }
+
+    @Test fun deadlineAndEarliestTimeRoundingAcrossSeasons() {
+        val ids = listOf("dnipro", "Europe/Berlin", "Asia/Jerusalem",
+            "Europe/Kiev", "odesa", "Europe/Simferopol")
+        val dates = listOf(LocalDate.of(2026, 3, 27), LocalDate.of(2026, 6, 19),
+            LocalDate.of(2026, 10, 30), LocalDate.of(2026, 11, 20))
+        val deadlines = setOf(ZmanType.ALOT, ZmanType.SOF_ZMAN_SHMA,
+            ZmanType.SOF_ZMAN_TFILA, ZmanType.CHATZOT, ZmanType.SUNSET)
+        val earliest = setOf(ZmanType.SUNRISE, ZmanType.MINCHA_GEDOLA,
+            ZmanType.PLAG_HAMINCHA, ZmanType.TZAIT)
+        for (id in ids) for (date in dates) {
+            val city = requireNotNull(cityById(id))
+            for (event in ZmanimEngine.itemsOf(date, city)) {
+                if (event.type in deadlines)
+                    assertTrue(!event.roundedTime.isAfter(event.exactTime),
+                        "${city.id} ${date} ${event.type} rounded after deadline")
+                if (event.type in earliest)
+                    assertTrue(!event.roundedTime.isBefore(event.exactTime),
+                        "${city.id} ${date} ${event.type} rounded before earliest event")
+            }
+        }
+    }
+
     @Test fun preservingCurrentNoInternetModelAndSixHourKashrutPolicy() {
         assertEquals(6L, app.mychitas.peleshaon.alarm.KashrutPolicy.WAIT_HOURS)
     }
