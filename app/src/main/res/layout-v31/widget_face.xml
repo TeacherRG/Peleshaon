@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/w_root"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@android:color/transparent"
+    android:padding="8dp">
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:gravity="center_horizontal"
+        android:orientation="vertical">
+
+        <!-- квадрат ровно под круг: размер ставит Live.faceViews, плашка встаёт сразу под ним -->
+        <FrameLayout
+            android:id="@+id/w_face_box"
+            android:layout_width="160dp"
+            android:layout_height="160dp">
+
+            <ImageView
+                android:id="@+id/w_face"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:contentDescription="@string/widget_face_name"
+                android:scaleType="fitCenter" />
+
+            <TextClock
+                android:id="@+id/w_time"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:format12Hour="HH:mm"
+                android:format24Hour="HH:mm"
+                android:fontFeatureSettings="tnum"
+                android:fontFamily="sans-serif-medium"
+                android:gravity="center"
+                android:includeFontPadding="false"
+                android:maxLines="1"
+                android:textFontWeight="600"
+                android:textColor="#F8FAFC"
+                android:textSize="28sp"
+                android:textStyle="normal" />
+
+            <!-- цируф висит под временем, не сдвигая его с центра циферблата -->
+            <TextView
+                android:id="@+id/w_tziruf"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:layout_marginTop="44dp"
+                android:fontFamily="sans-serif"
+                android:includeFontPadding="false"
+                android:maxLines="1"
+                android:textFontWeight="400"
+                android:textColor="#E2C07D"
+                android:textSize="15sp"
+                android:visibility="gone" />
+        </FrameLayout>
+
+        <TextView
+            android:id="@+id/w_date"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginTop="2dp"
+            android:background="@drawable/widget_date_pill_dark"
+            android:gravity="center"
+            android:maxLines="1"
+            android:fontFamily="sans-serif-medium"
+            android:paddingHorizontal="20dp"
+            android:paddingVertical="6dp"
+            android:textColor="#F3E5C8"
+            android:textSize="17sp"
+            android:textStyle="normal" />
+    </LinearLayout>
+</FrameLayout>

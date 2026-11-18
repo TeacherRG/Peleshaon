@@ -130,7 +130,7 @@ object Live {
             val manager = AppWidgetManager.getInstance(context)
             val light = ClockTheme.widgetLight(context)
             for (id in manager.getAppWidgetIds(ComponentName(context, FaceWidget::class.java)))
-                manager.updateAppWidget(id, ordinaryFaceViews(context, light))
+                manager.updateAppWidget(id, ordinaryFaceViews(context, light, id))
             for (id in manager.getAppWidgetIds(ComponentName(context, DateWidget::class.java)))
                 manager.updateAppWidget(id, ordinaryDateViews(context, light))
             if (ids.isEmpty()) cancelTick(context) else scheduleOrdinaryTick(context)
@@ -189,7 +189,7 @@ object Live {
     }
 
     /** No city: no stale geographical ring; TextClock follows the device zone. */
-    private fun ordinaryFaceViews(context: Context, light: Boolean): RemoteViews {
+    private fun ordinaryFaceViews(context: Context, light: Boolean, widgetId: Int): RemoteViews {
         val v = RemoteViews(context.packageName, R.layout.widget_face)
         v.setImageViewBitmap(R.id.w_face,
             android.graphics.Bitmap.createBitmap(2, 2, android.graphics.Bitmap.Config.ARGB_8888))
@@ -200,6 +200,7 @@ object Live {
         v.setString(R.id.w_time, "setTimeZone", java.time.ZoneId.systemDefault().id)
         v.setTextViewText(R.id.w_date, context.getString(R.string.city_choose))
         v.setOnClickPendingIntent(R.id.w_root, openApp(context))
+        fitFace(context, v, widgetId)
         return v
     }
 
@@ -221,6 +222,28 @@ object Live {
         val am = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
         am.setWindow(AlarmManager.RTC, System.currentTimeMillis() + 5 * 60_000L,
             10 * 60_000L, tickIntent(context))
+    }
+
+    /**
+     * Подгоняет большой виджет под его размер: круг — квадрат по меньшей стороне,
+     * плашка с датой сразу под ним (Android 12+), цифры времени — по размеру круга,
+     * чтобы не налезали на деления.
+     */
+    private fun fitFace(context: Context, v: RemoteViews, widgetId: Int) {
+        val opts = AppWidgetManager.getInstance(context).getAppWidgetOptions(widgetId)
+        val w = opts.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_WIDTH, 0)
+        val h = opts.getInt(AppWidgetManager.OPTION_APPWIDGET_MAX_HEIGHT, 0)
+        if (w <= 0 || h <= 0) return
+        val font = context.resources.configuration.fontScale
+        val pill = 17f * font * 1.3f + 12f + 6f   // текст, внутренние отступы, зазор
+        val side = minOf(w - 16f, h - 16f - pill).coerceAtLeast(96f)
+        val time = (side * 0.2f).coerceIn(22f, 44f)
+        v.setTextViewTextSize(R.id.w_time, TypedValue.COMPLEX_UNIT_DIP, time)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            v.setViewLayoutWidth(R.id.w_face_box, side, TypedValue.COMPLEX_UNIT_DIP)
+            v.setViewLayoutHeight(R.id.w_face_box, side, TypedValue.COMPLEX_UNIT_DIP)
+            v.setViewLayoutMargin(R.id.w_tziruf, RemoteViews.MARGIN_TOP, time * 0.6f + 14f, TypedValue.COMPLEX_UNIT_DIP)
+        }
     }
 
     /** Большой виджет: циферблат дня со скримом, время города и дата в плашке. */
@@ -247,6 +270,7 @@ object Live {
         v.clocks(context, s, R.id.w_time)
         v.setTextViewText(R.id.w_date, dateLine(s))
         v.setOnClickPendingIntent(R.id.w_root, openApp(context))
+        fitFace(context, v, widgetId)
         return v
     }
 
