@@ -1,0 +1,45 @@
+name: Independent settlement-coordinate and Ukrainian-name audit
+
+on:
+  pull_request:
+    paths:
+      - 'scripts/audit_geodata_external.py'
+      - 'scripts/test_audit_geodata_external.py'
+      - '.github/workflows/geo_independent.yml'
+      - 'core/src/main/kotlin/app/mychitas/peleshaon/domain/Cities.kt'
+      - 'core/src/main/kotlin/app/mychitas/peleshaon/domain/UkraineCities.kt'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify-geodata:
+    runs-on: ubuntu-latest
+    timeout-minutes: 18
+    steps:
+      - uses: actions/checkout@v5
+      - name: Unit tests for matching and confidence thresholds
+        run: python3 -m unittest discover -s scripts -p 'test_audit_geodata_external.py'
+      - name: Retrieve independent Ukrainian register / OSM points and worldwide GeoNames
+        run: |
+          mkdir -p /tmp/pele-geodata
+          curl --fail --location --silent --show-error --retry 4 --retry-delay 3 \
+            -o /tmp/pele-geodata/katottg.csv \
+            https://raw.githubusercontent.com/alexbabintsev/ua-geo/d37d5e967e3bb45255d180ea740e5a6ca90e00cc/data/out/katottg.csv
+          curl --fail --location --silent --show-error --retry 4 --retry-delay 3 \
+            -o /tmp/pele-geodata/cities500.zip \
+            https://download.geonames.org/export/dump/cities500.zip
+      - name: Compare every city, output row-level evidence (no automatic updates)
+        run: |
+          python3 scripts/audit_geodata_external.py \
+            --ukraine /tmp/pele-geodata/katottg.csv \
+            --geonames /tmp/pele-geodata/cities500.zip \
+            --out build/geo-audit
+      - name: Upload full independent provenance and review queues
+        if: always()
+        uses: actions/upload-artifact@v5
+        with:
+          name: geodata-independent-audit
+          path: build/geo-audit/
+          if-no-files-found: warn
