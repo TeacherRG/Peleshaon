@@ -32,4 +32,17 @@ class GeoAuditTest(unittest.TestCase):
         status,matched,_=module.find_world(city,points)
         self.assertEqual(status,"INDEPENDENT_MATCH")
         self.assertEqual(matched[3],"1001")
+    def test_similar_neighboring_district_must_not_certify_named_neighborhood(self):
+        city={"en":"Brooklyn (Crown Heights)","ru":"Бруклин (Краун-Хайтс)","lat":40.67,"lon":-73.94}
+        # Deliberately misleading alternate alias: location is Brooklyn Heights
+        # rather than requested Crown Heights; full alias score alone is unsafe.
+        points={(40,-74):[(40.6967,-73.9967,"Brooklyn Heights","Brooklyn Heights","US","501",("Brooklyn (Crown Heights)",))]}
+        status,candidate,_=module.find_world(city,points)
+        self.assertEqual(status,"SUBLOCALITY_NAME_REVIEW")
+        self.assertEqual(candidate[2],"Brooklyn Heights")
+    def test_exact_qualifier_name_is_accepted(self):
+        city={"en":"Tzfat (Safed)","ru":"Цфат","lat":32.96,"lon":35.5}
+        points={(32,35):[(32.96,35.5,"Safed","Safed","IL","502",("Tzfat (Safed)",))]}
+        status,_,_=module.find_world(city,points)
+        self.assertEqual(status,"INDEPENDENT_MATCH")
 if __name__=="__main__": unittest.main()

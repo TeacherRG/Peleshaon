@@ -159,6 +159,12 @@ def find_world(city,geo):
             "INDEPENDENT_MATCH" if candidate[0]<=7 and candidate[1]>=.85
             else "POSSIBLE_MATCH_REVIEW")
     else:status="DISTANCE_ONLY_REVIEW"
+    # Some legacy entries name both a city and a specific neighborhood.
+    # A nearby district with a similar *city* name is not proof that the
+    # designated neighborhood was independently verified.
+    qualifier = city["en"].split("(", 1)[1].split(")", 1)[0] if "(" in city["en"] and ")" in city["en"] else ""
+    if status == "INDEPENDENT_MATCH" and qualifier and normalize(qualifier) not in normalize(candidate[2]):
+        status = "SUBLOCALITY_NAME_REVIEW"
     return status,candidate,len(near)
 def write_tsv(path,rows,columns):
     path.parent.mkdir(parents=True,exist_ok=True)
