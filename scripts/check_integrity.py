@@ -65,7 +65,7 @@ def main() -> None:
         gradle = read(f"{module}/build.gradle.kts")
         check('applicationId = "app.mychitas.peleshaon"' in gradle,
               f"{module}: wrong applicationId (must match original)")
-        check("versionCode = 5" in gradle, f"{module}: unexpected version")
+        check("versionCode = 6" in gradle, f"{module}: unexpected version")
         manifest = ET.parse(ROOT / module / "src" / "main" / "AndroidManifest.xml")
         namespace = "{http://schemas.android.com/apk/res/android}"
         app = manifest.getroot().find("application")
@@ -96,6 +96,16 @@ def main() -> None:
     check("END_MIN" not in service31 and "sunset.plusMinutes(ZmanimEngine.END_MIN)" not in
           read("core/src/main/kotlin/app/mychitas/peleshaon/domain/KiddushLevana.kt"),
           "Fixed-minute Shabbat end fallback reintroduced")
+    # City selection and permissions must fail closed until the user chooses coordinates.
+    check("fun cityUnmatched(context: Context): Boolean = chosenCity(context) == null" in
+          read("app/src/main/java/app/mychitas/peleshaon/Prefs.kt"),
+          "Timezone-only state must never enable geographical calculations")
+    phone_manifest = read("app/src/main/AndroidManifest.xml")
+    check("android.permission.SCHEDULE_EXACT_ALARM" in phone_manifest and
+          "android.permission.USE_EXACT_ALARM" not in phone_manifest and
+          "android.permission.ACCESS_FINE_LOCATION" not in phone_manifest and
+          "android.permission.INTERNET" not in phone_manifest,
+          "Permission-on-use/offline contract regressed")
     # Prevent writing an Int literal where CityOption expects Kotlin Double.
     selected = read("core/src/main/kotlin/app/mychitas/peleshaon/domain/UkraineCities.kt")
     selected_records = re.findall(
