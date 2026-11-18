@@ -281,4 +281,13 @@
     <string name="home_open">Открыть настройки приложения</string>
     <string name="home_status">Виджетов приложения в телефоне: %1$d из 2 · рабочий стол: %2$s · %3$s, Android %4$s</string>
     <string name="pin_done">Готово — смотрите на главном экране</string>
+    <string name="city_manual_toggle">Добавить место по координатам</string>
+    <string name="city_manual_lat">Широта (от −90 до 90)</string>
+    <string name="city_manual_lon">Долгота (от −180 до 180)</string>
+    <string name="city_manual_zone">Часовой пояс IANA, например Europe/Kyiv</string>
+    <string name="city_manual_apply">Сохранить координаты</string>
+    <string name="city_manual_invalid">Укажите название, правильные координаты и часовой пояс.</string>
+    <string name="city_zone_override">Выбрать другой местный часовой пояс</string>
+    <string name="city_zone_apply">Применить часовой пояс</string>
+    <string name="city_timezone_notice">Проверьте фактическое местное время, особенно на оккупированных территориях.</string>
 </resources>

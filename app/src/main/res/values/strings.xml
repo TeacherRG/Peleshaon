@@ -279,4 +279,13 @@
     <string name="home_open">Open the app settings</string>
     <string name="home_status">App widgets on the phone: %1$d of 2 · home screen: %2$s · %3$s, Android %4$s</string>
     <string name="pin_done">Done — look at the home screen</string>
+    <string name="city_manual_toggle">Add a location by coordinates</string>
+    <string name="city_manual_lat">Latitude (−90 to 90)</string>
+    <string name="city_manual_lon">Longitude (−180 to 180)</string>
+    <string name="city_manual_zone">IANA time zone, e.g. Europe/Kyiv</string>
+    <string name="city_manual_apply">Save custom location</string>
+    <string name="city_manual_invalid">Enter a name, valid coordinates and a valid time zone.</string>
+    <string name="city_zone_override">Use a different local time zone</string>
+    <string name="city_zone_apply">Apply time zone</string>
+    <string name="city_timezone_notice">Confirm the actual local clock before using religious times, especially in occupied territories.</string>
 </resources>

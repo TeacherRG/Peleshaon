@@ -62,8 +62,22 @@ object Prefs {
 
     // ---- город: выбранный вручную, иначе — по часовому поясу телефона
 
-    /** Выбранный город; null — по часовому поясу. */
-    fun chosenCity(context: Context): CityOption? = cityById(of(context).getString("city_id", null))
+    /** Saved user selection, with optional explicit civil-time zone. */
+    fun chosenCity(context: Context): CityOption? {
+        val p = of(context)
+        val id = p.getString("city_id", null) ?: return null
+        if (id == app.mychitas.peleshaon.domain.ManualLocation.ID) {
+            return app.mychitas.peleshaon.domain.ManualLocation.parse(
+                p.getString("custom_city_name", null), p.getString("custom_city_lat", null),
+                p.getString("custom_city_lon", null), p.getString("custom_city_zone", null)
+            )
+        }
+        val base = cityById(id) ?: return null
+        val selectedZone = app.mychitas.peleshaon.domain.ManualLocation.zoneOrNull(
+            p.getString("city_zone_override", null)
+        ) ?: return base
+        return base.copy(zoneId = selectedZone.id)
+    }
 
     fun city(context: Context): CityOption = chosenCity(context) ?: cityForZone(ZoneId.systemDefault())
 
@@ -76,7 +90,29 @@ object Prefs {
 
     fun setCity(context: Context, city: CityOption?) {
         of(context).edit().apply {
-            if (city == null) remove("city_id") else putString("city_id", city.id)
+            if (city == null) {
+                remove("city_id")
+                remove("city_zone_override")
+            } else if (city.id == app.mychitas.peleshaon.domain.ManualLocation.ID) {
+                requireNotNull(app.mychitas.peleshaon.domain.ManualLocation.parse(
+                    city.name, city.lat.toString(), city.lon.toString(), city.zoneId
+                )) { "Invalid manual city coordinates or time zone" }
+                putString("city_id", city.id)
+                putString("custom_city_name", city.name)
+                putString("custom_city_lat", city.lat.toString())
+                putString("custom_city_lon", city.lon.toString())
+                putString("custom_city_zone", city.zoneId)
+                remove("city_zone_override")
+            } else {
+                requireNotNull(cityById(city.id)) { "Only catalog or explicit manual coordinates allowed" }
+                putString("city_id", city.id)
+                val original = cityById(city.id)!!
+                if (original.zoneId == city.zoneId) remove("city_zone_override")
+                else {
+                    requireNotNull(app.mychitas.peleshaon.domain.ManualLocation.zoneOrNull(city.zoneId))
+                    putString("city_zone_override", city.zoneId)
+                }
+            }
         }.apply()
     }
 

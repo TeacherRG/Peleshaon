@@ -280,4 +280,13 @@
     <string name="home_open">פתיחת הגדרות היישום</string>
     <string name="home_status">ווידג׳טים של היישום בטלפון: %1$d מתוך 2 · מסך הבית: %2$s · %3$s, Android %4$s</string>
     <string name="pin_done">בוצע — הסתכלו במסך הבית</string>
+    <string name="city_manual_toggle">הוספת מיקום לפי קואורדינטות</string>
+    <string name="city_manual_lat">קו רוחב (−90 עד 90)</string>
+    <string name="city_manual_lon">קו אורך (−180 עד 180)</string>
+    <string name="city_manual_zone">אזור זמן IANA, למשל Europe/Kyiv</string>
+    <string name="city_manual_apply">שמירת מיקום מותאם אישית</string>
+    <string name="city_manual_invalid">יש להזין שם, קואורדינטות תקינות ואזור זמן תקין.</string>
+    <string name="city_zone_override">בחירת אזור זמן מקומי אחר</string>
+    <string name="city_zone_apply">החלת אזור זמן</string>
+    <string name="city_timezone_notice">יש לוודא את השעה המקומית בפועל, במיוחד באזורים כבושים.</string>
 </resources>

@@ -527,6 +527,12 @@ private fun SheetColumn(content: @Composable () -> Unit) {
 internal fun CitySheet(city: CityOption, auto: Boolean, title: Boolean = true, onPick: (CityOption?) -> Unit) {
     val locale = androidx.compose.ui.platform.LocalConfiguration.current.locales[0]
     var q by remember { mutableStateOf("") }
+    var manualOpen by remember { mutableStateOf(false) }
+    var zoneOpen by remember { mutableStateOf(false) }
+    var latText by remember { mutableStateOf("") }
+    var lonText by remember { mutableStateOf("") }
+    var zoneText by remember(city.id, city.zoneId) { mutableStateOf(city.zoneId) }
+    var inputError by remember { mutableStateOf(false) }
     val list = remember(q) { if (q.isBlank()) CITIES.sortedBy { it.title(locale) } else findCities(q, 30) }
     Column(modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp).padding(bottom = 16.dp)) {
         if (title) SheetTitle(stringResource(R.string.city))
@@ -550,8 +556,54 @@ internal fun CitySheet(city: CityOption, auto: Boolean, title: Boolean = true, o
         if (!auto) {
             TextButton(onClick = { onPick(null) }) { Text("⟲ " + stringResource(R.string.city_by_zone), color = ClockColors.TcheletDeep) }
         }
-        if (list.isEmpty()) Note(stringResource(R.string.city_none))
-        LazyColumn(modifier = Modifier.fillMaxWidth().heightIn(max = 420.dp)) {
+        TextButton(onClick = { manualOpen = !manualOpen; zoneOpen = false; inputError = false }) {
+            Text(stringResource(R.string.city_manual_toggle), color = ClockColors.TcheletDeep)
+        }
+        if (manualOpen) {
+            OutlinedTextField(
+                value = latText, onValueChange = { latText = it; inputError = false },
+                label = { Text(stringResource(R.string.city_manual_lat)) },
+                singleLine = true, modifier = Modifier.fillMaxWidth()
+            )
+            OutlinedTextField(
+                value = lonText, onValueChange = { lonText = it; inputError = false },
+                label = { Text(stringResource(R.string.city_manual_lon)) },
+                singleLine = true, modifier = Modifier.fillMaxWidth()
+            )
+            OutlinedTextField(
+                value = zoneText, onValueChange = { zoneText = it; inputError = false },
+                label = { Text(stringResource(R.string.city_manual_zone)) },
+                singleLine = true, modifier = Modifier.fillMaxWidth()
+            )
+            TextButton(onClick = {
+                val c = app.mychitas.peleshaon.domain.ManualLocation.parse(q, latText, lonText, zoneText)
+                if (c == null) inputError = true else onPick(c)
+            }) {
+                Text(stringResource(R.string.city_manual_apply), color = ClockColors.Gold)
+            }
+        }
+        if (!auto && !manualOpen) {
+            TextButton(onClick = { zoneOpen = !zoneOpen; inputError = false }) {
+                Text(stringResource(R.string.city_zone_override), color = ClockColors.TcheletDeep)
+            }
+        }
+        if (zoneOpen) {
+            OutlinedTextField(
+                value = zoneText, onValueChange = { zoneText = it; inputError = false },
+                label = { Text(stringResource(R.string.city_manual_zone)) },
+                singleLine = true, modifier = Modifier.fillMaxWidth()
+            )
+            Note(stringResource(R.string.city_timezone_notice))
+            TextButton(onClick = {
+                val tz = app.mychitas.peleshaon.domain.ManualLocation.zoneOrNull(zoneText)
+                if (tz == null) inputError = true else onPick(city.copy(zoneId = tz.id))
+            }) {
+                Text(stringResource(R.string.city_zone_apply), color = ClockColors.Gold)
+            }
+        }
+        if (inputError) Note(stringResource(R.string.city_manual_invalid))
+        if (list.isEmpty() && !manualOpen) Note(stringResource(R.string.city_none))
+        LazyColumn(modifier = Modifier.fillMaxWidth().heightIn(max = if (manualOpen || zoneOpen) 125.dp else 420.dp)) {
             items(list, key = { it.id }) { c ->
                 Row(
                     modifier = Modifier.fillMaxWidth().clickable { onPick(c) }.padding(vertical = 11.dp),
