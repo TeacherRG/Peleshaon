@@ -6,6 +6,7 @@ on:
       - 'scripts/audit_geodata_external.py'
       - 'scripts/test_audit_geodata_external.py'
       - 'scripts/apply_verified_ua_names.py'
+      - 'scripts/sync_geo_audit_docs.py'
       - '.github/workflows/geo_independent.yml'
       - 'core/src/main/kotlin/app/mychitas/peleshaon/domain/Cities.kt'
       - 'core/src/main/kotlin/app/mychitas/peleshaon/domain/UkraineCities.kt'
@@ -44,6 +45,9 @@ jobs:
         run: |
           python3 scripts/apply_verified_ua_names.py
           git diff --check
+      - name: Synchronize full independent evidence and place-name review queues
+        if: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository && github.head_ref == 'qa/beta3-location-regression-fixes' }}
+        run: python3 scripts/sync_geo_audit_docs.py
       - name: Java 17 for the regenerated verified catalog
         if: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository && github.head_ref == 'qa/beta3-location-regression-fixes' }}
         uses: actions/setup-java@v5
@@ -67,7 +71,7 @@ jobs:
         run: |
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add core/src/main/kotlin/app/mychitas/peleshaon/domain/UkraineCities.kt qa/verified_ukrainian_names.tsv
+          git add core/src/main/kotlin/app/mychitas/peleshaon/domain/UkraineCities.kt qa/verified_ukrainian_names.tsv qa/coordinate_inventory.tsv qa/ukraine_missing_uk_names.tsv qa/independent_geodata_1694.tsv qa/geodata_requires_review.tsv GEODATA_FULL_AUDIT.md
           if ! git diff --cached --quiet; then
             git commit -m 'Fill independently verified KATOTTG Ukrainian names without changing coordinates'
             git push origin "HEAD:refs/heads/$QA_BRANCH"
