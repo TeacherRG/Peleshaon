@@ -26,4 +26,10 @@ class GeoAuditTest(unittest.TestCase):
         city={"id":"ua:71:kamianka","en":"Wrong","uk":"","ru":"Wrong","lat":49.0318,"lon":32.10396}
         status,_,_=module.find_ua(city,{"71":[(49.032,32.104,"Кам’янка","UA71ABC","code")]})
         self.assertNotEqual(status,"INDEPENDENT_MATCH")
+    def test_global_geonames_aliases_not_only_primary_english(self):
+        city={"en":"Kiev","ru":"Киев","lat":50.45,"lon":30.52}
+        points={(50,30):[(50.45,30.52,"Kyiv","Kyiv","UA","1001",("Kiev","Киев"))]}
+        status,matched,_=module.find_world(city,points)
+        self.assertEqual(status,"INDEPENDENT_MATCH")
+        self.assertEqual(matched[3],"1001")
 if __name__=="__main__": unittest.main()

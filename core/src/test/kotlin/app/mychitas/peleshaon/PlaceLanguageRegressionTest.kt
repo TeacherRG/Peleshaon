@@ -28,6 +28,18 @@ class PlaceLanguageRegressionTest {
         val ukrainian=requireNotNull(cityById("ua:71:kamianka"))
         assertTrue(ukrainian.title(Locale("he")).any { it in '\u05D0'..'\u05EA' })
     }
+    @Test fun all27AdministrativeRegionsAreLocalizedIntoFiveScripts() {
+        val regions=CITIES.mapNotNull { it.oblastUk }.distinct()
+        assertEquals(27,regions.size)
+        for (ua in regions) {
+            val location=CITIES.first { it.oblastUk==ua }
+            for (tag in listOf("en","de")) {
+                val value=requireNotNull(location.oblastTitle(Locale.forLanguageTag(tag)))
+                assertTrue(value.none { it in '\u0400'..'\u04FF' }, ua + " leaked Cyrillic in " + tag)
+            }
+            assertTrue(requireNotNull(location.oblastTitle(Locale("he"))).any { it in '\u05D0'..'\u05EA' })
+        }
+    }
     @Test fun keyUkrainianNamesAndCoordinatesRemainStable() {
         val city=requireNotNull(cityById("ua:71:kamianka"))
         assertEquals("Кам’янка", city.title(Locale("uk")))

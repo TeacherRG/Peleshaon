@@ -109,14 +109,33 @@ internal object PlaceLabels {
     // EN and DE use international Latin spelling when no established exonym
     // is known. This is transliteration, not an assertion of official translation.
     private val enRegion = mapOf(
-        "Київ" to "Kyiv", "Севастополь" to "Sevastopol",
         "Автономна Республіка Крим" to "Autonomous Republic of Crimea",
+        "Вінницька область" to "Vinnytsia Oblast",
+        "Волинська область" to "Volyn Oblast",
         "Дніпропетровська область" to "Dnipropetrovsk Oblast",
+        "Донецька область" to "Donetsk Oblast",
+        "Житомирська область" to "Zhytomyr Oblast",
+        "Закарпатська область" to "Zakarpattia Oblast",
         "Запорізька область" to "Zaporizhzhia Oblast",
+        "Івано-Франківська область" to "Ivano-Frankivsk Oblast",
+        "Київ" to "Kyiv",
         "Київська область" to "Kyiv Oblast",
+        "Кіровоградська область" to "Kirovohrad Oblast",
+        "Луганська область" to "Luhansk Oblast",
         "Львівська область" to "Lviv Oblast",
+        "Миколаївська область" to "Mykolaiv Oblast",
         "Одеська область" to "Odesa Oblast",
-        "Харківська область" to "Kharkiv Oblast"
+        "Полтавська область" to "Poltava Oblast",
+        "Рівненська область" to "Rivne Oblast",
+        "Севастополь" to "Sevastopol",
+        "Сумська область" to "Sumy Oblast",
+        "Тернопільська область" to "Ternopil Oblast",
+        "Харківська область" to "Kharkiv Oblast",
+        "Херсонська область" to "Kherson Oblast",
+        "Хмельницька область" to "Khmelnytskyi Oblast",
+        "Черкаська область" to "Cherkasy Oblast",
+        "Чернівецька область" to "Chernivtsi Oblast",
+        "Чернігівська область" to "Chernihiv Oblast"
     )
     fun region(uk: String, locale: Locale): String = when (locale.language) {
         "ru", "be" -> ruRegion[uk] ?: uk

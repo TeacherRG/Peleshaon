@@ -107,7 +107,7 @@ def load_geonames(zip_path):
                     lat,lon=float(f[4]),float(f[5])
                 except ValueError:
                     continue
-                point=(lat,lon,f[1],f[2],f[8],f[0])
+                point=(lat,lon,f[1],f[2],f[8],f[0],tuple(f[3].split(",")))
                 out[(math.floor(lat),math.floor(lon))].append(point)
     return out
 def find_ua(city,ua):
@@ -138,11 +138,16 @@ def find_world(city,geo):
     near=[]
     for y in range(math.floor(city["lat"])-1, math.floor(city["lat"])+2):
         for x in range(math.floor(city["lon"])-1, math.floor(city["lon"])+2):
-            for lat,lon,name,ascii_name,country,geoid in geo.get((y,x),()):
+            for lat,lon,name,ascii_name,country,geoid,alternates in geo.get((y,x),()):
                 if abs(lat-city["lat"])>.3 or abs(lon-city["lon"])>.4:continue
                 dist=geo_distance_km(city["lat"],city["lon"],lat,lon)
                 if dist>25:continue
                 sim=max(score_names(city["en"],name),score_names(city["en"],ascii_name))
+                # GeoNames alternative names contain published variants including Cyrillic.
+                for alias in alternates:
+                    if not alias or len(alias)>65:continue
+                    sim=max(sim,score_names(city["en"],alias),score_names(city["ru"],alias))
+                    if sim>=1.0:break
                 near.append((dist,sim,name,geoid,lat,lon,country))
     near.sort(key=lambda x:(-x[1],x[0]))
     good=[x for x in near if x[1]>=.80 and x[0]<=10]
