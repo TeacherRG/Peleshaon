@@ -5,13 +5,14 @@ on:
     paths:
       - 'scripts/audit_geodata_external.py'
       - 'scripts/test_audit_geodata_external.py'
+      - 'scripts/apply_verified_ua_names.py'
       - '.github/workflows/geo_independent.yml'
       - 'core/src/main/kotlin/app/mychitas/peleshaon/domain/Cities.kt'
       - 'core/src/main/kotlin/app/mychitas/peleshaon/domain/UkraineCities.kt'
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   verify-geodata:
@@ -19,6 +20,8 @@ jobs:
     timeout-minutes: 18
     steps:
       - uses: actions/checkout@v5
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
       - name: Unit tests for matching and confidence thresholds
         run: python3 -m unittest discover -s scripts -p 'test_audit_geodata_external.py'
       - name: Retrieve independent Ukrainian register / OSM points and worldwide GeoNames
@@ -36,6 +39,51 @@ jobs:
             --ukraine /tmp/pele-geodata/katottg.csv \
             --geonames /tmp/pele-geodata/cities500.zip \
             --out build/geo-audit
+      - name: Populate only unambiguous official Ukrainian names
+        if: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository && github.head_ref == 'qa/beta3-location-regression-fixes' }}
+        run: |
+          python3 scripts/apply_verified_ua_names.py
+          git diff --check
+      - name: Java 17 for the regenerated verified catalog
+        if: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository && github.head_ref == 'qa/beta3-location-regression-fixes' }}
+        uses: actions/setup-java@v5
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+      - name: Cached Gradle for Android and Wear regression
+        if: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository && github.head_ref == 'qa/beta3-location-regression-fixes' }}
+        uses: gradle/actions/setup-gradle@v5
+        with:
+          gradle-version: '8.7'
+      - name: Verify generated names, run core tests, build both APKs
+        if: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository && github.head_ref == 'qa/beta3-location-regression-fixes' }}
+        run: |
+          python3 scripts/check_integrity.py
+          gradle --no-daemon :core:test :app:assembleDebug :wear:assembleDebug
+      - name: Commit verified official Ukrainian labels to draft PR only
+        if: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository && github.head_ref == 'qa/beta3-location-regression-fixes' }}
+        env:
+          QA_BRANCH: ${{ github.head_ref }}
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add core/src/main/kotlin/app/mychitas/peleshaon/domain/UkraineCities.kt qa/verified_ukrainian_names.tsv
+          if ! git diff --cached --quiet; then
+            git commit -m 'Fill independently verified KATOTTG Ukrainian names without changing coordinates'
+            git push origin "HEAD:refs/heads/$QA_BRANCH"
+          fi
+      - name: Save updated Android debug APK
+        if: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository && github.head_ref == 'qa/beta3-location-regression-fixes' }}
+        uses: actions/upload-artifact@v5
+        with:
+          name: PeleShaon-verified-ua-phone
+          path: app/build/outputs/apk/debug/app-debug.apk
+      - name: Save updated Wear OS debug APK
+        if: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository && github.head_ref == 'qa/beta3-location-regression-fixes' }}
+        uses: actions/upload-artifact@v5
+        with:
+          name: PeleShaon-verified-ua-wear
+          path: wear/build/outputs/apk/debug/wear-debug.apk
       - name: Upload full independent provenance and review queues
         if: always()
         uses: actions/upload-artifact@v5
