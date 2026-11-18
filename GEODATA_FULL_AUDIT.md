@@ -1,26 +1,72 @@
-# Full coordinate inventory audit (2026-11-18)
+# PeleShaon independent geographic and localization QA
 
-**Source commit**: `bc1a03f184add375334456b4f2272ab63d7479c0`; checks cover **every 1694 static geographic record** (1497 imported Ukraine, 197 legacy worldwide).
+Generated from **the actual source tree** and the pinned KATOTTG/OpenStreetMap
+and GeoNames independent audit. An ID-level, auditable result is committed
+in [qa/independent_geodata_1694.tsv](qa/independent_geodata_1694.tsv).
 
-## Exhaustive checks
-- **1494 imported positions exactly match** the cited original source's longitude+latitude at 5 decimals: https://github.com/srestre/world-countries-cities-db . This is transfer integrity **NOT independent real-world geocoding**.
-- **3 supplemental records**: `ua:12:pokrov`, `ua:35:znamianka`, `ua:05:hnivan`; source-not-exact status is expected.
-- All 1694 positions are finite and within global longitude/latitude bounds. All 1497 imported Ukraine positions fit the broad Ukraine bounding rectangle (44..53 north and 22..41 east), which does NOT establish accurate region assignment.
-- The 1494 source-exact positions all preserve original region codes, **zero cross-region mismatches**.
-- **Zero duplicate coordinate pairs**, rounded to four decimal places, among all 1694 records.
-- **1351 imported entries lack independently checked Ukrainian display labels**. Never fill these with guessed translations.
-- **Two same-name+oblast ambiguities**: Самар (`ua:12:novomoskovsk`, `ua:12:novomoskovsk:2`); Подільськ (`ua:51:podilsk`, `ua:51:podilsk:2`). Keep both IDs until independently disambiguated; coordinates should be shown in UI. Five other same-name cases are distinguishable by their oblast text.
-- Every record and its individual status is enumerated in `qa/coordinate_inventory.tsv`. Unverified Ukrainian-language labels are listed in `qa/ukraine_missing_uk_names.tsv`.
+## Scope and verification totals
 
-## External cross-checks for supplemental Ukrainian cities
-- Кам’янка (Cherkasy, 49.0318,32.10396): https://www.fallingrain.com/world/UP/01/Kamyanka.html
-- Знам’янка (Kirovohrad, app 48.71702,32.65411): independently near 48.71996,32.66595 https://mapcarta.com/13719516 . The discrepancy is sub-km to about a kilometre and needs an authoritative settlement-centre definition for high-precision certification.
-- Гнівань (Vinnytsia, 49.0939,28.33785): independently appears at matching coordinates https://www.geonames.org/search.html?country=UA&q=Vinn%C3%B5tsja&startRow=50
-- Покров (Dnipropetrovsk, 47.65598,34.06847): https://maps.visicom.ua/c/34.06847%2C47.65598%2C13/f/STL1NLX3C?lang=uk
+| Class | Total | Independently strong-matched | Requires review |
+|---|---:|---:|---:|
+| Ukraine | 1497 | 1076 | 421 |
+| Worldwide legacy | 197 | 193 | 4 |
+| **All** | **1694** | **1269** | **425** |
 
-## Unresolved external-verification limits
-- The source copied for the 1,494 identical positions **cannot** independently validate itself. A licensed authoritative settlement index with precise boundaries and stable matching IDs is required to certify all positions geographically.
-- **197 legacy worldwide positions** passed full numeric integrity checks but were **not** compared one-by-one with another global geocoding index. The full list is retained as `LEGACY_UNVERIFIED`.
-- Correct arithmetic with approximate village coordinates does not make the coordinates authoritative. Use the exact-location option for sensitive religious times.
+**Ukrainian localized names populated:** 1085/1497.
+**Ukrainian place names still lacking independently supported Ukrainian form:** 412.
+These are recorded by ID in [qa/ukraine_missing_uk_names.tsv](qa/ukraine_missing_uk_names.tsv).
+**Ambiguous or unverified coordinates:** 425 entries in
+[qa/geodata_requires_review.tsv](qa/geodata_requires_review.tsv).
 
-**QA gate**: complete static inventory and provenance/transfer validation; independent verification of every locality remains OPEN, and must not be labeled complete.
+## How independence is assessed
+
+Ukraine: KATOTTG government settlement name + oblast code, matched geographically
+to independent OpenStreetMap points/polygons from [ua-geo](https://github.com/alexbabintsev/ua-geo),
+source commit d37d5e967e3bb45255d180ea740e5a6ca90e00cc.
+KATOTTG input SHA-256: 0952de2b19b1fed78b041cac415f296c73b663649e1325f0823082c4f7db1024.
+
+Worldwide: GeoNames cities500 published names and attested alternate names,
+within a conservative spatial radius. Download SHA-256:
+682a5f7e48463d64663755b3a4e17219dc4f27cea35d4b88c194d73a9bf453d1.
+
+INDEPENDENT_MATCH requires >=0.85 normalized place-name similarity,
+a plausible location within five kilometres for Ukraine (seven for worldwide),
+and no other similarly matching place that would make identity ambiguous.
+The rule establishes **strong independent consistency, not centimetre-level or
+individual-address precision**.
+
+Before this audit, 1,494 imported coordinates were merely compared to the
+source dataset they originated from. Their equality did **not** constitute
+independent verification; the source-match metadata is preserved separately
+in [qa/coordinate_inventory.tsv](qa/coordinate_inventory.tsv).
+
+## Language coverage vs certification
+
+UI languages: Ukrainian, Russian, English, German, Hebrew.
+- Ukrainian: government attested where known; 412 records remain unresolved,
+  for which original Latin names may be shown rather than fabricated Ukrainian spelling.
+- Russian: curated Russian exonyms where present, or Ukrainian Cyrillic as a documented
+  fallback; for unresolved points original romanized name may remain.
+- English: existing international romanizations / exonyms.
+- German: original nameDe if curated; otherwise international Latin romanization.
+- Hebrew: known Hebrew exonyms or automatically generated **phonetic transcription**.
+  Phonetic rendering is not a certified Hebrew place name.
+
+All five locales can display a non-blank title and region label, but **official
+native-language translations of every settlement have not been certified**.
+Do not equate five-language display coverage with fully reviewed exonyms.
+
+## Release gate
+
+- Technical inventory: complete for every 1694 location.
+- Independent identity agreement: 1269 strong matches,
+  425 unresolved.
+- Hallakhic calendar rules and city-specific candle offsets require their own
+  religious review, independent of geographic source quality.
+- Do not mark all location data as geographically certified; inspect every
+  remaining queue before final sign-off.
+
+Attribution: OpenStreetMap under ODbL 1.0
+https://www.openstreetmap.org/copyright ;
+GeoNames https://www.geonames.org/ ;
+KATOTTG public Ukrainian register.
