@@ -74,7 +74,7 @@ def load_catalog(core):
                 "lon":float(m[6]),"zone":m[7],"uk":uk,"oblast":oblast,
                 "kind":kind,"line":line
             })
-    assert len(out)>1600, f"Unexpected catalog size: {len(out)}"
+    assert 250 <= len(out) <= 400, f"Unapproved catalog size: {len(out)}"
     return out
 def load_ua(path):
     rows=defaultdict(list)
@@ -173,6 +173,7 @@ def write_tsv(path,rows,columns):
         writer.writeheader();writer.writerows(rows)
 def run(core,uk_file,global_file,out):
     catalog=load_catalog(core)
+    assert len(catalog) == 337, "Curated catalog must contain exactly 337 entries"
     ua=load_ua(uk_file)
     geo=load_geonames(global_file)
     results=[]
@@ -197,7 +198,7 @@ def run(core,uk_file,global_file,out):
     cols=["kind","id","en","ru","uk","oblast","lat","lon","zone","provider","status","candidate",
           "candidate_code","reference_lat","reference_lon","distance_km","name_similarity","nearby_count",
           "reference_match","line"]
-    write_tsv(out/"geodata_independent_1694.tsv",results,cols)
+    write_tsv(out/"geodata_selected_catalog.tsv",results,cols)
     proposed=[r for r in results if r["kind"]=="ua" and not r["uk"] and r["status"]=="INDEPENDENT_MATCH"]
     write_tsv(out/"reviewed_ukrainian_name_candidates.tsv",proposed,cols)
     exceptions=[r for r in results if r["status"]!="INDEPENDENT_MATCH"]

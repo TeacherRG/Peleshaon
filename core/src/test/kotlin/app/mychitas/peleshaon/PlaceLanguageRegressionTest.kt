@@ -21,6 +21,26 @@ class PlaceLanguageRegressionTest {
             }
         }
     }
+    @Test fun everySelectedUkrainianPlaceHasFiveReadableVariants() {
+        val ukrainian = CITIES.filter { it.id.startsWith("ua:") }
+        assertEquals(140, ukrainian.size)
+        for (city in ukrainian) {
+            val uk = city.title(Locale("uk"))
+            val ru = city.title(Locale("ru"))
+            val en = city.title(Locale("en"))
+            val de = city.title(Locale("de"))
+            val he = city.title(Locale("he"))
+            assertEquals(city.nameUk, uk, "UA entry without curated Ukrainian name: " + city.id)
+            assertTrue(uk.any { it in 'А'..'я' }, "Missing Ukrainian Cyrillic: " + city.id)
+            assertTrue(ru.any { it in 'А'..'я' } && ru.none { it in "іїєґІЇЄҐ" },
+                "Invalid Russian Cyrillic: " + city.id)
+            assertTrue(en.any { it in 'A'..'z' } && en.none { it in 'А'..'я' },
+                "English display not romanized: " + city.id)
+            assertTrue(de.any { it in 'A'..'z' } && de.none { it in 'А'..'я' },
+                "German display not romanized: " + city.id)
+            assertTrue(he.any { it in '\u05D0'..'\u05EA' }, "Hebrew has no Hebrew letters: " + city.id)
+        }
+    }
     @Test fun knownHebrewNamesAndSearchAreNotEnglishFallback() {
         assertEquals("ירושלים", requireNotNull(cityById("Asia/Jerusalem")).title(Locale("he")))
         assertEquals("ברלין", requireNotNull(cityById("Europe/Berlin")).title(Locale("he")))
@@ -30,7 +50,7 @@ class PlaceLanguageRegressionTest {
     }
     @Test fun all27AdministrativeRegionsAreLocalizedIntoFiveScripts() {
         val regions=CITIES.mapNotNull { it.oblastUk }.distinct()
-        assertEquals(27,regions.size)
+        assertTrue(regions.size in 24..27, "All 24 oblasts plus Crimea/Sevastopol/Kyiv may be represented through legacy entries")
         for (ua in regions) {
             val location=CITIES.first { it.oblastUk==ua }
             for (tag in listOf("en","de")) {

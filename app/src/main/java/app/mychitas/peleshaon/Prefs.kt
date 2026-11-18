@@ -86,8 +86,16 @@ object Prefs {
     fun cityUnconfirmed(context: Context): Boolean = chosenCity(context) == null
 
     /** If neither a manual city nor a timezone match exists, do not schedule religious alarms. */
+    /** A no-longer-supported saved city must NEVER turn into another city silently.
+     * Keep its stored ID until the user explicitly chooses a supported city or manual point.
+     * In this state all geographic religious alarms are held and the UI warns the user.
+     */
+    fun citySelectionObsolete(context: Context): Boolean =
+        of(context).getString("city_id", null) != null && chosenCity(context) == null
+
     fun cityUnmatched(context: Context): Boolean =
-        chosenCity(context) == null && cityMatchForZone(ZoneId.systemDefault()) == null
+        citySelectionObsolete(context) ||
+            (chosenCity(context) == null && cityMatchForZone(ZoneId.systemDefault()) == null)
 
     fun setCity(context: Context, city: CityOption?) {
         of(context).edit().apply {
