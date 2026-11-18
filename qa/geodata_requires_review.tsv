@@ -424,3 +424,4 @@ legacy	Europe/London	London	Лондон			51.51	-0.13	Europe/London	GeoNames po
 legacy	Asia/Dubai	Dubai	Дубай			25.2	55.27	Asia/Dubai	GeoNames populated places (cities500)	DISTANCE_ONLY_REVIEW	Downtown Dubai	10172907	25.19408	55.2781	1.048	0.556	57	AE	131
 legacy	Asia/Hong_Kong	Hong Kong	Гонконг			22.32	114.17	Asia/Hong_Kong	GeoNames populated places (cities500)	AMBIGUOUS_IDENTITY	Hong Kong	1819729	22.27832	114.17469	4.66	1.0	325	HK	133
 legacy	Asia/Singapore	Singapore	Сингапур			1.35	103.82	Asia/Singapore	GeoNames populated places (cities500)	POSSIBLE_MATCH_REVIEW	Singapore	1880252	1.28967	103.85007	7.495	1.0	140	SG	136
+legacy	brooklyn	Brooklyn (Crown Heights)	Бруклин (Краун-Хайтс)			40.67	-73.94	America/New_York	GeoNames populated places (cities500)	SUBLOCALITY_NAME_REVIEW	Brooklyn Heights	5110309	40.69538	-73.99375	5.339	0.857	229	US	219

@@ -1673,7 +1673,7 @@ legacy	thessaloniki	Thessaloniki			40.64	22.94	Europe/Athens	INDEPENDENT_MATCH		
 legacy	cyprus-larnaca	Larnaca			34.92	33.62	Asia/Nicosia	INDEPENDENT_MATCH					216	LEGACY_UNVERIFIED	GeoNames populated places (cities500)	Larnaca	146400	34.9221	33.62794	0.761	1.0	CY
 legacy	limassol	Limassol			34.68	33.04	Asia/Nicosia	INDEPENDENT_MATCH					217	LEGACY_UNVERIFIED	GeoNames populated places (cities500)	Limassol	146384	34.68406	33.03794	0.489	1.0	CY
 legacy	antalya	Antalya			36.9	30.7	Europe/Istanbul	INDEPENDENT_MATCH					218	LEGACY_UNVERIFIED	GeoNames populated places (cities500)	Antalya	323777	36.90812	30.69556	0.985	1.0	TR
-legacy	brooklyn	Brooklyn (Crown Heights)			40.67	-73.94	America/New_York	INDEPENDENT_MATCH					219	LEGACY_UNVERIFIED	GeoNames populated places (cities500)	Brooklyn Heights	5110309	40.69538	-73.99375	5.339	0.857	US
+legacy	brooklyn	Brooklyn (Crown Heights)			40.67	-73.94	America/New_York	SUBLOCALITY_NAME_REVIEW					219	LEGACY_UNVERIFIED	GeoNames populated places (cities500)	Brooklyn Heights	5110309	40.69538	-73.99375	5.339	0.857	US
 legacy	lakewood	Lakewood			40.08	-74.21	America/New_York	INDEPENDENT_MATCH					220	LEGACY_UNVERIFIED	GeoNames populated places (cities500)	Lakewood	5100280	40.09789	-74.21764	2.093	1.0	US
 legacy	monsey	Monsey			41.11	-74.07	America/New_York	INDEPENDENT_MATCH					221	LEGACY_UNVERIFIED	GeoNames populated places (cities500)	Monsey	5127315	41.11121	-74.06848	0.185	1.0	US
 legacy	boston	Boston			42.36	-71.06	America/New_York	INDEPENDENT_MATCH					222	LEGACY_UNVERIFIED	GeoNames populated places (cities500)	Boston	4930956	42.35843	-71.05977	0.176	1.0	US

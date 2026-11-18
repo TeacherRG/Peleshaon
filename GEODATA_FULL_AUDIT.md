@@ -9,13 +9,13 @@ in [qa/independent_geodata_1694.tsv](qa/independent_geodata_1694.tsv).
 | Class | Total | Independently strong-matched | Requires review |
 |---|---:|---:|---:|
 | Ukraine | 1497 | 1076 | 421 |
-| Worldwide legacy | 197 | 193 | 4 |
-| **All** | **1694** | **1269** | **425** |
+| Worldwide legacy | 197 | 192 | 5 |
+| **All** | **1694** | **1268** | **426** |
 
 **Ukrainian localized names populated:** 1085/1497.
 **Ukrainian place names still lacking independently supported Ukrainian form:** 412.
 These are recorded by ID in [qa/ukraine_missing_uk_names.tsv](qa/ukraine_missing_uk_names.tsv).
-**Ambiguous or unverified coordinates:** 425 entries in
+**Ambiguous or unverified coordinates:** 426 entries in
 [qa/geodata_requires_review.tsv](qa/geodata_requires_review.tsv).
 
 ## How independence is assessed
@@ -59,8 +59,8 @@ Do not equate five-language display coverage with fully reviewed exonyms.
 ## Release gate
 
 - Technical inventory: complete for every 1694 location.
-- Independent identity agreement: 1269 strong matches,
-  425 unresolved.
+- Independent identity agreement: 1268 strong matches,
+  426 unresolved.
 - Hallakhic calendar rules and city-specific candle offsets require their own
   religious review, independent of geographic source quality.
 - Do not mark all location data as geographically certified; inspect every
