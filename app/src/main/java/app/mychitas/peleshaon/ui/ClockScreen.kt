@@ -30,6 +30,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Checkbox
@@ -983,6 +984,10 @@ private fun TimesSheet(
 ) {
     val context = LocalContext.current
     val next = items.firstOrNull { it.roundedTime.isAfter(now) }
+    var showTzirufWarning by remember { mutableStateOf(false) }
+    val requestTzirufChange: (Boolean) -> Unit = { enabled ->
+        if (enabled) showTzirufWarning = true else onTziruf(false)
+    }
     SheetColumn {
         SheetTitle(stringResource(R.string.times_title))
         if (tomorrow) Text(stringResource(R.string.tomorrow, dayText(now.toLocalDate().plusDays(1))), color = ClockColors.GoldDeep, fontSize = 13.sp)
@@ -1019,8 +1024,8 @@ private fun TimesSheet(
         }
         Text(stringResource(R.string.on_face) + " — ✓", color = ClockColors.Muted, fontSize = 12.sp)
         HorizontalDivider(color = ClockColors.Line)
-        Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.clickable { onTziruf(!tziruf) }) {
-            Checkbox(checked = tziruf, onCheckedChange = onTziruf, colors = checkColors())
+        Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.clickable { requestTzirufChange(!tziruf) }) {
+            Checkbox(checked = tziruf, onCheckedChange = requestTzirufChange, colors = checkColors())
             Text(stringResource(R.string.tziruf), color = ClockColors.Ink, fontWeight = FontWeight.SemiBold)
         }
         if (tziruf) Note(stringResource(R.string.tziruf_note))
@@ -1032,6 +1037,26 @@ private fun TimesSheet(
             Text(stringResource(R.string.live_notif), color = ClockColors.Ink, fontWeight = FontWeight.SemiBold)
         }
         Note(stringResource(R.string.live_notif_note))
+    }
+    if (showTzirufWarning) {
+        AlertDialog(
+            onDismissRequest = { showTzirufWarning = false },
+            title = { Text(stringResource(R.string.tziruf_warning_title)) },
+            text = { Text(stringResource(R.string.tziruf_warning_body)) },
+            confirmButton = {
+                TextButton(onClick = {
+                    showTzirufWarning = false
+                    onTziruf(true)
+                }) {
+                    Text(stringResource(R.string.tziruf_enable))
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showTzirufWarning = false }) {
+                    Text(stringResource(R.string.tziruf_cancel))
+                }
+            }
+        )
     }
 }
 
