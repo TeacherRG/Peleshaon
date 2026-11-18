@@ -91,7 +91,7 @@ def main() -> None:
     # Prevent writing an Int literal where CityOption expects Kotlin Double.
     selected = read("core/src/main/kotlin/app/mychitas/peleshaon/domain/UkraineCities.kt")
     selected_records = re.findall(
-        r'CityOption\\("[^"]+", "[^"]+", "[^"]+", (?:null|"[^"]*"), '
+        r'CityOption\("[^"]+", "[^"]+", "[^"]+", (?:null|"[^"]*"), '
         r'(-?[0-9.]+), (-?[0-9.]+), "[^"]+", false,', selected
     )
     check(len(selected_records) == 140 and all("." in a and "." in b for a, b in selected_records),
