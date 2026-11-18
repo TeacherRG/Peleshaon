@@ -124,7 +124,7 @@ object KiddushLevanaRules {
     fun window(jewishGreg: LocalDate, city: CityOption): Pair<ZonedDateTime, ZonedDateTime> {
         val jc = JewishCalendar(jewishGreg).apply { inIsrael = city.isIsrael }
         val zone = city.zone()
-        fun z(d: java.util.Date) = java.time.Instant.ofEpochMilli(d.time).atZone(zone)
+        fun z(d: java.time.Instant) = d.atZone(zone)
         // Хабад и сефарды — с 7 суток после молада; литовские (по Рема) — с 3 суток. Конец: ашкеназы — середина между моладами, сефарды — 15 суток
         val start = if (ZmanimEngine.minhag == Minhag.LITVISH) jc.tchilasZmanKidushLevana3Days else jc.tchilasZmanKidushLevana7Days
         val end = if (ZmanimEngine.minhag == Minhag.SEFARDI) jc.sofZmanKidushLevana15Days else jc.sofZmanKidushLevanaBetweenMoldos
@@ -189,7 +189,8 @@ object KiddushLevanaRules {
         val sunset = ZmanimEngine.sunsetOf(evening, city) ?: return null
         var at = tzeit
         if (ShabbatGuard.checkMoment(at, city.name, city.lat, city.lon, zone, city.isIsrael, false).isQuietTime) {
-            at = (ZmanimEngine.havdalahOn(evening, city) ?: sunset.plusMinutes(ZmanimEngine.END_MIN)).withSecond(0).withNano(0).plusMinutes(1)
+            val end = ZmanimEngine.havdalahOn(evening, city) ?: return null
+            at = end.withSecond(0).withNano(0).plusMinutes(1)
             if (ShabbatGuard.checkMoment(at, city.name, city.lat, city.lon, zone, city.isIsrael, false).isQuietTime) return null
         }
         val (start, end) = window(evening.plusDays(1), city)

@@ -1,0 +1,14 @@
+id	uk	status	provenance
+Europe/London	Лондон	AMBIGUOUS_IDENTITY	GeoNames populated places (cities500)
+Asia/Dubai	Дубай	DISTANCE_ONLY_REVIEW	GeoNames populated places (cities500)
+Asia/Hong_Kong	Гонконг	AMBIGUOUS_IDENTITY	GeoNames populated places (cities500)
+Asia/Singapore	Сингапур	POSSIBLE_MATCH_REVIEW	GeoNames populated places (cities500)
+brooklyn	Бруклин (Краун-Хайтс)	SUBLOCALITY_NAME_REVIEW	GeoNames populated places (cities500)
+ua:77:vyzhnycya	Вижниця	NO_NEARBY_OFFICIAL_PLACE	KATOTTG government names + OSM center
+ua:56:rokytne	Рокитне	AMBIGUOUS_IDENTITY	KATOTTG government names + OSM center
+ua:77:hotyn	Хотин	NO_NEARBY_OFFICIAL_PLACE	KATOTTG government names + OSM center
+ua:14:doneck	Донецьк	POSSIBLE_MATCH_REVIEW	KATOTTG government names + OSM center
+ua:09:luhansk	Луганськ	NO_NEARBY_OFFICIAL_PLACE	KATOTTG government names + OSM center
+ua:77:chernivci	Чернівці	NO_NEARBY_OFFICIAL_PLACE	KATOTTG government names + OSM center
+ua:40:sevastopol	Севастополь	NO_NEARBY_OFFICIAL_PLACE	KATOTTG government names + OSM center
+ua:09:lysychansk	Лисичанськ	NO_NEARBY_OFFICIAL_PLACE	KATOTTG government names + OSM center

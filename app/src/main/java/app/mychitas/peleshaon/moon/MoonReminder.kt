@@ -85,7 +85,11 @@ object MoonReminder {
 
     /** Пришло время: если сейчас можно и Луну видно — одно тихое уведомление; потом — следующее напоминание. */
     fun fire(context: Context) {
-        val city = Prefs.city(context)
+        if (Prefs.cityUnmatched(context)) {
+            schedule(context)
+            return
+        }
+        val city = requireNotNull(Prefs.chosenCity(context))
         val now = ZonedDateTime.now(city.zone())
         val kl = runCatching { KiddushLevanaRules.now(now, city) }.getOrNull()
         if (isOn(context) && kl != null && kl.moon.altitude >= 5.0) notify(context, kl.moon, kl.end)

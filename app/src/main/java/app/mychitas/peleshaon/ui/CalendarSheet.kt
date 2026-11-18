@@ -48,6 +48,10 @@ import app.mychitas.peleshaon.domain.CityOption
 import app.mychitas.peleshaon.domain.JewishCal
 import app.mychitas.peleshaon.domain.ZmanType
 import app.mychitas.peleshaon.domain.ZmanimEngine
+import app.mychitas.peleshaon.domain.ZmanimService
+import app.mychitas.peleshaon.domain.ZmanimConfig
+import app.mychitas.peleshaon.domain.Minhag
+import java.time.Instant
 import java.time.DayOfWeek
 import java.time.LocalDate
 import java.time.ZonedDateTime
@@ -271,6 +275,11 @@ private val HHMM: DateTimeFormatter = DateTimeFormatter.ofPattern("HH:mm")
 @Composable
 private fun DayDetails(d: CalDay, city: CityOption, locale: Locale) {
     val items = remember(d.date, city) { ZmanimEngine.itemsOf(d.date, city).associateBy { it.type } }
+    val extras = remember(d.date, city, ZmanimEngine.minhag) {
+        if (ZmanimEngine.minhag == Minhag.CHABAD)
+            ZmanimService.calculate(d.date, ZmanimConfig(city, Minhag.CHABAD))
+        else null
+    }
     val next = remember(d.date, city) { JewishCal.day(d.date.plusDays(1), city.isIsrael) }
     val hebrew = remember(d.date, city) { ZmanimEngine.jewishDate(d.date, city.isIsrael).first }
     Surface(
@@ -304,25 +313,59 @@ private fun DayDetails(d: CalDay, city: CityOption, locale: Locale) {
                         }
                     }
                     CandleTransition.AFTER_NIGHTFALL -> {
-                        ZmanimEngine.havdalahOn(d.date, city)?.let {
+                        val previousEnd = ZmanimEngine.havdalahOn(d.date, city)
+                        if (previousEnd != null) {
                             TimeRow("🕯️", stringResource(R.string.cal_candles_after),
-                                it.withZoneSameInstant(zone).format(HHMM), ClockColors.GoldDeep)
+                                previousEnd.withZoneSameInstant(zone).format(HHMM), ClockColors.GoldDeep)
+                        } else {
+                            Text(stringResource(R.string.polar_shabbat_undefined),
+                                color = ClockColors.Bad, fontSize = 13.sp)
                         }
                     }
                     CandleTransition.NONE -> Unit
                 }
             }
             if (d.holy && !next.holy) {
-                ZmanimEngine.havdalahOn(d.date, city)?.let {
+                val end = ZmanimEngine.havdalahOn(d.date, city)
+                if (end != null) {
                     TimeRow("✨", stringResource(R.string.z_t_havdalah),
-                        it.withZoneSameInstant(zone).format(HHMM), ClockColors.GoldDeep)
+                        end.withZoneSameInstant(zone).format(HHMM), ClockColors.GoldDeep)
+                } else {
+                    Text(stringResource(R.string.polar_shabbat_undefined),
+                        color = ClockColors.Bad, fontSize = 13.sp)
                 }
             }
-            for (t in listOf(ZmanType.SUNRISE, ZmanType.SOF_ZMAN_SHMA, ZmanType.SOF_ZMAN_TFILA, ZmanType.SUNSET, ZmanType.TZAIT)) {
-                val it = items[t] ?: continue
-                TimeRow(null, stringResource(full(t.name)), it.roundedTime.withZoneSameInstant(zone).format(HHMM), zmanColor(t))
+            // Extras are Chabad-specific and must keep their own earliest/deadline
+            // rounding semantics. Sort by exact instants, never by the minute label.
+            val rows = mutableListOf<Triple<Instant, String, Color>>()
+            for (t in listOf(ZmanType.SUNRISE, ZmanType.SOF_ZMAN_SHMA,
+                ZmanType.SOF_ZMAN_TFILA, ZmanType.SUNSET, ZmanType.TZAIT)) {
+                items[t]?.let { rows += Triple(it.exactTime.toInstant(), stringResource(full(t.name)), zmanColor(t)) }
+            }
+            extras?.misheyakir?.let {
+                rows += Triple(it, stringResource(R.string.cal_misheyakir), ClockColors.TcheletDeep)
+            }
+            extras?.minchaKetana?.let {
+                rows += Triple(it, stringResource(R.string.cal_mincha_ketana), ClockColors.TcheletDeep)
+            }
+            extras?.sofZmanBiurChametz?.let {
+                rows += Triple(it, stringResource(R.string.cal_biur_chametz), ClockColors.Bad)
+            }
+            for ((instant, label, color) in rows.sortedBy { it.first }) {
+                val existing = items.values.firstOrNull { it.exactTime.toInstant() == instant }
+                val display = existing?.roundedTime ?: run {
+                    val fullMinute = instant.atZone(zone).truncatedTo(ChronoUnit.MINUTES)
+                    // Chametz burning is a deadline; other new times are earliest times.
+                    if (extras?.sofZmanBiurChametz == instant || !instant.isAfter(fullMinute.toInstant()))
+                        fullMinute else fullMinute.plusMinutes(1)
+                }
+                TimeRow(null, label, display.withZoneSameInstant(zone).format(HHMM), color)
             }
             if (items.isEmpty()) Text(stringResource(R.string.polar_short), color = ClockColors.Muted, fontSize = 13.sp)
+            else if (items[ZmanType.TZAIT] == null) {
+                Text(stringResource(R.string.polar_nightfall_undefined),
+                    color = ClockColors.Bad, fontSize = 13.sp)
+            }
         }
     }
 }

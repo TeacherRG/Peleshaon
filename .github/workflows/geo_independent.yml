@@ -1,0 +1,37 @@
+name: Independent curated city-coordinate audit
+
+on:
+  pull_request:
+    paths:
+      - 'core/src/main/kotlin/app/mychitas/peleshaon/domain/Cities.kt'
+      - 'core/src/main/kotlin/app/mychitas/peleshaon/domain/UkraineCities.kt'
+      - 'scripts/audit_geodata_external.py'
+      - 'scripts/test_audit_geodata_external.py'
+      - '.github/workflows/geo_independent.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  audit-curated-catalog:
+    runs-on: ubuntu-latest
+    timeout-minutes: 18
+    steps:
+      - uses: actions/checkout@v5
+      - name: Test geocoder matching rules
+        run: python3 -m unittest discover -s scripts -p 'test_audit_geodata_external.py'
+      - name: Download pinned independent KATOTTG/OSM and GeoNames data
+        run: |
+          mkdir -p /tmp/peleshaon-geodata
+          curl --fail --location --silent --show-error --retry 3 -o /tmp/peleshaon-geodata/katottg.csv https://raw.githubusercontent.com/alexbabintsev/ua-geo/d37d5e967e3bb45255d180ea740e5a6ca90e00cc/data/out/katottg.csv
+          curl --fail --location --silent --show-error --retry 3 -o /tmp/peleshaon-geodata/cities500.zip https://download.geonames.org/export/dump/cities500.zip
+      - name: Audit all 337 shipping locations without editing files
+        run: |
+          python3 scripts/audit_geodata_external.py --ukraine /tmp/peleshaon-geodata/katottg.csv --geonames /tmp/peleshaon-geodata/cities500.zip --out build/geo-audit
+          python3 -c "import json; j=json.load(open('build/geo-audit/summary.json')); assert j['catalog_total']==337 and j['ukrainian']==140 and j['world_legacy']==197,j"
+      - name: Publish individual independent location evidence
+        uses: actions/upload-artifact@v5
+        with:
+          name: geodata-curated-337
+          path: build/geo-audit/

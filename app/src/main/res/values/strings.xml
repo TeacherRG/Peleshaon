@@ -212,7 +212,7 @@
     <string name="candle_offset_title">Candle-lighting offset</string>
     <string name="candle_offset_local">Local custom</string>
     <string name="candle_offset_minutes">%1$d min</string>
-    <string name="candle_offset_note">Defaults: Jerusalem 40 min, Haifa 30 min, other cities 18 min. Check your local practice and ask your rabbi.</string>
+    <string name="candle_offset_note">Defaults: Jerusalem 40 min, Haifa 30 min, Tel Aviv 22 min, most other cities 18 min. Follow local practice and ask your rabbi.</string>
     <string name="alarm_fallback_channel">Alarm delivery problem</string>
     <string name="alarm_fallback_title">Alarm could not start</string>
     <string name="alarm_fallback_message">Android restricted the alarm service. Open the app and check its alarm and notification permissions.</string>
@@ -247,7 +247,7 @@
     <string name="minhag_chabad">Chabad</string>
     <string name="minhag_litvish">Lithuanian (Ashkenazi)</string>
     <string name="minhag_sefardi">Sephardi</string>
-    <string name="minhag_d_chabad">Times according to the Alter Rebbe (Baal HaTanya), as in Chabad calendars. Shabbat ends 50 minutes after sunset. Kiddush Levana from 7 days after the molad. The calendar shows the Chabad dates.</string>
+    <string name="minhag_d_chabad">Times according to the Alter Rebbe (Baal HaTanya), as in Chabad calendars. Shabbat ends when the sun reaches 8.5° below the horizon. Kiddush Levana from 7 days after the molad. The calendar shows the Chabad dates.</string>
     <string name="minhag_d_litvish">Times according to the Vilna Gaon (GRA): Shema and the morning prayer are counted from sunrise to sunset; nightfall and the end of Shabbat — when the sun is 8.5° below the horizon. Kiddush Levana from 3 days after the molad.</string>
     <string name="minhag_d_sefardi">Application calculation profile: dawn 72 proportional minutes before sunrise, Shema by Magen Avraham, morning prayer by GRA, nightfall after 13.5 proportional minutes, and Shabbat end by Rabbeinu Tam (72 proportional minutes). These methods do not define every Sephardi community.</string>
     <string name="minhag_note">Day times, Shabbat end, alarms and Moon reminders follow the selected profile. Candle-lighting depends on the city and any override. Ask your community rabbi.</string>
@@ -283,4 +283,23 @@
     <string name="home_open">Open the app settings</string>
     <string name="home_status">App widgets on the phone: %1$d of 2 · home screen: %2$s · %3$s, Android %4$s</string>
     <string name="pin_done">Done — look at the home screen</string>
+    <string name="city_manual_toggle">Add a location by coordinates</string>
+    <string name="city_manual_lat">Latitude (−90 to 90)</string>
+    <string name="city_manual_lon">Longitude (−180 to 180)</string>
+    <string name="city_manual_zone">IANA time zone, e.g. Europe/Kyiv</string>
+    <string name="city_manual_apply">Save custom location</string>
+    <string name="city_manual_invalid">Enter a name, valid coordinates and a valid time zone.</string>
+    <string name="city_zone_override">Use a different local time zone</string>
+    <string name="city_zone_apply">Apply time zone</string>
+    <string name="city_timezone_notice">Confirm the actual local clock before using religious times, especially in occupied territories.</string>
+    <string name="city_manual_name">Location name</string>
+    <string name="city_manual_israel">Apply Israel holiday calendar (otherwise diaspora)</string>
+    <string name="city_auto_unconfirmed_warning">City estimated from phone time zone. Select your exact location for reliable religious times.</string>
+    <string name="city_choose">Select city</string>
+    <string name="city_required_for_halacha">To calculate halachic times, select a city</string>
+    <string name="polar_nightfall_undefined">Nightfall cannot be determined reliably at this latitude and date. Consult your local rabbi.</string>
+    <string name="polar_shabbat_undefined">Shabbat or festival end cannot be determined reliably here. Do not assume Shabbat has ended; consult your local rabbi.</string>
+    <string name="cal_misheyakir">Earliest tallit and tefillin (Misheyakir)</string>
+    <string name="cal_mincha_ketana">Mincha Ketana</string>
+    <string name="cal_biur_chametz">Last time to burn chametz</string>
 </resources>

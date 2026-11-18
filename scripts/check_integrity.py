@@ -65,16 +65,59 @@ def main() -> None:
         gradle = read(f"{module}/build.gradle.kts")
         check('applicationId = "app.mychitas.peleshaon"' in gradle,
               f"{module}: wrong applicationId (must match original)")
-        check("versionCode = 2" in gradle, f"{module}: unexpected version")
+        check("versionCode = 6" in gradle, f"{module}: unexpected version")
         manifest = ET.parse(ROOT / module / "src" / "main" / "AndroidManifest.xml")
         namespace = "{http://schemas.android.com/apk/res/android}"
         app = manifest.getroot().find("application")
         check(app is not None and app.get(namespace + "label") == "@string/app_name",
               f"{module}: expected resource-based original app label")
+    main_gradle = read("app/build.gradle.kts")
+    check('applicationIdSuffix = ".qa"' in main_gradle and
+          'create("qa")' in main_gradle,
+          "Parallel QA build variant missing; do not require uninstalling old signed app")
+    qa_manifest = read("app/src/qa/AndroidManifest.xml")
+    check('android:label="PeleShaon QA"' in qa_manifest and
+          'tools:replace="android:label"' in qa_manifest,
+          "QA variant must use a distinguishable launcher label")
     engine = read("core/src/main/kotlin/app/mychitas/peleshaon/domain/ZmanimEngine.kt")
-    check("ZmanType.SOF_ZMAN_SHMA to shmaFrom(cal)" in engine and
-          "shmaFrom(cal(date, city))" in engine,
-          "Shma deadline and alarm no longer share one community formula")
+    service31 = read("core/src/main/kotlin/app/mychitas/peleshaon/domain/ZmanimService.kt")
+    gradle31 = read("core/build.gradle.kts")
+    check('api("com.kosherjava:zmanim:3.1.0")' in gradle31,
+          "KosherJava 3.1.0 must remain pinned to audited version")
+    check("ComprehensiveZmanimCalendar" in engine and
+          "ZmanType.SOF_ZMAN_SHMA to z.shema" in engine and
+          "shmaFrom(cal(date, city))" in engine and
+          "private fun shmaFrom" in engine,
+          "Shma deadline and alarm no longer share canonical 3.1.0 formula")
+    check("calendar.tzaisBaalHatanya" in service31 and
+          "calendar.tzaisGeonim8Point5Degrees" in service31 and
+          "calendar.alosBaalHatanya" in service31,
+          "Chabad 6° nightfall, 8.5° Shabbat end or 16.9° dawn missing")
+    check("END_MIN" not in service31 and "sunset.plusMinutes(ZmanimEngine.END_MIN)" not in
+          read("core/src/main/kotlin/app/mychitas/peleshaon/domain/KiddushLevana.kt"),
+          "Fixed-minute Shabbat end fallback reintroduced")
+    # City selection and permissions must fail closed until the user chooses coordinates.
+    check("fun cityUnmatched(context: Context): Boolean = chosenCity(context) == null" in
+          read("app/src/main/java/app/mychitas/peleshaon/Prefs.kt"),
+          "Timezone-only state must never enable geographical calculations")
+    phone_manifest = read("app/src/main/AndroidManifest.xml")
+    check("android.permission.SCHEDULE_EXACT_ALARM" in phone_manifest and
+          "android.permission.USE_EXACT_ALARM" not in phone_manifest and
+          "android.permission.ACCESS_FINE_LOCATION" not in phone_manifest and
+          "android.permission.INTERNET" not in phone_manifest,
+          "Permission-on-use/offline contract regressed")
+    # Prevent writing an Int literal where CityOption expects Kotlin Double.
+    selected = read("core/src/main/kotlin/app/mychitas/peleshaon/domain/UkraineCities.kt")
+    selected_records = re.findall(
+        r'CityOption\("[^"]+", "[^"]+", "[^"]+", (?:null|"[^"]*"), '
+        r'(-?[0-9.]+), (-?[0-9.]+), "[^"]+", false,', selected
+    )
+    check(len(selected_records) == 140 and all("." in a and "." in b for a, b in selected_records),
+          "Selected Ukrainian place coordinates must be 140 explicit Double literals")
+    migration_tests = read("core/src/test/kotlin/app/mychitas/peleshaon/Zmanim31MigrationTest.kt")
+    check('cityById("Europe/Berlin")' in migration_tests and
+          "sevenReferenceCitiesAcrossAllFourSeasons" in migration_tests,
+          "Missing Berlin or 7-city seasonal regression test")
     guard = read("core/src/main/kotlin/app/mychitas/peleshaon/alarm/ShabbatGuard.kt")
     check("LocalTime.of(14, 0)" not in guard and "LocalTime.of(23, 0)" not in guard,
           "Invented polar quiet-time cutoffs reappeared")

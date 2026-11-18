@@ -212,7 +212,7 @@
     <string name="candle_offset_title">הדלקת נרות לפני השקיעה</string>
     <string name="candle_offset_local">לפי העיר</string>
     <string name="candle_offset_minutes">%1$d דק׳</string>
-    <string name="candle_offset_note">ברירת מחדל: ירושלים 40 דקות, חיפה 30 דקות, ערים אחרות 18 דקות. יש לברר את מנהג המקום עם הרב.</string>
+    <string name="candle_offset_note">ברירת מחדל: ירושלים 40 דקות, חיפה 30 דקות, תל אביב 22 דקות, רוב הערים האחרות 18 דקות. יש לברר את מנהג המקום עם הרב.</string>
     <string name="alarm_fallback_channel">בעיה בהפעלת השעון המעורר</string>
     <string name="alarm_fallback_title">השעון המעורר לא הופעל</string>
     <string name="alarm_fallback_message">Android חסם את השירות. יש לבדוק הרשאות שעון מעורר והתראות.</string>
@@ -247,7 +247,7 @@
     <string name="minhag_chabad">חב״ד</string>
     <string name="minhag_litvish">ליטאית (אשכנזית)</string>
     <string name="minhag_sefardi">ספרדית</string>
-    <string name="minhag_d_chabad">הזמנים לפי אדמו״ר הזקן (בעל התניא), כמו בלוחות חב״ד. צאת השבת — 50 דקות אחרי השקיעה. קידוש לבנה — משבעה ימים אחרי המולד. בלוח — תאריכי חב״ד.</string>
+    <string name="minhag_d_chabad">הזמנים לפי אדמו״ר הזקן (בעל התניא), כמו בלוחות חב״ד. צאת השבת — כשהשמש 8.5° מתחת לאופק. קידוש לבנה — משבעה ימים אחרי המולד. בלוח — תאריכי חב״ד.</string>
     <string name="minhag_d_litvish">הזמנים לפי הגר״א: קריאת שמע ותפילת שחרית מחושבות מהזריחה עד השקיעה; צאת הכוכבים וצאת השבת — כשהשמש 8.5° מתחת לאופק. קידוש לבנה — משלושה ימים אחרי המולד.</string>
     <string name="minhag_d_sefardi">פרופיל החישוב ביישומון: עלות השחר 72 דקות זמניות לפני הזריחה, שמע לפי מגן אברהם, תפילת שחרית לפי הגר״א, צאת הכוכבים אחרי 13.5 דקות זמניות, וצאת השבת לפי רבנו תם (72 דקות זמניות). זו אינה הלכה אחידה לכל קהילות הספרדים.</string>
     <string name="minhag_note">זמני היום, צאת השבת, השעונים המעוררים ותזכורות הירח נקבעים לפי הפרופיל שנבחר. זמן הנרות תלוי בעיר ובהגדרות. יש להתייעץ עם רב הקהילה.</string>
@@ -284,4 +284,23 @@
     <string name="home_open">פתיחת הגדרות היישום</string>
     <string name="home_status">ווידג׳טים של היישום בטלפון: %1$d מתוך 2 · מסך הבית: %2$s · %3$s, Android %4$s</string>
     <string name="pin_done">בוצע — הסתכלו במסך הבית</string>
+    <string name="city_manual_toggle">הוספת מיקום לפי קואורדינטות</string>
+    <string name="city_manual_lat">קו רוחב (−90 עד 90)</string>
+    <string name="city_manual_lon">קו אורך (−180 עד 180)</string>
+    <string name="city_manual_zone">אזור זמן IANA, למשל Europe/Kyiv</string>
+    <string name="city_manual_apply">שמירת מיקום מותאם אישית</string>
+    <string name="city_manual_invalid">יש להזין שם, קואורדינטות תקינות ואזור זמן תקין.</string>
+    <string name="city_zone_override">בחירת אזור זמן מקומי אחר</string>
+    <string name="city_zone_apply">החלת אזור זמן</string>
+    <string name="city_timezone_notice">יש לוודא את השעה המקומית בפועל, במיוחד באזורים כבושים.</string>
+    <string name="city_manual_name">שם המקום</string>
+    <string name="city_manual_israel">שימוש בלוח חגי ישראל (אחרת חו״ל)</string>
+    <string name="city_auto_unconfirmed_warning">המיקום משוער לפי אזור הזמן בלבד. יש לבחור מיקום מדויק לזמני היום.</string>
+    <string name="city_choose">בחרו עיר</string>
+    <string name="city_required_for_halacha">לחישוב הזמנים ההלכתיים בחרו עיר</string>
+    <string name="polar_nightfall_undefined">לא ניתן לחשב באופן מהימן את צאת הכוכבים בקו רוחב זה ובתאריך זה. יש לפנות לרב המקומי.</string>
+    <string name="polar_shabbat_undefined">לא ניתן לחשב באופן מהימן את צאת השבת או החג כאן. אין להניח שהשבת הסתיימה; יש לפנות לרב המקומי.</string>
+    <string name="cal_misheyakir">משיכיר – זמן טלית ותפילין</string>
+    <string name="cal_mincha_ketana">מנחה קטנה</string>
+    <string name="cal_biur_chametz">סוף זמן ביעור חמץ</string>
 </resources>
