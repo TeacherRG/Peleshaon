@@ -64,7 +64,7 @@ def main() -> None:
     for module in ("app", "wear"):
         gradle = read(f"{module}/build.gradle.kts")
         check('applicationId = "app.mychitas.peleshaon"' in gradle,
-              f"{module}: wrong applicationId (must match original)")
+              f"{module}: wrong applicationId (must match Niflaot phone/watch ID)")
         check("versionCode = 6" in gradle, f"{module}: unexpected version")
         manifest = ET.parse(ROOT / module / "src" / "main" / "AndroidManifest.xml")
         namespace = "{http://schemas.android.com/apk/res/android}"
