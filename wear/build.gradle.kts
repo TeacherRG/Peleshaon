@@ -10,7 +10,7 @@ android {
 
     defaultConfig {
         // Тот же id, что у телефона: Google Play связывает приложение на телефоне и на часах
-        applicationId = "app.mychitas.peleshaon"
+        applicationId = "app.niflaot.peleshaon"
         minSdk = 30
         targetSdk = 35
         versionCode = 6
