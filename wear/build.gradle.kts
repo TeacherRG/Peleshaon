@@ -6,7 +6,7 @@ plugins {
 
 android {
     namespace = "app.mychitas.peleshaon.wear"
-    compileSdk = 35
+    compileSdk = 36
 
     defaultConfig {
         // Тот же id, что у телефона: Google Play связывает приложение на телефоне и на часах
