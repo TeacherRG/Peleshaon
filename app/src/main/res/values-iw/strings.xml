@@ -30,7 +30,7 @@
     <string name="z_d_sof_zman_shma">קריאת שמע של שחרית — עד סוף השעה השלישית. שעה זמנית היא חלק שנים־עשר מאור היום.</string>
     <string name="z_s_sof_zman_tfila">תפילה</string>
     <string name="z_t_sof_zman_tfila">סוף זמן תפילה</string>
-    <string name="z_d_sof_zman_tfila">תפילת שחרית — עד סוף השעה הרביעית.</string>
+    <string name="z_d_sof_zman_tfila">לכתחילה אין להתפלל שחרית לאחר סוף השעה ההלכתית הרביעית.</string>
     <string name="z_s_chatzot">חצות</string>
     <string name="z_t_chatzot">חצות היום</string>
     <string name="z_d_chatzot">חצות היום — באמצע בין הנץ לשקיעה. השמש בשיא גובהה.</string>
@@ -42,7 +42,7 @@
     <string name="z_d_plag_hamincha">פלג המנחה — שעה ורבע זמניות לפני סוף היום. מכאן אפשר לקבל שבת מוקדם.</string>
     <string name="z_s_sunset">שקיעה</string>
     <string name="z_t_sunset">סוף זמן מנחה (שקיעה)</string>
-    <string name="z_d_sunset">שקיעת החמה. מנחה מתפללים לפני השקיעה; עם השקיעה מתחיל היום העברי הבא.</string>
+    <string name="z_d_sunset">לכתחילה אין להתפלל מנחה לאחר שקיעת החמה; עם השקיעה מתחיל היום העברי הבא.</string>
     <string name="z_s_tzait">צאת</string>
     <string name="z_t_tzait">צאת הכוכבים</string>
     <string name="z_d_tzait">צאת הכוכבים — לילה. זמן קריאת שמע של ערבית ותפילת ערבית.</string>
@@ -247,7 +247,7 @@
     <string name="minhag_chabad">חב״ד</string>
     <string name="minhag_litvish">ליטאית (אשכנזית)</string>
     <string name="minhag_sefardi">ספרדית</string>
-    <string name="minhag_d_chabad">הזמנים לפי אדמו״ר הזקן (בעל התניא), כמו בלוחות חב״ד. צאת השבת — כשהשמש 8.5° מתחת לאופק. קידוש לבנה — משבעה ימים אחרי המולד. בלוח — תאריכי חב״ד.</string>
+    <string name="minhag_d_chabad">הזמנים לפי אדמו״ר הזקן (בעל התניא), כמו בלוחות חב״ד. קידוש לבנה — משבעה ימים אחרי המולד. בלוח — תאריכי חב״ד.</string>
     <string name="minhag_d_litvish">הזמנים לפי הגר״א: קריאת שמע ותפילת שחרית מחושבות מהזריחה עד השקיעה; צאת הכוכבים וצאת השבת — כשהשמש 8.5° מתחת לאופק. קידוש לבנה — משלושה ימים אחרי המולד.</string>
     <string name="minhag_d_sefardi">פרופיל החישוב ביישומון: עלות השחר 72 דקות זמניות לפני הזריחה, שמע לפי מגן אברהם, תפילת שחרית לפי הגר״א, צאת הכוכבים אחרי 13.5 דקות זמניות, וצאת השבת לפי רבנו תם (72 דקות זמניות). זו אינה הלכה אחידה לכל קהילות הספרדים.</string>
     <string name="minhag_note">זמני היום, צאת השבת, השעונים המעוררים ותזכורות הירח נקבעים לפי הפרופיל שנבחר. זמן הנרות תלוי בעיר ובהגדרות. יש להתייעץ עם רב הקהילה.</string>
@@ -266,7 +266,7 @@
         <item quantity="other">%d חלקים</item>
     </plurals>
     <string name="h7_t">מנהג קידוש בשעה השביעית</string>
-    <string name="h7_note">לפי מנהג חב״ד יש הנמנעים מקידוש בשעה הפלנטרית השביעית בליל שבת (שולחן ערוך אדמו״ר הזקן רעא:ג). אין זה איסור גורף.</string>
+    <string name="h7_note">לפי מנהג חב״ד יש הנמנעים מקידוש בשעה הפלנטרית השביעית בליל שבת (שולחן ערוך אדמו״ר הזקן רעא:ג).</string>
     <string name="menu_compass">מצפן</string>
     <string name="compass_jerusalem">ירושלים</string>
     <string name="compass_moon">ירח</string>

@@ -30,7 +30,7 @@
     <string name="z_d_sof_zman_shma">Das Schma am Morgen liest man bis zum Ende der dritten halachischen Stunde. Eine halachische Stunde ist ein Zwölftel des Tageslichts.</string>
     <string name="z_s_sof_zman_tfila">Gebet</string>
     <string name="z_t_sof_zman_tfila">Ende der Zeit für das Morgengebet</string>
-    <string name="z_d_sof_zman_tfila">Das Morgengebet (Schacharit) betet man bis zum Ende der vierten halachischen Stunde.</string>
+    <string name="z_d_sof_zman_tfila">Schacharit darf grundsätzlich nicht nach dem Ende der vierten halachischen Stunde gebetet werden.</string>
     <string name="z_s_chatzot">Mittag</string>
     <string name="z_t_chatzot">Mittag (Chazot)</string>
     <string name="z_d_chatzot">Mittag — genau zwischen Sonnenaufgang und Sonnenuntergang. Die Sonne steht am höchsten.</string>
@@ -42,7 +42,7 @@
     <string name="z_d_plag_hamincha">Plag HaMincha — 1¼ halachische Stunden vor dem Ende des Tages. Ab jetzt darf man den Schabbat früher empfangen.</string>
     <string name="z_s_sunset">Untergang</string>
     <string name="z_t_sunset">Ende der Zeit für Mincha (Sonnenuntergang)</string>
-    <string name="z_d_sunset">Sonnenuntergang. Mincha betet man vor dem Sonnenuntergang; mit ihm beginnt der nächste jüdische Tag.</string>
+    <string name="z_d_sunset">Mincha darf grundsätzlich nicht nach Sonnenuntergang gebetet werden; mit ihm beginnt der nächste jüdische Tag.</string>
     <string name="z_s_tzait">Sterne</string>
     <string name="z_t_tzait">Sternenaufgang</string>
     <string name="z_d_tzait">Nachteinbruch — die Sterne sind zu sehen. Die Zeit des Abend-Schma und von Maariw.</string>
@@ -247,7 +247,7 @@
     <string name="minhag_chabad">Chabad</string>
     <string name="minhag_litvish">Litauisch (aschkenasisch)</string>
     <string name="minhag_sefardi">Sefardisch</string>
-    <string name="minhag_d_chabad">Zeiten nach dem Alter Rebbe (Baal HaTanja), wie in den Kalendern von Chabad. Schabbat endet, wenn die Sonne 8,5° unter dem Horizont steht. Kiddusch Lewana ab 7 Tagen nach dem Molad. Im Kalender stehen die Chabad-Daten.</string>
+    <string name="minhag_d_chabad">Zeiten nach dem Alter Rebbe (Baal HaTanja), wie in den Kalendern von Chabad. Kiddusch Lewana ab 7 Tagen nach dem Molad. Im Kalender stehen die Chabad-Daten.</string>
     <string name="minhag_d_litvish">Zeiten nach dem Wilnaer Gaon (GRA): Schma und Morgengebet werden von Sonnenaufgang bis Sonnenuntergang gerechnet; Erscheinen der Sterne und Schabbatende — wenn die Sonne 8,5° unter dem Horizont steht. Kiddusch Lewana ab 3 Tagen nach dem Molad.</string>
     <string name="minhag_d_sefardi">Berechnungsprofil der App: Morgendämmerung 72 proportionale Minuten vor Sonnenaufgang, Schema nach Magen Awraham, Morgengebet nach GRA, Nachtbeginn nach 13,5 proportionalen Minuten, Schabbatende nach Rabbenu Tam (72 proportionale Minuten). Das ist keine einheitliche Regel für alle sephardischen Gemeinden.</string>
     <string name="minhag_note">Tageszeiten, Schabbatende, Wecker und Monderinnerungen folgen dem ausgewählten Profil. Die Kerzenzeit hängt von Ort und Einstellung ab. Bitte den Rabbiner fragen.</string>
@@ -265,7 +265,7 @@
         <item quantity="other">%d Teile</item>
     </plurals>
     <string name="h7_t">Kiddusch-Brauch der siebten Stunde</string>
-    <string name="h7_note">Im Chabad-Brauch vermeiden manche den Kiddusch in der siebten planetarischen Stunde am Freitagabend (Schulchan Aruch des Alter Rebbe 271:3). Dies ist kein allgemeines Verbot.</string>
+    <string name="h7_note">Im Chabad-Brauch vermeiden manche den Kiddusch in der siebten planetarischen Stunde am Freitagabend (Schulchan Aruch des Alter Rebbe 271:3).</string>
     <string name="menu_compass">Kompass</string>
     <string name="compass_jerusalem">Jerusalem</string>
     <string name="compass_moon">Mond</string>
