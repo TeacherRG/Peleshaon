@@ -265,7 +265,7 @@
         <item quantity="other">%d parts</item>
     </plurals>
     <string name="h7_t">Seventh-hour Kiddush custom</string>
-    <string name="h7_note">In Chabad practice some avoid Kiddush during the seventh planetary hour on Friday night (Alter Rebbe, Orach Chaim 271:3). This is not a universal prohibition.</string>
+    <string name="h7_note">In Chabad practice some avoid Kiddush during the seventh planetary hour on Friday night (Alter Rebbe, Orach Chaim 271:3).</string>
     <string name="menu_compass">Compass</string>
     <string name="compass_jerusalem">Jerusalem</string>
     <string name="compass_moon">Moon</string>
