@@ -235,14 +235,14 @@ object Live {
         val h = opts.getInt(AppWidgetManager.OPTION_APPWIDGET_MAX_HEIGHT, 0)
         if (w <= 0 || h <= 0) return
         val font = context.resources.configuration.fontScale
-        val pill = 17f * font * 1.3f + 12f + 6f   // текст, внутренние отступы, зазор
+        val pill = 15f * font * 1.2f + 8f + 2f   // компактная дата: текст, отступы и зазор
         val side = minOf(w - 16f, h - 16f - pill).coerceAtLeast(96f)
         val time = (side * 0.2f).coerceIn(22f, 44f)
         v.setTextViewTextSize(R.id.w_time, TypedValue.COMPLEX_UNIT_DIP, time)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
             v.setViewLayoutWidth(R.id.w_face_box, side, TypedValue.COMPLEX_UNIT_DIP)
             v.setViewLayoutHeight(R.id.w_face_box, side, TypedValue.COMPLEX_UNIT_DIP)
-            v.setViewLayoutMargin(R.id.w_tziruf, RemoteViews.MARGIN_TOP, time * 0.6f + 14f, TypedValue.COMPLEX_UNIT_DIP)
+            v.setViewLayoutMargin(R.id.w_tziruf, RemoteViews.MARGIN_TOP, (time * 0.3f + 5f).coerceAtLeast(10f), TypedValue.COMPLEX_UNIT_DIP)
         }
     }
 
