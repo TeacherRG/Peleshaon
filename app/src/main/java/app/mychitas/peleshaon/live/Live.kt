@@ -140,7 +140,7 @@ object Live {
         val s = ClockTheme.render(light) { LiveState.of(context) }
         val m = AppWidgetManager.getInstance(context)
         for (id in m.getAppWidgetIds(ComponentName(context, FaceWidget::class.java))) m.updateAppWidget(id, faceViews(context, s, id, light))
-        for (id in m.getAppWidgetIds(ComponentName(context, DateWidget::class.java))) m.updateAppWidget(id, dateViews(context, s, light))
+        for (id in m.getAppWidgetIds(ComponentName(context, DateWidget::class.java))) m.updateAppWidget(id, dateViews(context, s, light, id))
         if (notif) showNotification(context, s)
         scheduleTick(context, s)
     }
