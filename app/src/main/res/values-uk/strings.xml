@@ -267,7 +267,7 @@
         <item quantity="other">%d частини</item>
     </plurals>
     <string name="h7_t">Звичай кідушу сьомої години</string>
-    <string name="h7_note">За звичаєм Хабаду деякі утримуються від кідушу протягом сьомої планетарної години в п’ятницю ввечері (Шулхан арух Алтер Ребе 271:3). Це не загальна заборона.</string>
+    <string name="h7_note">За звичаєм Хабаду деякі утримуються від кідушу протягом сьомої планетарної години в п’ятницю ввечері (Шулхан арух Алтер Ребе 271:3).</string>
     <string name="menu_compass">Компас</string>
     <string name="compass_jerusalem">Єрусалим</string>
     <string name="compass_moon">Місяць</string>
