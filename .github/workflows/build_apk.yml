@@ -100,7 +100,7 @@ jobs:
           "$AAPT" dump xmltree "$apk" --file AndroidManifest.xml > manifest.txt
           for w in FaceWidget DateWidget; do
             grep -A12 "live.$w" manifest.txt | tee /dev/stderr | grep -q 'android.appwidget.provider' || { echo "::error::$w is not a widget"; exit 1; }
-            grep -A3 "live.$w" manifest.txt | grep -q 'exported.*=true\\|exported.*0xffffffff' || { echo "::error::$w is not exported"; exit 1; }
+            grep -A3 "live.$w" manifest.txt | grep -q 'exported.*=true\|exported.*0xffffffff' || { echo "::error::$w is not exported"; exit 1; }
           done
           "$AAPT" dump xmltree "$apk" --file res/xml/widget_face_info.xml || true
 
