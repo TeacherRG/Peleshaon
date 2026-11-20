@@ -132,7 +132,7 @@ object Live {
             for (id in manager.getAppWidgetIds(ComponentName(context, FaceWidget::class.java)))
                 manager.updateAppWidget(id, ordinaryFaceViews(context, light, id))
             for (id in manager.getAppWidgetIds(ComponentName(context, DateWidget::class.java)))
-                manager.updateAppWidget(id, ordinaryDateViews(context, light))
+                manager.updateAppWidget(id, ordinaryDateViews(context, light, id))
             if (ids.isEmpty()) cancelTick(context) else scheduleOrdinaryTick(context)
             return
         }
@@ -204,7 +204,7 @@ object Live {
         return v
     }
 
-    private fun ordinaryDateViews(context: Context, light: Boolean): RemoteViews {
+    private fun ordinaryDateViews(context: Context, light: Boolean, widgetId: Int): RemoteViews {
         val v = RemoteViews(context.packageName, R.layout.widget_date)
         val today = java.time.LocalDate.now()
         val loc = context.resources.configuration.locales[0] ?: Locale.getDefault()
@@ -217,7 +217,7 @@ object Live {
         v.setTextViewText(R.id.w_month, today.month.getDisplayName(java.time.format.TextStyle.FULL_STANDALONE, loc))
         v.setTextViewText(R.id.w_weekday, today.dayOfWeek.getDisplayName(java.time.format.TextStyle.FULL_STANDALONE, loc))
         v.setTextViewText(R.id.w_year, today.year.toString())
-        fitDate(context, v)
+        fitDate(context, v, widgetId)
         v.setOnClickPendingIntent(R.id.w_root, openApp(context))
         return v
     }
@@ -279,7 +279,7 @@ object Live {
     }
 
     /** Маленький виджет: вертикальная карточка еврейской даты, локализованная на языке приложения. */
-    private fun dateViews(context: Context, s: LiveState, light: Boolean): RemoteViews {
+    private fun dateViews(context: Context, s: LiveState, light: Boolean, widgetId: Int): RemoteViews {
         val v = RemoteViews(context.packageName, R.layout.widget_date)
         val locale = context.resources.configuration.locales[0] ?: Locale.getDefault()
         val jd = ZmanimEngine.jewishDay(s.day.date, s.city.isIsrael)
@@ -295,7 +295,7 @@ object Live {
         v.setTextViewText(R.id.w_day, dayText)
         v.setTextViewText(R.id.w_month, month)
         v.setTextViewText(R.id.w_year, if (locale.language in setOf("iw", "he")) hebrewNumeral(jd.year % 1000) else jd.year.toString())
-        fitDate(context, v)
+        fitDate(context, v, widgetId)
         v.setOnClickPendingIntent(R.id.w_root, openApp(context, openCalendar = true))
         return v
     }
@@ -324,12 +324,10 @@ object Live {
     }
 
     /** Keep all four lines legible when the launcher resizes the date card. */
-    private fun fitDate(context: Context, v: RemoteViews) {
-        val manager = AppWidgetManager.getInstance(context)
-        val ids = manager.getAppWidgetIds(ComponentName(context, DateWidget::class.java))
-        val opts = ids.firstOrNull()?.let { manager.getAppWidgetOptions(it) }
-        val width = opts?.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_WIDTH, 110) ?: 110
-        val height = opts?.getInt(AppWidgetManager.OPTION_APPWIDGET_MAX_HEIGHT, 165) ?: 165
+    private fun fitDate(context: Context, v: RemoteViews, widgetId: Int) {
+        val opts = AppWidgetManager.getInstance(context).getAppWidgetOptions(widgetId)
+        val width = opts.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_WIDTH, 110).coerceAtLeast(90)
+        val height = opts.getInt(AppWidgetManager.OPTION_APPWIDGET_MAX_HEIGHT, 165).coerceAtLeast(135)
         val scale = minOf(width / 110f, height / 165f).coerceIn(0.82f, 1.45f)
         v.setTextViewTextSize(R.id.w_weekday, TypedValue.COMPLEX_UNIT_SP, 16f * scale)
         v.setTextViewTextSize(R.id.w_day, TypedValue.COMPLEX_UNIT_SP, 52f * scale)
