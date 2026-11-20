@@ -6,7 +6,6 @@
     android:minHeight="165dp"
     android:minResizeWidth="90dp"
     android:minResizeHeight="135dp"
-    android:previewImage="@drawable/widget_date_preview"
     android:previewLayout="@layout/widget_date"
     android:resizeMode="horizontal|vertical"
     android:targetCellWidth="2"
