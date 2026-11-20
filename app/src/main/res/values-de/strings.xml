@@ -265,7 +265,7 @@
         <item quantity="other">%d Teile</item>
     </plurals>
     <string name="h7_t">Kiddusch-Brauch der siebten Stunde</string>
-    <string name="h7_note">Im Chabad-Brauch vermeiden manche den Kiddusch in der siebten planetarischen Stunde am Freitagabend (Schulchan Aruch des Alter Rebbe 271:3). Dies ist kein allgemeines Verbot.</string>
+    <string name="h7_note">Im Chabad-Brauch vermeiden manche den Kiddusch in der siebten planetarischen Stunde am Freitagabend (Schulchan Aruch des Alter Rebbe 271:3).</string>
     <string name="menu_compass">Kompass</string>
     <string name="compass_jerusalem">Jerusalem</string>
     <string name="compass_moon">Mond</string>
