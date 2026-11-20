@@ -49,9 +49,9 @@ jobs:
           echo "== Phone" && head -6 /tmp/phone-package.txt
           echo "== QA parallel" && head -6 /tmp/parallel-package.txt
           echo "== Wear" && head -6 /tmp/wear-package.txt
-          grep -q "name='app.mychitas.peleshaon' versionCode='6'" /tmp/phone-package.txt
-          grep -q "name='app.mychitas.peleshaon.qa' versionCode='6'" /tmp/parallel-package.txt
-          grep -q "name='app.mychitas.peleshaon' versionCode='6'" /tmp/wear-package.txt
+          grep -q "name='app.niflaot.peleshaon' versionCode='6'" /tmp/phone-package.txt
+          grep -q "name='app.niflaot.peleshaon.qa' versionCode='6'" /tmp/parallel-package.txt
+          grep -q "name='app.niflaot.peleshaon' versionCode='6'" /tmp/wear-package.txt
           grep -q "minSdkVersion:'26'" /tmp/phone-package.txt
           grep -q "minSdkVersion:'26'" /tmp/parallel-package.txt
           echo "Verified: normal update + separate QA install with independent package ID"
