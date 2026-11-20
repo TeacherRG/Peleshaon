@@ -207,13 +207,17 @@ object Live {
     private fun ordinaryDateViews(context: Context, light: Boolean): RemoteViews {
         val v = RemoteViews(context.packageName, R.layout.widget_date)
         val today = java.time.LocalDate.now()
-        val loc = Locale.getDefault()
-        v.setInt(R.id.w_root, "setBackgroundResource",
-            if (light) R.drawable.widget_date_pill_light else R.drawable.widget_date_pill_dark)
-        v.paint(light, R.id.w_day to GOLD, R.id.w_month to INK, R.id.w_weekday to INK2)
+        val loc = context.resources.configuration.locales[0] ?: Locale.getDefault()
+        v.setInt(R.id.w_root, "setBackgroundResource", R.drawable.widget_date_card)
+        v.setTextColor(R.id.w_weekday, android.graphics.Color.WHITE)
+        v.setTextColor(R.id.w_day, android.graphics.Color.WHITE)
+        v.setTextColor(R.id.w_month, android.graphics.Color.WHITE)
+        v.setTextColor(R.id.w_year, android.graphics.Color.WHITE)
         v.setTextViewText(R.id.w_day, today.dayOfMonth.toString())
         v.setTextViewText(R.id.w_month, today.month.getDisplayName(java.time.format.TextStyle.FULL_STANDALONE, loc))
         v.setTextViewText(R.id.w_weekday, today.dayOfWeek.getDisplayName(java.time.format.TextStyle.FULL_STANDALONE, loc))
+        v.setTextViewText(R.id.w_year, today.year.toString())
+        fitDate(context, v)
         v.setOnClickPendingIntent(R.id.w_root, openApp(context))
         return v
     }
@@ -274,24 +278,63 @@ object Live {
         return v
     }
 
-    /** Маленький виджет: еврейская дата — день числом, месяц и день недели. После заката — уже следующий день. */
+    /** Маленький виджет: вертикальная карточка еврейской даты, локализованная на языке приложения. */
     private fun dateViews(context: Context, s: LiveState, light: Boolean): RemoteViews {
         val v = RemoteViews(context.packageName, R.layout.widget_date)
-        v.setInt(
-            R.id.w_root,
-            "setBackgroundResource",
-            if (light) R.drawable.widget_date_pill_light else R.drawable.widget_date_pill_dark
-        )
-        v.paint(light, R.id.w_day to GOLD, R.id.w_month to INK, R.id.w_weekday to INK2)
+        val locale = context.resources.configuration.locales[0] ?: Locale.getDefault()
         val jd = ZmanimEngine.jewishDay(s.day.date, s.city.isIsrael)
-        v.setTextViewText(R.id.w_day, jd.day.toString())
-        // на иврите в списке месяцев — «בכסלו» (для «7 בכסלו»); отдельной строкой — без ב
-        val month = jewishMonthName(jd).let { if (Locale.getDefault().language in setOf("iw", "he") && it.startsWith("ב")) it.drop(1) else it }
+        v.setInt(R.id.w_root, "setBackgroundResource", R.drawable.widget_date_card)
+        listOf(R.id.w_weekday, R.id.w_day, R.id.w_month, R.id.w_year).forEach {
+            v.setTextColor(it, android.graphics.Color.WHITE)
+        }
+        val dayText = if (locale.language in setOf("iw", "he")) hebrewNumeral(jd.day) else jd.day.toString()
+        val month = jewishMonthName(jd, locale).let {
+            if (locale.language in setOf("iw", "he") && it.startsWith("ב")) it.drop(1) else it
+        }
+        v.setTextViewText(R.id.w_weekday, s.day.date.dayOfWeek.getDisplayName(java.time.format.TextStyle.FULL_STANDALONE, locale))
+        v.setTextViewText(R.id.w_day, dayText)
         v.setTextViewText(R.id.w_month, month)
-        // день недели еврейского дня: после заката — уже следующий
-        v.setTextViewText(R.id.w_weekday, s.day.date.dayOfWeek.getDisplayName(java.time.format.TextStyle.FULL_STANDALONE, Locale.getDefault()))
+        v.setTextViewText(R.id.w_year, if (locale.language in setOf("iw", "he")) hebrewNumeral(jd.year % 1000) else jd.year.toString())
+        fitDate(context, v)
         v.setOnClickPendingIntent(R.id.w_root, openApp(context, openCalendar = true))
         return v
+    }
+
+    /** Hebrew numerals with standard geresh/gershayim punctuation (e.g. ג׳, ט״ו, תשפ״ז). */
+    private fun hebrewNumeral(value: Int): String {
+        if (value <= 0) return value.toString()
+        var n = value
+        val out = StringBuilder()
+        while (n >= 400) { out.append('ת'); n -= 400 }
+        val hundreds = listOf(300 to 'ש', 200 to 'ר', 100 to 'ק')
+        for ((amount, letter) in hundreds) if (n >= amount) { out.append(letter); n -= amount }
+        if (n == 15) { out.append("טו"); n = 0 }
+        else if (n == 16) { out.append("טז"); n = 0 }
+        else {
+            val tens = listOf(90 to 'צ', 80 to 'פ', 70 to 'ע', 60 to 'ס', 50 to 'נ', 40 to 'מ', 30 to 'ל', 20 to 'כ', 10 to 'י')
+            for ((amount, letter) in tens) if (n >= amount) { out.append(letter); n -= amount }
+            val ones = listOf(9 to 'ט', 8 to 'ח', 7 to 'ז', 6 to 'ו', 5 to 'ה', 4 to 'ד', 3 to 'ג', 2 to 'ב', 1 to 'א')
+            for ((amount, letter) in ones) if (n >= amount) { out.append(letter); n -= amount }
+        }
+        return when (out.length) {
+            0 -> value.toString()
+            1 -> "${out}׳"
+            else -> "${out.substring(0, out.length - 1)}״${out.last()}"
+        }
+    }
+
+    /** Keep all four lines legible when the launcher resizes the date card. */
+    private fun fitDate(context: Context, v: RemoteViews) {
+        val manager = AppWidgetManager.getInstance(context)
+        val ids = manager.getAppWidgetIds(ComponentName(context, DateWidget::class.java))
+        val opts = ids.firstOrNull()?.let { manager.getAppWidgetOptions(it) }
+        val width = opts?.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_WIDTH, 110) ?: 110
+        val height = opts?.getInt(AppWidgetManager.OPTION_APPWIDGET_MAX_HEIGHT, 165) ?: 165
+        val scale = minOf(width / 110f, height / 165f).coerceIn(0.82f, 1.45f)
+        v.setTextViewTextSize(R.id.w_weekday, TypedValue.COMPLEX_UNIT_SP, 16f * scale)
+        v.setTextViewTextSize(R.id.w_day, TypedValue.COMPLEX_UNIT_SP, 52f * scale)
+        v.setTextViewTextSize(R.id.w_month, TypedValue.COMPLEX_UNIT_SP, 25f * scale)
+        v.setTextViewTextSize(R.id.w_year, TypedValue.COMPLEX_UNIT_SP, 19f * scale)
     }
 
     private fun showNotification(context: Context, s: LiveState) {
