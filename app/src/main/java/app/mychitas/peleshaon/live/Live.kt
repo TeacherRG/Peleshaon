@@ -329,10 +329,10 @@ object Live {
         val width = opts.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_WIDTH, 110).coerceAtLeast(90)
         val height = opts.getInt(AppWidgetManager.OPTION_APPWIDGET_MAX_HEIGHT, 165).coerceAtLeast(135)
         val scale = minOf(width / 110f, height / 165f).coerceIn(0.82f, 1.45f)
-        v.setTextViewTextSize(R.id.w_weekday, TypedValue.COMPLEX_UNIT_SP, 16f * scale)
-        v.setTextViewTextSize(R.id.w_day, TypedValue.COMPLEX_UNIT_SP, 52f * scale)
-        v.setTextViewTextSize(R.id.w_month, TypedValue.COMPLEX_UNIT_SP, 25f * scale)
-        v.setTextViewTextSize(R.id.w_year, TypedValue.COMPLEX_UNIT_SP, 19f * scale)
+        v.setTextViewTextSize(R.id.w_weekday, TypedValue.COMPLEX_UNIT_SP, 14f * scale)
+        v.setTextViewTextSize(R.id.w_day, TypedValue.COMPLEX_UNIT_SP, 44f * scale)
+        v.setTextViewTextSize(R.id.w_month, TypedValue.COMPLEX_UNIT_SP, 20f * scale)
+        v.setTextViewTextSize(R.id.w_year, TypedValue.COMPLEX_UNIT_SP, 16f * scale)
     }
 
     private fun showNotification(context: Context, s: LiveState) {
