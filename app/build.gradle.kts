@@ -6,12 +6,12 @@ plugins {
 
 android {
     namespace = "app.mychitas.peleshaon"
-    compileSdk = 35
+    compileSdk = 36
 
     defaultConfig {
         applicationId = "app.niflaot.peleshaon"
         minSdk = 26
-        targetSdk = 35
+        targetSdk = 36
         versionCode = 6
         versionName = "1.0.0-beta3"
     }

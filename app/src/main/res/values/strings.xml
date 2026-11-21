@@ -165,7 +165,7 @@
     <string name="privacy_t">Privacy</string>
     <string name="privacy_1">The app collects no data about you: no accounts, no ads, no analytics, no trackers.</string>
     <string name="privacy_2">It does not go online — it does not even have the internet permission. The site opens only when you tap a button, in your browser.</string>
-    <string name="privacy_3">The city, alarms and settings stay on the phone. If Android backup is on, the system may save them to your Google account.</string>
+    <string name="privacy_3">The city, alarms and settings stay on the phone. The app does not use Android automatic backup or upload this information to an account.</string>
     <string name="privacy_4">Location is not requested: the city comes from the time zone or your choice.</string>
     <string name="privacy_full">Full text on the site →</string>
     <string name="hour_day">Hour %d of the day</string>
