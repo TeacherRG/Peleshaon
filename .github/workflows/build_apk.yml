@@ -48,6 +48,17 @@ jobs:
       - name: Test core and build both Beta APKs
         run: gradle --no-daemon :core:test :app:assembleDebug :app:assembleQa :wear:assembleDebug
 
+      # Build Release bundles without configuring or reusing the public debug key.
+      # These AABs are intentionally unsigned; production signing is a separate protected step.
+      - name: Build unsigned Release App Bundles
+        run: gradle --no-daemon :app:bundleRelease :wear:bundleRelease
+
+      - name: Verify Release App Bundles exist
+        run: |
+          test -s app/build/outputs/bundle/release/app-release.aab
+          test -s wear/build/outputs/bundle/release/wear-release.aab
+          ls -lh app/build/outputs/bundle/release/app-release.aab wear/build/outputs/bundle/release/wear-release.aab
+
       - name: Validate both phone packages and upgrade version code
         run: |
           AAPT=$(ls "$ANDROID_HOME"/build-tools/*/aapt2 | sort -V | tail -1)
@@ -123,3 +134,15 @@ jobs:
         with:
           name: PeleShaon-phone-parallel-qa
           path: app/build/outputs/apk/qa/app-qa.apk
+
+      - name: Upload unsigned phone Release AAB
+        uses: actions/upload-artifact@v5
+        with:
+          name: PeleShaon-phone-release-unsigned-aab
+          path: app/build/outputs/bundle/release/app-release.aab
+
+      - name: Upload unsigned Wear OS Release AAB
+        uses: actions/upload-artifact@v5
+        with:
+          name: PeleShaon-wear-release-unsigned-aab
+          path: wear/build/outputs/bundle/release/wear-release.aab
