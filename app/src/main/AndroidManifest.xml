@@ -85,6 +85,10 @@
             android:exported="false" />
 
         <receiver
+            android:name=".live.FaceWidgetTapReceiver"
+            android:exported="false" />
+
+        <receiver
             android:name=".live.FaceWidget"
             android:exported="true"
             android:label="@string/widget_face_name">

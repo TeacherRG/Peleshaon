@@ -106,6 +106,27 @@ object Live {
         update(context)
     }
 
+    /** First tap reveals the configured four-letter Name; the next tap opens the app. */
+    fun handleFaceWidgetTap(context: Context, widgetId: Int) {
+        val app = context.applicationContext
+        if (!Prefs.tziruf(app) || Prefs.chosenCity(app) == null) {
+            app.startActivity(Intent(app, MainActivity::class.java)
+                .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP))
+            return
+        }
+        val prefs = Prefs.of(app)
+        val revealed = prefs.getBoolean("widget_tziruf_revealed", false)
+        if (revealed) {
+            prefs.edit().remove("widget_tziruf_revealed").apply()
+            updateAsync(app)
+            app.startActivity(Intent(app, MainActivity::class.java)
+                .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP))
+            return
+        }
+        prefs.edit().putBoolean("widget_tziruf_revealed", true).apply()
+        updateAsync(app)
+    }
+
     /** Keep bitmap rendering off the BroadcastReceiver/main thread. */
     fun updateAsync(context: Context, pending: BroadcastReceiver.PendingResult? = null) {
         val app = context.applicationContext
@@ -265,7 +286,8 @@ object Live {
         )
         v.paint(light, R.id.w_time to INK, R.id.w_date to CREAM)
         val ring = s.ring
-        val showTziruf = Prefs.tziruf(context) && ring != null
+        val showTziruf = Prefs.tziruf(context) && ring != null &&
+            Prefs.of(context).getBoolean("widget_tziruf_revealed", false)
         v.setViewVisibility(R.id.w_tziruf, if (showTziruf) View.VISIBLE else View.GONE)
         if (showTziruf && ring != null) {
             v.setTextViewText(R.id.w_tziruf, Dial.TZIRUFIM[ring.hour])
@@ -273,7 +295,13 @@ object Live {
         }
         v.clocks(context, s, R.id.w_time)
         v.setTextViewText(R.id.w_date, dateLine(s))
-        v.setOnClickPendingIntent(R.id.w_root, openApp(context))
+        val tapIntent = Intent(context, FaceWidgetTapReceiver::class.java)
+            .putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, widgetId)
+        v.setOnClickPendingIntent(
+            R.id.w_root,
+            PendingIntent.getBroadcast(context, 6000 + widgetId, tapIntent,
+                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
+        )
         fitFace(context, v, widgetId)
         return v
     }
@@ -396,5 +424,16 @@ object Live {
 class LiveReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent) {
         Live.updateAsync(context, goAsync())
+    }
+}
+
+
+/** First tap reveals the Name; second tap opens the application. */
+class FaceWidgetTapReceiver : BroadcastReceiver() {
+    override fun onReceive(context: Context, intent: Intent) {
+        val widgetId = intent.getIntExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, AppWidgetManager.INVALID_APPWIDGET_ID)
+        if (widgetId != AppWidgetManager.INVALID_APPWIDGET_ID) {
+            Live.handleFaceWidgetTap(context, widgetId)
+        }
     }
 }
