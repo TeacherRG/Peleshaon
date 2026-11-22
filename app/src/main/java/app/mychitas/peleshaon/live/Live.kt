@@ -91,6 +91,7 @@ object Live {
     private const val CHANNEL = "pele_live"
     private const val NOTIF_ID = 4001
     private const val TICK = "app.mychitas.peleshaon.LIVE_TICK"
+    private const val REVEAL_TZIRUF_WINDOW_MS = 30_000L
 
     fun widgetIds(context: Context): IntArray {
         val m = AppWidgetManager.getInstance(context)
@@ -104,6 +105,41 @@ object Live {
         Prefs.of(context).edit().putBoolean("live_notification", on).apply()
         if (!on) NotificationManagerCompat.from(context).cancel(NOTIF_ID)
         update(context)
+    }
+
+    /** First tap reveals the configured four-letter Name; the next tap opens the app. */
+    fun handleFaceWidgetTap(context: Context, widgetId: Int) {
+        val app = context.applicationContext
+        if (!Prefs.tziruf(app) || Prefs.chosenCity(app) == null) {
+            app.startActivity(Intent(app, MainActivity::class.java)
+                .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP))
+            return
+        }
+        val prefs = Prefs.of(app)
+        val now = System.currentTimeMillis()
+        val until = prefs.getLong("widget_tziruf_reveal_until", 0L)
+        if (until > now) {
+            prefs.edit().remove("widget_tziruf_reveal_until").apply()
+            app.startActivity(Intent(app, MainActivity::class.java)
+                .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP))
+            return
+        }
+        prefs.edit().putLong("widget_tziruf_reveal_until", now + REVEAL_TZIRUF_WINDOW_MS).apply()
+        updateAsync(app)
+        worker.execute {
+            try {
+                Thread.sleep(REVEAL_TZIRUF_WINDOW_MS)
+                val current = Prefs.of(app).getLong("widget_tziruf_reveal_until", 0L)
+                if (current != 0L && current <= System.currentTimeMillis()) {
+                    Prefs.of(app).edit().remove("widget_tziruf_reveal_until").apply()
+                    update(app)
+                }
+            } catch (e: InterruptedException) {
+                Thread.currentThread().interrupt()
+            } catch (e: Exception) {
+                android.util.Log.e("PeleShaon.Live", "Tziruf reveal reset failed", e)
+            }
+        }
     }
 
     /** Keep bitmap rendering off the BroadcastReceiver/main thread. */
@@ -265,7 +301,8 @@ object Live {
         )
         v.paint(light, R.id.w_time to INK, R.id.w_date to CREAM)
         val ring = s.ring
-        val showTziruf = Prefs.tziruf(context) && ring != null
+        val revealUntil = Prefs.of(context).getLong("widget_tziruf_reveal_until", 0L)
+        val showTziruf = Prefs.tziruf(context) && ring != null && revealUntil > System.currentTimeMillis()
         v.setViewVisibility(R.id.w_tziruf, if (showTziruf) View.VISIBLE else View.GONE)
         if (showTziruf && ring != null) {
             v.setTextViewText(R.id.w_tziruf, Dial.TZIRUFIM[ring.hour])
@@ -273,7 +310,13 @@ object Live {
         }
         v.clocks(context, s, R.id.w_time)
         v.setTextViewText(R.id.w_date, dateLine(s))
-        v.setOnClickPendingIntent(R.id.w_root, openApp(context))
+        val tapIntent = Intent(context, FaceWidgetTapReceiver::class.java)
+            .putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, widgetId)
+        v.setOnClickPendingIntent(
+            R.id.w_root,
+            PendingIntent.getBroadcast(context, 6000 + widgetId, tapIntent,
+                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
+        )
         fitFace(context, v, widgetId)
         return v
     }
@@ -396,5 +439,16 @@ object Live {
 class LiveReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent) {
         Live.updateAsync(context, goAsync())
+    }
+}
+
+
+/** First tap reveals the Name; second tap within 30 seconds opens the application. */
+class FaceWidgetTapReceiver : BroadcastReceiver() {
+    override fun onReceive(context: Context, intent: Intent) {
+        val widgetId = intent.getIntExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, AppWidgetManager.INVALID_APPWIDGET_ID)
+        if (widgetId != AppWidgetManager.INVALID_APPWIDGET_ID) {
+            Live.handleFaceWidgetTap(context, widgetId)
+        }
     }
 }
