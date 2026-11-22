@@ -91,7 +91,6 @@ object Live {
     private const val CHANNEL = "pele_live"
     private const val NOTIF_ID = 4001
     private const val TICK = "app.mychitas.peleshaon.LIVE_TICK"
-    private const val REVEAL_TZIRUF_WINDOW_MS = 30_000L
 
     fun widgetIds(context: Context): IntArray {
         val m = AppWidgetManager.getInstance(context)
@@ -116,30 +115,15 @@ object Live {
             return
         }
         val prefs = Prefs.of(app)
-        val now = System.currentTimeMillis()
-        val until = prefs.getLong("widget_tziruf_reveal_until", 0L)
-        if (until > now) {
-            prefs.edit().remove("widget_tziruf_reveal_until").apply()
+        val revealed = prefs.getBoolean("widget_tziruf_revealed", false)
+        if (revealed) {
+            prefs.edit().remove("widget_tziruf_revealed").apply()
             app.startActivity(Intent(app, MainActivity::class.java)
                 .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP))
             return
         }
-        prefs.edit().putLong("widget_tziruf_reveal_until", now + REVEAL_TZIRUF_WINDOW_MS).apply()
+        prefs.edit().putBoolean("widget_tziruf_revealed", true).apply()
         updateAsync(app)
-        worker.execute {
-            try {
-                Thread.sleep(REVEAL_TZIRUF_WINDOW_MS)
-                val current = Prefs.of(app).getLong("widget_tziruf_reveal_until", 0L)
-                if (current != 0L && current <= System.currentTimeMillis()) {
-                    Prefs.of(app).edit().remove("widget_tziruf_reveal_until").apply()
-                    update(app)
-                }
-            } catch (e: InterruptedException) {
-                Thread.currentThread().interrupt()
-            } catch (e: Exception) {
-                android.util.Log.e("PeleShaon.Live", "Tziruf reveal reset failed", e)
-            }
-        }
     }
 
     /** Keep bitmap rendering off the BroadcastReceiver/main thread. */
@@ -301,8 +285,8 @@ object Live {
         )
         v.paint(light, R.id.w_time to INK, R.id.w_date to CREAM)
         val ring = s.ring
-        val revealUntil = Prefs.of(context).getLong("widget_tziruf_reveal_until", 0L)
-        val showTziruf = Prefs.tziruf(context) && ring != null && revealUntil > System.currentTimeMillis()
+        val showTziruf = Prefs.tziruf(context) && ring != null &&
+            Prefs.of(context).getBoolean("widget_tziruf_revealed", false)
         v.setViewVisibility(R.id.w_tziruf, if (showTziruf) View.VISIBLE else View.GONE)
         if (showTziruf && ring != null) {
             v.setTextViewText(R.id.w_tziruf, Dial.TZIRUFIM[ring.hour])
@@ -443,7 +427,7 @@ class LiveReceiver : BroadcastReceiver() {
 }
 
 
-/** First tap reveals the Name; second tap within 30 seconds opens the application. */
+/** First tap reveals the Name; second tap opens the application. */
 class FaceWidgetTapReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent) {
         val widgetId = intent.getIntExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, AppWidgetManager.INVALID_APPWIDGET_ID)
