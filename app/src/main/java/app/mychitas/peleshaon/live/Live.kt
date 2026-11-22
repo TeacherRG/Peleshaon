@@ -118,6 +118,7 @@ object Live {
         val revealed = prefs.getBoolean("widget_tziruf_revealed", false)
         if (revealed) {
             prefs.edit().remove("widget_tziruf_revealed").apply()
+            updateAsync(app)
             app.startActivity(Intent(app, MainActivity::class.java)
                 .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP))
             return
