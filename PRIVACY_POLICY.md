@@ -2,24 +2,38 @@
 
 **Продукт:** Пеле Шаон Луах (Pele Shaon Luach)  
 **Платформа:** Android и Wear OS  
-**Статус документа:** предварительная версия для проверки перед закрытым бета-тестированием  
+**Статус документа:** предварительная версия; требуется финальная проверка перед публикацией  
 **Дата вступления в силу:** будет указана перед публикацией
 
-## 1. Важное замечание о статусе документа
+## 1. Разработчик и контакт
 
-Эта редакция подготовлена по текущим манифестам и конфигурации проекта. Она не является окончательным юридическим заключением. Перед публикацией разработчик должен проверить фактическое поведение итоговой сборки, объединённый Android-манифест, все подключённые библиотеки и настройки резервного копирования.
+По вопросам конфиденциальности обращайтесь: **Office@niflaot.app**.
 
-Контакт разработчика: **Office@niflaot.app**
+## 2. Что делает приложение
 
-## 2. Какие данные обрабатывает приложение
+Пеле Шаон Луах показывает еврейский календарь, времена дня, связанные с ними сведения и функции напоминаний/будильников. Версия для Wear OS может работать самостоятельно и хранит собственные настройки часов.
 
-Приложение предназначено для работы с еврейским календарём, временами дня, Шаббатом, напоминаниями и связанными функциями.
+В проверенных исходных файлах не обнаружены учётные записи пользователей, рекламные или аналитические SDK, а также реализация отправки пользовательских настроек с часов на телефон. Это вывод по текущим файлам проекта, а не обещание для будущих версий.
 
-В текущем основном Android-манифесте не объявлено разрешение `android.permission.INTERNET`. Поэтому текущая конфигурация приложения не предусматривает самостоятельный сетевой обмен данными приложением. Это утверждение относится только к проверенной конфигурации проекта и должно быть перепроверено для итогового релизного артефакта, включая объединённый манифест и сторонние компоненты.
+## 3. Какие данные и настройки сохраняются
 
-Приложение может сохранять настройки и данные, необходимые для работы выбранных пользователем функций, непосредственно на устройстве. Точный перечень сохраняемых полей должен быть подтверждён аудитом исходного кода перед публикацией этой политики.
+Проверенный код телефона сохраняет настройки локально на устройстве Android в приватном хранилище приложения SharedPreferences. В частности, это могут быть:
 
-## 3. Разрешения Android
+- выбранный город из встроенного каталога;
+- если пользователь сам задаёт местоположение вручную — введённое название, широта, долгота, часовой пояс и признак нахождения в Израиле;
+- выбранная община/обычай (например, Хабад, литовский или сефардский);
+- язык приложения и настройки отображения циферблата;
+- выбранные времена/отметки на циферблате и параметры отображения;
+- параметры будильников: включение, время, дни недели, настройки до времени Шма и режим сигнала;
+- список пользовательских будильников и их настройки;
+- состояние и отметка времени таймера ожидания между мясным и молочным;
+- настройки напоминаний, времени зажигания свечей, первого знакомства с приложением и другие рабочие предпочтения.
+
+Версия Wear OS отдельно сохраняет в приватных настройках часов выбранный город из каталога, общину и настройку минут до зажигания свечей.
+
+Приложение не запрашивает геолокацию устройства в проверенном основном манифесте телефона. Город выбирается из каталога или может быть задан пользователем вручную. Если в будущем появится автоматическое определение местоположения, эта политика должна быть обновлена до выпуска такой версии.
+
+## 4. Разрешения Android
 
 В проверенном манифесте телефона объявлены следующие разрешения:
 
@@ -30,41 +44,33 @@
 - `FOREGROUND_SERVICE` и `FOREGROUND_SERVICE_MEDIA_PLAYBACK` — для работы службы сигнала;
 - `VIBRATE` — для вибрации при уведомлениях или сигналах.
 
-Само наличие разрешения не означает, что оно используется для сбора или передачи персональных данных. Разрешения могут запрашиваться системой отдельно, в зависимости от версии Android и действий пользователя.
+Эти разрешения используются для функций приложения и сами по себе не означают сбор или передачу персональных данных.
 
-В проверенном основном манифесте телефона разрешения на доступ к точной или приблизительной геолокации не объявлены. Если в будущей версии появится определение местоположения, этот раздел и политика будут обновлены до выпуска такой версии.
+## 5. Сеть и передача третьим лицам
 
-## 4. Резервное копирование Android
+В проверенном основном манифесте телефона и манифесте Wear OS не объявлено разрешение `android.permission.INTERNET`. В проверенных Gradle-файлах зависимостей указаны Android/Compose-компоненты и библиотека KosherJava для календарных расчётов; рекламные, аналитические и crash-reporting SDK в этих файлах не обнаружены.
 
-В текущем манифесте приложения указано `android:allowBackup="true"`. Это означает, что Android может включать данные приложения в системное резервное копирование в зависимости от версии системы, настроек устройства и доступных пользователю сервисов резервного копирования.
+Таким образом, по проверенным исходникам текущая версия не содержит заявленного приложением сетевого обмена пользовательскими данными и не передаёт выбранные настройки на сервер. Этот вывод необходимо повторно проверить по объединённым манифестам и окончательным APK/AAB перед публикацией. Системные службы Android, включая резервное копирование, рассматриваются отдельно ниже.
 
-Такое резервное копирование контролируется настройками Android и соответствующими системными сервисами, а не отдельной функцией отправки данных на сервер, реализованной приложением. Перед релизом необходимо проверить правила резервного копирования и решить, какие категории данных допустимо включать в резервные копии.
+Если в будущей версии появятся аккаунты, аналитика, отчёты о сбоях, реклама, облачная синхронизация или другие сетевые компоненты, политика должна быть пересмотрена до выпуска такой версии.
 
-## 5. Передача данных третьим лицам
+## 6. Резервное копирование Android
 
-В проверенной конфигурации основного манифеста нет разрешения на интернет. По этой причине текущая сборка не должна самостоятельно отправлять данные на удалённые серверы через обычные сетевые API Android.
+В манифесте телефонного приложения указано `android:allowBackup="true"`. В проекте не найдено отдельного файла правил резервного копирования `backup_rules.xml` или `data_extraction_rules.xml`. Поэтому данные приложения могут быть включены в системное резервное копирование Android в зависимости от версии системы, настроек устройства и доступных системных сервисов.
 
-Это не является гарантией отсутствия любой системной обработки данных устройством. Например, резервное копирование Android описано в разделе 4. Если в приложение будут добавлены аналитика, отчёты о сбоях, реклама, учётные записи, облачная синхронизация или другие сетевые SDK, этот раздел необходимо пересмотреть и явно описать соответствующие категории данных и получателей до выпуска обновления.
+Резервное копирование контролируется Android и настройками пользователя. Перед публикацией разработчику следует отдельно решить, допустимо ли резервное копирование настроек будильников, выбранного города и введённых вручную координат, и при необходимости задать явные правила исключения/включения данных.
 
-## 6. Данные детей
+## 7. Безопасность и удаление данных
 
-На момент подготовки этого документа отдельная проверка целевой аудитории, возрастных ограничений и требований Google Play Families не завершена. Не следует считать приложение предназначенным или не предназначенным для детей, пока эти настройки не будут определены в Play Console и проверены на соответствие фактическому содержанию приложения.
+Настройки хранятся в приватном хранилище приложения на соответствующем устройстве. Удаление приложения или очистка его данных Android может удалить локальные настройки и будильники. Если пользователь использует резервное копирование Android, копии могут подчиняться настройкам системного сервиса.
 
-## 7. Безопасность и хранение
+## 8. Дети
 
-Настройки и рабочие данные приложения могут храниться на устройстве. Пользователь должен учитывать защиту самого устройства, блокировку экрана и настройки системного резервного копирования.
+Целевая аудитория и возрастные настройки Google Play ещё должны быть проверены и окончательно выбраны разработчиком. До завершения этой проверки мы не заявляем в этой политике, что приложение специально предназначено для детей или исключает детскую аудиторию.
 
-Не удаляйте приложение, если хотите сохранить локальные данные, не проверив предварительно возможность их резервного копирования или переноса.
+## 9. Изменения политики
 
-## 8. Изменения политики
-
-Политика будет обновляться при изменениях функциональности, разрешений, способов хранения данных, подключённых SDK или сетевого взаимодействия. Актуальная версия должна быть доступна по публичной ссылке, указанной в Google Play.
-
-## 9. Контакт
-
-По вопросам конфиденциальности обращайтесь:
-
-**Office@niflaot.app**
+Политика будет обновляться при изменениях функциональности, разрешений, способов хранения данных, подключённых SDK, резервного копирования или сетевого взаимодействия. Актуальная версия должна быть доступна по общедоступной HTTPS-ссылке, указанной в Google Play.
 
 ---
 
@@ -72,26 +78,40 @@
 
 **Product:** Pele Shaon Luach  
 **Platforms:** Android and Wear OS  
-**Document status:** Preliminary draft for review before closed beta testing  
+**Document status:** Preliminary; final review required before publication  
 **Effective date:** To be added before publication
 
-## 1. Important status notice
+## 1. Developer and contact
 
-This draft is based on the project manifests and configuration currently reviewed. It is not a final legal assessment. Before publication, the developer must review the final app behavior, the merged Android manifest, all included libraries and SDKs, and Android backup configuration.
+For privacy questions, contact **Office@niflaot.app**.
 
-Developer privacy contact: **Office@niflaot.app**
+## 2. What the app does
 
-## 2. Data handled by the app
+Pele Shaon Luach displays the Jewish calendar, daily times, related information, and reminder/alarm features. The Wear OS version can operate independently and stores its own watch settings.
 
-The app is designed for the Jewish calendar, daily times, Shabbat, reminders, and related features.
+The source files reviewed do not show user accounts, advertising or analytics SDKs, or an implementation that sends user settings from the watch to the phone. This is a finding about the current project files, not a promise about future versions.
 
-The main Android manifest currently reviewed does not declare `android.permission.INTERNET`. Therefore, the current project configuration does not provide for the app itself to exchange data over the network. This statement applies only to the reviewed project configuration and must be verified against the final release artifact, including its merged manifest and third-party components.
+## 3. Data and settings stored
 
-The app may store settings and information needed for user-selected features locally on the device. The exact list of stored fields must be confirmed by a source-code audit before this policy is published.
+The reviewed phone code stores settings locally on the Android device in the app's private SharedPreferences storage. These may include:
 
-## 3. Android permissions
+- the city selected from the built-in catalog;
+- if the user enters a location manually, the entered place name, latitude, longitude, time zone, and Israel-location flag;
+- the selected community/custom (such as Chabad, Litvish, or Sephardi);
+- app language and clock-display settings;
+- selected clock markers and display preferences;
+- alarm settings, including enabled state, time, weekdays, settings relative to the end of the Shema time, and alarm mode;
+- custom alarm list and settings;
+- the state and timestamp of the meat-to-dairy waiting timer;
+- reminder settings, candle-lighting offset, onboarding completion, and other operational preferences.
 
-The reviewed phone manifest declares these permissions:
+The Wear OS version separately stores the catalog city selection, community, and candle-lighting offset in the watch app's private preferences.
+
+The reviewed main phone manifest does not request device location permission. A city is selected from the catalog or may be entered manually by the user. If automatic location detection is introduced in a future version, this policy must be updated before that version is released.
+
+## 4. Android permissions
+
+The reviewed phone manifest declares:
 
 - `SCHEDULE_EXACT_ALARM` — scheduling exact reminders and alarms;
 - `POST_NOTIFICATIONS` — showing notifications on supported Android versions;
@@ -100,38 +120,30 @@ The reviewed phone manifest declares these permissions:
 - `FOREGROUND_SERVICE` and `FOREGROUND_SERVICE_MEDIA_PLAYBACK` — running the alarm service;
 - `VIBRATE` — vibration for notifications or alarms.
 
-A declared permission does not by itself mean that the app collects or transmits personal data. Android may request permissions separately depending on the OS version and user actions.
+These permissions support app features and do not by themselves mean that personal data is collected or transmitted.
 
-The reviewed main phone manifest does not declare permission to access precise or approximate location. If location access is introduced in a future version, this section and the policy will be updated before that version is released.
+## 5. Network access and sharing
 
-## 4. Android backup
+The reviewed main phone and Wear OS manifests do not declare `android.permission.INTERNET`. The reviewed Gradle dependency files list Android/Compose components and the KosherJava library for calendar calculations; no advertising, analytics, or crash-reporting SDKs were found in those files.
 
-The current app manifest sets `android:allowBackup="true"`. Android may therefore include app data in system backups depending on the OS version, device settings, and backup services available to the user.
+Based on the source files reviewed, the current version does not contain app-declared network exchange of user data and does not send selected settings to a server. This finding must be checked again against the merged manifests and final APK/AAB before publication. Android system services, including backup, are addressed separately below.
 
-Such backup is controlled by Android and the relevant system services, rather than by a separate app-operated server upload feature. Before release, the developer must review backup rules and decide which categories of data may be included.
+If accounts, analytics, crash reporting, advertising, cloud synchronization, or other network-enabled components are added in a future version, this policy must be revised before that version is released.
 
-## 5. Sharing with third parties
+## 6. Android backup
 
-The reviewed main manifest does not declare the INTERNET permission. Accordingly, the current build is not expected to send data to remote servers through ordinary Android networking APIs on the app's own behalf.
+The phone app manifest sets `android:allowBackup="true"`. No separate `backup_rules.xml` or `data_extraction_rules.xml` file was found in the project. Android may therefore include app data in system backups depending on the OS version, device settings, and available system backup services.
 
-This does not guarantee that the device performs no system-level data processing. For example, Android backup is described in section 4. If analytics, crash reporting, advertising, accounts, cloud synchronization, or other network-enabled SDKs are added, this section must be revised before release to explain the relevant data categories and recipients.
+Backup is controlled by Android and the user's device settings. Before publication, the developer should decide whether alarm settings, selected cities, and manually entered coordinates may be backed up, and configure explicit include/exclude rules if needed.
 
-## 6. Children
+## 7. Security and deletion
 
-The target audience, age settings, and Google Play Families requirements have not yet been fully reviewed for this document. The app should not be described as either child-directed or not child-directed until its Play Console audience settings and actual content have been assessed.
+Settings are stored in the app's private storage on the relevant device. Uninstalling the app or clearing its data through Android may delete local settings and alarms. If Android backup is enabled by the user, backup copies may be subject to the system service's settings.
 
-## 7. Security and storage
+## 8. Children
 
-App settings and operational data may be stored on the device. Users should protect their devices with appropriate device security and review their Android backup settings.
+The target audience and Google Play age settings still need to be reviewed and finalized by the developer. Until that review is complete, this policy does not claim that the app is specifically directed to children or excludes children from its audience.
 
-If you want to preserve local app data, do not uninstall the app without first checking whether backup or transfer is available.
+## 9. Policy changes
 
-## 8. Policy changes
-
-This policy will be updated if app functionality, permissions, storage practices, included SDKs, or network behavior change. The current version must be available at a public URL entered in Google Play.
-
-## 9. Contact
-
-For privacy questions, contact:
-
-**Office@niflaot.app**
+This policy will be updated if app functionality, permissions, storage practices, included SDKs, backup configuration, or network behavior change. The current version must be available at a public HTTPS URL entered in Google Play.
