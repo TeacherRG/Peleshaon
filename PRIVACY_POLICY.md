@@ -9,9 +9,7 @@
 
 Эта редакция подготовлена по текущим манифестам и конфигурации проекта. Она не является окончательным юридическим заключением. Перед публикацией разработчик должен проверить фактическое поведение итоговой сборки, объединённый Android-манифест, все подключённые библиотеки и настройки резервного копирования.
 
-Контакт разработчика: **[УКАЖИТЕ ДЕЙСТВУЮЩИЙ EMAIL ДЛЯ ОБРАЩЕНИЙ ПО КОНФИДЕНЦИАЛЬНОСТИ]**
-
-Не публикуйте эту политику, пока вместо квадратных скобок не будет указан действующий адрес электронной почты.
+Контакт разработчика: **Office@niflaot.app**
 
 ## 2. Какие данные обрабатывает приложение
 
@@ -66,7 +64,7 @@
 
 По вопросам конфиденциальности обращайтесь:
 
-**[УКАЖИТЕ ДЕЙСТВУЮЩИЙ EMAIL РАЗРАБОТЧИКА]**
+**Office@niflaot.app**
 
 ---
 
@@ -81,9 +79,7 @@
 
 This draft is based on the project manifests and configuration currently reviewed. It is not a final legal assessment. Before publication, the developer must review the final app behavior, the merged Android manifest, all included libraries and SDKs, and Android backup configuration.
 
-Developer privacy contact: **[ADD A WORKING PRIVACY CONTACT EMAIL]**
-
-Do not publish this policy until the placeholder above has been replaced with a working email address.
+Developer privacy contact: **Office@niflaot.app**
 
 ## 2. Data handled by the app
 
@@ -138,4 +134,4 @@ This policy will be updated if app functionality, permissions, storage practices
 
 For privacy questions, contact:
 
-**[ADD A WORKING DEVELOPER EMAIL ADDRESS]**
+**Office@niflaot.app**
