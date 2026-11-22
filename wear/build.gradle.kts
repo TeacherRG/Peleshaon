@@ -32,6 +32,11 @@ android {
         getByName("debug") {
             signingConfig = signingConfigs.getByName("debug")
         }
+        // Release output is built unsigned until the production upload key is configured.
+        getByName("release") {
+            isMinifyEnabled = false
+            isShrinkResources = false
+        }
     }
 
     buildFeatures {

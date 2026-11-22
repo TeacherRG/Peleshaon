@@ -41,6 +41,12 @@ android {
             matchingFallbacks += listOf("debug")
             signingConfig = signingConfigs.getByName("debug")
         }
+        // Prepare a production variant. It intentionally remains unsigned until
+        // a dedicated Play upload key is created and configured securely.
+        getByName("release") {
+            isMinifyEnabled = false
+            isShrinkResources = false
+        }
     }
 
     buildFeatures {

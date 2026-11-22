@@ -38,7 +38,7 @@ jobs:
       # One Gradle invocation shares dependency resolution and configuration
       # across tests and both APKs, avoiding duplicate runner time.
       - name: Test core and build both Beta APKs
-        run: gradle --no-daemon :core:test :app:assembleDebug :app:assembleQa :wear:assembleDebug
+        run: gradle --no-daemon :core:test :app:assembleDebug :app:assembleQa :wear:assembleDebug :app:bundleRelease :wear:assembleRelease
 
       - name: Validate both phone packages and upgrade version code
         run: |
@@ -98,11 +98,23 @@ jobs:
           done
           "$AAPT" dump xmltree "$apk" --file res/xml/widget_face_info.xml || true
 
+      - name: Upload unsigned Play App Bundle (phone)
+        uses: actions/upload-artifact@v5
+        with:
+          name: Niflaot-phone-release-unsigned-aab
+          path: app/build/outputs/bundle/release/app-release.aab
+
       - name: Upload phone APK
         uses: actions/upload-artifact@v5
         with:
           name: PeleShaon-debug
           path: app/build/outputs/apk/debug/app-debug.apk
+
+      - name: Upload unsigned Wear OS release APK
+        uses: actions/upload-artifact@v5
+        with:
+          name: Niflaot-wear-release-unsigned
+          path: wear/build/outputs/apk/release/wear-release-unsigned.apk
 
       - name: Upload watch APK
         uses: actions/upload-artifact@v5
