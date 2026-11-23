@@ -304,4 +304,28 @@
     <string name="cal_misheyakir">Мишеякир — талит и тфилин</string>
     <string name="cal_mincha_ketana">Минха ктана</string>
     <string name="cal_biur_chametz">Срок сжигания хамеца</string>
+
+    <!-- первый запуск: обязательный выбор города и подсказки на экране -->
+    <string name="gate_t">Где вы находитесь?</string>
+    <string name="gate_b">Времена молитв, Шабат и будильники считаются для вашего города. Выберите его, чтобы продолжить — сменить город можно в любой момент кнопкой 📍 на главном экране.</string>
+    <string name="gate_guess">📍 %1$s — это мой город</string>
+    <string name="gate_or">или найдите свой город в списке:</string>
+    <string name="tour_city_t">📍 Ваш город</string>
+    <string name="tour_city">Все времена считаются для этого города. Нажмите, чтобы сменить его.</string>
+    <string name="tour_date_t">📅 Дата и календарь</string>
+    <string name="tour_date">Сегодняшняя еврейская и гражданская дата. Нажмите — откроется календарь с праздниками и временами на любой день.</string>
+    <string name="tour_menu_t">☰ Меню</string>
+    <string name="tour_menu">Компас на Йерушалаим, настройки (язык, община, тема) и справка «?» — там можно снова посмотреть эти подсказки.</string>
+    <string name="tour_dial_t">🕒 Циферблат дня</string>
+    <string name="tour_dial">Половина суток: 12 галахических часов дня или ночи. Нажмите на точку на ободе — увидите, что это за время и сколько до него осталось.</string>
+    <string name="tour_shabbat_t">🕯️ Шабат</string>
+    <string name="tour_shabbat">Время зажигания свечей и исхода Шабата для вашего города.</string>
+    <string name="tour_alarm_t">⏰ Будильник</string>
+    <string name="tour_alarm">Будильник к сроку Шма или на своё время. Молчит в Шабат и праздники. Здесь же — дополнительные будильники и таймер «мясное → молочное».</string>
+    <string name="tour_study_t">📖 Учёба</string>
+    <string name="tour_study">Напоминание об учёбе Торы в выбранные дни.</string>
+    <string name="tour_times_t">🕘 Времена</string>
+    <string name="tour_times">Все времена дня списком. Отметьте, какие из них показывать на циферблате.</string>
+    <string name="tour_done">Понятно</string>
+    <string name="tour_again">Подсказки по экрану</string>
 </resources>

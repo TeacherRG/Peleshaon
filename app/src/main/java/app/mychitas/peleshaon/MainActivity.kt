@@ -30,6 +30,9 @@ import kotlinx.coroutines.delay
 import app.mychitas.peleshaon.ui.ClockScreen
 import app.mychitas.peleshaon.ui.NightFace
 import app.mychitas.peleshaon.ui.Onboarding
+import app.mychitas.peleshaon.ui.CityGate
+import app.mychitas.peleshaon.ui.MAIN_TOUR
+import app.mychitas.peleshaon.ui.TourState
 
 /**
  * Пеле Шаон — «Часы» сайта Нифлаот в телефоне: циферблат дня на весь экран, времена по Алтер Ребе,
@@ -132,20 +135,34 @@ fun PeleShaonApp(
 ) {
     val context = LocalContext.current
     var night by rememberSaveable { mutableStateOf(false) }
-    // Знакомство — при первом запуске (разрешение на уведомления просит его шаг про будильники, с объяснением)
-    var intro by rememberSaveable { mutableStateOf(!Prefs.of(context).getBoolean("onboarded", false)) }
+    // Первый запуск (владелец, 23.11.2026): сначала обязательный выбор города, затем подсказки
+    // поверх главного экрана — что где находится; подсказки можно пропустить.
+    val firstRun = !Prefs.of(context).getBoolean("onboarded", false)
+    var needCity by rememberSaveable { mutableStateOf(firstRun && Prefs.chosenCity(context) == null) }
+    var showTour by rememberSaveable { mutableStateOf(firstRun) }
+    // пролистываемое «Знакомство» — теперь только по кнопке в справке «?»
+    var intro by rememberSaveable { mutableStateOf(false) }
+    val finishTour: () -> Unit = {
+        Prefs.of(context).edit().putBoolean("onboarded", true).apply()
+        showTour = false
+    }
+    val tour = remember { TourState(MAIN_TOUR, onFinish = { finishTour() }) }
     LaunchedEffect(openAlarm.value, openCalendar.value) {
-        if (openAlarm.value != null) {
+        if (openAlarm.value != null || openCalendar.value > 0) {
             night = false
             intro = false
-        }
-        if (openCalendar.value > 0) {
-            night = false
-            intro = false
+            // открыли окно будильника или календаря — подсказки не закрывают его
+            if (showTour && !needCity) finishTour()
         }
     }
 
-    if (intro) {
+    if (needCity) {
+        // без города нельзя считать времена — окно обязательно, пропустить нельзя
+        CityGate(onChosen = {
+            needCity = false
+            tour.index = 0
+        })
+    } else if (intro) {
         Onboarding(onDone = {
             Prefs.of(context).edit().putBoolean("onboarded", true).apply()
             AlarmScheduler.rescheduleAllFromPrefs(context)
@@ -171,7 +188,9 @@ fun PeleShaonApp(
         NightFace(Modifier.fillMaxSize().background(Color.Black).clickable { night = false })
     } else {
         ClockScreen(onNightScreen = { night = true }, onIntro = { intro = true },
+            onTour = { tour.index = 0; showTour = true },
             onMoon = { openMoon.value = "moon" }, onCompass = { openMoon.value = "jer" },
-            requestedAlarm = openAlarm, requestedCalendar = openCalendar)
+            requestedAlarm = openAlarm, requestedCalendar = openCalendar,
+            tour = if (showTour && Prefs.chosenCity(context) != null) tour else null)
     }
 }

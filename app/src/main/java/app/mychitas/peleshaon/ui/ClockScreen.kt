@@ -129,10 +129,13 @@ private val HHMM: DateTimeFormatter = DateTimeFormatter.ofPattern("HH:mm")
 fun ClockScreen(
     onNightScreen: () -> Unit,
     onIntro: () -> Unit = {},
+    onTour: () -> Unit = {},
     onMoon: () -> Unit = {},
     onCompass: () -> Unit = {},
     requestedAlarm: androidx.compose.runtime.MutableState<String?>? = null,
-    requestedCalendar: androidx.compose.runtime.MutableState<Int>? = null
+    requestedCalendar: androidx.compose.runtime.MutableState<Int>? = null,
+    // подсказки первого запуска: что где находится (null — не показываются)
+    tour: TourState? = null
 ) {
     val context = LocalContext.current
     val locale = androidx.compose.ui.platform.LocalConfiguration.current.locales[0]
@@ -223,7 +226,7 @@ fun ClockScreen(
             }
             // ---- шапка: город, дата, «Как считаем»
             Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-                Chip(onClick = { panel = Panel.CITY }, modifier = Modifier.widthIn(max = 124.dp)) {
+                Chip(onClick = { panel = Panel.CITY }, modifier = Modifier.widthIn(max = 124.dp).tourTarget(tour, TourKeys.CITY)) {
                     Text("📍", fontSize = 14.sp)
                     Text(city.title(locale), maxLines = 1, overflow = TextOverflow.Ellipsis, fontWeight = FontWeight.Bold, fontSize = 14.sp, color = ClockColors.Ink)
                     Text("▾", fontSize = 12.sp, color = ClockColors.TcheletDeep)
@@ -234,7 +237,7 @@ fun ClockScreen(
                     shape = RoundedCornerShape(16.dp),
                     color = ClockColors.Surface,
                     border = BorderStroke(1.dp, ClockColors.Line),
-                    modifier = Modifier.weight(1f).padding(horizontal = 6.dp)
+                    modifier = Modifier.weight(1f).padding(horizontal = 6.dp).tourTarget(tour, TourKeys.DATE)
                 ) {
                 Column(
                     modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
@@ -263,7 +266,7 @@ fun ClockScreen(
                 // меню: компас, настройки, помощь (владелец, 18.11.2026)
                 Box {
                     var menu by remember { mutableStateOf(false) }
-                    Chip(onClick = { menu = true }, round = true) {
+                    Chip(onClick = { menu = true }, round = true, modifier = Modifier.tourTarget(tour, TourKeys.MENU)) {
                         Text("☰", fontSize = 18.sp, color = ClockColors.TcheletDeep)
                     }
                     DropdownMenu(expanded = menu, onDismissRequest = { menu = false }, containerColor = ClockColors.SheetBg) {
@@ -283,7 +286,7 @@ fun ClockScreen(
             }
 
             // ---- циферблат на всё место и подсказка у точки
-            BoxWithConstraints(modifier = Modifier.weight(1f).fillMaxWidth()) {
+            BoxWithConstraints(modifier = Modifier.weight(1f).fillMaxWidth().tourTarget(tour, TourKeys.DIAL)) {
                 if (day.isPolarAnomaly) {
                     Text(stringResource(R.string.polar), color = ClockColors.Ink2, textAlign = TextAlign.Center, modifier = Modifier.align(Alignment.Center).padding(24.dp))
                 }
@@ -358,13 +361,15 @@ fun ClockScreen(
             val nextStudy = remember(version, city, minute) { AlarmRules.nextRing(Prefs.alarm(context, Prefs.TORAH), cityNow, city, Prefs.earlyShabbatMinutes(context)) }
             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 DockTool("🕯️", stringResource(R.string.dock_shabbat),
-                    (if (shabbatOn) sh.havdalah else sh.candles)?.let(wdTime) ?: "—", Modifier.weight(1f), live = shabbatOn) { panel = Panel.SHABBAT }
-                DockTool("⏰", stringResource(R.string.dock_alarm), nextWake?.let(wdTime) ?: off, Modifier.weight(1f)) { panel = Panel.WAKE }
-                DockTool("📖", stringResource(R.string.dock_study), nextStudy?.let(wdTime) ?: off, Modifier.weight(1f)) { panel = Panel.STUDY }
+                    (if (shabbatOn) sh.havdalah else sh.candles)?.let(wdTime) ?: "—", Modifier.weight(1f).tourTarget(tour, TourKeys.SHABBAT), live = shabbatOn) { panel = Panel.SHABBAT }
+                DockTool("⏰", stringResource(R.string.dock_alarm), nextWake?.let(wdTime) ?: off, Modifier.weight(1f).tourTarget(tour, TourKeys.ALARM)) { panel = Panel.WAKE }
+                DockTool("📖", stringResource(R.string.dock_study), nextStudy?.let(wdTime) ?: off, Modifier.weight(1f).tourTarget(tour, TourKeys.STUDY)) { panel = Panel.STUDY }
                 DockTool("🕘", stringResource(R.string.dock_times),
-                    stringResource(if (day.isNextJewishDayAfterSunset) R.string.tomorrow_word else R.string.today), Modifier.weight(1f)) { panel = Panel.TIMES }
+                    stringResource(if (day.isNextJewishDayAfterSunset) R.string.tomorrow_word else R.string.today), Modifier.weight(1f).tourTarget(tour, TourKeys.TIMES)) { panel = Panel.TIMES }
             }
         }
+        // подсказки первого запуска — поверх всего экрана
+        if (tour != null && panel == null) TourOverlay(tour)
     }
 
     // ---- окна
@@ -408,7 +413,8 @@ fun ClockScreen(
                         Prefs.setTziruf(context, it)
                         app.mychitas.peleshaon.live.Live.updateAsync(context)
                     })
-                Panel.INFO -> InfoSheet(onNightScreen = { panel = null; onNightScreen() }, onIntro = { panel = null; onIntro() }, onPrivacy = { panel = Panel.PRIVACY })
+                Panel.INFO -> InfoSheet(onNightScreen = { panel = null; onNightScreen() }, onIntro = { panel = null; onIntro() }, onPrivacy = { panel = Panel.PRIVACY },
+                    onTour = { panel = null; onTour() })
                 Panel.PRIVACY -> PrivacySheet()
                 Panel.CALENDAR -> CalendarSheet(city, cityNow)
                 Panel.SETTINGS -> SettingsSheet(onChange = bump)
@@ -626,7 +632,7 @@ private fun SheetColumn(content: @Composable () -> Unit) {
 // ---------------------------------------------------------------- город
 
 @Composable
-internal fun CitySheet(city: CityOption, auto: Boolean, title: Boolean = true, onPick: (CityOption?) -> Unit) {
+internal fun CitySheet(city: CityOption, auto: Boolean, title: Boolean = true, showCurrent: Boolean = true, onPick: (CityOption?) -> Unit) {
     val locale = androidx.compose.ui.platform.LocalConfiguration.current.locales[0]
     var q by remember { mutableStateOf("") }
     var manualOpen by remember { mutableStateOf(false) }
@@ -644,11 +650,13 @@ internal fun CitySheet(city: CityOption, auto: Boolean, title: Boolean = true, o
     }
     Column(modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp).padding(bottom = 16.dp)) {
         if (title) SheetTitle(stringResource(R.string.city))
-        Text(
-            city.title(locale) + if (auto) " · " + stringResource(R.string.city_auto) else "",
-            color = ClockColors.Gold, fontWeight = FontWeight.Bold
-        )
-        Spacer(Modifier.height(8.dp))
+        if (showCurrent) {
+            Text(
+                city.title(locale) + if (auto) " · " + stringResource(R.string.city_auto) else "",
+                color = ClockColors.Gold, fontWeight = FontWeight.Bold
+            )
+            Spacer(Modifier.height(8.dp))
+        }
         OutlinedTextField(
             value = q,
             onValueChange = { q = it },
@@ -1262,7 +1270,7 @@ private fun TimesSheet(
 // ---------------------------------------------------------------- как считаем
 
 @Composable
-private fun InfoSheet(onNightScreen: () -> Unit, onIntro: () -> Unit, onPrivacy: () -> Unit) {
+private fun InfoSheet(onNightScreen: () -> Unit, onIntro: () -> Unit, onPrivacy: () -> Unit, onTour: (() -> Unit)? = null) {
     SheetColumn {
         SheetTitle(stringResource(R.string.help))
         Text(stringResource(R.string.legend_t), fontWeight = FontWeight.Bold, color = ClockColors.Ink)
@@ -1285,6 +1293,11 @@ private fun InfoSheet(onNightScreen: () -> Unit, onIntro: () -> Unit, onPrivacy:
         HomeScreenHelp()
         Note(stringResource(R.string.ob5_l2))
         Note(stringResource(R.string.ob5_l3))
+        if (onTour != null) {
+            OutlinedButton(onClick = onTour, border = BorderStroke(1.dp, ClockColors.Line)) {
+                Text("💡 " + stringResource(R.string.tour_again), color = ClockColors.Ink)
+            }
+        }
         OutlinedButton(onClick = onIntro, border = BorderStroke(1.dp, ClockColors.Line)) {
             Text(stringResource(R.string.ob_again), color = ClockColors.Ink)
         }

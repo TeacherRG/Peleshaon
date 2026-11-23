@@ -302,4 +302,28 @@
     <string name="cal_misheyakir">Earliest tallit and tefillin (Misheyakir)</string>
     <string name="cal_mincha_ketana">Mincha Ketana</string>
     <string name="cal_biur_chametz">Last time to burn chametz</string>
+
+    <!-- первый запуск: обязательный выбор города и подсказки на экране -->
+    <string name="gate_t">Where are you?</string>
+    <string name="gate_b">Prayer times, Shabbat and the alarms are calculated for your city. Please choose it to continue — you can change it any time with the 📍 button on the main screen.</string>
+    <string name="gate_guess">📍 %1$s — that\'s my city</string>
+    <string name="gate_or">or find your city in the list:</string>
+    <string name="tour_city_t">📍 Your city</string>
+    <string name="tour_city">All times are calculated for this city. Tap here to change it.</string>
+    <string name="tour_date_t">📅 Date and calendar</string>
+    <string name="tour_date">Today\'s Jewish and civil date. Tap to open the calendar with holidays and times for any day.</string>
+    <string name="tour_menu_t">☰ Menu</string>
+    <string name="tour_menu">Compass to Jerusalem, settings (language, community, theme) and help «?» — where you can watch these hints again.</string>
+    <string name="tour_dial_t">🕒 Dial of the day</string>
+    <string name="tour_dial">Half a day: 12 halachic hours of the day or the night. Tap a dot on the rim to see which time it is and how much is left.</string>
+    <string name="tour_shabbat_t">🕯️ Shabbat</string>
+    <string name="tour_shabbat">Candle lighting and the end of Shabbat for your city.</string>
+    <string name="tour_alarm_t">⏰ Alarm</string>
+    <string name="tour_alarm">Wake up by the Shema deadline or at your own time. It stays silent on Shabbat and holidays. Extra alarms and the meat → dairy timer are here too.</string>
+    <string name="tour_study_t">📖 Study</string>
+    <string name="tour_study">A reminder for Torah study on the days you choose.</string>
+    <string name="tour_times_t">🕘 Times</string>
+    <string name="tour_times">All times of the day in a list. Mark which of them to show on the dial.</string>
+    <string name="tour_done">Got it</string>
+    <string name="tour_again">Show screen hints</string>
 </resources>

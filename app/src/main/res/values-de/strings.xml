@@ -302,4 +302,28 @@
     <string name="cal_misheyakir">Misheyakir – früheste Zeit für Tallit und Tefillin</string>
     <string name="cal_mincha_ketana">Mincha Ketana</string>
     <string name="cal_biur_chametz">Letzte Zeit zum Verbrennen von Chametz</string>
+
+    <!-- первый запуск: обязательный выбор города и подсказки на экране -->
+    <string name="gate_t">Wo bist du?</string>
+    <string name="gate_b">Gebetszeiten, Schabbat und Wecker werden für deine Stadt berechnet. Wähle sie, um fortzufahren — ändern kannst du sie jederzeit mit der Taste 📍 auf dem Hauptbildschirm.</string>
+    <string name="gate_guess">📍 %1$s — das ist meine Stadt</string>
+    <string name="gate_or">oder suche deine Stadt in der Liste:</string>
+    <string name="tour_city_t">📍 Deine Stadt</string>
+    <string name="tour_city">Alle Zeiten werden für diese Stadt berechnet. Tippe hier, um sie zu ändern.</string>
+    <string name="tour_date_t">📅 Datum und Kalender</string>
+    <string name="tour_date">Das heutige jüdische und bürgerliche Datum. Tippe, um den Kalender mit Feiertagen und Zeiten für jeden Tag zu öffnen.</string>
+    <string name="tour_menu_t">☰ Menü</string>
+    <string name="tour_menu">Kompass nach Jerusalem, Einstellungen (Sprache, Gemeinde, Design) und Hilfe «?» — dort kannst du diese Hinweise erneut ansehen.</string>
+    <string name="tour_dial_t">🕒 Zifferblatt des Tages</string>
+    <string name="tour_dial">Ein halber Tag: 12 halachische Stunden des Tages oder der Nacht. Tippe auf einen Punkt am Rand, um zu sehen, welche Zeit es ist und wie lange es noch dauert.</string>
+    <string name="tour_shabbat_t">🕯️ Schabbat</string>
+    <string name="tour_shabbat">Kerzenzünden und Schabbatausgang für deine Stadt.</string>
+    <string name="tour_alarm_t">⏰ Wecker</string>
+    <string name="tour_alarm">Wecken zur Schma-Frist oder zu deiner Uhrzeit. Er schweigt an Schabbat und Feiertagen. Hier findest du auch weitere Wecker und den Timer „Fleischig → milchig“.</string>
+    <string name="tour_study_t">📖 Lernen</string>
+    <string name="tour_study">Eine Erinnerung an das Torastudium an den gewählten Tagen.</string>
+    <string name="tour_times_t">🕘 Zeiten</string>
+    <string name="tour_times">Alle Zeiten des Tages als Liste. Markiere, welche davon auf dem Zifferblatt erscheinen.</string>
+    <string name="tour_done">Verstanden</string>
+    <string name="tour_again">Bildschirmhinweise zeigen</string>
 </resources>

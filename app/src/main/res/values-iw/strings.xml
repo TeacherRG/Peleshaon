@@ -303,4 +303,28 @@
     <string name="cal_misheyakir">משיכיר – זמן טלית ותפילין</string>
     <string name="cal_mincha_ketana">מנחה קטנה</string>
     <string name="cal_biur_chametz">סוף זמן ביעור חמץ</string>
+
+    <!-- первый запуск: обязательный выбор города и подсказки на экране -->
+    <string name="gate_t">איפה אתם נמצאים?</string>
+    <string name="gate_b">זמני התפילה, השבת והשעונים המעוררים מחושבים לפי העיר שלכם. בחרו אותה כדי להמשיך — אפשר לשנות אותה בכל עת בכפתור 📍 במסך הראשי.</string>
+    <string name="gate_guess">📍 %1$s — זו העיר שלי</string>
+    <string name="gate_or">או חפשו את העיר שלכם ברשימה:</string>
+    <string name="tour_city_t">📍 העיר שלכם</string>
+    <string name="tour_city">כל הזמנים מחושבים לעיר הזאת. הקישו כאן כדי לשנות אותה.</string>
+    <string name="tour_date_t">📅 תאריך ולוח שנה</string>
+    <string name="tour_date">התאריך העברי והלועזי של היום. הקישו כדי לפתוח את לוח השנה עם החגים והזמנים לכל יום.</string>
+    <string name="tour_menu_t">☰ תפריט</string>
+    <string name="tour_menu">מצפן לירושלים, הגדרות (שפה, קהילה, ערכת נושא) ועזרה «?» — שם אפשר לראות שוב את הרמזים האלה.</string>
+    <string name="tour_dial_t">🕒 שעון היום</string>
+    <string name="tour_dial">חצי יממה: 12 שעות זמניות של היום או של הלילה. הקישו על נקודה בשפת השעון כדי לראות איזה זמן זה וכמה נשאר עד אליו.</string>
+    <string name="tour_shabbat_t">🕯️ שבת</string>
+    <string name="tour_shabbat">זמן הדלקת נרות וצאת השבת בעיר שלכם.</string>
+    <string name="tour_alarm_t">⏰ שעון מעורר</string>
+    <string name="tour_alarm">השכמה לפי סוף זמן קריאת שמע או בשעה שתבחרו. שותק בשבת ובחגים. כאן גם שעונים נוספים וטיימר „בשרי → חלבי“.</string>
+    <string name="tour_study_t">📖 לימוד</string>
+    <string name="tour_study">תזכורת ללימוד תורה בימים שתבחרו.</string>
+    <string name="tour_times_t">🕘 זמנים</string>
+    <string name="tour_times">כל זמני היום ברשימה. סמנו אילו מהם להציג על השעון.</string>
+    <string name="tour_done">הבנתי</string>
+    <string name="tour_again">הצגת רמזים על המסך</string>
 </resources>
