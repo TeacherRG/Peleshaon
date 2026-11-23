@@ -160,7 +160,7 @@
     <string name="about_t">О приложении</string>
     <string name="about_version">Версия %s</string>
     <string name="about_by">Тора-проект MyChitas · «Часы» сайта Нифлаот</string>
-    <string name="about_site">Сайт Нифлаот — niflaot.mychitas.app</string>
+    <string name="about_site">Сайт Нифлаот — niflaot.app</string>
     <string name="about_mail">Написать нам — Office@mychitas.app</string>
     <string name="privacy_t">Конфиденциальность</string>
     <string name="privacy_1">Приложение не собирает о вас никаких данных: нет аккаунтов, рекламы, аналитики и счётчиков.</string>
