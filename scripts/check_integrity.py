@@ -65,7 +65,13 @@ def main() -> None:
         gradle = read(f"{module}/build.gradle.kts")
         check('applicationId = "app.niflaot.peleshaon"' in gradle,
               f"{module}: wrong applicationId (must match Niflaot phone/watch ID)")
-        check("versionCode = 6" in gradle, f"{module}: unexpected version")
+        expected = "versionCode = 7" if module == "app" else "versionCode = 100007"
+        check(expected in gradle, f"{module}: unexpected version (expected {expected})")
+        # Google Play: new apps and updates must target API 36 on phones and API 35 on Wear OS.
+        target = "targetSdk = 36" if module == "app" else "targetSdk = 35"
+        check(target in gradle, f"{module}: Google Play target API requirement ({target})")
+        check('signingConfigs.findByName("upload")' in gradle and ".jks" not in gradle,
+              f"{module}: release must use the external upload key only")
         manifest = ET.parse(ROOT / module / "src" / "main" / "AndroidManifest.xml")
         namespace = "{http://schemas.android.com/apk/res/android}"
         app = manifest.getroot().find("application")

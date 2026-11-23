@@ -165,7 +165,7 @@
     <string name="privacy_t">Datenschutz</string>
     <string name="privacy_1">Die App sammelt keine Daten über dich: keine Konten, keine Werbung, keine Analyse, keine Zähler.</string>
     <string name="privacy_2">Sie geht nicht ins Internet — sie hat nicht einmal diese Berechtigung. Die Seite öffnet sich nur auf deinen Knopfdruck, im Browser.</string>
-    <string name="privacy_3">Stadt, Wecker und Einstellungen bleiben auf dem Handy. Ist die Android-Sicherung an, kann das System sie in deinem Google-Konto speichern.</string>
+    <string name="privacy_3">Stadt, Wecker, Kalender-Erinnerungen und Einstellungen bleiben auf dem Handy. Erinnerungsdateien werden nur gelesen oder geschrieben, wenn du sie auswählst. Ist die Android-Sicherung an, kann das System sie in deinem Google-Konto speichern.</string>
     <string name="privacy_4">Der Standort wird nicht abgefragt: die Stadt kommt aus der Zeitzone oder von deiner Wahl.</string>
     <string name="privacy_full">Vollständiger Text auf der Seite →</string>
     <string name="hour_day">%d. Stunde des Tages</string>

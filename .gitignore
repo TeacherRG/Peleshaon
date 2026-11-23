@@ -1,0 +1,6 @@
+*.jks
+*.keystore
+!debug.keystore
+keystore.properties
+local.properties
+build/

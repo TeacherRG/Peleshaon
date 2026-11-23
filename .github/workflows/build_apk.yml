@@ -30,15 +30,34 @@ jobs:
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v5
         with:
-          gradle-version: '8.7'
+          gradle-version: '8.11.1'
 
       - name: Check source and translation integrity
         run: python3 scripts/check_integrity.py
 
+      # Play upload key (optional). Without these secrets release bundles stay unsigned.
+      # Secrets: PELE_UPLOAD_KEYSTORE_BASE64, PELE_UPLOAD_STORE_PASSWORD, PELE_UPLOAD_KEY_ALIAS,
+      # PELE_UPLOAD_KEY_PASSWORD — see PLAY_RELEASE.md.
+      - name: Restore Play upload key
+        env:
+          KEYSTORE_B64: ${{ secrets.PELE_UPLOAD_KEYSTORE_BASE64 }}
+        run: |
+          if [ -n "$KEYSTORE_B64" ]; then
+            echo "$KEYSTORE_B64" | base64 -d > "$RUNNER_TEMP/upload.jks"
+            echo "PELE_UPLOAD_STORE_FILE=$RUNNER_TEMP/upload.jks" >> "$GITHUB_ENV"
+            echo "Upload key restored: release bundles will be signed"
+          else
+            echo "No upload key secret: release bundles stay unsigned"
+          fi
+
       # One Gradle invocation shares dependency resolution and configuration
       # across tests and both APKs, avoiding duplicate runner time.
       - name: Test core and build both Beta APKs
-        run: gradle --no-daemon :core:test :app:assembleDebug :app:assembleQa :wear:assembleDebug :app:bundleRelease :wear:assembleRelease
+        env:
+          PELE_UPLOAD_STORE_PASSWORD: ${{ secrets.PELE_UPLOAD_STORE_PASSWORD }}
+          PELE_UPLOAD_KEY_ALIAS: ${{ secrets.PELE_UPLOAD_KEY_ALIAS }}
+          PELE_UPLOAD_KEY_PASSWORD: ${{ secrets.PELE_UPLOAD_KEY_PASSWORD }}
+        run: gradle --no-daemon :core:test :app:assembleDebug :app:assembleQa :wear:assembleDebug :app:bundleRelease :wear:bundleRelease :wear:assembleRelease
 
       - name: Validate both phone packages and upgrade version code
         run: |
@@ -49,9 +68,11 @@ jobs:
           echo "== Phone" && head -6 /tmp/phone-package.txt
           echo "== QA parallel" && head -6 /tmp/parallel-package.txt
           echo "== Wear" && head -6 /tmp/wear-package.txt
-          grep -q "name='app.niflaot.peleshaon' versionCode='6'" /tmp/phone-package.txt
-          grep -q "name='app.niflaot.peleshaon.qa' versionCode='6'" /tmp/parallel-package.txt
-          grep -q "name='app.niflaot.peleshaon' versionCode='6'" /tmp/wear-package.txt
+          grep -q "name='app.niflaot.peleshaon' versionCode='7'" /tmp/phone-package.txt
+          grep -q "name='app.niflaot.peleshaon.qa' versionCode='7'" /tmp/parallel-package.txt
+          grep -q "name='app.niflaot.peleshaon' versionCode='100007'" /tmp/wear-package.txt
+          grep -q "targetSdkVersion:'36'" /tmp/phone-package.txt
+          grep -q "targetSdkVersion:'35'" /tmp/wear-package.txt
           grep -q "minSdkVersion:'26'" /tmp/phone-package.txt
           grep -q "minSdkVersion:'26'" /tmp/parallel-package.txt
           echo "Verified: normal update + separate QA install with independent package ID"
@@ -98,11 +119,27 @@ jobs:
           done
           "$AAPT" dump xmltree "$apk" --file res/xml/widget_face_info.xml || true
 
-      - name: Upload unsigned Play App Bundle (phone)
+      - name: Report release bundle signing
+        run: |
+          for aab in app/build/outputs/bundle/release/app-release.aab wear/build/outputs/bundle/release/wear-release.aab; do
+            if jarsigner -verify "$aab" 2>&1 | grep -q "jar verified"; then
+              echo "SIGNED: $aab"
+            else
+              echo "UNSIGNED: $aab (add the upload key secrets to sign it for Google Play)"
+            fi
+          done
+
+      - name: Upload Play App Bundle (phone)
         uses: actions/upload-artifact@v5
         with:
-          name: Niflaot-phone-release-unsigned-aab
+          name: Niflaot-phone-release-aab
           path: app/build/outputs/bundle/release/app-release.aab
+
+      - name: Upload Play App Bundle (Wear OS)
+        uses: actions/upload-artifact@v5
+        with:
+          name: Niflaot-wear-release-aab
+          path: wear/build/outputs/bundle/release/wear-release.aab
 
       - name: Upload phone APK
         uses: actions/upload-artifact@v5

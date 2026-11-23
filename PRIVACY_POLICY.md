@@ -2,8 +2,8 @@
 
 **Продукт:** Пеле Шаон Луах (Pele Shaon Luach)  
 **Платформа:** Android и Wear OS  
-**Статус документа:** предварительная версия; требуется финальная проверка перед публикацией  
-**Дата вступления в силу:** будет указана перед публикацией
+**Статус документа:** действует для бета-версии 1.0.0-beta4 (versionCode 7; Wear OS — 100007)  
+**Дата вступления в силу:** 23 ноября 2026 г.
 
 ## 1. Разработчик и контакт
 
@@ -81,8 +81,8 @@
 
 **Product:** Pele Shaon Luach  
 **Platforms:** Android and Wear OS  
-**Document status:** Preliminary; final review required before publication  
-**Effective date:** To be added before publication
+**Document status:** In effect for beta 1.0.0-beta4 (versionCode 7; Wear OS — 100007)  
+**Effective date:** November 23, 2026
 
 ## 1. Developer and contact
 

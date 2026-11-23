@@ -1,0 +1,32 @@
+Pele Shaon Luach ist ein jüdischer Kalender und eine Uhr, die vollständig offline funktionieren.
+
+JÜDISCHER KALENDER
+• Jüdischer Monat als Raster mit bürgerlichen Daten, Feiertagen, Fasttagen, Rosch Chodesch, Chanukka, Omer und Wochenabschnitt
+• Diaspora- oder Israel-Kalender je nach Stadt
+• Jeder Tag: Tageszeiten, Kerzenzünden und Ausgang von Schabbat und Jom Tov
+
+MEINE ERINNERUNGEN
+• Eigene Erinnerungen direkt im Kalender anlegen, bearbeiten und löschen
+• Wiederholung nach bürgerlichem oder jüdischem Datum — Jahrzeit, jüdischer Geburtstag, jeder Rosch Chodesch
+• Import aus Google Kalender (ZIP/.ics-Export) und Export in die Standardformate .ics und .vcs
+
+ZMANIM
+• Berechnung nach dem Alter Rebbe, litauischem oder sefardischem Brauch
+• Zifferblatt mit halachischen Stunden, Morgendämmerung, Ende des Schma, Sonnenuntergang und Nachteinbruch
+• Hunderte Städte oder eigene Koordinaten
+
+WECKER, DIE SCHABBAT HALTEN
+• Morgenwecker zur Uhrzeit oder vor dem Ende der Schma-Zeit
+• Tora-Lernwecker und eigene Wecker
+• Still vom Kerzenzünden bis zum Ausgang von Schabbat und Jom Tov; optional auch an Chol HaMoed
+• Sechs-Stunden-Timer von Fleischig zu Milchig
+
+AUSSERDEM
+• Kiddusch-Levana-Erinnerung mit Mondkompass und Richtung Jerusalem
+• Widgets, Nachtanzeige und Bildschirmschoner
+• App für Wear OS
+
+DATENSCHUTZ
+Keine Werbung, keine Konten, keine Analyse. Die App hat keine Internetberechtigung; alles bleibt auf dem Handy.
+
+Dies ist eine Betaversion. Die Zeiten sind berechnet, nicht zertifiziert — klären Sie örtliche Bräuche mit Ihrem Rabbiner.

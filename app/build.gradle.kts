@@ -6,14 +6,14 @@ plugins {
 
 android {
     namespace = "app.mychitas.peleshaon"
-    compileSdk = 35
+    compileSdk = 36
 
     defaultConfig {
         applicationId = "app.niflaot.peleshaon"
         minSdk = 26
-        targetSdk = 35
-        versionCode = 6
-        versionName = "1.0.0-beta3"
+        targetSdk = 36
+        versionCode = 7
+        versionName = "1.0.0-beta4"
     }
 
     // Один ключ для всех тестовых сборок: иначе каждая сборка на GitHub подписана новым ключом,
@@ -24,6 +24,20 @@ android {
             storePassword = "android"
             keyAlias = "androiddebugkey"
             keyPassword = "android"
+        }
+    }
+
+    // Ключ загрузки Google Play (Play App Signing). В репозиторий не кладётся: путь и пароли —
+    // из переменных окружения (секреты GitHub Actions) или из ~/.gradle/gradle.properties.
+    // Нет ключа — release собирается неподписанным, как раньше. Подробно — PLAY_RELEASE.md.
+    val uploadStore = (System.getenv("PELE_UPLOAD_STORE_FILE") ?: findProperty("pele.upload.storeFile") as String?)
+        ?.takeIf { it.isNotBlank() && file(it).exists() }
+    if (uploadStore != null) {
+        signingConfigs.create("upload") {
+            storeFile = file(uploadStore)
+            storePassword = System.getenv("PELE_UPLOAD_STORE_PASSWORD") ?: findProperty("pele.upload.storePassword") as String?
+            keyAlias = System.getenv("PELE_UPLOAD_KEY_ALIAS") ?: findProperty("pele.upload.keyAlias") as String?
+            keyPassword = System.getenv("PELE_UPLOAD_KEY_PASSWORD") ?: findProperty("pele.upload.keyPassword") as String?
         }
     }
 
@@ -45,6 +59,7 @@ android {
         // a dedicated Play upload key is created and configured securely.
         getByName("release") {
             isMinifyEnabled = false
+            signingConfigs.findByName("upload")?.let { signingConfig = it }
             isShrinkResources = false
         }
     }

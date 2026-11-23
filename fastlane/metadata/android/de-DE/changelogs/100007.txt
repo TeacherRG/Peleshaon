@@ -1,0 +1,5 @@
+Beta 4
+• Kalender-Erinnerungen: anlegen, bearbeiten, löschen; Wiederholung nach bürgerlichem oder jüdischem Datum
+• Import aus Google Kalender (.ics / ZIP) und Export als .ics und .vcs
+• Erinnerungen warten bis zum Ausgang von Schabbat und Jom Tov
+• Für Android 16 aktualisiert

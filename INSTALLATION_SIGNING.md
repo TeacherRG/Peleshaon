@@ -1,3 +1,5 @@
+> **Актуально на 1.0.0-beta4:** пакет `app.niflaot.peleshaon` (QA — `app.niflaot.peleshaon.qa`), телефон `versionCode=7`, Wear OS `versionCode=100007`. Сборки для Google Play подписываются отдельным ключом загрузки — см. [PLAY_RELEASE.md](PLAY_RELEASE.md). Ниже — история проблем с установкой тестовых APK.
+
 # PeleShaon installation and signing compatibility
 
 **Issue confirmed in release history:** the permanent debug signing keystore was

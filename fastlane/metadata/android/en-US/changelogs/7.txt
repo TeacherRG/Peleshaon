@@ -1,0 +1,5 @@
+Beta 4
+• Calendar reminders: add, edit and delete; repeat by civil or Jewish date
+• Import from Google Calendar (.ics / ZIP) and export to .ics and .vcs
+• Reminder notifications wait until Shabbat and Yom Tov end
+• Updated for Android 16

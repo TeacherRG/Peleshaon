@@ -1,0 +1,32 @@
+Pele Shaon Luach is a Jewish calendar and clock that works fully offline.
+
+JEWISH CALENDAR
+• Jewish month grid with civil dates, festivals, fasts, Rosh Chodesh, Chanukah, Omer and the weekly Torah portion
+• Diaspora or Israel schedule according to your city
+• Any day: times of the day, candle lighting and Shabbat/Yom Tov end
+
+MY REMINDERS
+• Add, edit and delete your own reminders right in the calendar
+• Repeat by civil date or by Jewish date — yahrzeits, Jewish birthdays, every Rosh Chodesh
+• Import from Google Calendar (its ZIP/.ics export) and export to standard .ics and .vcs files
+
+ZMANIM
+• Times of the day by the method of the Alter Rebbe, Litvish or Sephardi custom
+• Clock face with halachic hours, dawn, end of Shema, sunset and nightfall
+• Hundreds of cities, or enter coordinates yourself
+
+ALARMS THAT RESPECT SHABBAT
+• Morning alarm at a set time or before the end of the Shema time
+• Torah study alarm and your own alarms
+• Silent from candle lighting until Shabbat and Yom Tov end; optional silence on Chol HaMoed
+• Six-hour meat-to-dairy timer
+
+ALSO
+• Kiddush Levana reminder with a Moon compass and the direction to Jerusalem
+• Home-screen widgets, night screen and screensaver
+• Wear OS app
+
+PRIVACY
+No ads, no accounts, no analytics. The app has no internet permission; everything stays on your phone.
+
+This is a beta version. Religious times are calculated, not certified — confirm local customs with your rabbi.
