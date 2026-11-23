@@ -57,6 +57,7 @@ class MainActivity : ComponentActivity() {
         ClockTheme.load(this)
         AlarmScheduler.rescheduleAllFromPrefs(this)
         MoonReminder.schedule(this)
+        app.mychitas.peleshaon.reminder.ReminderNotifier.schedule(this)
         // компас переводит экран в портрет — активность пересоздаётся, а компас должен остаться открытым
         openMoon.value = savedInstanceState?.getString("compass")
             ?: if (intent?.getBooleanExtra(MoonReminder.EXTRA_OPEN, false) == true) "moon" else null

@@ -28,6 +28,9 @@
 - список пользовательских будильников и их настройки;
 - состояние и отметка времени таймера ожидания между мясным и молочным;
 - настройки напоминаний, времени зажигания свечей, первого знакомства с приложением и другие рабочие предпочтения.
+- напоминания календаря, созданные пользователем или импортированные им из файла: название, заметка, дата, время, правило повтора и время уведомления.
+
+Импорт и экспорт напоминаний выполняются только через файлы, которые пользователь сам выбирает или создаёт в системном окне выбора файлов (форматы iCalendar `.ics`, vCalendar `.vcs`, а также ZIP-выгрузка Google Календаря). Приложение не подключается к Google Календарю или другим онлайн-сервисам и не читает системный календарь устройства; файл обрабатывается на телефоне, а созданный при экспорте файл остаётся там, куда его сохранил пользователь.
 
 Версия Wear OS отдельно сохраняет в приватных настройках часов выбранный город из каталога, общину и настройку минут до зажигания свечей.
 
@@ -104,6 +107,9 @@ The reviewed phone code stores settings locally on the Android device in the app
 - custom alarm list and settings;
 - the state and timestamp of the meat-to-dairy waiting timer;
 - reminder settings, candle-lighting offset, onboarding completion, and other operational preferences.
+- calendar reminders created by the user or imported by the user from a file: title, note, date, time, repeat rule, and notification time.
+
+Reminder import and export work only through files that the user picks or creates in the system file picker (iCalendar `.ics`, vCalendar `.vcs`, and the Google Calendar ZIP export). The app does not connect to Google Calendar or any other online service and does not read the device's system calendar; the file is processed on the phone, and an exported file stays wherever the user saved it.
 
 The Wear OS version separately stores the catalog city selection, community, and candle-lighting offset in the watch app's private preferences.
 

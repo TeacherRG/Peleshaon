@@ -234,5 +234,6 @@ class BootReceiver : BroadcastReceiver() {
         AlarmScheduler.rescheduleAllFromPrefs(context)
         app.mychitas.peleshaon.live.Live.updateAsync(context)
         app.mychitas.peleshaon.moon.MoonReminder.schedule(context)
+        app.mychitas.peleshaon.reminder.ReminderNotifier.schedule(context)
     }
 }
