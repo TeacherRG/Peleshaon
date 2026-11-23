@@ -1294,7 +1294,7 @@ private fun InfoSheet(onNightScreen: () -> Unit, onIntro: () -> Unit, onPrivacy:
 }
 
 private const val SITE = "https://niflaot.mychitas.app/"
-private const val PRIVACY_URL = "https://niflaot.mychitas.app/peleshaon/privacy/"
+private const val PRIVACY_URL = "https://niflaot.app/peleshaon/privacy/"
 private const val MAIL = "Office@mychitas.app"
 
 private fun langParam(): String = when (Locale.getDefault().language) {
