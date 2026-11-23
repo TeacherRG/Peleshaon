@@ -32,6 +32,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
@@ -49,6 +50,9 @@ import app.mychitas.peleshaon.domain.CityOption
 import app.mychitas.peleshaon.domain.JewishCal
 import app.mychitas.peleshaon.domain.ZmanType
 import app.mychitas.peleshaon.domain.ZmanimEngine
+import app.mychitas.peleshaon.reminder.Reminder
+import app.mychitas.peleshaon.reminder.ReminderRules
+import app.mychitas.peleshaon.reminder.ReminderStore
 import java.time.DayOfWeek
 import java.time.LocalDate
 import java.time.ZonedDateTime
@@ -97,6 +101,17 @@ fun CalendarSheet(city: CityOption, now: ZonedDateTime) {
     val sel = remember(selected, city) { JewishCal.day(selected, city.isIsrael) }
     val upcoming = remember(today, city) { JewishCal.upcoming(today, city.isIsrael) }
     val inThisMonth = month.any { it.date == today }
+
+    // напоминания пользователя: список, дни месяца с ними, редактор
+    val context = LocalContext.current
+    var reminders by remember { mutableStateOf(ReminderStore.load(context)) }
+    var editing by remember { mutableStateOf<Pair<Reminder, Boolean>?>(null) }
+    val askNotifications = rememberNotificationAsk()
+    val reminderDays = remember(reminders, first.date) {
+        val end = month.last().date
+        reminders.flatMap { ReminderRules.occurrences(it, first.date, end) }.toSet()
+    }
+    val selectedReminders = remember(reminders, selected) { reminders.filter { ReminderRules.occursOn(it, selected) } }
 
     Column(
         modifier = Modifier.fillMaxWidth().verticalScroll(rememberScrollState()).padding(start = 16.dp, end = 16.dp, bottom = 28.dp),
@@ -154,7 +169,8 @@ fun CalendarSheet(city: CityOption, now: ZonedDateTime) {
                     for (i in 0 until 7) {
                         val d = row.getOrNull(i)
                         Box(Modifier.weight(1f)) {
-                            if (d != null) DayCell(d, today = d.date == today, selected = d.date == selected, locale = locale) { selected = d.date }
+                            if (d != null) DayCell(d, today = d.date == today, selected = d.date == selected, locale = locale,
+                                reminder = d.date in reminderDays) { selected = d.date }
                         }
                     }
                 }
@@ -163,6 +179,28 @@ fun CalendarSheet(city: CityOption, now: ZonedDateTime) {
 
         // ---- выбранный день
         DayDetails(sel, city, locale)
+
+        // ---- напоминания выбранного дня; импорт и экспорт
+        DayReminders(
+            day = selected, todays = selectedReminders,
+            onEdit = { editing = it to false },
+            onAdd = { editing = newReminder(selected) to true }
+        )
+        ReminderFiles(reminders) { reminders = it }
+        editing?.let { (r, isNew) ->
+            ReminderEditor(
+                initial = r, isNew = isNew, isIsrael = city.isIsrael,
+                onSave = { saved ->
+                    reminders = ReminderStore.upsert(context, saved)
+                    if (saved.alertMinutes != null) askNotifications()
+                    selected = if (ReminderRules.occursOn(saved, selected)) selected else saved.date
+                    anchor = selected
+                    editing = null
+                },
+                onDelete = { reminders = ReminderStore.delete(context, r.id); editing = null },
+                onDismiss = { editing = null }
+            )
+        }
 
         // ---- ближайшие даты
         HorizontalDivider(color = ClockColors.Line)
@@ -210,7 +248,7 @@ private fun NavButton(text: String, label: String, onClick: () -> Unit) {
 }
 
 @Composable
-private fun DayCell(d: CalDay, today: Boolean, selected: Boolean, locale: Locale, onClick: () -> Unit) {
+private fun DayCell(d: CalDay, today: Boolean, selected: Boolean, locale: Locale, reminder: Boolean = false, onClick: () -> Unit) {
     val shabbat = d.date.dayOfWeek == DayOfWeek.SATURDAY
     val holiday = d.holy && !shabbat
     val bg = when {
@@ -263,6 +301,8 @@ private fun DayCell(d: CalDay, today: Boolean, selected: Boolean, locale: Locale
                 for (c in dots) Box(Modifier.size(6.dp).background(c, CircleShape))
             }
         }
+        // своё напоминание — маленький колокольчик в правом верхнем углу
+        if (reminder) Text("🔔", fontSize = 8.sp, modifier = Modifier.align(Alignment.TopEnd))
     }
 }
 

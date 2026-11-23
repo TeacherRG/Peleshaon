@@ -441,6 +441,7 @@ fun ClockScreen(
                     ClockTheme.refresh(context)
                     AlarmScheduler.rescheduleAllFromPrefs(context)
                     app.mychitas.peleshaon.moon.MoonReminder.schedule(context)
+                    app.mychitas.peleshaon.reminder.ReminderNotifier.schedule(context)
                     app.mychitas.peleshaon.live.Live.updateAsync(context)
                     pop = null
                     bump()
@@ -550,6 +551,7 @@ private fun NoCityClockScreen(
                     Prefs.setCity(context, chosen)
                     AlarmScheduler.rescheduleAllFromPrefs(context)
                     app.mychitas.peleshaon.moon.MoonReminder.schedule(context)
+                    app.mychitas.peleshaon.reminder.ReminderNotifier.schedule(context)
                     Live.updateAsync(context)
                     panel = null
                     onChanged()
