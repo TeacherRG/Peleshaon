@@ -314,4 +314,5 @@
     <string name="clock_halachic">Галахічний</string>
     <string name="clock_civil">Звичайний</string>
     <string name="clock_sub_time_note">Малий циферблат показує обраний звичайний або галахічний час; повне коло зманім залишається на головному циферблаті.</string>
+    <string name="clock_hidden">Приховати</string>
 </resources>

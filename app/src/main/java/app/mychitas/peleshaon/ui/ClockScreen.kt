@@ -194,8 +194,6 @@ fun ClockScreen(
     val half = remember(city, minute, version) { ZmanimEngine.halfOf(cityNow, city) }
     val halfItems = remember(half, city, version) { half?.let { ZmanimEngine.halfItems(it, city) } ?: emptyList() }
     val ring = Dial.ring(cityNow, half)
-    val subStyle = Prefs.faceStyle(context, "sub")
-    val subTime = Prefs.faceTime(context, "sub")
     val mainStyle = Prefs.faceStyle(context, "main")
     val mainTime = Prefs.faceTime(context, "main")
     val hourLabel = half?.let { stringResource(if (it.day) R.string.hour_day else R.string.hour_night, it.hour(cityNow)) }
@@ -307,27 +305,6 @@ fun ClockScreen(
                         analogStyle = true,
                         onPick = if (mainTime == "HALACHIC") ({ id, fx, fy -> pop = if (id == null || pop?.first == id) null else Triple(id, fx, fy) }) else null
                     )
-                }
-                if (!day.isPolarAnomaly && subStyle != "HIDDEN") {
-                    val subNow = if (subTime == "HALACHIC") cityNow else now
-                    Surface(
-                        modifier = Modifier.align(Alignment.BottomEnd).padding(12.dp).size(112.dp),
-                        shape = CircleShape,
-                        color = ClockColors.RimFill,
-                        border = BorderStroke(1.dp, ClockColors.RimStroke)
-                    ) {
-                        Box(contentAlignment = Alignment.Center) {
-                            if (subStyle == "DIGITAL") {
-                                Text(
-                                    subNow.format(DateTimeFormatter.ofPattern("HH:mm")),
-                                    color = ClockColors.BigTime, fontWeight = FontWeight.Bold,
-                                    fontSize = 19.sp, textAlign = TextAlign.Center
-                                )
-                            } else {
-                                SmallAnalogFace(now = subNow, modifier = Modifier.fillMaxSize())
-                            }
-                        }
-                    }
                 }
                 val p = pop
                 val e = p?.let { pp -> events.find { it.id == pp.first } }
@@ -1411,66 +1388,6 @@ private fun minhagNote(): String = when (ZmanimEngine.minhag) {
 @OptIn(androidx.compose.foundation.layout.ExperimentalLayoutApi::class)
 
 @Composable
-private fun SmallAnalogFace(now: ZonedDateTime, modifier: Modifier = Modifier) {
-    androidx.compose.foundation.Canvas(modifier) {
-        val c = androidx.compose.ui.geometry.Offset(size.width / 2f, size.height / 2f)
-        val radius = size.minDimension * 0.39f
-        drawCircle(ClockColors.RimStroke, radius = radius, center = c, style = androidx.compose.ui.graphics.drawscope.Stroke(width = 1.dp.toPx()))
-        for (i in 0 until 12) {
-            val angle = Math.toRadians(i * 30.0 - 90.0)
-            val inner = radius * if (i % 3 == 0) 0.80f else 0.88f
-            val outer = radius * 0.96f
-            drawLine(
-                ClockColors.Muted,
-                androidx.compose.ui.geometry.Offset(c.x + kotlin.math.cos(angle).toFloat() * inner, c.y + kotlin.math.sin(angle).toFloat() * inner),
-                androidx.compose.ui.geometry.Offset(c.x + kotlin.math.cos(angle).toFloat() * outer, c.y + kotlin.math.sin(angle).toFloat() * outer),
-                strokeWidth = if (i % 3 == 0) 1.6.dp.toPx() else 0.8.dp.toPx()
-            )
-        }
-        val hour = (now.hour % 12 + now.minute / 60f) * 30f - 90f
-        val minute = now.minute * 6f + now.second * 0.1f - 90f
-        fun endpoint(degrees: Float, length: Float) = androidx.compose.ui.geometry.Offset(
-            c.x + kotlin.math.cos(Math.toRadians(degrees.toDouble())).toFloat() * radius * length,
-            c.y + kotlin.math.sin(Math.toRadians(degrees.toDouble())).toFloat() * radius * length
-        )
-        drawLine(ClockColors.BigTime, c, endpoint(hour, 0.48f), strokeWidth = 3.dp.toPx(), cap = androidx.compose.ui.graphics.StrokeCap.Round)
-        drawLine(ClockColors.BigTime, c, endpoint(minute, 0.74f), strokeWidth = 2.dp.toPx(), cap = androidx.compose.ui.graphics.StrokeCap.Round)
-        drawCircle(ClockColors.Gold, radius = 2.dp.toPx(), center = c)
-    }
-}
-
-
-@Composable
-private fun SmallAnalogFace(now: ZonedDateTime, modifier: Modifier = Modifier) {
-    androidx.compose.foundation.Canvas(modifier) {
-        val center = androidx.compose.ui.geometry.Offset(size.width / 2f, size.height / 2f)
-        val radius = size.minDimension * 0.39f
-        drawCircle(ClockColors.RimStroke, radius = radius, center = center,
-            style = androidx.compose.ui.graphics.drawscope.Stroke(width = 1.dp.toPx()))
-        for (i in 0 until 12) {
-            val angle = Math.toRadians(i * 30.0 - 90.0)
-            val inner = radius * if (i % 3 == 0) 0.80f else 0.88f
-            val outer = radius * 0.96f
-            drawLine(
-                ClockColors.Muted,
-                androidx.compose.ui.geometry.Offset(center.x + kotlin.math.cos(angle).toFloat() * inner, center.y + kotlin.math.sin(angle).toFloat() * inner),
-                androidx.compose.ui.geometry.Offset(center.x + kotlin.math.cos(angle).toFloat() * outer, center.y + kotlin.math.sin(angle).toFloat() * outer),
-                strokeWidth = if (i % 3 == 0) 1.6.dp.toPx() else 0.8.dp.toPx()
-            )
-        }
-        val hourAngle = (now.hour % 12 + now.minute / 60f) * 30f - 90f
-        val minuteAngle = now.minute * 6f + now.second * 0.1f - 90f
-        fun endpoint(degrees: Float, fraction: Float) = androidx.compose.ui.geometry.Offset(
-            center.x + kotlin.math.cos(Math.toRadians(degrees.toDouble())).toFloat() * radius * fraction,
-            center.y + kotlin.math.sin(Math.toRadians(degrees.toDouble())).toFloat() * radius * fraction
-        )
-        drawLine(ClockColors.BigTime, center, endpoint(hourAngle, 0.48f), strokeWidth = 3.dp.toPx(), cap = androidx.compose.ui.graphics.StrokeCap.Round)
-        drawLine(ClockColors.BigTime, center, endpoint(minuteAngle, 0.74f), strokeWidth = 2.dp.toPx(), cap = androidx.compose.ui.graphics.StrokeCap.Round)
-        drawCircle(ClockColors.Gold, radius = 2.dp.toPx(), center = center)
-    }
-}
-
-@Composable
 private fun FaceSettings(context: Context, face: String, title: Int) {
     var style by remember(face) { mutableStateOf(Prefs.faceStyle(context, face)) }
     var time by remember(face) { mutableStateOf(Prefs.faceTime(context, face)) }
@@ -1478,7 +1395,7 @@ private fun FaceSettings(context: Context, face: String, title: Int) {
         Text(stringResource(title), color = ClockColors.Ink, fontWeight = FontWeight.SemiBold)
         Text(stringResource(R.string.clock_style_title), color = ClockColors.Ink2, fontSize = 12.sp)
         Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-            for ((value, label) in listOf("DIGITAL" to R.string.clock_digital, "ANALOG" to R.string.clock_analog, "HIDDEN" to R.string.clock_hidden)) {
+            for ((value, label) in listOf("DIGITAL" to R.string.clock_digital, "ANALOG" to R.string.clock_analog)) {
                 FilterChip(selected = style == value, onClick = {
                     style = value
                     Prefs.setFaceStyle(context, face, value)
@@ -1577,7 +1494,6 @@ private fun SettingsSheet(onChange: () -> Unit) {
         Text(stringResource(R.string.clock_faces_title), fontWeight = FontWeight.Bold, color = ClockColors.Ink)
         FaceSettings(context, "main", R.string.clock_main_face)
         FaceSettings(context, "sub", R.string.clock_sub_face)
-        Text(stringResource(R.string.clock_sub_time_note), color = ClockColors.Muted, fontSize = 11.sp)
         HorizontalDivider(color = ClockColors.Line)
         HorizontalDivider(color = ClockColors.Line)
         // There is no valid coordinate context for geographically sensitive settings.
