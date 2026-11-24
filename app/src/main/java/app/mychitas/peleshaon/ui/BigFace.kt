@@ -123,6 +123,43 @@ private fun place(events: List<FaceEvent>, half: Half?): List<DotPlace> {
 private val MOON = PathParser().parsePathString("M2 -7 A7 7 0 1 0 7 2 A5.5 5.5 0 0 1 2 -7Z").toPath()
 private val HHMM: DateTimeFormatter = DateTimeFormatter.ofPattern("HH:mm")
 
+/** Compact drawn symbol for the two time systems; no text or emoji. */
+@Composable
+internal fun TimeSystemMark(halachic: Boolean, modifier: Modifier = Modifier) {
+    Canvas(modifier = modifier) {
+        val side = size.minDimension
+        val c = Offset(size.width / 2f, size.height / 2f)
+        if (halachic) {
+            val color = ClockColors.GoldDeep
+            val r = side * 0.27f
+            drawArc(color, 180f, 180f, false,
+                topLeft = Offset(c.x - r, c.y - r), size = Size(r * 2, r * 2),
+                style = Stroke(width = side * 0.065f, cap = StrokeCap.Round))
+            drawLine(color, Offset(c.x - side * 0.34f, c.y + side * 0.04f),
+                Offset(c.x + side * 0.34f, c.y + side * 0.04f), side * 0.06f, cap = StrokeCap.Round)
+            for (dx in listOf(-0.2f, 0f, 0.2f)) {
+                val top = if (dx == 0f) -0.42f else -0.32f
+                drawLine(color, Offset(c.x + side * dx, c.y),
+                    Offset(c.x + side * dx, c.y + side * top), side * 0.05f, cap = StrokeCap.Round)
+            }
+            drawCircle(color, side * 0.055f, Offset(c.x, c.y + side * 0.24f))
+        } else {
+            val color = ClockColors.TcheletDeep
+            val r = side * 0.31f
+            drawCircle(color, r, c, style = Stroke(width = side * 0.06f))
+            for (a in 0 until 4) {
+                val angle = a * PI / 2.0
+                val outer = Offset(c.x + (r * 0.9f * cos(angle)).toFloat(), c.y + (r * 0.9f * sin(angle)).toFloat())
+                val inner = Offset(c.x + (r * 0.68f * cos(angle)).toFloat(), c.y + (r * 0.68f * sin(angle)).toFloat())
+                drawLine(color, inner, outer, side * 0.05f, cap = StrokeCap.Round)
+            }
+            drawLine(color, c, Offset(c.x, c.y - r * 0.56f), side * 0.06f, cap = StrokeCap.Round)
+            drawLine(color, c, Offset(c.x + r * 0.5f, c.y + r * 0.34f), side * 0.06f, cap = StrokeCap.Round)
+            drawCircle(color, side * 0.05f, c)
+        }
+    }
+}
+
 /**
  * Большой циферблат страницы «Часы»: кольцо суток из штрихов, солнце и луна, все времена дня — точками на ободе
  * (нажатие — `onPick`), выбранные подписаны временем; внутри — время города, секунды и, по желанию, сочетание Имени часа.
@@ -141,6 +178,7 @@ fun BigFace(
     /** «4-й час дня» — под временем */
     hourLabel: String? = null,
     timeText: String? = null,
+    analog: Boolean = false,
     onPick: ((String?, Float, Float) -> Unit)? = null
 ) {
     val dots = remember(events, half) { place(events, half) }
@@ -166,7 +204,7 @@ fun BigFace(
         translate((size.width - side) / 2f, (size.height - side) / 2f) {
             scale(k, k, pivot = Offset.Zero) {
                 translate(-BOX_MIN, -BOX_MIN) {
-                    drawFace(now, zone, ring, dots, labelsOf(dots, now), active, tziruf, k, hourLabel = hourLabel, timeText = timeText)
+                    drawFace(now, zone, ring, dots, labelsOf(dots, now), active, tziruf, k, hourLabel = hourLabel, timeText = timeText, analog = analog)
                 }
             }
         }
@@ -191,6 +229,7 @@ private fun DrawScope.drawFace(
     showTime: Boolean = true,
     hourLabel: String? = null,
     timeText: String? = null,
+    analog: Boolean = false,
     widgetStyle: Boolean = false
 ) {
     val c = Offset(100f, 100f)
@@ -326,8 +365,25 @@ private fun DrawScope.drawFace(
     }
     if (showTime) {
         val t = now.withZoneSameInstant(zone)
-        text(timeText ?: String.format(Locale.ROOT, "%02d:%02d", t.hour, t.minute), 100f, 91f, 34f, ClockColors.BigTime)
-        text(String.format(Locale.ROOT, "%02d", t.second), 100f, 114f, 14f, ClockColors.Seconds)
+        val shown = timeText ?: String.format(Locale.ROOT, "%02d:%02d", t.hour, t.minute)
+        if (analog) {
+            val parts = shown.split(":")
+            val h = parts.getOrNull(0)?.toIntOrNull() ?: t.hour
+            val m = parts.getOrNull(1)?.toIntOrNull() ?: t.minute
+            val center = Offset(100f, 96f)
+            fun hand(degrees: Double, length: Float) = Offset(
+                center.x + (length * cos(degrees * PI / 180.0)).toFloat(),
+                center.y + (length * sin(degrees * PI / 180.0)).toFloat()
+            )
+            val hourEnd = hand((h % 12 * 30.0) + m * 0.5 - 90.0, 15f)
+            val minuteEnd = hand(m * 6.0 - 90.0, 23f)
+            drawLine(ClockColors.BigTime, center, hourEnd, strokeWidth = 3.4f, cap = StrokeCap.Round)
+            drawLine(ClockColors.BigTime, center, minuteEnd, strokeWidth = 2.0f, cap = StrokeCap.Round)
+            drawCircle(ClockColors.GoldDeep, radius = 2.8f, center = center)
+        } else {
+            text(shown, 100f, 91f, 34f, ClockColors.BigTime)
+            text(String.format(Locale.ROOT, "%02d", t.second), 100f, 114f, 14f, ClockColors.Seconds)
+        }
     }
     if (hourLabel != null) text(hourLabel, 100f, if (showTime) 131f else 124f, 9f, ClockColors.Muted)
 }
