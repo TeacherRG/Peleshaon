@@ -314,4 +314,7 @@
     <string name="clock_sub_time_note">The secondary dial shows the selected civil or halachic clock time; the full zmanim ring remains on the main dial.</string>
     <string name="clock_hidden">Hidden</string>
     <string name="clock_sub_visible">Show secondary dial</string>
+    <string name="clock_widget_shape_title">Phone widget shape</string>
+    <string name="clock_widget_round">Round</string>
+    <string name="clock_widget_rectangular">Rectangular</string>
 </resources>
