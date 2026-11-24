@@ -1408,8 +1408,21 @@ private fun FaceSettings(context: Context, face: String, title: Int, onChange: (
     var style by remember(face) { mutableStateOf(Prefs.faceStyle(context, face)) }
     var time by remember(face) { mutableStateOf(Prefs.faceTime(context, face)) }
     var visible by remember(face) { mutableStateOf(Prefs.subFaceVisible(context)) }
+    var widgetShape by remember(face) { mutableStateOf(Prefs.widgetFaceShape(context)) }
     Column(verticalArrangement = Arrangement.spacedBy(5.dp)) {
         Text(stringResource(title), color = ClockColors.Ink, fontWeight = FontWeight.SemiBold)
+        if (face == "main") {
+            Text(stringResource(R.string.clock_widget_shape_title), color = ClockColors.Ink2, fontSize = 12.sp)
+            Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                for ((value, label) in listOf("ROUND" to R.string.clock_widget_round, "RECTANGULAR" to R.string.clock_widget_rectangular)) {
+                    FilterChip(selected = widgetShape == value, onClick = {
+                        widgetShape = value
+                        Prefs.setWidgetFaceShape(context, value)
+                        app.mychitas.peleshaon.live.Live.updateAsync(context)
+                    }, label = { Text(stringResource(label), fontSize = 12.sp) }, colors = chipColors())
+                }
+            }
+        }
         if (face == "sub") {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Text(stringResource(R.string.clock_sub_visible), color = ClockColors.Ink2, modifier = Modifier.weight(1f))
