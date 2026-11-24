@@ -1466,6 +1466,45 @@ private fun SettingsSheet(onChange: () -> Unit) {
         }
         Note(stringResource(R.string.theme_note))
         HorizontalDivider(color = ClockColors.Line)
+
+        // Two time systems share one face. The secondary face is always the opposite of the primary.
+        Text(stringResource(R.string.dual_clock_title), fontWeight = FontWeight.Bold, color = ClockColors.Ink)
+        var mainTimeType by remember { mutableStateOf(Prefs.mainTimeType(context)) }
+        var subdialEnabled by remember { mutableStateOf(Prefs.subdialEnabled(context)) }
+        Text(stringResource(R.string.main_time_title), color = ClockColors.Ink2)
+        FlowRow(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+            for ((type, label) in listOf(
+                Prefs.TIME_CIVIL to R.string.civil_time_title,
+                Prefs.TIME_HALACHIC to R.string.halachic_time_title
+            )) {
+                FilterChip(
+                    selected = mainTimeType == type,
+                    onClick = {
+                        mainTimeType = type
+                        Prefs.setMainTimeType(context, type)
+                        app.mychitas.peleshaon.live.Live.updateAsync(context)
+                        onChange()
+                    },
+                    label = { Text(stringResource(label), fontSize = 13.sp) },
+                    colors = chipColors()
+                )
+            }
+        }
+        FilterChip(
+            selected = subdialEnabled,
+            onClick = {
+                subdialEnabled = !subdialEnabled
+                Prefs.setSubdialEnabled(context, subdialEnabled)
+                onChange()
+            },
+            label = { Text(stringResource(R.string.secondary_dial_title), fontSize = 13.sp) },
+            colors = chipColors()
+        )
+        Text(
+            stringResource(if (mainTimeType == Prefs.TIME_CIVIL) R.string.halachic_time_title else R.string.civil_time_title),
+            color = ClockColors.Muted, fontSize = 12.sp
+        )
+        HorizontalDivider(color = ClockColors.Line)
         // There is no valid coordinate context for geographically sensitive settings.
         if (Prefs.chosenCity(context) == null) return@SheetColumn
 
