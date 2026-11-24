@@ -260,4 +260,13 @@ object Prefs {
     fun setSubFaceVisible(context: Context, visible: Boolean) {
         of(context).edit().putBoolean("clock_sub_visible", visible).apply()
     }
+
+    /** Phone home-screen widget shape; the in-app/watch dial remains circular. */
+    fun widgetFaceShape(context: Context): String =
+        of(context).getString("widget_face_shape", "ROUND")?.takeIf { it in setOf("ROUND", "RECTANGULAR") } ?: "ROUND"
+
+    fun setWidgetFaceShape(context: Context, shape: String) {
+        require(shape in setOf("ROUND", "RECTANGULAR"))
+        of(context).edit().putString("widget_face_shape", shape).apply()
+    }
 }
