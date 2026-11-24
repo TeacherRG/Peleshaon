@@ -314,4 +314,5 @@
     <string name="clock_civil">רגיל</string>
     <string name="clock_sub_time_note">הלוח המשני מציג את השעה הרגילה או ההלכתית שנבחרה; מעגל הזמנים המלא נשאר בלוח הראשי.</string>
     <string name="clock_hidden">הסתר</string>
+    <string name="clock_sub_visible">הצג לוח משנה</string>
 </resources>
