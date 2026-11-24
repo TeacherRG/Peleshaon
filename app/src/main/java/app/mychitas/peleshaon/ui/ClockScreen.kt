@@ -310,6 +310,7 @@ fun ClockScreen(
                     hourLabel = hourLabel,
                     timeText = primaryTimeText,
                     analog = mainAnalog,
+                    timeSystemHalachic = mainTimeType == Prefs.TIME_HALACHIC,
                     onPick = { id, fx, fy -> pop = if (id == null || pop?.first == id) null else Triple(id, fx, fy) }
                 )
                 if (subdialEnabled) {
