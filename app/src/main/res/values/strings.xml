@@ -302,4 +302,12 @@
     <string name="cal_misheyakir">Earliest tallit and tefillin (Misheyakir)</string>
     <string name="cal_mincha_ketana">Mincha Ketana</string>
     <string name="cal_biur_chametz">Last time to burn chametz</string>
+    <string name="dual_clock_title">Dual time display</string>
+    <string name="main_time_title">Main dial</string>
+    <string name="civil_time_title">Ordinary time</string>
+    <string name="halachic_time_title">Halachic time</string>
+    <string name="secondary_dial_title">Show secondary dial</string>
+    <string name="face_style_title">Display style</string>
+    <string name="face_digital">Digital</string>
+    <string name="face_analog">Analog</string>
 </resources>
