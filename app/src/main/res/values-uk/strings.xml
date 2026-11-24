@@ -313,4 +313,5 @@
     <string name="clock_time_title">Тип часу</string>
     <string name="clock_halachic">Галахічний</string>
     <string name="clock_civil">Звичайний</string>
+    <string name="clock_hidden">Приховати</string>
 </resources>
