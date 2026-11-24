@@ -287,6 +287,15 @@ fun ClockScreen(
                 if (day.isPolarAnomaly) {
                     Text(stringResource(R.string.polar), color = ClockColors.Ink2, textAlign = TextAlign.Center, modifier = Modifier.align(Alignment.Center).padding(24.dp))
                 }
+                val mainTimeType = remember(version) { Prefs.mainTimeType(context) }
+                val subdialEnabled = remember(version) { Prefs.subdialEnabled(context) }
+                val civilTimeText = cityNow.format(DateTimeFormatter.ofPattern("HH:mm", Locale.ROOT))
+                val halachicTimeText = half?.let {
+                    val elapsed = (it.frac(cityNow).coerceIn(0.0, 0.99999) * 12.0 * 60.0).toInt()
+                    String.format(Locale.ROOT, "%02d:%02d", elapsed / 60, elapsed % 60)
+                } ?: "--:--"
+                val primaryTimeText = if (mainTimeType == Prefs.TIME_HALACHIC) halachicTimeText else civilTimeText
+                val secondaryTimeText = if (mainTimeType == Prefs.TIME_HALACHIC) civilTimeText else halachicTimeText
                 BigFace(
                     now = cityNow,
                     zone = zone,
@@ -297,8 +306,28 @@ fun ClockScreen(
                     tziruf = tziruf,
                     modifier = Modifier.fillMaxSize(),
                     hourLabel = hourLabel,
+                    timeText = primaryTimeText,
                     onPick = { id, fx, fy -> pop = if (id == null || pop?.first == id) null else Triple(id, fx, fy) }
                 )
+                if (subdialEnabled) {
+                    val secondaryIsHalachic = mainTimeType == Prefs.TIME_CIVIL
+                    Surface(
+                        modifier = Modifier.align(Alignment.BottomEnd).padding(end = 14.dp, bottom = 8.dp).size(94.dp),
+                        shape = CircleShape,
+                        color = ClockColors.SheetBg.copy(alpha = 0.96f),
+                        border = BorderStroke(1.5.dp, if (secondaryIsHalachic) ClockColors.Gold else ClockColors.TcheletDeep),
+                        shadowElevation = 5.dp
+                    ) {
+                        Column(horizontalAlignment = Alignment.CenterHorizontally,
+                            verticalArrangement = Arrangement.Center) {
+                            Text(if (secondaryIsHalachic) "✧" else "◷",
+                                color = if (secondaryIsHalachic) ClockColors.GoldDeep else ClockColors.TcheletDeep,
+                                fontSize = 17.sp, fontWeight = FontWeight.Bold)
+                            Text(secondaryTimeText, color = ClockColors.Ink, fontSize = 19.sp,
+                                fontWeight = FontWeight.Bold, maxLines = 1)
+                        }
+                    }
+                }
                 val p = pop
                 val e = p?.let { pp -> events.find { it.id == pp.first } }
                 if (p != null && e != null) {
