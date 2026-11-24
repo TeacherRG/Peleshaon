@@ -304,4 +304,19 @@
     <string name="cal_misheyakir">Мішеякір — таліт і тфілін</string>
     <string name="cal_mincha_ketana">Мінха ктана</string>
     <string name="cal_biur_chametz">Останній час спалення хамецу</string>
+    <string name="clock_faces_title">Два циферблати</string>
+    <string name="clock_main_face">Головний циферблат</string>
+    <string name="clock_sub_face">Субциферблат</string>
+    <string name="clock_style_title">Стиль відображення</string>
+    <string name="clock_digital">Цифровий</string>
+    <string name="clock_analog">Зі стрілками</string>
+    <string name="clock_time_title">Тип часу</string>
+    <string name="clock_halachic">Галахічний</string>
+    <string name="clock_civil">Звичайний</string>
+    <string name="clock_sub_time_note">Малий циферблат показує обраний звичайний або галахічний час; повне коло зманім залишається на головному циферблаті.</string>
+    <string name="clock_hidden">Приховати</string>
+    <string name="clock_sub_visible">Показувати субциферблат</string>
+    <string name="clock_widget_shape_title">Форма віджета телефона</string>
+    <string name="clock_widget_round">Кругла</string>
+    <string name="clock_widget_rectangular">Прямокутна</string>
 </resources>

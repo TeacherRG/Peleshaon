@@ -302,4 +302,19 @@
     <string name="cal_misheyakir">Misheyakir – früheste Zeit für Tallit und Tefillin</string>
     <string name="cal_mincha_ketana">Mincha Ketana</string>
     <string name="cal_biur_chametz">Letzte Zeit zum Verbrennen von Chametz</string>
+    <string name="clock_faces_title">Zwei Zifferblätter</string>
+    <string name="clock_main_face">Hauptzifferblatt</string>
+    <string name="clock_sub_face">Nebenzifferblatt</string>
+    <string name="clock_style_title">Anzeigestil</string>
+    <string name="clock_digital">Digital</string>
+    <string name="clock_analog">Mit Zeigern</string>
+    <string name="clock_time_title">Zeitart</string>
+    <string name="clock_halachic">Halachisch</string>
+    <string name="clock_civil">Bürgerlich</string>
+    <string name="clock_sub_time_note">Das Nebenzifferblatt zeigt die gewählte bürgerliche oder halachische Uhrzeit; der vollständige Zmanim-Ring bleibt auf dem Hauptzifferblatt.</string>
+    <string name="clock_hidden">Ausblenden</string>
+    <string name="clock_sub_visible">Nebenzifferblatt anzeigen</string>
+    <string name="clock_widget_shape_title">Form des Telefon-Widgets</string>
+    <string name="clock_widget_round">Rund</string>
+    <string name="clock_widget_rectangular">Rechteckig</string>
 </resources>

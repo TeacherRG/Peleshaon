@@ -211,7 +211,8 @@ object Live {
 
     /** No city: no stale geographical ring; TextClock follows the device zone. */
     private fun ordinaryFaceViews(context: Context, light: Boolean, widgetId: Int): RemoteViews {
-        val v = RemoteViews(context.packageName, R.layout.widget_face)
+        val rectangular = Prefs.widgetFaceShape(context) == "RECTANGULAR"
+        val v = RemoteViews(context.packageName, if (rectangular) R.layout.widget_face_rect else R.layout.widget_face)
         v.setImageViewBitmap(R.id.w_face,
             android.graphics.Bitmap.createBitmap(2, 2, android.graphics.Bitmap.Config.ARGB_8888))
         v.setInt(R.id.w_date, "setBackgroundResource",
@@ -221,7 +222,7 @@ object Live {
         v.setString(R.id.w_time, "setTimeZone", java.time.ZoneId.systemDefault().id)
         v.setTextViewText(R.id.w_date, context.getString(R.string.city_choose))
         v.setOnClickPendingIntent(R.id.w_root, openApp(context))
-        fitFace(context, v, widgetId)
+        fitFace(context, v, widgetId, rectangular)
         return v
     }
 
@@ -254,31 +255,40 @@ object Live {
      * плашка с датой сразу под ним (Android 12+), цифры времени — по размеру круга,
      * чтобы не налезали на деления.
      */
-    private fun fitFace(context: Context, v: RemoteViews, widgetId: Int) {
+    private fun fitFace(context: Context, v: RemoteViews, widgetId: Int, rectangular: Boolean = false) {
         val opts = AppWidgetManager.getInstance(context).getAppWidgetOptions(widgetId)
         val w = opts.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_WIDTH, 0)
         val h = opts.getInt(AppWidgetManager.OPTION_APPWIDGET_MAX_HEIGHT, 0)
         if (w <= 0 || h <= 0) return
         val font = context.resources.configuration.fontScale
-        val pill = 15f * font * 1.2f + 8f + 2f   // компактная дата: текст, отступы и зазор
-        val side = minOf(w - 16f, h - 16f - pill).coerceAtLeast(96f)
-        val time = (side * 0.2f).coerceIn(22f, 44f)
+        val pill = 15f * font * 1.2f + 8f + 2f
+        val boxWidth = (w - 16f).coerceAtLeast(120f)
+        val boxHeight = (h - 16f - pill).coerceAtLeast(96f)
+        val side = minOf(boxWidth, boxHeight).coerceAtLeast(96f)
+        val time = if (rectangular) minOf(boxHeight * 0.34f, boxWidth * 0.16f).coerceIn(22f, 44f)
+            else (side * 0.2f).coerceIn(22f, 44f)
         v.setTextViewTextSize(R.id.w_time, TypedValue.COMPLEX_UNIT_DIP, time)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-            v.setViewLayoutWidth(R.id.w_face_box, side, TypedValue.COMPLEX_UNIT_DIP)
-            v.setViewLayoutHeight(R.id.w_face_box, side, TypedValue.COMPLEX_UNIT_DIP)
+            v.setViewLayoutWidth(R.id.w_face_box, if (rectangular) boxWidth else side, TypedValue.COMPLEX_UNIT_DIP)
+            v.setViewLayoutHeight(R.id.w_face_box, if (rectangular) boxHeight else side, TypedValue.COMPLEX_UNIT_DIP)
             v.setViewLayoutMargin(R.id.w_tziruf, RemoteViews.MARGIN_TOP, (time * 0.3f + 5f).coerceAtLeast(10f), TypedValue.COMPLEX_UNIT_DIP)
         }
     }
 
     /** Большой виджет: циферблат дня со скримом, время города и дата в плашке. */
     private fun faceViews(context: Context, s: LiveState, widgetId: Int, light: Boolean): RemoteViews {
-        val v = RemoteViews(context.packageName, R.layout.widget_face)
-        // размер картинки — по виджету, не меньше 360 и не больше 720 пикселей
+        val rectangular = Prefs.widgetFaceShape(context) == "RECTANGULAR"
+        val v = RemoteViews(context.packageName, if (rectangular) R.layout.widget_face_rect else R.layout.widget_face)
+        // Bitmap follows the actual widget proportions so a rectangular face stays crisp.
         val opts = AppWidgetManager.getInstance(context).getAppWidgetOptions(widgetId)
-        val dp = maxOf(opts.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_WIDTH, 200), opts.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_HEIGHT, 200))
-        val px = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, dp.toFloat(), context.resources.displayMetrics).toInt().coerceIn(360, 720)
-        v.setImageViewBitmap(R.id.w_face, renderFace(px, s.now, s.city.zone(), s.half, s.ring, s.events, Prefs.tziruf(context), light = light))
+        val widthDp = opts.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_WIDTH, 200).coerceAtLeast(120)
+        val heightDp = opts.getInt(AppWidgetManager.OPTION_APPWIDGET_MAX_HEIGHT, 200).coerceAtLeast(120)
+        val widthPx = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, widthDp.toFloat(), context.resources.displayMetrics).toInt().coerceIn(360, 900)
+        val heightPx = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, heightDp.toFloat(), context.resources.displayMetrics).toInt().coerceIn(240, 900)
+        v.setImageViewBitmap(R.id.w_face, renderFace(
+            widthPx, s.now, s.city.zone(), s.half, s.ring, s.events, Prefs.tziruf(context),
+            light = light, rectangular = rectangular, heightPx = heightPx
+        ))
         v.setInt(
             R.id.w_date,
             "setBackgroundResource",
@@ -302,7 +312,7 @@ object Live {
             PendingIntent.getBroadcast(context, 6000 + widgetId, tapIntent,
                 PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
         )
-        fitFace(context, v, widgetId)
+        fitFace(context, v, widgetId, rectangular)
         return v
     }
 

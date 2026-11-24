@@ -140,7 +140,8 @@ fun BigFace(
     modifier: Modifier = Modifier,
     /** «4-й час дня» — под временем */
     hourLabel: String? = null,
-    onPick: ((String?, Float, Float) -> Unit)? = null
+    onPick: ((String?, Float, Float) -> Unit)? = null,
+    analogStyle: Boolean = true
 ) {
     val dots = remember(events, half) { place(events, half) }
 
@@ -165,7 +166,7 @@ fun BigFace(
         translate((size.width - side) / 2f, (size.height - side) / 2f) {
             scale(k, k, pivot = Offset.Zero) {
                 translate(-BOX_MIN, -BOX_MIN) {
-                    drawFace(now, zone, ring, dots, labelsOf(dots, now), active, tziruf, k, hourLabel = hourLabel)
+                    drawFace(now, zone, ring, dots, labelsOf(dots, now), active, tziruf, k, hourLabel = hourLabel, analogStyle = analogStyle)
                 }
             }
         }
@@ -189,7 +190,8 @@ private fun DrawScope.drawFace(
     k: Float,
     showTime: Boolean = true,
     hourLabel: String? = null,
-    widgetStyle: Boolean = false
+    widgetStyle: Boolean = false,
+    analogStyle: Boolean = true
 ) {
     val c = Offset(100f, 100f)
     val rimFill = if (widgetStyle) ClockColors.WidgetFace else ClockColors.RimFill
@@ -288,8 +290,18 @@ private fun DrawScope.drawFace(
     }
     if (showTime) {
         val t = now.withZoneSameInstant(zone)
-        text(String.format(Locale.ROOT, "%02d:%02d", t.hour, t.minute), 100f, 91f, 34f, ClockColors.BigTime)
-        text(String.format(Locale.ROOT, "%02d", t.second), 100f, 114f, 14f, ClockColors.Seconds)
+        if (analogStyle) {
+            val hourAngle = ((t.hour % 12) + t.minute / 60.0) * 30.0
+            val minuteAngle = (t.minute + t.second / 60.0) * 6.0
+            val secondAngle = t.second * 6.0
+            drawLine(ClockColors.BigTime, c, polar(hourAngle / 360.0, 25.0), strokeWidth = 3.6f, cap = StrokeCap.Round)
+            drawLine(ClockColors.BigTime, c, polar(minuteAngle / 360.0, 39.0), strokeWidth = 2.2f, cap = StrokeCap.Round)
+            drawLine(ClockColors.Hand, c, polar(secondAngle / 360.0, 47.0), strokeWidth = 1.1f, cap = StrokeCap.Round)
+            drawCircle(ClockColors.Gold, radius = 3.2f, center = c)
+        } else {
+            text(String.format(Locale.ROOT, "%02d:%02d", t.hour, t.minute), 100f, 91f, 34f, ClockColors.BigTime)
+            text(String.format(Locale.ROOT, "%02d", t.second), 100f, 114f, 14f, ClockColors.Seconds)
+        }
     }
     if (hourLabel != null) text(hourLabel, 100f, if (showTime) 131f else 124f, 9f, ClockColors.Muted)
 }
@@ -319,14 +331,36 @@ fun renderFace(
     events: List<FaceEvent>,
     tziruf: Boolean,
     hourLabel: String? = null,
-    light: Boolean = false
+    light: Boolean = false,
+    rectangular: Boolean = false,
+    heightPx: Int = sizePx
 ): android.graphics.Bitmap = ClockTheme.render(light) {
-    val bmp = ImageBitmap(sizePx, sizePx)
-    val insetPx = 34f
-    val k = (sizePx - 2f * insetPx) / BOX
+    val bitmapHeight = if (rectangular) heightPx.coerceAtLeast(120) else sizePx
+    val bmp = ImageBitmap(sizePx, bitmapHeight)
+    val dialSide = if (rectangular) {
+        minOf(bitmapHeight - 24f, (sizePx - 24f) * 0.52f).coerceAtLeast(96f)
+    } else sizePx - 68f
+    val k = dialSide / BOX
+    val left = if (rectangular) 12f else (sizePx - dialSide) / 2f
+    val top = (bitmapHeight - dialSide) / 2f
     val dots = place(events, half)
-    CanvasDrawScope().draw(Density(1f), LayoutDirection.Ltr, androidx.compose.ui.graphics.Canvas(bmp), Size(sizePx.toFloat(), sizePx.toFloat())) {
-        translate(insetPx, insetPx) {
+    CanvasDrawScope().draw(Density(1f), LayoutDirection.Ltr, androidx.compose.ui.graphics.Canvas(bmp), Size(sizePx.toFloat(), bitmapHeight.toFloat())) {
+        if (rectangular) {
+            drawRoundRect(
+                color = ClockColors.WidgetFace,
+                topLeft = Offset(1f, 1f),
+                size = Size(size.width - 2f, size.height - 2f),
+                cornerRadius = androidx.compose.ui.geometry.CornerRadius(22f, 22f)
+            )
+            drawRoundRect(
+                color = ClockColors.Gold.copy(alpha = 0.72f),
+                topLeft = Offset(1f, 1f),
+                size = Size(size.width - 2f, size.height - 2f),
+                cornerRadius = androidx.compose.ui.geometry.CornerRadius(22f, 22f),
+                style = Stroke(width = 2f)
+            )
+        }
+        translate(left, top) {
             scale(k, k, pivot = Offset.Zero) {
                 translate(-BOX_MIN, -BOX_MIN) {
                     drawFace(

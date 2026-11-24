@@ -235,4 +235,38 @@ object Prefs {
 
     fun setMinhag(context: Context, m: app.mychitas.peleshaon.domain.Minhag) =
         of(context).edit().putString("minhag", m.name).apply()
+
+    // ---- independent display settings for the two clock faces
+    fun faceStyle(context: Context, face: String): String =
+        of(context).getString("clock_${face}_style", "ANALOG")?.takeIf { it in setOf("ANALOG", "DIGITAL") } ?: "ANALOG"
+
+    fun setFaceStyle(context: Context, face: String, style: String) {
+        require(face in setOf("main", "sub") && style in setOf("ANALOG", "DIGITAL"))
+        of(context).edit().putString("clock_${face}_style", style).apply()
+    }
+
+    fun faceTime(context: Context, face: String): String =
+        of(context).getString("clock_${face}_time", "HALACHIC")?.takeIf { it in setOf("HALACHIC", "CIVIL") } ?: "HALACHIC"
+
+    fun setFaceTime(context: Context, face: String, time: String) {
+        require(face in setOf("main", "sub") && time in setOf("HALACHIC", "CIVIL"))
+        of(context).edit().putString("clock_${face}_time", time).apply()
+    }
+
+    /** The secondary dial is visible by default; the user's choice stays on this device. */
+    fun subFaceVisible(context: Context): Boolean =
+        of(context).getBoolean("clock_sub_visible", true)
+
+    fun setSubFaceVisible(context: Context, visible: Boolean) {
+        of(context).edit().putBoolean("clock_sub_visible", visible).apply()
+    }
+
+    /** Phone home-screen widget shape; the in-app/watch dial remains circular. */
+    fun widgetFaceShape(context: Context): String =
+        of(context).getString("widget_face_shape", "ROUND")?.takeIf { it in setOf("ROUND", "RECTANGULAR") } ?: "ROUND"
+
+    fun setWidgetFaceShape(context: Context, shape: String) {
+        require(shape in setOf("ROUND", "RECTANGULAR"))
+        of(context).edit().putString("widget_face_shape", shape).apply()
+    }
 }

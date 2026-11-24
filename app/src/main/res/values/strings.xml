@@ -302,4 +302,19 @@
     <string name="cal_misheyakir">Earliest tallit and tefillin (Misheyakir)</string>
     <string name="cal_mincha_ketana">Mincha Ketana</string>
     <string name="cal_biur_chametz">Last time to burn chametz</string>
+    <string name="clock_faces_title">Two clock faces</string>
+    <string name="clock_main_face">Main dial</string>
+    <string name="clock_sub_face">Subdial</string>
+    <string name="clock_style_title">Display style</string>
+    <string name="clock_digital">Digital</string>
+    <string name="clock_analog">Analog hands</string>
+    <string name="clock_time_title">Time system</string>
+    <string name="clock_halachic">Halachic</string>
+    <string name="clock_civil">Civil</string>
+    <string name="clock_sub_time_note">The secondary dial shows the selected civil or halachic clock time; the full zmanim ring remains on the main dial.</string>
+    <string name="clock_hidden">Hidden</string>
+    <string name="clock_sub_visible">Show secondary dial</string>
+    <string name="clock_widget_shape_title">Phone widget shape</string>
+    <string name="clock_widget_round">Round</string>
+    <string name="clock_widget_rectangular">Rectangular</string>
 </resources>

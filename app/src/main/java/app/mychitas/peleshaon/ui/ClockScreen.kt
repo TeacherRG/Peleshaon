@@ -5,6 +5,7 @@ import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -65,6 +66,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.graphics.drawscope.rotate
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
@@ -194,6 +197,11 @@ fun ClockScreen(
     val half = remember(city, minute, version) { ZmanimEngine.halfOf(cityNow, city) }
     val halfItems = remember(half, city, version) { half?.let { ZmanimEngine.halfItems(it, city) } ?: emptyList() }
     val ring = Dial.ring(cityNow, half)
+    val mainStyle = Prefs.faceStyle(context, "main")
+    val mainTime = Prefs.faceTime(context, "main")
+    val subVisible = Prefs.subFaceVisible(context)
+    val subStyle = Prefs.faceStyle(context, "sub")
+    val subTime = Prefs.faceTime(context, "sub")
     val hourLabel = half?.let { stringResource(if (it.day) R.string.hour_day else R.string.hour_night, it.hour(cityNow)) }
     // еврейская дата — день обычным числом, крупно
     val jd = remember(day.date, city) { ZmanimEngine.jewishDay(day.date, city.isIsrael) }
@@ -287,18 +295,33 @@ fun ClockScreen(
                 if (day.isPolarAnomaly) {
                     Text(stringResource(R.string.polar), color = ClockColors.Ink2, textAlign = TextAlign.Center, modifier = Modifier.align(Alignment.Center).padding(24.dp))
                 }
-                BigFace(
-                    now = cityNow,
-                    zone = zone,
-                    half = half,
-                    ring = ring,
-                    events = events,
-                    active = pop?.first,
-                    tziruf = tziruf,
-                    modifier = Modifier.fillMaxSize(),
-                    hourLabel = hourLabel,
-                    onPick = { id, fx, fy -> pop = if (id == null || pop?.first == id) null else Triple(id, fx, fy) }
-                )
+                if (mainStyle == "DIGITAL") {
+                    DigitalFaceTime(now = cityNow, halachic = mainTime == "HALACHIC", hourLabel = hourLabel, modifier = Modifier.fillMaxSize().padding(bottom = if (subVisible) 42.dp else 0.dp))
+                } else {
+                    BigFace(
+                        now = cityNow,
+                        zone = zone,
+                        half = if (mainTime == "HALACHIC") half else null,
+                        ring = if (mainTime == "HALACHIC") ring else null,
+                        events = if (mainTime == "HALACHIC") events else emptyList(),
+                        active = if (mainTime == "HALACHIC") pop?.first else null,
+                        tziruf = tziruf && mainTime == "HALACHIC",
+                        modifier = Modifier.fillMaxSize(),
+                        hourLabel = if (mainTime == "HALACHIC") hourLabel else null,
+                        analogStyle = true,
+                        onPick = if (mainTime == "HALACHIC") ({ id, fx, fy -> pop = if (id == null || pop?.first == id) null else Triple(id, fx, fy) }) else null
+                    )
+                }
+                if (subVisible && (subTime == "CIVIL" || half != null)) {
+                    SubFaceDial(
+                        now = cityNow,
+                        half = half,
+                        halachic = subTime == "HALACHIC",
+                        digital = subStyle == "DIGITAL",
+                        hourLabel = hourLabel,
+                        modifier = Modifier.align(Alignment.BottomCenter).padding(bottom = 3.dp).size(104.dp)
+                    )
+                }
                 val p = pop
                 val e = p?.let { pp -> events.find { it.id == pp.first } }
                 if (p != null && e != null) {
@@ -1379,6 +1402,187 @@ private fun minhagNote(): String = when (ZmanimEngine.minhag) {
  * времена дня, исход Шабата, Кидуш Левана и даты календаря.
  */
 @OptIn(androidx.compose.foundation.layout.ExperimentalLayoutApi::class)
+
+@Composable
+private fun FaceSettings(context: Context, face: String, title: Int, onChange: () -> Unit) {
+    var style by remember(face) { mutableStateOf(Prefs.faceStyle(context, face)) }
+    var time by remember(face) { mutableStateOf(Prefs.faceTime(context, face)) }
+    var visible by remember(face) { mutableStateOf(Prefs.subFaceVisible(context)) }
+    var widgetShape by remember(face) { mutableStateOf(Prefs.widgetFaceShape(context)) }
+    Column(verticalArrangement = Arrangement.spacedBy(5.dp)) {
+        Text(stringResource(title), color = ClockColors.Ink, fontWeight = FontWeight.SemiBold)
+        if (face == "main") {
+            Text(stringResource(R.string.clock_widget_shape_title), color = ClockColors.Ink2, fontSize = 12.sp)
+            Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                for ((value, label) in listOf("ROUND" to R.string.clock_widget_round, "RECTANGULAR" to R.string.clock_widget_rectangular)) {
+                    FilterChip(selected = widgetShape == value, onClick = {
+                        widgetShape = value
+                        Prefs.setWidgetFaceShape(context, value)
+                        app.mychitas.peleshaon.live.Live.updateAsync(context)
+                    }, label = { Text(stringResource(label), fontSize = 12.sp) }, colors = chipColors())
+                }
+            }
+        }
+        if (face == "sub") {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Text(stringResource(R.string.clock_sub_visible), color = ClockColors.Ink2, modifier = Modifier.weight(1f))
+                Switch(checked = visible, onCheckedChange = {
+                    visible = it
+                    Prefs.setSubFaceVisible(context, it)
+                    onChange()
+                }, colors = SwitchDefaults.colors(checkedTrackColor = ClockColors.Gold, checkedThumbColor = ClockColors.SheetBg))
+            }
+        }
+        Text(stringResource(R.string.clock_style_title), color = ClockColors.Ink2, fontSize = 12.sp)
+        Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+            for ((value, label) in listOf("DIGITAL" to R.string.clock_digital, "ANALOG" to R.string.clock_analog)) {
+                FilterChip(selected = style == value, onClick = {
+                    style = value
+                    Prefs.setFaceStyle(context, face, value)
+                }, label = { Text(stringResource(label), fontSize = 12.sp) }, colors = chipColors())
+            }
+        }
+        Text(stringResource(R.string.clock_time_title), color = ClockColors.Ink2, fontSize = 12.sp)
+        Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+            for ((value, label) in listOf("HALACHIC" to R.string.clock_halachic, "CIVIL" to R.string.clock_civil)) {
+                FilterChip(selected = time == value, onClick = {
+                    time = value
+                    Prefs.setFaceTime(context, face, value)
+                    app.mychitas.peleshaon.live.Live.updateAsync(context)
+                }, label = { Text(stringResource(label), fontSize = 12.sp) }, colors = chipColors())
+            }
+        }
+    }
+}
+
+@Composable
+private fun SubFaceDial(
+    now: ZonedDateTime,
+    half: app.mychitas.peleshaon.domain.Half?,
+    halachic: Boolean,
+    digital: Boolean,
+    hourLabel: String?,
+    modifier: Modifier = Modifier
+) {
+    val elapsedSeconds = if (halachic) {
+        ((half?.frac(now) ?: 0.0).coerceIn(0.0, 0.999999) * 43_200.0).toInt()
+    } else 0
+    val hour = if (halachic) (elapsedSeconds / 3600) % 12 + 1 else now.hour
+    val minute = if (halachic) (elapsedSeconds / 60) % 60 else now.minute
+    val second = if (halachic) elapsedSeconds % 60 else now.second
+    val timeText = String.format(Locale.ROOT, "%02d:%02d", hour, minute)
+    val label = if (halachic) hourLabel ?: stringResource(R.string.clock_halachic)
+        else stringResource(R.string.clock_civil)
+
+    Surface(
+        modifier = modifier,
+        shape = CircleShape,
+        color = ClockColors.RimFill,
+        border = BorderStroke(1.5.dp, ClockColors.Gold.copy(alpha = 0.9f))
+    ) {
+        Box(contentAlignment = Alignment.Center) {
+            if (digital) {
+                Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center) {
+                    Text(timeText, color = ClockColors.BigTime, fontSize = 21.sp, fontWeight = FontWeight.Bold)
+                    Text(label, color = ClockColors.Muted, fontSize = 8.sp, maxLines = 1)
+                    Text("•", color = ClockColors.Gold.copy(alpha = 0.7f), fontSize = 8.sp)
+                }
+            } else {
+                Canvas(Modifier.fillMaxSize().padding(13.dp)) {
+                    val c = androidx.compose.ui.geometry.Offset(size.width / 2f, size.height / 2f)
+                    val hourAngle = ((hour % 12) + minute / 60.0) * 30.0
+                    val minuteAngle = (minute + second / 60.0) * 6.0
+                    rotate(hourAngle.toFloat(), pivot = c) {
+                        drawLine(ClockColors.BigTime, c, androidx.compose.ui.geometry.Offset(c.x, c.y - size.minDimension * 0.23f),
+                            strokeWidth = 3.dp.toPx(), cap = StrokeCap.Round)
+                    }
+                    rotate(minuteAngle.toFloat(), pivot = c) {
+                        drawLine(ClockColors.BigTime, c, androidx.compose.ui.geometry.Offset(c.x, c.y - size.minDimension * 0.34f),
+                            strokeWidth = 2.dp.toPx(), cap = StrokeCap.Round)
+                    }
+                    rotate((second * 6).toFloat(), pivot = c) {
+                        drawLine(ClockColors.Hand, c, androidx.compose.ui.geometry.Offset(c.x, c.y - size.minDimension * 0.38f),
+                            strokeWidth = 1.dp.toPx(), cap = StrokeCap.Round)
+                    }
+                    drawCircle(ClockColors.Gold, radius = 3.dp.toPx(), center = c)
+                }
+                Text(label, color = ClockColors.Muted, fontSize = 7.sp, maxLines = 1,
+                    modifier = Modifier.align(Alignment.BottomCenter).padding(bottom = 7.dp))
+            }
+        }
+    }
+}
+
+@Composable
+private fun DigitalFaceTime(
+    now: ZonedDateTime,
+    halachic: Boolean,
+    hourLabel: String?,
+    modifier: Modifier = Modifier
+) {
+    val timeLabel = if (halachic) (hourLabel ?: stringResource(R.string.clock_halachic))
+        else stringResource(R.string.clock_civil)
+    Box(modifier = modifier, contentAlignment = Alignment.Center) {
+        Surface(
+            shape = CircleShape,
+            color = ClockColors.RimFill,
+            border = BorderStroke(1.5.dp, ClockColors.Gold.copy(alpha = 0.72f))
+        ) {
+            Box(contentAlignment = Alignment.Center) {
+                Canvas(Modifier.matchParentSize().padding(8.dp)) {
+                    val inset = 1.5.dp.toPx()
+                    val diameter = size.minDimension - inset * 2
+                    val arcSize = androidx.compose.ui.geometry.Size(diameter, diameter)
+                    val topLeft = androidx.compose.ui.geometry.Offset(
+                        (size.width - diameter) / 2f,
+                        (size.height - diameter) / 2f
+                    )
+                    drawCircle(
+                        color = ClockColors.RimStroke.copy(alpha = 0.42f),
+                        radius = diameter / 2f,
+                        center = androidx.compose.ui.geometry.Offset(size.width / 2f, size.height / 2f),
+                        style = androidx.compose.ui.graphics.drawscope.Stroke(width = 0.8.dp.toPx())
+                    )
+                    drawArc(
+                        color = ClockColors.Gold.copy(alpha = 0.78f),
+                        startAngle = -90f,
+                        sweepAngle = (now.second / 60f) * 360f,
+                        useCenter = false,
+                        topLeft = topLeft,
+                        size = arcSize,
+                        style = androidx.compose.ui.graphics.drawscope.Stroke(
+                            width = 2.dp.toPx(),
+                            cap = StrokeCap.Round
+                        )
+                    )
+                }
+                Column(
+                    modifier = Modifier.padding(horizontal = 28.dp, vertical = 22.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.Center) {
+                        Text(now.format(DateTimeFormatter.ofPattern("HH")), color = ClockColors.BigTime,
+                            fontSize = 42.sp, fontWeight = FontWeight.Bold)
+                        Text(":", color = ClockColors.Gold.copy(alpha = if (now.second % 2 == 0) 0.9f else 0.42f),
+                            fontSize = 40.sp, fontWeight = FontWeight.Light)
+                        Text(now.format(DateTimeFormatter.ofPattern("mm")), color = ClockColors.BigTime,
+                            fontSize = 42.sp, fontWeight = FontWeight.Bold)
+                    }
+                    Spacer(Modifier.height(3.dp))
+                    Text(timeLabel, color = ClockColors.Muted, fontSize = 12.sp,
+                        fontWeight = FontWeight.Medium, textAlign = TextAlign.Center, maxLines = 1)
+                    Spacer(Modifier.height(4.dp))
+                    Box(
+                        Modifier.size(4.dp)
+                            .background(ClockColors.Gold.copy(alpha = 0.72f), CircleShape)
+                    )
+                }
+            }
+        }
+    }
+}
+
+@OptIn(androidx.compose.foundation.layout.ExperimentalLayoutApi::class)
 @Composable
 private fun SettingsSheet(onChange: () -> Unit) {
     val context = LocalContext.current
@@ -1436,6 +1640,11 @@ private fun SettingsSheet(onChange: () -> Unit) {
             }
         }
         Note(stringResource(R.string.theme_note))
+        HorizontalDivider(color = ClockColors.Line)
+        Text(stringResource(R.string.clock_faces_title), fontWeight = FontWeight.Bold, color = ClockColors.Ink)
+        FaceSettings(context, "main", R.string.clock_main_face, onChange)
+        FaceSettings(context, "sub", R.string.clock_sub_face, onChange)
+        HorizontalDivider(color = ClockColors.Line)
         HorizontalDivider(color = ClockColors.Line)
         // There is no valid coordinate context for geographically sensitive settings.
         if (Prefs.chosenCity(context) == null) return@SheetColumn
