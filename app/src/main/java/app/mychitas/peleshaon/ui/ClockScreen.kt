@@ -1422,17 +1422,24 @@ private fun DigitalFaceTime(
     hourLabel: String?,
     modifier: Modifier = Modifier
 ) {
-    val value = if (halachic && hourLabel != null) hourLabel else now.format(DateTimeFormatter.ofPattern("HH:mm:ss"))
+    val blinkColor = if (now.second % 2 == 0) ClockColors.BigTime else ClockColors.BigTime.copy(alpha = 0.12f)
     Box(modifier = modifier, contentAlignment = Alignment.Center) {
         Surface(shape = CircleShape, color = ClockColors.RimFill, border = BorderStroke(1.dp, ClockColors.RimStroke)) {
             Column(Modifier.padding(horizontal = 28.dp, vertical = 22.dp), horizontalAlignment = Alignment.CenterHorizontally) {
-                Text(value, color = ClockColors.BigTime, fontSize = 34.sp, fontWeight = FontWeight.Bold, textAlign = TextAlign.Center)
-                Text(if (halachic) stringResource(R.string.clock_halachic) else stringResource(R.string.clock_civil), color = ClockColors.Muted, fontSize = 13.sp)
+                Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.Center) {
+                    Text(now.format(DateTimeFormatter.ofPattern("HH")), color = ClockColors.BigTime, fontSize = 42.sp, fontWeight = FontWeight.Bold)
+                    Text(":", color = blinkColor, fontSize = 42.sp, fontWeight = FontWeight.Bold)
+                    Text(now.format(DateTimeFormatter.ofPattern("mm")), color = ClockColors.BigTime, fontSize = 42.sp, fontWeight = FontWeight.Bold)
+                }
+                Text(if (halachic) (hourLabel ?: stringResource(R.string.clock_halachic)) else stringResource(R.string.clock_civil),
+                    color = ClockColors.Muted, fontSize = 13.sp, textAlign = TextAlign.Center)
+                Text("●", color = ClockColors.Seconds.copy(alpha = 0.35f + (now.second % 2) * 0.25f), fontSize = 7.sp)
             }
         }
     }
 }
 
+@OptIn(androidx.compose.foundation.layout.ExperimentalLayoutApi::class)
 @Composable
 private fun SettingsSheet(onChange: () -> Unit) {
     val context = LocalContext.current
