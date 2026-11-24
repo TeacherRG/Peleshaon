@@ -329,4 +329,6 @@
     <string name="widget_card_name">Пеле Шаон — прямокутний годинник</string>
     <string name="widget_card_desc">Час, дата і єврейська дата, схід, захід і галахічна година</string>
     <string name="skin_adaptive">Адаптивна (день / ніч)</string>
+    <string name="skin_jerusalem">Єрусалим</string>
+    <string name="skin_nature">Природна</string>
 </resources>

@@ -155,6 +155,12 @@ enum class FaceSkin(
 ) {
     CLASSIC("classic", R.string.skin_classic, 0xFF1D2C4F, 0xFF0A1226, 0xFFD9B66A, 0xFFEFE6CF, 0xFFC9BF9F, 0xFFE8C46F,
         0xFFFFF1C4, 0xFFE2B85A, 0xFF0D1730, true),
+    /** светлое небо над стенами Старого города — текст тёмный */
+    JERUSALEM("jerusalem", R.string.skin_jerusalem, 0xFFDCE7F5, 0xFFF3E2C2, 0xFF8A6420, 0xFF1C2333, 0xFF3C465C, 0xFF8E6216,
+        0xFF1C2333, 0xFF2A3550, 0xFFF8F2E4, false, image = R.drawable.clock_skin_jerusalem),
+    /** листья маслины, смоковницы и лозы — тёмно-зелёный, текст светлый */
+    NATURE("nature", R.string.skin_nature, 0xFF1C3A22, 0xFF0B1A0E, 0xFFE2C07D, 0xFFF4F0E2, 0xFFD3DCC8, 0xFFE8C46F,
+        0xFFFFF6DC, 0xFFF0CF86, 0xFF0E2414, true, image = R.drawable.clock_skin_nature),
     SUNSET("sunset", R.string.skin_sunset, 0xFF0B1532, 0xFF050B1E, 0xFFE2C07D, 0xFFF4EFE2, 0xFFCFD5E8, 0xFFE8C46F,
         0xFFFFF6DC, 0xFFF0CF86, 0xFF0B1532, true, image = R.drawable.clock_halachic_face),
     MINIMAL("minimal", R.string.skin_minimal, 0xFF132245, 0xFF132245, 0xFFC9A85C, 0xFFE9ECF5, 0xFFA8B1CC, 0xFFD9B66A,
@@ -394,7 +400,8 @@ private fun DrawScope.drawFace(
     drawCircle(Brush.radialGradient(listOf(Color(skin.bg0), Color(skin.bg1)), center = Offset(100f, 84f), radius = 112f), radius = rimIn, center = c)
     if (artwork != null) {
         clipPath(Path().apply { addOval(Rect(c.x - rimIn, c.y - rimIn, c.x + rimIn, c.y + rimIn)) }) {
-            val d = rimIn.toInt()
+            // картинка чуть больше круга: её мягкий край прячется под ободом
+            val d = rimIn.toInt() + 3
             drawImage(artwork, dstOffset = IntOffset(100 - d, 100 - d), dstSize = IntSize(2 * d, 2 * d))
         }
     }
@@ -535,9 +542,10 @@ fun renderCard(context: android.content.Context, w: Int, h: Int, skin: FaceSkin,
             drawPath(innerPath, Brush.radialGradient(listOf(Color(skin.bg0), Color(skin.bg1)), center = Offset(W / 2, 40f), radius = W * 0.7f))
             if (artwork != null) clipPath(innerPath) {
                 // картинка — по ширине, горизонт — ниже середины
+                // картинка — по ширине, низ (город, листья) — внизу карточки
                 val side = W.toInt()
-                drawImage(artwork, dstOffset = IntOffset(0, (50 - side * 0.55f).toInt()), dstSize = IntSize(side, side))
-                drawRect(Color(0x590B1532), size = Size(W, 100f))
+                drawImage(artwork, dstOffset = IntOffset(0, (100 - side * 0.83f).toInt()), dstSize = IntSize(side, side))
+                if (skin.dark) drawRect(Color(0x400B1532), size = Size(W, 100f))
             }
             val tx = Texts(drawContext.canvas.nativeCanvas, k, skin.dark)
             val text = Color(skin.text); val text2 = Color(skin.text2); val accent = Color(skin.accent)

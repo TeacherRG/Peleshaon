@@ -328,4 +328,6 @@
     <string name="widget_card_name">פלא שעון — שעון מלבני</string>
     <string name="widget_card_desc">השעה, התאריך והתאריך העברי, זריחה, שקיעה והשעה ההלכתית</string>
     <string name="skin_adaptive">מתאים (יום / לילה)</string>
+    <string name="skin_jerusalem">ירושלים</string>
+    <string name="skin_nature">טבע</string>
 </resources>

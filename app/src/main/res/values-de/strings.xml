@@ -327,4 +327,6 @@
     <string name="widget_card_name">Pele Shaon — rechteckige Uhr</string>
     <string name="widget_card_desc">Uhrzeit, Datum und jüdisches Datum, Sonnenaufgang, Sonnenuntergang und halachische Stunde</string>
     <string name="skin_adaptive">Automatisch (Tag / Nacht)</string>
+    <string name="skin_jerusalem">Jerusalem</string>
+    <string name="skin_nature">Natur</string>
 </resources>

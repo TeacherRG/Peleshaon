@@ -327,4 +327,6 @@
     <string name="widget_card_name">Pele Shaon — rectangular clock</string>
     <string name="widget_card_desc">Time, the date and the Jewish date, sunrise, sunset and the halachic hour</string>
     <string name="skin_adaptive">Adaptive (day / night)</string>
+    <string name="skin_jerusalem">Jerusalem</string>
+    <string name="skin_nature">Nature</string>
 </resources>
