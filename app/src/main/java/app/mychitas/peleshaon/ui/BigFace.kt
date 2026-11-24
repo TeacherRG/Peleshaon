@@ -164,7 +164,13 @@ enum class FaceSkin(
     LIGHT("light", R.string.skin_light, 0xFFFFFFFF, 0xFFEFE8D8, 0xFFB8913F, 0xFF1C2333, 0xFF4A5266, 0xFFA87A26,
         0xFF1C2333, 0xFF1C2333, 0xFFF8F2E4, false),
     DARK("dark", R.string.skin_dark, 0xFF222224, 0xFF060607, 0xFFCFAE68, 0xFFF2F2F2, 0xFFB9B9BD, 0xFFE0BD6C,
-        0xFFFFF4D6, 0xFFE0BB66, 0xFF111113, true);
+        0xFFFFF4D6, 0xFFE0BB66, 0xFF111113, true),
+    /** днём — «Светлая», ночью — «Классика» (по теме приложения / телефона); цвета здесь — только для порядка */
+    ADAPTIVE("adaptive", R.string.skin_adaptive, 0xFFFFFFFF, 0xFFEFE8D8, 0xFFB8913F, 0xFF1C2333, 0xFF4A5266, 0xFFA87A26,
+        0xFF1C2333, 0xFF1C2333, 0xFFF8F2E4, false);
+
+    /** «Адаптивная» — светлое или тёмное оформление по теме; остальные — сами по себе. */
+    fun resolve(light: Boolean): FaceSkin = if (this == ADAPTIVE) (if (light) LIGHT else CLASSIC) else this
 
     companion object {
         fun of(key: String?): FaceSkin = values().firstOrNull { it.key == key } ?: CLASSIC

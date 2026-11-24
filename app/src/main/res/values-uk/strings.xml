@@ -328,4 +328,5 @@
     <string name="show_zmanim">Основні зманім на ободі</string>
     <string name="widget_card_name">Пеле Шаон — прямокутний годинник</string>
     <string name="widget_card_desc">Час, дата і єврейська дата, схід, захід і галахічна година</string>
+    <string name="skin_adaptive">Адаптивна (день / ніч)</string>
 </resources>

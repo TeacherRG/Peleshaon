@@ -327,4 +327,5 @@
     <string name="show_zmanim">זמנים עיקריים על המסגרת</string>
     <string name="widget_card_name">פלא שעון — שעון מלבני</string>
     <string name="widget_card_desc">השעה, התאריך והתאריך העברי, זריחה, שקיעה והשעה ההלכתית</string>
+    <string name="skin_adaptive">מתאים (יום / לילה)</string>
 </resources>

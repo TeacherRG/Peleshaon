@@ -290,7 +290,7 @@ fun ClockScreen(
                 }
                 val mainTimeType = remember(version) { Prefs.mainTimeType(context) }
                 val mainAnalog = remember(version) { Prefs.faceStyle(context) == Prefs.FACE_ANALOG }
-                val skin = remember(version) { FaceSkin.of(Prefs.faceSkin(context)) }
+                val skin = remember(version) { FaceSkin.of(Prefs.faceSkin(context)) }.resolve(ClockTheme.light)
                 val showZmanim = remember(version) { Prefs.showZmanim(context) }
                 val info = remember(version, minute, day, half) { faceInfo(context, city, cityNow, day, half) }
                 // малый циферблат с галахическим временем меняется не раз в минуту — пересчитать каждую секунду
@@ -1512,10 +1512,11 @@ private fun SettingsSheet(onChange: () -> Unit) {
                     ) {
                         BigFace(now = previewNow, zone = previewNow.zone, half = null, ring = null, events = emptyList(),
                             active = null, tziruf = false, modifier = Modifier.fillMaxSize(), analog = true,
-                            timeText = "10:10", skin = skin)
+                            timeText = "10:10", skin = skin.resolve(ClockTheme.light))
                     }
                     Text(stringResource(skin.title), fontSize = 12.sp, color = if (on) ClockColors.GoldDeep else ClockColors.Ink2,
-                        fontWeight = if (on) FontWeight.Bold else FontWeight.Normal, maxLines = 1)
+                        fontWeight = if (on) FontWeight.Bold else FontWeight.Normal, maxLines = 2,
+                        textAlign = TextAlign.Center, lineHeight = 14.sp)
                 }
             }
         }

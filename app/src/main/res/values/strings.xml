@@ -326,4 +326,5 @@
     <string name="show_zmanim">Main zmanim on the rim</string>
     <string name="widget_card_name">Pele Shaon — rectangular clock</string>
     <string name="widget_card_desc">Time, the date and the Jewish date, sunrise, sunset and the halachic hour</string>
+    <string name="skin_adaptive">Adaptive (day / night)</string>
 </resources>

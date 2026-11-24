@@ -287,7 +287,7 @@ object Live {
         val opts = AppWidgetManager.getInstance(context).getAppWidgetOptions(widgetId)
         val dp = maxOf(opts.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_WIDTH, 200), opts.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_HEIGHT, 200))
         val px = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, dp.toFloat(), context.resources.displayMetrics).toInt().coerceIn(360, 720)
-        val skin = FaceSkin.of(Prefs.faceSkin(context))
+        val skin = FaceSkin.of(Prefs.faceSkin(context)).resolve(light)
         val info = faceInfo(context, s.city, s.now, s.day, s.half, widget = true)
         v.setImageViewBitmap(R.id.w_face, renderFace(
             context, px, s.now, s.city.zone(), s.half, s.ring,
@@ -345,7 +345,7 @@ object Live {
         val scale = (900f / TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, cw, dm)).coerceAtMost(1f)
         val wPx = (TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, cw, dm) * scale).toInt()
         val hPx = (TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, ch, dm) * scale).toInt()
-        val skin = FaceSkin.of(Prefs.faceSkin(context))
+        val skin = FaceSkin.of(Prefs.faceSkin(context)).resolve(ClockTheme.widgetLight(context))
         val info = faceInfo(context, s.city, s.now, s.day, s.half, widget = true)
         v.setImageViewBitmap(R.id.w_card, renderCard(context, wPx, hPx, skin, info))
         v.setViewVisibility(R.id.w_date, View.GONE)
@@ -367,7 +367,7 @@ object Live {
         val dm = context.resources.displayMetrics
         val wPx = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, cw, dm).toInt().coerceAtMost(900)
         val hPx = (wPx * ch / cw).toInt()
-        val skin = FaceSkin.of(Prefs.faceSkin(context))
+        val skin = FaceSkin.of(Prefs.faceSkin(context)).resolve(ClockTheme.widgetLight(context))
         v.setImageViewBitmap(R.id.w_card, renderCard(context, wPx, hPx, skin, app.mychitas.peleshaon.ui.FaceInfo()))
         v.setTextColor(R.id.w_time, skin.time1.toInt())
         v.setString(R.id.w_time, "setTimeZone", java.time.ZoneId.systemDefault().id)

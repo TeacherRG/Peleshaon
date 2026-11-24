@@ -328,4 +328,5 @@
     <string name="show_zmanim">Основные зманим на ободе</string>
     <string name="widget_card_name">Пеле Шаон — прямоугольные часы</string>
     <string name="widget_card_desc">Время, дата и еврейская дата, восход, закат и галахический час</string>
+    <string name="skin_adaptive">Адаптивная (день / ночь)</string>
 </resources>
