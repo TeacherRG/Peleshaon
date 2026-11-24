@@ -10,6 +10,11 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.foundation.background
@@ -215,6 +220,12 @@ fun WearApp() {
                         contentDescription = null,
                         contentScale = ContentScale.Crop,
                         modifier = Modifier.fillMaxSize().clip(CircleShape)
+                    )
+                    Image(
+                        painter = painterResource(R.drawable.clock_halachic_face),
+                        contentDescription = null,
+                        modifier = Modifier.fillMaxSize().padding(6.dp).clip(CircleShape),
+                        contentScale = ContentScale.Crop
                     )
                     WatchRing(cityNow, half, halfItems, next)
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
