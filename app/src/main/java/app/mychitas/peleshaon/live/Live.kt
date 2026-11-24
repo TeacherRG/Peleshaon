@@ -278,7 +278,10 @@ object Live {
         val opts = AppWidgetManager.getInstance(context).getAppWidgetOptions(widgetId)
         val dp = maxOf(opts.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_WIDTH, 200), opts.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_HEIGHT, 200))
         val px = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, dp.toFloat(), context.resources.displayMetrics).toInt().coerceIn(360, 720)
-        v.setImageViewBitmap(R.id.w_face, renderFace(px, s.now, s.city.zone(), s.half, s.ring, s.events, Prefs.tziruf(context), light = light))
+        v.setImageViewBitmap(R.id.w_face, renderFace(
+            px, s.now, s.city.zone(), s.half, s.ring, s.events, Prefs.tziruf(context),
+            light = light, timeSystemHalachic = Prefs.mainTimeType(context) == Prefs.TIME_HALACHIC
+        ))
         v.setInt(
             R.id.w_date,
             "setBackgroundResource",
