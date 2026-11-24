@@ -140,6 +140,7 @@ fun BigFace(
     modifier: Modifier = Modifier,
     /** «4-й час дня» — под временем */
     hourLabel: String? = null,
+    timeText: String? = null,
     onPick: ((String?, Float, Float) -> Unit)? = null
 ) {
     val dots = remember(events, half) { place(events, half) }
@@ -165,7 +166,7 @@ fun BigFace(
         translate((size.width - side) / 2f, (size.height - side) / 2f) {
             scale(k, k, pivot = Offset.Zero) {
                 translate(-BOX_MIN, -BOX_MIN) {
-                    drawFace(now, zone, ring, dots, labelsOf(dots, now), active, tziruf, k, hourLabel = hourLabel)
+                    drawFace(now, zone, ring, dots, labelsOf(dots, now), active, tziruf, k, hourLabel = hourLabel, timeText = timeText)
                 }
             }
         }
@@ -189,6 +190,7 @@ private fun DrawScope.drawFace(
     k: Float,
     showTime: Boolean = true,
     hourLabel: String? = null,
+    timeText: String? = null,
     widgetStyle: Boolean = false
 ) {
     val c = Offset(100f, 100f)
@@ -324,7 +326,7 @@ private fun DrawScope.drawFace(
     }
     if (showTime) {
         val t = now.withZoneSameInstant(zone)
-        text(String.format(Locale.ROOT, "%02d:%02d", t.hour, t.minute), 100f, 91f, 34f, ClockColors.BigTime)
+        text(timeText ?: String.format(Locale.ROOT, "%02d:%02d", t.hour, t.minute), 100f, 91f, 34f, ClockColors.BigTime)
         text(String.format(Locale.ROOT, "%02d", t.second), 100f, 114f, 14f, ClockColors.Seconds)
     }
     if (hourLabel != null) text(hourLabel, 100f, if (showTime) 131f else 124f, 9f, ClockColors.Muted)
