@@ -302,4 +302,12 @@
     <string name="cal_misheyakir">Misheyakir – früheste Zeit für Tallit und Tefillin</string>
     <string name="cal_mincha_ketana">Mincha Ketana</string>
     <string name="cal_biur_chametz">Letzte Zeit zum Verbrennen von Chametz</string>
+    <string name="dual_clock_title">Zwei Zeiten auf einem Zifferblatt</string>
+    <string name="main_time_title">Hauptzifferblatt</string>
+    <string name="civil_time_title">Bürgerliche Zeit</string>
+    <string name="halachic_time_title">Halachische Zeit</string>
+    <string name="secondary_dial_title">Nebenzifferblatt anzeigen</string>
+    <string name="face_style_title">Anzeigestil</string>
+    <string name="face_digital">Digital</string>
+    <string name="face_analog">Mit Zeigern</string>
 </resources>

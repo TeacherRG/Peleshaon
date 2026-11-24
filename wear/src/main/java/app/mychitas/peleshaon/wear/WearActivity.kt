@@ -5,6 +5,11 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.foundation.background
@@ -205,6 +210,18 @@ fun WearApp() {
                     modifier = Modifier.fillMaxWidth().aspectRatio(1f),
                     contentAlignment = Alignment.Center
                 ) {
+                    Image(
+                        painter = painterResource(R.drawable.watch_face_bg),
+                        contentDescription = null,
+                        contentScale = ContentScale.Crop,
+                        modifier = Modifier.fillMaxSize().clip(CircleShape)
+                    )
+                    Image(
+                        painter = painterResource(R.drawable.clock_halachic_face),
+                        contentDescription = null,
+                        modifier = Modifier.fillMaxSize().padding(6.dp).clip(CircleShape),
+                        contentScale = ContentScale.Crop
+                    )
                     WatchRing(cityNow, half, halfItems, next)
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
                         Text(cityNow.format(HHMM), color = Color.White, fontSize = 34.sp, fontWeight = FontWeight.Bold)
@@ -277,8 +294,7 @@ private fun WatchRing(now: ZonedDateTime, half: Half?, items: List<ZmanItem>, ne
             c.y + rr * sin(deg * PI / 180).toFloat()
         )
 
-        drawCircle(Face, radius = r, center = c)
-        drawCircle(Gold.copy(alpha = 0.5f), radius = r, center = c, style = Stroke(1.5.dp.toPx()))
+        // The artwork supplies the watch's circular gold bezel and night-sky landscape.
         for (i in 0 until 12) {
             val deg = i * 30.0 - 90.0
             drawLine(

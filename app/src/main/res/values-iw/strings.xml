@@ -303,4 +303,12 @@
     <string name="cal_misheyakir">משיכיר – זמן טלית ותפילין</string>
     <string name="cal_mincha_ketana">מנחה קטנה</string>
     <string name="cal_biur_chametz">סוף זמן ביעור חמץ</string>
+    <string name="dual_clock_title">שני זמנים על לוח שעון אחד</string>
+    <string name="main_time_title">לוח ראשי</string>
+    <string name="civil_time_title">זמן רגיל</string>
+    <string name="halachic_time_title">זמן הלכתי</string>
+    <string name="secondary_dial_title">הצגת לוח משני</string>
+    <string name="face_style_title">סגנון תצוגה</string>
+    <string name="face_digital">דיגיטלי</string>
+    <string name="face_analog">עם מחוגים</string>
 </resources>

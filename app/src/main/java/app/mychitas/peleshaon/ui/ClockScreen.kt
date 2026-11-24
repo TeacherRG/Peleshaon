@@ -63,6 +63,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
@@ -287,6 +288,17 @@ fun ClockScreen(
                 if (day.isPolarAnomaly) {
                     Text(stringResource(R.string.polar), color = ClockColors.Ink2, textAlign = TextAlign.Center, modifier = Modifier.align(Alignment.Center).padding(24.dp))
                 }
+                val mainTimeType = remember(version) { Prefs.mainTimeType(context) }
+                val subdialEnabled = remember(version) { Prefs.subdialEnabled(context) }
+                val mainAnalog = remember(version) { Prefs.faceStyle(context) == Prefs.FACE_ANALOG }
+                val secondaryAnalog = remember(version) { Prefs.secondaryFaceStyle(context) == Prefs.FACE_ANALOG }
+                val civilTimeText = cityNow.format(DateTimeFormatter.ofPattern("HH:mm", Locale.ROOT))
+                val halachicTimeText = half?.let {
+                    val elapsed = (it.frac(cityNow).coerceIn(0.0, 0.99999) * 12.0 * 60.0).toInt()
+                    String.format(Locale.ROOT, "%02d:%02d", elapsed / 60, elapsed % 60)
+                } ?: "--:--"
+                val primaryTimeText = if (mainTimeType == Prefs.TIME_HALACHIC) halachicTimeText else civilTimeText
+                val secondaryTimeText = if (mainTimeType == Prefs.TIME_HALACHIC) civilTimeText else halachicTimeText
                 BigFace(
                     now = cityNow,
                     zone = zone,
@@ -297,8 +309,50 @@ fun ClockScreen(
                     tziruf = tziruf,
                     modifier = Modifier.fillMaxSize(),
                     hourLabel = hourLabel,
+                    timeText = primaryTimeText,
+                    analog = mainAnalog,
+                    timeSystemHalachic = mainTimeType == Prefs.TIME_HALACHIC,
                     onPick = { id, fx, fy -> pop = if (id == null || pop?.first == id) null else Triple(id, fx, fy) }
                 )
+                if (subdialEnabled) {
+                    val secondaryIsHalachic = mainTimeType == Prefs.TIME_CIVIL
+                    Surface(
+                        modifier = Modifier.align(Alignment.BottomCenter).padding(bottom = 8.dp).size(94.dp),
+                        shape = CircleShape,
+                        color = Color.Transparent,
+                        border = BorderStroke(1.5.dp, if (secondaryIsHalachic) ClockColors.Gold else ClockColors.TcheletDeep),
+                        shadowElevation = 5.dp
+                    ) {
+                        Box(modifier = Modifier.fillMaxSize()) {
+                            Image(
+                                painter = painterResource(R.drawable.clock_halachic_face),
+                                contentDescription = null,
+                                modifier = Modifier.fillMaxSize().clip(CircleShape),
+                                contentScale = ContentScale.Crop
+                            )
+                            Box(
+                                modifier = Modifier.fillMaxSize().background(
+                                    if (ClockTheme.light) Color(0xBFF8F3E8) else Color(0x990B1532),
+                                    CircleShape
+                                )
+                            )
+                            Column(
+                                modifier = Modifier.fillMaxSize(),
+                                horizontalAlignment = Alignment.CenterHorizontally,
+                                verticalArrangement = Arrangement.Center
+                            ) {
+                                if (secondaryAnalog) {
+                                    MiniAnalogHands(secondaryTimeText, secondaryIsHalachic, Modifier.size(56.dp))
+                                    TimeSystemMark(secondaryIsHalachic, Modifier.size(18.dp))
+                                } else {
+                                    TimeSystemMark(secondaryIsHalachic, Modifier.size(20.dp))
+                                    Text(secondaryTimeText, color = ClockColors.Ink, fontSize = 19.sp,
+                                        fontWeight = FontWeight.Bold, maxLines = 1)
+                                }
+                            }
+                        }
+                    }
+                }
                 val p = pop
                 val e = p?.let { pp -> events.find { it.id == pp.first } }
                 if (p != null && e != null) {
@@ -501,6 +555,33 @@ private fun NoCityClockScreen(
                     modifier = Modifier.padding(24.dp), color = ClockColors.Ink)
             }
         }
+    }
+}
+
+@Composable
+private fun MiniAnalogHands(timeText: String, halachic: Boolean, modifier: Modifier = Modifier) {
+    val handColor = if (halachic) ClockColors.GoldDeep else ClockColors.TcheletDeep
+    androidx.compose.foundation.Canvas(modifier = modifier) {
+        val c = androidx.compose.ui.geometry.Offset(size.width / 2f, size.height / 2f)
+        val r = size.minDimension * 0.45f
+        drawCircle(ClockColors.Line, r, c, style = androidx.compose.ui.graphics.drawscope.Stroke(1.2.dp.toPx()))
+        for (i in 0 until 12) {
+            val a = (i * 30.0 - 90.0) * Math.PI / 180.0
+            val outer = androidx.compose.ui.geometry.Offset(c.x + r * kotlin.math.cos(a).toFloat(), c.y + r * kotlin.math.sin(a).toFloat())
+            val innerR = r * if (i % 3 == 0) 0.76f else 0.86f
+            val inner = androidx.compose.ui.geometry.Offset(c.x + innerR * kotlin.math.cos(a).toFloat(), c.y + innerR * kotlin.math.sin(a).toFloat())
+            drawLine(handColor.copy(alpha = 0.75f), inner, outer, 1.dp.toPx(), cap = androidx.compose.ui.graphics.StrokeCap.Round)
+        }
+        val parts = timeText.split(":")
+        val h = parts.getOrNull(0)?.toIntOrNull() ?: 0
+        val m = parts.getOrNull(1)?.toIntOrNull() ?: 0
+        fun at(degrees: Double, length: Float) = androidx.compose.ui.geometry.Offset(
+            c.x + length * kotlin.math.cos(degrees * Math.PI / 180.0).toFloat(),
+            c.y + length * kotlin.math.sin(degrees * Math.PI / 180.0).toFloat()
+        )
+        drawLine(handColor, c, at(h % 12 * 30.0 + m * 0.5 - 90.0, r * 0.52f), 2.5.dp.toPx(), cap = androidx.compose.ui.graphics.StrokeCap.Round)
+        drawLine(handColor, c, at(m * 6.0 - 90.0, r * 0.82f), 1.5.dp.toPx(), cap = androidx.compose.ui.graphics.StrokeCap.Round)
+        drawCircle(handColor, 2.dp.toPx(), c)
     }
 }
 
@@ -1436,6 +1517,86 @@ private fun SettingsSheet(onChange: () -> Unit) {
             }
         }
         Note(stringResource(R.string.theme_note))
+        HorizontalDivider(color = ClockColors.Line)
+
+        // Two time systems share one face. The secondary face is always the opposite of the primary.
+        Text(stringResource(R.string.dual_clock_title), fontWeight = FontWeight.Bold, color = ClockColors.Ink)
+        var mainTimeType by remember { mutableStateOf(Prefs.mainTimeType(context)) }
+        var subdialEnabled by remember { mutableStateOf(Prefs.subdialEnabled(context)) }
+        var mainFaceStyle by remember { mutableStateOf(Prefs.faceStyle(context)) }
+        var secondaryFaceStyle by remember { mutableStateOf(Prefs.secondaryFaceStyle(context)) }
+        Text(stringResource(R.string.main_time_title), color = ClockColors.Ink2)
+        Text(stringResource(R.string.face_style_title), color = ClockColors.Muted, fontSize = 12.sp)
+        FlowRow(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+            for ((style, label) in listOf(
+                Prefs.FACE_DIGITAL to R.string.face_digital,
+                Prefs.FACE_ANALOG to R.string.face_analog
+            )) {
+                FilterChip(
+                    selected = mainFaceStyle == style,
+                    onClick = {
+                        mainFaceStyle = style
+                        Prefs.setFaceStyle(context, style)
+                        onChange()
+                    },
+                    label = { Text(stringResource(label), fontSize = 13.sp) },
+                    colors = chipColors()
+                )
+            }
+        }
+        FlowRow(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+            for ((type, label) in listOf(
+                Prefs.TIME_CIVIL to R.string.civil_time_title,
+                Prefs.TIME_HALACHIC to R.string.halachic_time_title
+            )) {
+                FilterChip(
+                    selected = mainTimeType == type,
+                    onClick = {
+                        mainTimeType = type
+                        Prefs.setMainTimeType(context, type)
+                        app.mychitas.peleshaon.live.Live.updateAsync(context)
+                        onChange()
+                    },
+                    label = { Text(stringResource(label), fontSize = 13.sp) },
+                    colors = chipColors()
+                )
+            }
+        }
+        FilterChip(
+            selected = subdialEnabled,
+            onClick = {
+                subdialEnabled = !subdialEnabled
+                Prefs.setSubdialEnabled(context, subdialEnabled)
+                onChange()
+            },
+            label = { Text(stringResource(R.string.secondary_dial_title), fontSize = 13.sp) },
+            colors = chipColors()
+        )
+        Text(
+            stringResource(if (mainTimeType == Prefs.TIME_CIVIL) R.string.halachic_time_title else R.string.civil_time_title),
+            color = ClockColors.Muted, fontSize = 12.sp
+        )
+        if (subdialEnabled) {
+            Text(stringResource(R.string.secondary_dial_title), color = ClockColors.Ink2)
+            Text(stringResource(R.string.face_style_title), color = ClockColors.Muted, fontSize = 12.sp)
+            FlowRow(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                for ((style, label) in listOf(
+                    Prefs.FACE_DIGITAL to R.string.face_digital,
+                    Prefs.FACE_ANALOG to R.string.face_analog
+                )) {
+                    FilterChip(
+                        selected = secondaryFaceStyle == style,
+                        onClick = {
+                            secondaryFaceStyle = style
+                            Prefs.setSecondaryFaceStyle(context, style)
+                            onChange()
+                        },
+                        label = { Text(stringResource(label), fontSize = 13.sp) },
+                        colors = chipColors()
+                    )
+                }
+            }
+        }
         HorizontalDivider(color = ClockColors.Line)
         // There is no valid coordinate context for geographically sensitive settings.
         if (Prefs.chosenCity(context) == null) return@SheetColumn
