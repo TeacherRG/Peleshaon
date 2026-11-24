@@ -311,5 +311,4 @@
     <string name="clock_time_title">Time system</string>
     <string name="clock_halachic">Halachic</string>
     <string name="clock_civil">Civil</string>
-    <string name="clock_hidden">Hidden</string>
 </resources>

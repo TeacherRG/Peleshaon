@@ -312,5 +312,4 @@
     <string name="clock_time_title">סוג הזמן</string>
     <string name="clock_halachic">הלכתי</string>
     <string name="clock_civil">רגיל</string>
-    <string name="clock_hidden">הסתר</string>
 </resources>

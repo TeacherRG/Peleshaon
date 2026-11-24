@@ -311,5 +311,4 @@
     <string name="clock_time_title">Zeitart</string>
     <string name="clock_halachic">Halachisch</string>
     <string name="clock_civil">Bürgerlich</string>
-    <string name="clock_hidden">Ausblenden</string>
 </resources>

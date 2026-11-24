@@ -1439,6 +1439,37 @@ private fun SmallAnalogFace(now: ZonedDateTime, modifier: Modifier = Modifier) {
     }
 }
 
+
+@Composable
+private fun SmallAnalogFace(now: ZonedDateTime, modifier: Modifier = Modifier) {
+    androidx.compose.foundation.Canvas(modifier) {
+        val center = androidx.compose.ui.geometry.Offset(size.width / 2f, size.height / 2f)
+        val radius = size.minDimension * 0.39f
+        drawCircle(ClockColors.RimStroke, radius = radius, center = center,
+            style = androidx.compose.ui.graphics.drawscope.Stroke(width = 1.dp.toPx()))
+        for (i in 0 until 12) {
+            val angle = Math.toRadians(i * 30.0 - 90.0)
+            val inner = radius * if (i % 3 == 0) 0.80f else 0.88f
+            val outer = radius * 0.96f
+            drawLine(
+                ClockColors.Muted,
+                androidx.compose.ui.geometry.Offset(center.x + kotlin.math.cos(angle).toFloat() * inner, center.y + kotlin.math.sin(angle).toFloat() * inner),
+                androidx.compose.ui.geometry.Offset(center.x + kotlin.math.cos(angle).toFloat() * outer, center.y + kotlin.math.sin(angle).toFloat() * outer),
+                strokeWidth = if (i % 3 == 0) 1.6.dp.toPx() else 0.8.dp.toPx()
+            )
+        }
+        val hourAngle = (now.hour % 12 + now.minute / 60f) * 30f - 90f
+        val minuteAngle = now.minute * 6f + now.second * 0.1f - 90f
+        fun endpoint(degrees: Float, fraction: Float) = androidx.compose.ui.geometry.Offset(
+            center.x + kotlin.math.cos(Math.toRadians(degrees.toDouble())).toFloat() * radius * fraction,
+            center.y + kotlin.math.sin(Math.toRadians(degrees.toDouble())).toFloat() * radius * fraction
+        )
+        drawLine(ClockColors.BigTime, center, endpoint(hourAngle, 0.48f), strokeWidth = 3.dp.toPx(), cap = androidx.compose.ui.graphics.StrokeCap.Round)
+        drawLine(ClockColors.BigTime, center, endpoint(minuteAngle, 0.74f), strokeWidth = 2.dp.toPx(), cap = androidx.compose.ui.graphics.StrokeCap.Round)
+        drawCircle(ClockColors.Gold, radius = 2.dp.toPx(), center = center)
+    }
+}
+
 @Composable
 private fun FaceSettings(context: Context, face: String, title: Int) {
     var style by remember(face) { mutableStateOf(Prefs.faceStyle(context, face)) }
