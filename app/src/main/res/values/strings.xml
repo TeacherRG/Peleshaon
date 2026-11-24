@@ -313,4 +313,5 @@
     <string name="clock_civil">Civil</string>
     <string name="clock_sub_time_note">The secondary dial shows the selected civil or halachic clock time; the full zmanim ring remains on the main dial.</string>
     <string name="clock_hidden">Hidden</string>
+    <string name="clock_sub_visible">Show secondary dial</string>
 </resources>
