@@ -179,6 +179,7 @@ fun BigFace(
     hourLabel: String? = null,
     timeText: String? = null,
     analog: Boolean = false,
+    timeSystemHalachic: Boolean = false,
     onPick: ((String?, Float, Float) -> Unit)? = null
 ) {
     val dots = remember(events, half) { place(events, half) }
@@ -204,7 +205,7 @@ fun BigFace(
         translate((size.width - side) / 2f, (size.height - side) / 2f) {
             scale(k, k, pivot = Offset.Zero) {
                 translate(-BOX_MIN, -BOX_MIN) {
-                    drawFace(now, zone, ring, dots, labelsOf(dots, now), active, tziruf, k, hourLabel = hourLabel, timeText = timeText, analog = analog)
+                    drawFace(now, zone, ring, dots, labelsOf(dots, now), active, tziruf, k, hourLabel = hourLabel, timeText = timeText, analog = analog, timeSystemHalachic = timeSystemHalachic)
                 }
             }
         }
@@ -230,6 +231,7 @@ private fun DrawScope.drawFace(
     hourLabel: String? = null,
     timeText: String? = null,
     analog: Boolean = false,
+    timeSystemHalachic: Boolean = false,
     widgetStyle: Boolean = false
 ) {
     val c = Offset(100f, 100f)
@@ -337,8 +339,9 @@ private fun DrawScope.drawFace(
         drawCircle(color, radius = 0.8f, center = center)
     }
     if (ring != null) {
-        halachicMark(Offset(61f, 91f))
-        civilMark(Offset(139f, 91f))
+        // One clear marker for the active main time system; the secondary dial carries its opposite marker.
+        if (timeSystemHalachic) halachicMark(Offset(100f, 65f))
+        else civilMark(Offset(100f, 65f))
     }
 
     for ((d, turn) in labelled) {
@@ -413,7 +416,8 @@ fun renderFace(
     events: List<FaceEvent>,
     tziruf: Boolean,
     hourLabel: String? = null,
-    light: Boolean = false
+    light: Boolean = false,
+    timeSystemHalachic: Boolean = false
 ): android.graphics.Bitmap = ClockTheme.render(light) {
     val bmp = ImageBitmap(sizePx, sizePx)
     val insetPx = 34f
@@ -425,7 +429,7 @@ fun renderFace(
                 translate(-BOX_MIN, -BOX_MIN) {
                     drawFace(
                         now, zone, ring, dots, labelsOf(dots, now), null, tziruf, k,
-                        showTime = false, hourLabel = hourLabel, widgetStyle = true
+                        showTime = false, hourLabel = hourLabel, timeSystemHalachic = timeSystemHalachic, widgetStyle = true
                     )
                 }
             }
