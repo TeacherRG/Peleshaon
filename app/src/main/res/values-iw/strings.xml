@@ -315,4 +315,7 @@
     <string name="clock_sub_time_note">הלוח המשני מציג את השעה הרגילה או ההלכתית שנבחרה; מעגל הזמנים המלא נשאר בלוח הראשי.</string>
     <string name="clock_hidden">הסתר</string>
     <string name="clock_sub_visible">הצג לוח משנה</string>
+    <string name="clock_widget_shape_title">צורת הווידג׳ט בטלפון</string>
+    <string name="clock_widget_round">עגול</string>
+    <string name="clock_widget_rectangular">מלבני</string>
 </resources>
