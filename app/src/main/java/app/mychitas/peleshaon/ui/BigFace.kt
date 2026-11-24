@@ -264,6 +264,42 @@ private fun DrawScope.drawFace(
         canvas.restore()
     }
 
+    // Авторские знаки двух систем времени: золотой — алохическое кольцо,
+    // сине-серебряный — обычное гражданское время в центре. Без текстовых подписей.
+    fun halachicMark(center: Offset) {
+        val color = ClockColors.GoldDeep
+        drawArc(
+            color = color, startAngle = 180f, sweepAngle = 180f, useCenter = false,
+            topLeft = Offset(center.x - 4.8f, center.y - 4.8f),
+            size = Size(9.6f, 9.6f), style = Stroke(width = 1.35f, cap = StrokeCap.Round)
+        )
+        drawLine(color, Offset(center.x - 6f, center.y + 0.2f), Offset(center.x + 6f, center.y + 0.2f),
+            strokeWidth = 1.25f, cap = StrokeCap.Round)
+        for (dx in listOf(-3.8f, 0f, 3.8f)) {
+            val top = if (dx == 0f) center.y - 7.1f else center.y - 5.8f
+            drawLine(color, Offset(center.x + dx, center.y - 1.2f), Offset(center.x + dx, top),
+                strokeWidth = 1.05f, cap = StrokeCap.Round)
+        }
+        drawCircle(color, radius = 0.9f, center = Offset(center.x, center.y + 4.1f))
+    }
+    fun civilMark(center: Offset) {
+        val color = ClockColors.TcheletDeep
+        drawCircle(color, radius = 5.6f, center = center, style = Stroke(width = 1.2f))
+        for (angle in 0 until 4) {
+            val a = angle * (PI / 2.0)
+            val outer = Offset(center.x + (5.1 * cos(a)).toFloat(), center.y + (5.1 * sin(a)).toFloat())
+            val inner = Offset(center.x + (4.0 * cos(a)).toFloat(), center.y + (4.0 * sin(a)).toFloat())
+            drawLine(color, inner, outer, strokeWidth = 1.1f, cap = StrokeCap.Round)
+        }
+        drawLine(color, center, Offset(center.x, center.y - 3.2f), strokeWidth = 1.25f, cap = StrokeCap.Round)
+        drawLine(color, center, Offset(center.x + 2.8f, center.y + 1.7f), strokeWidth = 1.25f, cap = StrokeCap.Round)
+        drawCircle(color, radius = 0.8f, center = center)
+    }
+    if (ring != null) {
+        halachicMark(Offset(61f, 91f))
+        civilMark(Offset(139f, 91f))
+    }
+
     for ((d, turn) in labelled) {
         val pos = polar(turn, 68.0)
         text(
