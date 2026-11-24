@@ -316,7 +316,7 @@ fun ClockScreen(
                 if (subdialEnabled) {
                     val secondaryIsHalachic = mainTimeType == Prefs.TIME_CIVIL
                     Surface(
-                        modifier = Modifier.align(Alignment.BottomEnd).padding(end = 14.dp, bottom = 8.dp).size(94.dp),
+                        modifier = Modifier.align(Alignment.BottomCenter).padding(bottom = 8.dp).size(94.dp),
                         shape = CircleShape,
                         color = ClockColors.SheetBg.copy(alpha = 0.96f),
                         border = BorderStroke(1.5.dp, if (secondaryIsHalachic) ClockColors.Gold else ClockColors.TcheletDeep),
