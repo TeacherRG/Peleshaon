@@ -1507,18 +1507,63 @@ private fun DigitalFaceTime(
     hourLabel: String?,
     modifier: Modifier = Modifier
 ) {
-    val blinkColor = if (now.second % 2 == 0) ClockColors.BigTime else ClockColors.BigTime.copy(alpha = 0.12f)
+    val timeLabel = if (halachic) (hourLabel ?: stringResource(R.string.clock_halachic))
+        else stringResource(R.string.clock_civil)
     Box(modifier = modifier, contentAlignment = Alignment.Center) {
-        Surface(shape = CircleShape, color = ClockColors.RimFill, border = BorderStroke(1.dp, ClockColors.RimStroke)) {
-            Column(Modifier.padding(horizontal = 28.dp, vertical = 22.dp), horizontalAlignment = Alignment.CenterHorizontally) {
-                Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.Center) {
-                    Text(now.format(DateTimeFormatter.ofPattern("HH")), color = ClockColors.BigTime, fontSize = 42.sp, fontWeight = FontWeight.Bold)
-                    Text(":", color = blinkColor, fontSize = 42.sp, fontWeight = FontWeight.Bold)
-                    Text(now.format(DateTimeFormatter.ofPattern("mm")), color = ClockColors.BigTime, fontSize = 42.sp, fontWeight = FontWeight.Bold)
+        Surface(
+            shape = CircleShape,
+            color = ClockColors.RimFill,
+            border = BorderStroke(1.5.dp, ClockColors.Gold.copy(alpha = 0.72f))
+        ) {
+            Box(contentAlignment = Alignment.Center) {
+                Canvas(Modifier.fillMaxSize().padding(8.dp)) {
+                    val inset = 1.5.dp.toPx()
+                    val diameter = size.minDimension - inset * 2
+                    val arcSize = androidx.compose.ui.geometry.Size(diameter, diameter)
+                    val topLeft = androidx.compose.ui.geometry.Offset(
+                        (size.width - diameter) / 2f,
+                        (size.height - diameter) / 2f
+                    )
+                    drawCircle(
+                        color = ClockColors.RimStroke.copy(alpha = 0.42f),
+                        radius = diameter / 2f,
+                        center = androidx.compose.ui.geometry.Offset(size.width / 2f, size.height / 2f),
+                        style = androidx.compose.ui.graphics.drawscope.Stroke(width = 0.8.dp.toPx())
+                    )
+                    drawArc(
+                        color = ClockColors.Gold.copy(alpha = 0.78f),
+                        startAngle = -90f,
+                        sweepAngle = (now.second / 60f) * 360f,
+                        useCenter = false,
+                        topLeft = topLeft,
+                        size = arcSize,
+                        style = androidx.compose.ui.graphics.drawscope.Stroke(
+                            width = 2.dp.toPx(),
+                            cap = StrokeCap.Round
+                        )
+                    )
                 }
-                Text(if (halachic) (hourLabel ?: stringResource(R.string.clock_halachic)) else stringResource(R.string.clock_civil),
-                    color = ClockColors.Muted, fontSize = 13.sp, textAlign = TextAlign.Center)
-                Text("●", color = ClockColors.Seconds.copy(alpha = 0.35f + (now.second % 2) * 0.25f), fontSize = 7.sp)
+                Column(
+                    modifier = Modifier.padding(horizontal = 28.dp, vertical = 22.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.Center) {
+                        Text(now.format(DateTimeFormatter.ofPattern("HH")), color = ClockColors.BigTime,
+                            fontSize = 42.sp, fontWeight = FontWeight.Bold)
+                        Text(":", color = ClockColors.Gold.copy(alpha = if (now.second % 2 == 0) 0.9f else 0.42f),
+                            fontSize = 40.sp, fontWeight = FontWeight.Light)
+                        Text(now.format(DateTimeFormatter.ofPattern("mm")), color = ClockColors.BigTime,
+                            fontSize = 42.sp, fontWeight = FontWeight.Bold)
+                    }
+                    Spacer(Modifier.height(3.dp))
+                    Text(timeLabel, color = ClockColors.Muted, fontSize = 12.sp,
+                        fontWeight = FontWeight.Medium, textAlign = TextAlign.Center, maxLines = 1)
+                    Spacer(Modifier.height(4.dp))
+                    Box(
+                        Modifier.size(4.dp)
+                            .background(ClockColors.Gold.copy(alpha = 0.72f), CircleShape)
+                    )
+                }
             }
         }
     }
