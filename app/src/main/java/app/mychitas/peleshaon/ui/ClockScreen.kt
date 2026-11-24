@@ -194,6 +194,8 @@ fun ClockScreen(
     val half = remember(city, minute, version) { ZmanimEngine.halfOf(cityNow, city) }
     val halfItems = remember(half, city, version) { half?.let { ZmanimEngine.halfItems(it, city) } ?: emptyList() }
     val ring = Dial.ring(cityNow, half)
+    val mainStyle = Prefs.faceStyle(context, "main")
+    val mainTime = Prefs.faceTime(context, "main")
     val hourLabel = half?.let { stringResource(if (it.day) R.string.hour_day else R.string.hour_night, it.hour(cityNow)) }
     // еврейская дата — день обычным числом, крупно
     val jd = remember(day.date, city) { ZmanimEngine.jewishDay(day.date, city.isIsrael) }
@@ -287,18 +289,23 @@ fun ClockScreen(
                 if (day.isPolarAnomaly) {
                     Text(stringResource(R.string.polar), color = ClockColors.Ink2, textAlign = TextAlign.Center, modifier = Modifier.align(Alignment.Center).padding(24.dp))
                 }
-                BigFace(
-                    now = cityNow,
-                    zone = zone,
-                    half = half,
-                    ring = ring,
-                    events = events,
-                    active = pop?.first,
-                    tziruf = tziruf,
-                    modifier = Modifier.fillMaxSize(),
-                    hourLabel = hourLabel,
-                    onPick = { id, fx, fy -> pop = if (id == null || pop?.first == id) null else Triple(id, fx, fy) }
-                )
+                if (mainStyle == "DIGITAL") {
+                    DigitalFaceTime(now = cityNow, halachic = mainTime == "HALACHIC", hourLabel = hourLabel, modifier = Modifier.fillMaxSize())
+                } else {
+                    BigFace(
+                        now = cityNow,
+                        zone = zone,
+                        half = if (mainTime == "HALACHIC") half else null,
+                        ring = if (mainTime == "HALACHIC") ring else null,
+                        events = if (mainTime == "HALACHIC") events else emptyList(),
+                        active = if (mainTime == "HALACHIC") pop?.first else null,
+                        tziruf = tziruf && mainTime == "HALACHIC",
+                        modifier = Modifier.fillMaxSize(),
+                        hourLabel = if (mainTime == "HALACHIC") hourLabel else null,
+                        analogStyle = true,
+                        onPick = if (mainTime == "HALACHIC") ({ id, fx, fy -> pop = if (id == null || pop?.first == id) null else Triple(id, fx, fy) }) else null
+                    )
+                }
                 val p = pop
                 val e = p?.let { pp -> events.find { it.id == pp.first } }
                 if (p != null && e != null) {
@@ -1379,6 +1386,53 @@ private fun minhagNote(): String = when (ZmanimEngine.minhag) {
  * времена дня, исход Шабата, Кидуш Левана и даты календаря.
  */
 @OptIn(androidx.compose.foundation.layout.ExperimentalLayoutApi::class)
+
+@Composable
+private fun FaceSettings(context: Context, face: String, title: Int) {
+    var style by remember(face) { mutableStateOf(Prefs.faceStyle(context, face)) }
+    var time by remember(face) { mutableStateOf(Prefs.faceTime(context, face)) }
+    Column(verticalArrangement = Arrangement.spacedBy(5.dp)) {
+        Text(stringResource(title), color = ClockColors.Ink, fontWeight = FontWeight.SemiBold)
+        Text(stringResource(R.string.clock_style_title), color = ClockColors.Ink2, fontSize = 12.sp)
+        Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+            for ((value, label) in listOf("DIGITAL" to R.string.clock_digital, "ANALOG" to R.string.clock_analog)) {
+                FilterChip(selected = style == value, onClick = {
+                    style = value
+                    Prefs.setFaceStyle(context, face, value)
+                }, label = { Text(stringResource(label), fontSize = 12.sp) }, colors = chipColors())
+            }
+        }
+        Text(stringResource(R.string.clock_time_title), color = ClockColors.Ink2, fontSize = 12.sp)
+        Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+            for ((value, label) in listOf("HALACHIC" to R.string.clock_halachic, "CIVIL" to R.string.clock_civil)) {
+                FilterChip(selected = time == value, onClick = {
+                    time = value
+                    Prefs.setFaceTime(context, face, value)
+                    app.mychitas.peleshaon.live.Live.updateAsync(context)
+                }, label = { Text(stringResource(label), fontSize = 12.sp) }, colors = chipColors())
+            }
+        }
+    }
+}
+
+@Composable
+private fun DigitalFaceTime(
+    now: ZonedDateTime,
+    halachic: Boolean,
+    hourLabel: String?,
+    modifier: Modifier = Modifier
+) {
+    val value = if (halachic && hourLabel != null) hourLabel else now.format(DateTimeFormatter.ofPattern("HH:mm:ss"))
+    Box(modifier = modifier, contentAlignment = Alignment.Center) {
+        Surface(shape = CircleShape, color = ClockColors.RimFill, border = BorderStroke(1.dp, ClockColors.RimStroke)) {
+            Column(Modifier.padding(horizontal = 28.dp, vertical = 22.dp), horizontalAlignment = Alignment.CenterHorizontally) {
+                Text(value, color = ClockColors.BigTime, fontSize = 34.sp, fontWeight = FontWeight.Bold, textAlign = TextAlign.Center)
+                Text(if (halachic) stringResource(R.string.clock_halachic) else stringResource(R.string.clock_civil), color = ClockColors.Muted, fontSize = 13.sp)
+            }
+        }
+    }
+}
+
 @Composable
 private fun SettingsSheet(onChange: () -> Unit) {
     val context = LocalContext.current
@@ -1436,6 +1490,11 @@ private fun SettingsSheet(onChange: () -> Unit) {
             }
         }
         Note(stringResource(R.string.theme_note))
+        HorizontalDivider(color = ClockColors.Line)
+        Text(stringResource(R.string.clock_faces_title), fontWeight = FontWeight.Bold, color = ClockColors.Ink)
+        FaceSettings(context, "main", R.string.clock_main_face)
+        FaceSettings(context, "sub", R.string.clock_sub_face)
+        HorizontalDivider(color = ClockColors.Line)
         HorizontalDivider(color = ClockColors.Line)
         // There is no valid coordinate context for geographically sensitive settings.
         if (Prefs.chosenCity(context) == null) return@SheetColumn

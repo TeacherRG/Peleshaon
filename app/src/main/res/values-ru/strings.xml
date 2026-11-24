@@ -304,4 +304,13 @@
     <string name="cal_misheyakir">Мишеякир — талит и тфилин</string>
     <string name="cal_mincha_ketana">Минха ктана</string>
     <string name="cal_biur_chametz">Срок сжигания хамеца</string>
+    <string name="clock_faces_title">Два циферблата</string>
+    <string name="clock_main_face">Главный циферблат</string>
+    <string name="clock_sub_face">Субциферблат</string>
+    <string name="clock_style_title">Стиль отображения</string>
+    <string name="clock_digital">Цифровой</string>
+    <string name="clock_analog">Со стрелками</string>
+    <string name="clock_time_title">Тип времени</string>
+    <string name="clock_halachic">Галахическое</string>
+    <string name="clock_civil">Обычное</string>
 </resources>

@@ -140,7 +140,8 @@ fun BigFace(
     modifier: Modifier = Modifier,
     /** «4-й час дня» — под временем */
     hourLabel: String? = null,
-    onPick: ((String?, Float, Float) -> Unit)? = null
+    onPick: ((String?, Float, Float) -> Unit)? = null,
+    analogStyle: Boolean = true
 ) {
     val dots = remember(events, half) { place(events, half) }
 
@@ -165,7 +166,7 @@ fun BigFace(
         translate((size.width - side) / 2f, (size.height - side) / 2f) {
             scale(k, k, pivot = Offset.Zero) {
                 translate(-BOX_MIN, -BOX_MIN) {
-                    drawFace(now, zone, ring, dots, labelsOf(dots, now), active, tziruf, k, hourLabel = hourLabel)
+                    drawFace(now, zone, ring, dots, labelsOf(dots, now), active, tziruf, k, hourLabel = hourLabel, analogStyle = analogStyle)
                 }
             }
         }
@@ -189,7 +190,8 @@ private fun DrawScope.drawFace(
     k: Float,
     showTime: Boolean = true,
     hourLabel: String? = null,
-    widgetStyle: Boolean = false
+    widgetStyle: Boolean = false,
+    analogStyle: Boolean = true
 ) {
     val c = Offset(100f, 100f)
     val rimFill = if (widgetStyle) ClockColors.WidgetFace else ClockColors.RimFill
@@ -288,8 +290,18 @@ private fun DrawScope.drawFace(
     }
     if (showTime) {
         val t = now.withZoneSameInstant(zone)
-        text(String.format(Locale.ROOT, "%02d:%02d", t.hour, t.minute), 100f, 91f, 34f, ClockColors.BigTime)
-        text(String.format(Locale.ROOT, "%02d", t.second), 100f, 114f, 14f, ClockColors.Seconds)
+        if (analogStyle) {
+            val hourAngle = ((t.hour % 12) + t.minute / 60.0) * 30.0
+            val minuteAngle = (t.minute + t.second / 60.0) * 6.0
+            val secondAngle = t.second * 6.0
+            drawLine(ClockColors.BigTime, c, polar(hourAngle / 360.0, 25.0), strokeWidth = 3.6f, cap = StrokeCap.Round)
+            drawLine(ClockColors.BigTime, c, polar(minuteAngle / 360.0, 39.0), strokeWidth = 2.2f, cap = StrokeCap.Round)
+            drawLine(ClockColors.Hand, c, polar(secondAngle / 360.0, 47.0), strokeWidth = 1.1f, cap = StrokeCap.Round)
+            drawCircle(ClockColors.Gold, radius = 3.2f, center = c)
+        } else {
+            text(String.format(Locale.ROOT, "%02d:%02d", t.hour, t.minute), 100f, 91f, 34f, ClockColors.BigTime)
+            text(String.format(Locale.ROOT, "%02d", t.second), 100f, 114f, 14f, ClockColors.Seconds)
+        }
     }
     if (hourLabel != null) text(hourLabel, 100f, if (showTime) 131f else 124f, 9f, ClockColors.Muted)
 }
