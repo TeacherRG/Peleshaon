@@ -313,4 +313,5 @@
     <string name="clock_civil">Bürgerlich</string>
     <string name="clock_sub_time_note">Das Nebenzifferblatt zeigt die gewählte bürgerliche oder halachische Uhrzeit; der vollständige Zmanim-Ring bleibt auf dem Hauptzifferblatt.</string>
     <string name="clock_hidden">Ausblenden</string>
+    <string name="clock_sub_visible">Nebenzifferblatt anzeigen</string>
 </resources>
