@@ -1,5 +1,6 @@
 package app.mychitas.peleshaon.ui
 
+import android.graphics.BitmapFactory
 import android.graphics.Paint
 import android.graphics.Typeface
 import androidx.compose.foundation.Canvas
@@ -8,10 +9,15 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Rect
+import androidx.compose.ui.unit.IntOffset
+import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.graphics.drawscope.clipPath
 import androidx.compose.ui.graphics.drawscope.rotate
 import androidx.compose.ui.graphics.drawscope.scale
 import androidx.compose.ui.graphics.drawscope.translate
@@ -20,12 +26,14 @@ import androidx.compose.ui.graphics.nativeCanvas
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.asAndroidBitmap
+import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.drawscope.CanvasDrawScope
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.graphics.vector.PathParser
 import androidx.compose.ui.input.pointer.pointerInput
+import app.mychitas.peleshaon.R
 import app.mychitas.peleshaon.domain.DashState
 import app.mychitas.peleshaon.domain.Dial
 import app.mychitas.peleshaon.domain.Half
@@ -183,6 +191,8 @@ fun BigFace(
     onPick: ((String?, Float, Float) -> Unit)? = null
 ) {
     val dots = remember(events, half) { place(events, half) }
+    val context = androidx.compose.ui.platform.LocalContext.current
+    val artwork = remember { BitmapFactory.decodeResource(context.resources, R.drawable.clock_halachic_face).asImageBitmap() }
 
     val tap = if (onPick != null) Modifier.pointerInput(dots) {
         detectTapGestures { o ->
@@ -205,7 +215,7 @@ fun BigFace(
         translate((size.width - side) / 2f, (size.height - side) / 2f) {
             scale(k, k, pivot = Offset.Zero) {
                 translate(-BOX_MIN, -BOX_MIN) {
-                    drawFace(now, zone, ring, dots, labelsOf(dots, now), active, tziruf, k, hourLabel = hourLabel, timeText = timeText, analog = analog, timeSystemHalachic = timeSystemHalachic)
+                    drawFace(now, zone, ring, dots, labelsOf(dots, now), active, tziruf, k, hourLabel = hourLabel, timeText = timeText, analog = analog, timeSystemHalachic = timeSystemHalachic, artwork = artwork)
                 }
             }
         }
@@ -232,6 +242,7 @@ private fun DrawScope.drawFace(
     timeText: String? = null,
     analog: Boolean = false,
     timeSystemHalachic: Boolean = false,
+    artwork: ImageBitmap? = null,
     widgetStyle: Boolean = false
 ) {
     val c = Offset(100f, 100f)
@@ -245,6 +256,20 @@ private fun DrawScope.drawFace(
         drawContext.canvas.nativeCanvas.drawCircle(100f, 100f, 99f, shadow)
     }
     drawCircle(rimFill, radius = 99f, center = c)
+    if (artwork != null) {
+        val faceClip = Path().apply { addOval(Rect(1f, 1f, 199f, 199f)) }
+        clipPath(faceClip) {
+            drawImage(
+                image = artwork,
+                dstOffset = IntOffset(1, 1),
+                dstSize = IntSize(198, 198),
+                alpha = if (ClockTheme.light && !widgetStyle) 0.88f else 1f
+            )
+            if (ClockTheme.light && !widgetStyle) {
+                drawRect(Color(0xFFF8F3E8).copy(alpha = 0.70f), topLeft = Offset(1f, 1f), size = Size(198f, 198f))
+            }
+        }
+    }
     drawCircle(rimStroke, radius = 99f, center = c, style = Stroke(if (widgetStyle) 1f / k else 0.5f))
 
     if (ring != null) {
@@ -408,6 +433,7 @@ private fun labelsOf(dots: List<DotPlace>, now: ZonedDateTime): List<Pair<DotPla
  * Время в центре не рисуется: его показывает TextClock поверх, он идёт сам.
  */
 fun renderFace(
+    context: android.content.Context,
     sizePx: Int,
     now: ZonedDateTime,
     zone: ZoneId,
@@ -427,9 +453,11 @@ fun renderFace(
         translate(insetPx, insetPx) {
             scale(k, k, pivot = Offset.Zero) {
                 translate(-BOX_MIN, -BOX_MIN) {
+                    val artwork = BitmapFactory.decodeResource(context.resources, R.drawable.clock_halachic_face).asImageBitmap()
                     drawFace(
                         now, zone, ring, dots, labelsOf(dots, now), null, tziruf, k,
-                        showTime = false, hourLabel = hourLabel, timeSystemHalachic = timeSystemHalachic, widgetStyle = true
+                        showTime = false, hourLabel = hourLabel, timeSystemHalachic = timeSystemHalachic,
+                        artwork = artwork, widgetStyle = true
                     )
                 }
             }
