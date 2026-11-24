@@ -168,6 +168,15 @@ object Prefs {
         of(context).edit().putString("face_style", style).apply()
     }
 
+    fun secondaryFaceStyle(context: Context): String =
+        of(context).getString("secondary_face_style", FACE_DIGITAL)
+            ?.takeIf { it == FACE_DIGITAL || it == FACE_ANALOG } ?: FACE_DIGITAL
+
+    fun setSecondaryFaceStyle(context: Context, style: String) {
+        require(style == FACE_DIGITAL || style == FACE_ANALOG)
+        of(context).edit().putString("secondary_face_style", style).apply()
+    }
+
     fun subdialEnabled(context: Context): Boolean =
         of(context).getBoolean("subdial_enabled", true)
 
