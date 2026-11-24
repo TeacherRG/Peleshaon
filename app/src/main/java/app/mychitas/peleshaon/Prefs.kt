@@ -139,6 +139,42 @@ object Prefs {
     fun tziruf(context: Context): Boolean = of(context).getBoolean("clock_tziruf", false)
     fun setTziruf(context: Context, on: Boolean) = of(context).edit().putBoolean("clock_tziruf", on).apply()
 
+    // ---- dual clock presentation (civil + halachic), independent of zmanim calculations
+
+    const val TIME_CIVIL = "CIVIL"
+    const val TIME_HALACHIC = "HALACHIC"
+    const val FACE_DIGITAL = "DIGITAL"
+    const val FACE_ANALOG = "ANALOG"
+
+    fun mainTimeType(context: Context): String =
+        of(context).getString("main_time_type", TIME_CIVIL)
+            ?.takeIf { it == TIME_CIVIL || it == TIME_HALACHIC } ?: TIME_CIVIL
+
+    fun setMainTimeType(context: Context, type: String) {
+        require(type == TIME_CIVIL || type == TIME_HALACHIC)
+        of(context).edit().putString("main_time_type", type).apply()
+    }
+
+    /** The secondary dial is always the opposite time system; there is no independent duplicate choice. */
+    fun secondaryTimeType(context: Context): String =
+        if (mainTimeType(context) == TIME_CIVIL) TIME_HALACHIC else TIME_CIVIL
+
+    fun faceStyle(context: Context): String =
+        of(context).getString("face_style", FACE_DIGITAL)
+            ?.takeIf { it == FACE_DIGITAL || it == FACE_ANALOG } ?: FACE_DIGITAL
+
+    fun setFaceStyle(context: Context, style: String) {
+        require(style == FACE_DIGITAL || style == FACE_ANALOG)
+        of(context).edit().putString("face_style", style).apply()
+    }
+
+    fun subdialEnabled(context: Context): Boolean =
+        of(context).getBoolean("subdial_enabled", true)
+
+    fun setSubdialEnabled(context: Context, enabled: Boolean) {
+        of(context).edit().putBoolean("subdial_enabled", enabled).apply()
+    }
+
     // ---- будильники
 
     private fun prefix(type: String) = when (type) { MORNING -> "morning"; TORAH -> "torah"; else -> type.lowercase() }
