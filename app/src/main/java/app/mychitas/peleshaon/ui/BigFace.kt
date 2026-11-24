@@ -331,14 +331,36 @@ fun renderFace(
     events: List<FaceEvent>,
     tziruf: Boolean,
     hourLabel: String? = null,
-    light: Boolean = false
+    light: Boolean = false,
+    rectangular: Boolean = false,
+    heightPx: Int = sizePx
 ): android.graphics.Bitmap = ClockTheme.render(light) {
-    val bmp = ImageBitmap(sizePx, sizePx)
-    val insetPx = 34f
-    val k = (sizePx - 2f * insetPx) / BOX
+    val bitmapHeight = if (rectangular) heightPx.coerceAtLeast(120) else sizePx
+    val bmp = ImageBitmap(sizePx, bitmapHeight)
+    val dialSide = if (rectangular) {
+        minOf(bitmapHeight - 24f, (sizePx - 24f) * 0.52f).coerceAtLeast(96f)
+    } else sizePx - 68f
+    val k = dialSide / BOX
+    val left = if (rectangular) 12f else (sizePx - dialSide) / 2f
+    val top = (bitmapHeight - dialSide) / 2f
     val dots = place(events, half)
-    CanvasDrawScope().draw(Density(1f), LayoutDirection.Ltr, androidx.compose.ui.graphics.Canvas(bmp), Size(sizePx.toFloat(), sizePx.toFloat())) {
-        translate(insetPx, insetPx) {
+    CanvasDrawScope().draw(Density(1f), LayoutDirection.Ltr, androidx.compose.ui.graphics.Canvas(bmp), Size(sizePx.toFloat(), bitmapHeight.toFloat())) {
+        if (rectangular) {
+            drawRoundRect(
+                color = ClockColors.WidgetFace,
+                topLeft = Offset(1f, 1f),
+                size = Size(size.width - 2f, size.height - 2f),
+                cornerRadius = androidx.compose.ui.geometry.CornerRadius(22f, 22f)
+            )
+            drawRoundRect(
+                color = ClockColors.Gold.copy(alpha = 0.72f),
+                topLeft = Offset(1f, 1f),
+                size = Size(size.width - 2f, size.height - 2f),
+                cornerRadius = androidx.compose.ui.geometry.CornerRadius(22f, 22f),
+                style = Stroke(width = 2f)
+            )
+        }
+        translate(left, top) {
             scale(k, k, pivot = Offset.Zero) {
                 translate(-BOX_MIN, -BOX_MIN) {
                     drawFace(
