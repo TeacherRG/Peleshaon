@@ -314,4 +314,7 @@
     <string name="clock_sub_time_note">Das Nebenzifferblatt zeigt die gewählte bürgerliche oder halachische Uhrzeit; der vollständige Zmanim-Ring bleibt auf dem Hauptzifferblatt.</string>
     <string name="clock_hidden">Ausblenden</string>
     <string name="clock_sub_visible">Nebenzifferblatt anzeigen</string>
+    <string name="clock_widget_shape_title">Form des Telefon-Widgets</string>
+    <string name="clock_widget_round">Rund</string>
+    <string name="clock_widget_rectangular">Rechteckig</string>
 </resources>
