@@ -68,7 +68,7 @@
     <string name="today">היום</string>
     <string name="tomorrow_word">למחר</string>
     <string name="tomorrow">אחרי השקיעה — הזמנים של מחר: %s</string>
-    <string name="evening">אחרי השקיעה — כבר היום הבא</string>
+    <string name="evening">מהשקיעה — יום חדש</string>
     <string name="off2">כבוי</string>
     <string name="dock_shabbat">שבת</string>
     <string name="dock_alarm">שעון מעורר</string>

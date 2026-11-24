@@ -281,7 +281,8 @@ private fun DrawScope.drawFace(
             val color = when {
                 d.state == DashState.NOW && widgetStyle -> ClockColors.WidgetNow
                 d.state == DashState.NOW -> ClockColors.Hand
-                widgetStyle -> ClockColors.WidgetTick.copy(alpha = 0.22f)
+                // в виджете прошедшие четверти часа — светлые, будущие — бледные: видно, сколько прошло
+                widgetStyle -> ClockColors.WidgetTick.copy(alpha = if (d.state == DashState.LIT) 0.78f else 0.22f)
                 else -> lerp(ClockColors.Tchelet, ClockColors.Gold, d.light.toFloat())
             }
             drawLine(
@@ -300,8 +301,9 @@ private fun DrawScope.drawFace(
         )
         // внутри вверху — солнце днём, луна ночью
         // в виджете время — поверх картинки и крупнее: солнце / луна выше и чуть меньше, под подписью у верхней точки
-        translate(100f, if (showTime) 56f else if (widgetStyle) 68f else 47f) {
-            val sc = if (showTime) 1.15f else 0.95f
+        // луна / солнце — выше значка системы времени (y 65), не налезают на него
+        translate(100f, if (showTime) 46f else if (widgetStyle) 68f else 47f) {
+            val sc = if (showTime) 1.0f else 0.95f
             scale(sc, sc, pivot = Offset.Zero) {
                 if (ring.day) {
                     drawCircle(ClockColors.Gold, radius = 4.5f, center = Offset.Zero)
@@ -326,6 +328,9 @@ private fun DrawScope.drawFace(
             textAlign = Paint.Align.CENTER
             typeface = if (bold) Typeface.DEFAULT_BOLD else Typeface.DEFAULT
             fontFeatureSettings = "tnum"
+            // тень: цифры читаются и на светлом закате картинки
+            val lightFace = ClockTheme.light && !widgetStyle
+            setShadowLayer(2.2f * k, 0f, 0.6f * k, if (lightFace) 0xCCFFFFFF.toInt() else 0xE6000000.toInt())
         }
         val fm = p.fontMetrics
         canvas.drawText(s, x * k, y * k - (fm.ascent + fm.descent) / 2, p)
@@ -373,7 +378,7 @@ private fun DrawScope.drawFace(
         val pos = polar(turn, 68.0)
         text(
             d.e.at.withZoneSameInstant(zone).format(HHMM), pos.x, pos.y, 8.4f,
-            if (widgetStyle) Color(0x99A0AEC0) else d.e.color
+            if (widgetStyle) Color(0xD9E2E8F0) else d.e.color
         )
     }
 
@@ -413,7 +418,7 @@ private fun DrawScope.drawFace(
             text(String.format(Locale.ROOT, "%02d", t.second), 100f, 114f, 14f, ClockColors.Seconds)
         }
     }
-    if (hourLabel != null) text(hourLabel, 100f, if (showTime) 131f else 124f, 9f, ClockColors.Muted)
+    if (hourLabel != null) text(hourLabel, 100f, if (showTime) 131f else 124f, 9f, ClockColors.Ink2)
 }
 
 /**
@@ -444,7 +449,9 @@ fun renderFace(
     hourLabel: String? = null,
     light: Boolean = false,
     timeSystemHalachic: Boolean = false
-): android.graphics.Bitmap = ClockTheme.render(light) {
+): android.graphics.Bitmap = ClockTheme.render(false) {
+    // картинка циферблата — всегда ночное небо: деления и подписи — тёмной темы, иначе тёмное по тёмному
+    // (светлая тема виджета меняет только плашку с датой)
     val bmp = ImageBitmap(sizePx, sizePx)
     val insetPx = 34f
     val k = (sizePx - 2f * insetPx) / BOX

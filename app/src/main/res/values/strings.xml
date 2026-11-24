@@ -68,7 +68,7 @@
     <string name="today">Today</string>
     <string name="tomorrow_word">tomorrow</string>
     <string name="tomorrow">After sunset — tomorrow\'s times: %s</string>
-    <string name="evening">after sunset — already the next day</string>
+    <string name="evening">from sunset — a new day</string>
     <string name="off2">off</string>
     <string name="dock_shabbat">Shabbat</string>
     <string name="dock_alarm">Alarm</string>

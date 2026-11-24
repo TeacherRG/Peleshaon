@@ -39,6 +39,10 @@
                 android:textFontWeight="600"
                 android:textColor="#F8FAFC"
                 android:textSize="28sp"
+                android:shadowColor="#CC000000"
+                android:shadowDx="0"
+                android:shadowDy="1"
+                android:shadowRadius="6"
                 android:textStyle="normal" />
 
             <!-- цируф висит под временем, не сдвигая его с центра циферблата -->

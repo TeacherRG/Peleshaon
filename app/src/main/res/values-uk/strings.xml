@@ -68,7 +68,7 @@
     <string name="today">Сьогодні</string>
     <string name="tomorrow_word">на завтра</string>
     <string name="tomorrow">Після заходу сонця — час на завтра: %s</string>
-    <string name="evening">після заходу — вже наступний день</string>
+    <string name="evening">із заходу — новий день</string>
     <string name="off2">вимк.</string>
     <string name="dock_shabbat">Шабат</string>
     <string name="dock_alarm">Будильник</string>

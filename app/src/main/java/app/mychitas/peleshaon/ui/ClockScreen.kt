@@ -243,7 +243,6 @@ fun ClockScreen(
                 ) {
                     // «7 кислева 5787» крупно; ниже — буквами и гражданская дата; нажатие — календарь
                     Row(verticalAlignment = Alignment.Bottom) {
-                        Text("📅", fontSize = 14.sp, modifier = Modifier.padding(end = 4.dp, bottom = 5.dp))
                         Text("${jd.day}", color = ClockColors.GoldDeep, fontSize = 28.sp, fontWeight = FontWeight.ExtraBold, lineHeight = 30.sp)
                         Spacer(Modifier.width(5.dp))
                         Text(
@@ -258,7 +257,8 @@ fun ClockScreen(
                         day.jewishDateHebrew + " · " + cityNow.format(DateTimeFormatter.ofPattern("EEE d MMM", locale)),
                         color = ClockColors.Ink2, fontSize = 12.sp, textAlign = TextAlign.Center, maxLines = 1, overflow = TextOverflow.Ellipsis
                     )
-                    if (day.isNextJewishDayAfterSunset) Text(stringResource(R.string.evening), color = ClockColors.Muted, fontSize = 11.sp, textAlign = TextAlign.Center)
+                    if (day.isNextJewishDayAfterSunset) Text(stringResource(R.string.evening), color = ClockColors.Muted, fontSize = 11.sp,
+                        textAlign = TextAlign.Center, maxLines = 1, overflow = TextOverflow.Ellipsis)
                 }
                 }
                 // меню: компас, настройки, помощь (владелец, 18.11.2026)
@@ -307,7 +307,8 @@ fun ClockScreen(
                     events = events,
                     active = pop?.first,
                     tziruf = tziruf,
-                    modifier = Modifier.fillMaxSize(),
+                    // малый циферблат стоит под большим, а не поверх его обода
+                    modifier = Modifier.fillMaxSize().padding(bottom = if (subdialEnabled) 96.dp else 0.dp),
                     hourLabel = hourLabel,
                     timeText = primaryTimeText,
                     analog = mainAnalog,
@@ -317,7 +318,7 @@ fun ClockScreen(
                 if (subdialEnabled) {
                     val secondaryIsHalachic = mainTimeType == Prefs.TIME_CIVIL
                     Surface(
-                        modifier = Modifier.align(Alignment.BottomCenter).padding(bottom = 8.dp).size(94.dp),
+                        modifier = Modifier.align(Alignment.BottomCenter).padding(bottom = 2.dp).size(88.dp),
                         shape = CircleShape,
                         color = Color.Transparent,
                         border = BorderStroke(1.5.dp, if (secondaryIsHalachic) ClockColors.Gold else ClockColors.TcheletDeep),
@@ -396,7 +397,9 @@ fun ClockScreen(
             } else if (pop == null && mev != null) {
                 MevarchimPill(mev, onClick = { panel = Panel.SHABBAT })
             } else if (pop == null && !day.isPolarAnomaly) {
-                Text(stringResource(R.string.hint), color = ClockColors.Muted, fontSize = 12.sp, textAlign = TextAlign.Center)
+                // подсказка — на полупрозрачной плашке: под ней яркий закат фона
+                Text(stringResource(R.string.hint), color = ClockColors.Ink2, fontSize = 12.sp, textAlign = TextAlign.Center,
+                    modifier = Modifier.background(ClockColors.Surface, RoundedCornerShape(12.dp)).padding(horizontal = 10.dp, vertical = 3.dp))
             }
 
             // ---- кнопки внизу: Шабат · Будильник · Учёба · Времена
