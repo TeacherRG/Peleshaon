@@ -160,8 +160,8 @@
     <string name="about_t">על היישום</string>
     <string name="about_version">גרסה %s</string>
     <string name="about_by">פרויקט התורה MyChitas · ה״שעון״ של אתר נפלאות</string>
-    <string name="about_site">אתר נפלאות — niflaot.mychitas.app</string>
-    <string name="about_mail">כתבו לנו — Office@mychitas.app</string>
+    <string name="about_site">אתר נפלאות — niflaot.app</string>
+    <string name="about_mail">כתבו לנו — Office@niflaot.app</string>
     <string name="privacy_t">פרטיות</string>
     <string name="privacy_1">היישום אינו אוסף עליכם שום מידע: אין חשבונות, פרסומות, ניתוח נתונים או מונים.</string>
     <string name="privacy_2">הוא אינו מתחבר לאינטרנט — אין לו אפילו הרשאה לכך. האתר נפתח רק בלחיצה שלכם, בדפדפן.</string>
@@ -280,7 +280,7 @@
     <string name="home_vivo">בטלפונים של vivo: הגדרות היישום ← «הרשאות» ← «קיצורי דרך במסך הבית» ← «לאשר». אחר כך לחצו שוב על הכפתורים למעלה.</string>
     <string name="home_huawei">בטלפונים של Huawei ו־Honor: הגדרות היישום ← «הרשאות» ← «קיצורי דרך במסך הבית» ← «לאשר». אחר כך לחצו שוב על הכפתורים למעלה.</string>
     <string name="home_other">אם חלון ההוספה לא הופיע — פתחו את הגדרות היישום ובדקו הרשאות של מסך הבית («קיצורי דרך»). ווידג׳טים: לחיצה ארוכה על מקום ריק במסך הבית ← «ווידג׳טים» ← «פלא שעון».</string>
-    <string name="home_zero">הטלפון אינו רואה את הווידג׳טים של היישום — הפעילו את הטלפון מחדש פעם אחת. אם עדיין 0 — שלחו צילום של המסך הזה ל־Office@mychitas.app.</string>
+    <string name="home_zero">הטלפון אינו רואה את הווידג׳טים של היישום — הפעילו את הטלפון מחדש פעם אחת. אם עדיין 0 — שלחו צילום של המסך הזה ל־Office@niflaot.app.</string>
     <string name="home_open">פתיחת הגדרות היישום</string>
     <string name="home_status">ווידג׳טים של היישום בטלפון: %1$d מתוך 2 · מסך הבית: %2$s · %3$s, Android %4$s</string>
     <string name="pin_done">בוצע — הסתכלו במסך הבית</string>

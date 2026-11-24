@@ -160,8 +160,8 @@
     <string name="about_t">Про застосунок</string>
     <string name="about_version">Версія %s</string>
     <string name="about_by">Тора-проєкт MyChitas · «Годинник» сайту Ніфлаот</string>
-    <string name="about_site">Сайт Ніфлаот — niflaot.mychitas.app</string>
-    <string name="about_mail">Написати нам — Office@mychitas.app</string>
+    <string name="about_site">Сайт Ніфлаот — niflaot.app</string>
+    <string name="about_mail">Написати нам — Office@niflaot.app</string>
     <string name="privacy_t">Конфіденційність</string>
     <string name="privacy_1">Застосунок не збирає про вас жодних даних: немає акаунтів, реклами, аналітики й лічильників.</string>
     <string name="privacy_2">Він не виходить в інтернет — у нього навіть немає такого дозволу. Сайт відкривається лише вашою кнопкою, у браузері.</string>
@@ -281,7 +281,7 @@
     <string name="home_vivo">На телефонах vivo: налаштування застосунку → «Дозволи» → «Ярлики на робочому столі» → «Дозволити». Потім знову натисніть кнопки вище.</string>
     <string name="home_huawei">На телефонах Huawei і Honor: налаштування застосунку → «Дозволи» → «Ярлики на робочому столі» → «Дозволити». Потім знову натисніть кнопки вище.</string>
     <string name="home_other">Якщо вікно додавання не з’явилося — відкрийте налаштування застосунку і перевірте дозволи, пов’язані з робочим столом («Ярлики»). Віджети: довге натискання на порожньому місці робочого столу → «Віджети» → «Пеле Шаон».</string>
-    <string name="home_zero">Телефон не бачить віджетів застосунку — перезавантажте телефон один раз. Якщо й потім 0 — надішліть знімок цього екрана на Office@mychitas.app.</string>
+    <string name="home_zero">Телефон не бачить віджетів застосунку — перезавантажте телефон один раз. Якщо й потім 0 — надішліть знімок цього екрана на Office@niflaot.app.</string>
     <string name="home_open">Відкрити налаштування застосунку</string>
     <string name="home_status">Віджетів застосунку в телефоні: %1$d з 2 · робочий стіл: %2$s · %3$s, Android %4$s</string>
     <string name="pin_done">Готово — дивіться на головному екрані</string>

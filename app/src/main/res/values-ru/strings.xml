@@ -160,8 +160,8 @@
     <string name="about_t">О приложении</string>
     <string name="about_version">Версия %s</string>
     <string name="about_by">Тора-проект MyChitas · «Часы» сайта Нифлаот</string>
-    <string name="about_site">Сайт Нифлаот — niflaot.mychitas.app</string>
-    <string name="about_mail">Написать нам — Office@mychitas.app</string>
+    <string name="about_site">Сайт Нифлаот — niflaot.app</string>
+    <string name="about_mail">Написать нам — Office@niflaot.app</string>
     <string name="privacy_t">Конфиденциальность</string>
     <string name="privacy_1">Приложение не собирает о вас никаких данных: нет аккаунтов, рекламы, аналитики и счётчиков.</string>
     <string name="privacy_2">Оно не выходит в интернет — у него нет даже такого разрешения. Сайт открывается только по вашей кнопке, в браузере.</string>
@@ -281,7 +281,7 @@
     <string name="home_vivo">На телефонах vivo: настройки приложения → «Разрешения» → «Ярлыки на рабочем столе» → «Разрешить». Потом снова нажмите кнопки выше.</string>
     <string name="home_huawei">На телефонах Huawei и Honor: настройки приложения → «Разрешения» → «Ярлыки на рабочем столе» → «Разрешить». Потом снова нажмите кнопки выше.</string>
     <string name="home_other">Если окно добавления не появилось — откройте настройки приложения и проверьте разрешения, связанные с рабочим столом («Ярлыки»). Виджеты: долгое нажатие на пустом месте рабочего стола → «Виджеты» → «Пеле Шаон».</string>
-    <string name="home_zero">Телефон не видит виджетов приложения — перезагрузите телефон один раз. Если и потом 0 — пришлите снимок этого экрана на Office@mychitas.app.</string>
+    <string name="home_zero">Телефон не видит виджетов приложения — перезагрузите телефон один раз. Если и потом 0 — пришлите снимок этого экрана на Office@niflaot.app.</string>
     <string name="home_open">Открыть настройки приложения</string>
     <string name="home_status">Виджетов приложения в телефоне: %1$d из 2 · рабочий стол: %2$s · %3$s, Android %4$s</string>
     <string name="pin_done">Готово — смотрите на главном экране</string>

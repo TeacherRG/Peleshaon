@@ -160,8 +160,8 @@
     <string name="about_t">About</string>
     <string name="about_version">Version %s</string>
     <string name="about_by">MyChitas Torah project · the «Clock» of the Niflaot site</string>
-    <string name="about_site">Niflaot site — niflaot.mychitas.app</string>
-    <string name="about_mail">Write to us — Office@mychitas.app</string>
+    <string name="about_site">Niflaot site — niflaot.app</string>
+    <string name="about_mail">Write to us — Office@niflaot.app</string>
     <string name="privacy_t">Privacy</string>
     <string name="privacy_1">The app collects no data about you: no accounts, no ads, no analytics, no trackers.</string>
     <string name="privacy_2">It does not go online — it does not even have the internet permission. The site opens only when you tap a button, in your browser.</string>
@@ -279,7 +279,7 @@
     <string name="home_vivo">On vivo phones: app settings → «Permissions» → «Home screen shortcuts» → «Allow». Then tap the buttons above again.</string>
     <string name="home_huawei">On Huawei and Honor phones: app settings → «Permissions» → «Home screen shortcuts» → «Allow». Then tap the buttons above again.</string>
     <string name="home_other">If no «add» window appeared, open the app settings and check the permissions related to the home screen («Shortcuts»). Widgets: long-press an empty spot on the home screen → «Widgets» → «Pele Shaon».</string>
-    <string name="home_zero">The phone does not see the app\'s widgets — restart the phone once. If it is still 0, send a screenshot of this screen to Office@mychitas.app.</string>
+    <string name="home_zero">The phone does not see the app\'s widgets — restart the phone once. If it is still 0, send a screenshot of this screen to Office@niflaot.app.</string>
     <string name="home_open">Open the app settings</string>
     <string name="home_status">App widgets on the phone: %1$d of 2 · home screen: %2$s · %3$s, Android %4$s</string>
     <string name="pin_done">Done — look at the home screen</string>

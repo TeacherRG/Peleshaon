@@ -160,8 +160,8 @@
     <string name="about_t">Über die App</string>
     <string name="about_version">Version %s</string>
     <string name="about_by">Tora-Projekt MyChitas · die «Uhr» der Seite Niflaot</string>
-    <string name="about_site">Seite Niflaot — niflaot.mychitas.app</string>
-    <string name="about_mail">Schreib uns — Office@mychitas.app</string>
+    <string name="about_site">Seite Niflaot — niflaot.app</string>
+    <string name="about_mail">Schreib uns — Office@niflaot.app</string>
     <string name="privacy_t">Datenschutz</string>
     <string name="privacy_1">Die App sammelt keine Daten über dich: keine Konten, keine Werbung, keine Analyse, keine Zähler.</string>
     <string name="privacy_2">Sie geht nicht ins Internet — sie hat nicht einmal diese Berechtigung. Die Seite öffnet sich nur auf deinen Knopfdruck, im Browser.</string>
@@ -279,7 +279,7 @@
     <string name="home_vivo">Auf vivo-Handys: App-Einstellungen → «Berechtigungen» → «Verknüpfungen auf dem Startbildschirm» → «Zulassen». Dann noch einmal auf die Knöpfe oben tippen.</string>
     <string name="home_huawei">Auf Huawei- und Honor-Handys: App-Einstellungen → «Berechtigungen» → «Verknüpfungen auf dem Startbildschirm» → «Zulassen». Dann noch einmal auf die Knöpfe oben tippen.</string>
     <string name="home_other">Wenn kein Fenster zum Hinzufügen erschienen ist, öffne die App-Einstellungen und prüfe die Berechtigungen für den Startbildschirm («Verknüpfungen»). Widgets: lange auf eine freie Stelle drücken → «Widgets» → «Pele Schaon».</string>
-    <string name="home_zero">Das Handy sieht die Widgets der App nicht — starte das Handy einmal neu. Steht dann immer noch 0 da, schick ein Bildschirmfoto an Office@mychitas.app.</string>
+    <string name="home_zero">Das Handy sieht die Widgets der App nicht — starte das Handy einmal neu. Steht dann immer noch 0 da, schick ein Bildschirmfoto an Office@niflaot.app.</string>
     <string name="home_open">App-Einstellungen öffnen</string>
     <string name="home_status">Widgets der App auf dem Handy: %1$d von 2 · Startbildschirm: %2$s · %3$s, Android %4$s</string>
     <string name="pin_done">Fertig — schau auf den Startbildschirm</string>

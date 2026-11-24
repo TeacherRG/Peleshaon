@@ -1216,7 +1216,7 @@ private fun LinkButton(text: String, route: String, modifier: Modifier) {
             val lang = when (Locale.getDefault().language) {
                 "ru", "uk", "be" -> "ru"; "de" -> "de"; "iw", "he" -> "he"; else -> "en"
             }
-            context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("https://niflaot.mychitas.app/?lang=$lang&ref=app#/$route")))
+            context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("https://niflaot.app/?lang=$lang&ref=app#/$route")))
         },
         shape = RoundedCornerShape(12.dp),
         color = ClockColors.Surface,
@@ -1377,9 +1377,9 @@ private fun InfoSheet(onNightScreen: () -> Unit, onIntro: () -> Unit, onPrivacy:
     }
 }
 
-private const val SITE = "https://niflaot.mychitas.app/"
-private const val PRIVACY_URL = "https://niflaot.mychitas.app/peleshaon/privacy/"
-private const val MAIL = "Office@mychitas.app"
+private const val SITE = "https://niflaot.app/"
+private const val PRIVACY_URL = "https://niflaot.app/peleshaon/privacy/"
+private const val MAIL = "Office@niflaot.app"
 
 private fun langParam(): String = when (Locale.getDefault().language) {
     "ru", "uk", "be" -> "ru"; "de" -> "de"; "iw", "he" -> "he"; else -> "en"
