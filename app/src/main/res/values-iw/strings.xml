@@ -312,4 +312,5 @@
     <string name="clock_time_title">סוג הזמן</string>
     <string name="clock_halachic">הלכתי</string>
     <string name="clock_civil">רגיל</string>
+    <string name="clock_sub_time_note">הלוח המשני מציג את השעה הרגילה או ההלכתית שנבחרה; מעגל הזמנים המלא נשאר בלוח הראשי.</string>
 </resources>

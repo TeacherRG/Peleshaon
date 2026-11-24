@@ -313,4 +313,5 @@
     <string name="clock_time_title">Тип времени</string>
     <string name="clock_halachic">Галахическое</string>
     <string name="clock_civil">Обычное</string>
+    <string name="clock_sub_time_note">Малый циферблат показывает выбранное обычное или галахическое время; полный круг зманим остаётся на главном циферблате.</string>
 </resources>

@@ -1577,6 +1577,7 @@ private fun SettingsSheet(onChange: () -> Unit) {
         Text(stringResource(R.string.clock_faces_title), fontWeight = FontWeight.Bold, color = ClockColors.Ink)
         FaceSettings(context, "main", R.string.clock_main_face)
         FaceSettings(context, "sub", R.string.clock_sub_face)
+        Text(stringResource(R.string.clock_sub_time_note), color = ClockColors.Muted, fontSize = 11.sp)
         HorizontalDivider(color = ClockColors.Line)
         HorizontalDivider(color = ClockColors.Line)
         // There is no valid coordinate context for geographically sensitive settings.
