@@ -316,4 +316,7 @@
     <string name="clock_sub_time_note">Малый циферблат показывает выбранное обычное или галахическое время; полный круг зманим остаётся на главном циферблате.</string>
     <string name="clock_hidden">Скрыть</string>
     <string name="clock_sub_visible">Показывать субциферблат</string>
+    <string name="clock_widget_shape_title">Форма виджета телефона</string>
+    <string name="clock_widget_round">Круглая</string>
+    <string name="clock_widget_rectangular">Прямоугольная</string>
 </resources>
