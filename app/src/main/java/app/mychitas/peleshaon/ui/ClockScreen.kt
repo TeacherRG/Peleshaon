@@ -318,19 +318,36 @@ fun ClockScreen(
                     Surface(
                         modifier = Modifier.align(Alignment.BottomCenter).padding(bottom = 8.dp).size(94.dp),
                         shape = CircleShape,
-                        color = ClockColors.SheetBg.copy(alpha = 0.96f),
+                        color = Color.Transparent,
                         border = BorderStroke(1.5.dp, if (secondaryIsHalachic) ClockColors.Gold else ClockColors.TcheletDeep),
                         shadowElevation = 5.dp
                     ) {
-                        Column(horizontalAlignment = Alignment.CenterHorizontally,
-                            verticalArrangement = Arrangement.Center) {
-                            if (secondaryAnalog) {
-                                MiniAnalogHands(secondaryTimeText, secondaryIsHalachic, Modifier.size(56.dp))
-                                TimeSystemMark(secondaryIsHalachic, Modifier.size(18.dp))
-                            } else {
-                                TimeSystemMark(secondaryIsHalachic, Modifier.size(20.dp))
-                                Text(secondaryTimeText, color = ClockColors.Ink, fontSize = 19.sp,
-                                    fontWeight = FontWeight.Bold, maxLines = 1)
+                        Box(modifier = Modifier.fillMaxSize()) {
+                            Image(
+                                painter = painterResource(R.drawable.clock_halachic_face),
+                                contentDescription = null,
+                                modifier = Modifier.fillMaxSize().clip(CircleShape),
+                                contentScale = ContentScale.Crop
+                            )
+                            Box(
+                                modifier = Modifier.fillMaxSize().background(
+                                    if (ClockTheme.light) Color(0xBFF8F3E8) else Color(0x990B1532),
+                                    CircleShape
+                                )
+                            )
+                            Column(
+                                modifier = Modifier.fillMaxSize(),
+                                horizontalAlignment = Alignment.CenterHorizontally,
+                                verticalArrangement = Arrangement.Center
+                            ) {
+                                if (secondaryAnalog) {
+                                    MiniAnalogHands(secondaryTimeText, secondaryIsHalachic, Modifier.size(56.dp))
+                                    TimeSystemMark(secondaryIsHalachic, Modifier.size(18.dp))
+                                } else {
+                                    TimeSystemMark(secondaryIsHalachic, Modifier.size(20.dp))
+                                    Text(secondaryTimeText, color = ClockColors.Ink, fontSize = 19.sp,
+                                        fontWeight = FontWeight.Bold, maxLines = 1)
+                                }
                             }
                         }
                     }
