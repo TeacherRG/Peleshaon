@@ -252,4 +252,12 @@ object Prefs {
         require(face in setOf("main", "sub") && time in setOf("HALACHIC", "CIVIL"))
         of(context).edit().putString("clock_${face}_time", time).apply()
     }
+
+    /** The secondary dial is visible by default; the user's choice stays on this device. */
+    fun subFaceVisible(context: Context): Boolean =
+        of(context).getBoolean("clock_sub_visible", true)
+
+    fun setSubFaceVisible(context: Context, visible: Boolean) {
+        of(context).edit().putBoolean("clock_sub_visible", visible).apply()
+    }
 }
