@@ -1516,7 +1516,7 @@ private fun DigitalFaceTime(
             border = BorderStroke(1.5.dp, ClockColors.Gold.copy(alpha = 0.72f))
         ) {
             Box(contentAlignment = Alignment.Center) {
-                Canvas(Modifier.fillMaxSize().padding(8.dp)) {
+                Canvas(Modifier.matchParentSize().padding(8.dp)) {
                     val inset = 1.5.dp.toPx()
                     val diameter = size.minDimension - inset * 2
                     val arcSize = androidx.compose.ui.geometry.Size(diameter, diameter)
