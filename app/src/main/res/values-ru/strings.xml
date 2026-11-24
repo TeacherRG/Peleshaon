@@ -307,9 +307,25 @@
     <string name="dual_clock_title">Два времени на одном циферблате</string>
     <string name="main_time_title">Главный циферблат</string>
     <string name="civil_time_title">Обычное время</string>
-    <string name="halachic_time_title">Алохическое время</string>
+    <string name="halachic_time_title">Галахическое время</string>
     <string name="secondary_dial_title">Показывать субциферблат</string>
     <string name="face_style_title">Стиль отображения</string>
     <string name="face_digital">Цифровой</string>
     <string name="face_analog">Со стрелками</string>
+    <string name="skin_classic">Классика</string>
+    <string name="skin_sunset">Закат</string>
+    <string name="skin_minimal">Минимализм</string>
+    <string name="skin_traditional">Традиционная</string>
+    <string name="skin_light">Светлая</string>
+    <string name="skin_dark">Тёмная</string>
+    <string name="design_title">Оформление часов</string>
+    <string name="main_clock_title">Главные часы</string>
+    <string name="time_type_title">Тип времени</string>
+    <string name="extra_clock_title">Дополнительные часы (малый циферблат)</string>
+    <string name="extra_hide">Скрыть</string>
+    <string name="show_date">Показывать дату</string>
+    <string name="show_sun">Восход и закат</string>
+    <string name="show_zmanim">Основные зманим на ободе</string>
+    <string name="widget_card_name">Пеле Шаон — прямоугольные часы</string>
+    <string name="widget_card_desc">Время, дата и еврейская дата, восход, закат и галахический час</string>
 </resources>

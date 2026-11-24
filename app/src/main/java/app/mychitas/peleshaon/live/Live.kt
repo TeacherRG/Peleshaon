@@ -34,6 +34,9 @@ import app.mychitas.peleshaon.ui.isDeadline
 import app.mychitas.peleshaon.ui.jewishMonthName
 import app.mychitas.peleshaon.ui.jewishDayMonth
 import app.mychitas.peleshaon.ui.renderFace
+import app.mychitas.peleshaon.ui.renderCard
+import app.mychitas.peleshaon.ui.FaceSkin
+import app.mychitas.peleshaon.ui.faceInfo
 import app.mychitas.peleshaon.ui.short
 import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
@@ -95,7 +98,8 @@ object Live {
     fun widgetIds(context: Context): IntArray {
         val m = AppWidgetManager.getInstance(context)
         return m.getAppWidgetIds(ComponentName(context, FaceWidget::class.java)) +
-            m.getAppWidgetIds(ComponentName(context, DateWidget::class.java))
+            m.getAppWidgetIds(ComponentName(context, DateWidget::class.java)) +
+            m.getAppWidgetIds(ComponentName(context, CardWidget::class.java))
     }
 
     fun notificationOn(context: Context): Boolean = Prefs.of(context).getBoolean("live_notification", false)
@@ -154,6 +158,8 @@ object Live {
                 manager.updateAppWidget(id, ordinaryFaceViews(context, light, id))
             for (id in manager.getAppWidgetIds(ComponentName(context, DateWidget::class.java)))
                 manager.updateAppWidget(id, ordinaryDateViews(context, light, id))
+            for (id in manager.getAppWidgetIds(ComponentName(context, CardWidget::class.java)))
+                manager.updateAppWidget(id, ordinaryCardViews(context, id))
             if (ids.isEmpty()) cancelTick(context) else scheduleOrdinaryTick(context)
             return
         }
@@ -162,6 +168,7 @@ object Live {
         val m = AppWidgetManager.getInstance(context)
         for (id in m.getAppWidgetIds(ComponentName(context, FaceWidget::class.java))) m.updateAppWidget(id, faceViews(context, s, id, light))
         for (id in m.getAppWidgetIds(ComponentName(context, DateWidget::class.java))) m.updateAppWidget(id, dateViews(context, s, light, id))
+        for (id in m.getAppWidgetIds(ComponentName(context, CardWidget::class.java))) m.updateAppWidget(id, cardViews(context, s, id))
         if (notif) showNotification(context, s)
         scheduleTick(context, s)
     }
@@ -254,20 +261,22 @@ object Live {
      * плашка с датой сразу под ним (Android 12+), цифры времени — по размеру круга,
      * чтобы не налезали на деления.
      */
-    private fun fitFace(context: Context, v: RemoteViews, widgetId: Int) {
+    private fun fitFace(context: Context, v: RemoteViews, widgetId: Int, withPill: Boolean = true) {
         val opts = AppWidgetManager.getInstance(context).getAppWidgetOptions(widgetId)
         val w = opts.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_WIDTH, 0)
         val h = opts.getInt(AppWidgetManager.OPTION_APPWIDGET_MAX_HEIGHT, 0)
         if (w <= 0 || h <= 0) return
         val font = context.resources.configuration.fontScale
-        val pill = 15f * font * 1.2f + 8f + 2f   // компактная дата: текст, отступы и зазор
+        val pill = if (withPill) 15f * font * 1.2f + 8f + 2f else 0f   // компактная дата: текст, отступы и зазор
         val side = minOf(w - 16f, h - 16f - pill).coerceAtLeast(96f)
-        val time = (side * 0.2f).coerceIn(22f, 44f)
+        // время — там же, где в приложении: чуть выше центра, между датой и восходом / закатом
+        val time = (side * 0.18f).coerceIn(20f, 48f)
         v.setTextViewTextSize(R.id.w_time, TypedValue.COMPLEX_UNIT_DIP, time)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
             v.setViewLayoutWidth(R.id.w_face_box, side, TypedValue.COMPLEX_UNIT_DIP)
             v.setViewLayoutHeight(R.id.w_face_box, side, TypedValue.COMPLEX_UNIT_DIP)
-            v.setViewLayoutMargin(R.id.w_tziruf, RemoteViews.MARGIN_TOP, (time * 0.3f + 5f).coerceAtLeast(10f), TypedValue.COMPLEX_UNIT_DIP)
+            v.setViewLayoutMargin(R.id.w_time, RemoteViews.MARGIN_BOTTOM, side * 0.18f, TypedValue.COMPLEX_UNIT_DIP)
+            v.setViewLayoutMargin(R.id.w_tziruf, RemoteViews.MARGIN_TOP, side * 0.06f, TypedValue.COMPLEX_UNIT_DIP)
         }
     }
 
@@ -278,17 +287,23 @@ object Live {
         val opts = AppWidgetManager.getInstance(context).getAppWidgetOptions(widgetId)
         val dp = maxOf(opts.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_WIDTH, 200), opts.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_HEIGHT, 200))
         val px = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, dp.toFloat(), context.resources.displayMetrics).toInt().coerceIn(360, 720)
+        val skin = FaceSkin.of(Prefs.faceSkin(context))
+        val info = faceInfo(context, s.city, s.now, s.day, s.half, widget = true)
         v.setImageViewBitmap(R.id.w_face, renderFace(
-            context, px, s.now, s.city.zone(), s.half, s.ring, s.events, Prefs.tziruf(context),
-            light = light, timeSystemHalachic = Prefs.mainTimeType(context) == Prefs.TIME_HALACHIC
+            context, px, s.now, s.city.zone(), s.half, s.ring,
+            if (Prefs.showZmanim(context)) s.events else emptyList(), Prefs.tziruf(context),
+            skin = skin, info = info
         ))
         v.setInt(
             R.id.w_date,
             "setBackgroundResource",
             if (light) R.drawable.widget_date_pill_light else R.drawable.widget_date_pill_dark
         )
-        // циферблат — всегда ночная картинка: время и сочетание — светлые; тема меняет только плашку с датой
-        v.paint(false, R.id.w_time to INK)
+        // дата — на самом циферблате; плашка под ним — только если дату на циферблате выключили
+        val pill = info.jewishLine == null
+        v.setViewVisibility(R.id.w_date, if (pill) View.VISIBLE else View.GONE)
+        // время и сочетание — цветом оформления
+        v.setTextColor(R.id.w_time, skin.time1.toInt())
         v.paint(light, R.id.w_date to CREAM)
         val ring = s.ring
         val showTziruf = Prefs.tziruf(context) && ring != null &&
@@ -296,7 +311,7 @@ object Live {
         v.setViewVisibility(R.id.w_tziruf, if (showTziruf) View.VISIBLE else View.GONE)
         if (showTziruf && ring != null) {
             v.setTextViewText(R.id.w_tziruf, Dial.TZIRUFIM[ring.hour])
-            v.paint(false, R.id.w_tziruf to GOLD)
+            v.setTextColor(R.id.w_tziruf, skin.accent.toInt())
         }
         v.clocks(context, s, R.id.w_time)
         v.setTextViewText(R.id.w_date, dateLine(s))
@@ -307,7 +322,59 @@ object Live {
             PendingIntent.getBroadcast(context, 6000 + widgetId, tapIntent,
                 PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
         )
-        fitFace(context, v, widgetId)
+        fitFace(context, v, widgetId, pill)
+        return v
+    }
+
+    /** Размер прямоугольного виджета в dp: ширина и высота (в портрете — минимальная ширина и наибольшая высота). */
+    private fun cardSize(context: Context, widgetId: Int): Pair<Float, Float> {
+        val opts = AppWidgetManager.getInstance(context).getAppWidgetOptions(widgetId)
+        val w = opts.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_WIDTH, 280).takeIf { it > 0 } ?: 280
+        val h = opts.getInt(AppWidgetManager.OPTION_APPWIDGET_MAX_HEIGHT, 140).takeIf { it > 0 } ?: 140
+        // карточка не выше половины ширины и не ниже трети — иначе пусто или тесно
+        val cw = (w - 12f).coerceAtLeast(160f)
+        val ch = (h - 12f).coerceIn(cw / 3f, cw / 1.6f)
+        return cw to ch
+    }
+
+    /** Прямоугольный виджет (владелец, 24.11.2026): оформление, дата, время, восход, галахический час, закат. */
+    private fun cardViews(context: Context, s: LiveState, widgetId: Int): RemoteViews {
+        val v = RemoteViews(context.packageName, R.layout.widget_card)
+        val (cw, ch) = cardSize(context, widgetId)
+        val dm = context.resources.displayMetrics
+        val scale = (900f / TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, cw, dm)).coerceAtMost(1f)
+        val wPx = (TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, cw, dm) * scale).toInt()
+        val hPx = (TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, ch, dm) * scale).toInt()
+        val skin = FaceSkin.of(Prefs.faceSkin(context))
+        val info = faceInfo(context, s.city, s.now, s.day, s.half, widget = true)
+        v.setImageViewBitmap(R.id.w_card, renderCard(context, wPx, hPx, skin, info))
+        v.setViewVisibility(R.id.w_date, View.GONE)
+        v.setTextColor(R.id.w_time, skin.time1.toInt())
+        v.setTextViewTextSize(R.id.w_time, TypedValue.COMPLEX_UNIT_DIP, (ch * 0.3f).coerceIn(24f, 64f))
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            v.setViewLayoutWidth(R.id.w_card_box, cw, TypedValue.COMPLEX_UNIT_DIP)
+            v.setViewLayoutHeight(R.id.w_card_box, ch, TypedValue.COMPLEX_UNIT_DIP)
+        }
+        v.clocks(context, s, R.id.w_time)
+        v.setOnClickPendingIntent(R.id.w_root, openApp(context))
+        return v
+    }
+
+    /** Без города: прямоугольный виджет зовёт выбрать город. */
+    private fun ordinaryCardViews(context: Context, widgetId: Int): RemoteViews {
+        val v = RemoteViews(context.packageName, R.layout.widget_card)
+        val (cw, ch) = cardSize(context, widgetId)
+        val dm = context.resources.displayMetrics
+        val wPx = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, cw, dm).toInt().coerceAtMost(900)
+        val hPx = (wPx * ch / cw).toInt()
+        val skin = FaceSkin.of(Prefs.faceSkin(context))
+        v.setImageViewBitmap(R.id.w_card, renderCard(context, wPx, hPx, skin, app.mychitas.peleshaon.ui.FaceInfo()))
+        v.setTextColor(R.id.w_time, skin.time1.toInt())
+        v.setString(R.id.w_time, "setTimeZone", java.time.ZoneId.systemDefault().id)
+        v.setViewVisibility(R.id.w_date, View.VISIBLE)
+        v.setTextColor(R.id.w_date, skin.text.toInt())
+        v.setTextViewText(R.id.w_date, context.getString(R.string.city_choose))
+        v.setOnClickPendingIntent(R.id.w_root, openApp(context))
         return v
     }
 

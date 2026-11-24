@@ -310,4 +310,20 @@
     <string name="face_style_title">Display style</string>
     <string name="face_digital">Digital</string>
     <string name="face_analog">Analog</string>
+    <string name="skin_classic">Classic</string>
+    <string name="skin_sunset">Sunset</string>
+    <string name="skin_minimal">Minimal</string>
+    <string name="skin_traditional">Traditional</string>
+    <string name="skin_light">Light</string>
+    <string name="skin_dark">Dark</string>
+    <string name="design_title">Clock design</string>
+    <string name="main_clock_title">Main clock</string>
+    <string name="time_type_title">Type of time</string>
+    <string name="extra_clock_title">Extra clock (small dial)</string>
+    <string name="extra_hide">Hide</string>
+    <string name="show_date">Show the date</string>
+    <string name="show_sun">Sunrise and sunset</string>
+    <string name="show_zmanim">Main zmanim on the rim</string>
+    <string name="widget_card_name">Pele Shaon — rectangular clock</string>
+    <string name="widget_card_desc">Time, the date and the Jewish date, sunrise, sunset and the halachic hour</string>
 </resources>

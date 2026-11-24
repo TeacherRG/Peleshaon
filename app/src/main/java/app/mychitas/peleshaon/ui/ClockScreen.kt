@@ -5,6 +5,7 @@ import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.border
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -27,6 +28,7 @@ import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
@@ -287,71 +289,30 @@ fun ClockScreen(
                     Text(stringResource(R.string.polar), color = ClockColors.Ink2, textAlign = TextAlign.Center, modifier = Modifier.align(Alignment.Center).padding(24.dp))
                 }
                 val mainTimeType = remember(version) { Prefs.mainTimeType(context) }
-                val subdialEnabled = remember(version) { Prefs.subdialEnabled(context) }
                 val mainAnalog = remember(version) { Prefs.faceStyle(context) == Prefs.FACE_ANALOG }
-                val secondaryAnalog = remember(version) { Prefs.secondaryFaceStyle(context) == Prefs.FACE_ANALOG }
-                val civilTimeText = cityNow.format(DateTimeFormatter.ofPattern("HH:mm", Locale.ROOT))
-                val halachicTimeText = half?.let {
-                    val elapsed = (it.frac(cityNow).coerceIn(0.0, 0.99999) * 12.0 * 60.0).toInt()
-                    String.format(Locale.ROOT, "%02d:%02d", elapsed / 60, elapsed % 60)
-                } ?: "--:--"
-                val primaryTimeText = if (mainTimeType == Prefs.TIME_HALACHIC) halachicTimeText else civilTimeText
-                val secondaryTimeText = if (mainTimeType == Prefs.TIME_HALACHIC) civilTimeText else halachicTimeText
+                val skin = remember(version) { FaceSkin.of(Prefs.faceSkin(context)) }
+                val showZmanim = remember(version) { Prefs.showZmanim(context) }
+                val info = remember(version, minute, day, half) { faceInfo(context, city, cityNow, day, half) }
+                // малый циферблат с галахическим временем меняется не раз в минуту — пересчитать каждую секунду
+                val liveInfo = if (info.subText != null && info.subLabel != null && mainTimeType == Prefs.TIME_CIVIL)
+                    info.copy(subText = halachicText(half, cityNow)) else info
                 BigFace(
                     now = cityNow,
                     zone = zone,
                     half = half,
                     ring = ring,
-                    events = events,
+                    events = if (showZmanim) events else emptyList(),
                     active = pop?.first,
                     tziruf = tziruf,
-                    // малый циферблат стоит под большим, а не поверх его обода
-                    modifier = Modifier.fillMaxSize().padding(bottom = if (subdialEnabled) 96.dp else 0.dp),
-                    hourLabel = hourLabel,
-                    timeText = primaryTimeText,
+                    modifier = Modifier.fillMaxSize(),
+                    timeText = if (mainTimeType == Prefs.TIME_HALACHIC) halachicText(half, cityNow)
+                        else cityNow.format(DateTimeFormatter.ofPattern("HH:mm", Locale.ROOT)),
                     analog = mainAnalog,
                     timeSystemHalachic = mainTimeType == Prefs.TIME_HALACHIC,
+                    skin = skin,
+                    info = liveInfo,
                     onPick = { id, fx, fy -> pop = if (id == null || pop?.first == id) null else Triple(id, fx, fy) }
                 )
-                if (subdialEnabled) {
-                    val secondaryIsHalachic = mainTimeType == Prefs.TIME_CIVIL
-                    Surface(
-                        modifier = Modifier.align(Alignment.BottomCenter).padding(bottom = 2.dp).size(88.dp),
-                        shape = CircleShape,
-                        color = Color.Transparent,
-                        border = BorderStroke(1.5.dp, if (secondaryIsHalachic) ClockColors.Gold else ClockColors.TcheletDeep),
-                        shadowElevation = 5.dp
-                    ) {
-                        Box(modifier = Modifier.fillMaxSize()) {
-                            Image(
-                                painter = painterResource(R.drawable.clock_halachic_face),
-                                contentDescription = null,
-                                modifier = Modifier.fillMaxSize().clip(CircleShape),
-                                contentScale = ContentScale.Crop
-                            )
-                            Box(
-                                modifier = Modifier.fillMaxSize().background(
-                                    if (ClockTheme.light) Color(0xBFF8F3E8) else Color(0x990B1532),
-                                    CircleShape
-                                )
-                            )
-                            Column(
-                                modifier = Modifier.fillMaxSize(),
-                                horizontalAlignment = Alignment.CenterHorizontally,
-                                verticalArrangement = Arrangement.Center
-                            ) {
-                                if (secondaryAnalog) {
-                                    MiniAnalogHands(secondaryTimeText, secondaryIsHalachic, Modifier.size(56.dp))
-                                    TimeSystemMark(secondaryIsHalachic, Modifier.size(18.dp))
-                                } else {
-                                    TimeSystemMark(secondaryIsHalachic, Modifier.size(20.dp))
-                                    Text(secondaryTimeText, color = ClockColors.Ink, fontSize = 19.sp,
-                                        fontWeight = FontWeight.Bold, maxLines = 1)
-                                }
-                            }
-                        }
-                    }
-                }
                 val p = pop
                 val e = p?.let { pp -> events.find { it.id == pp.first } }
                 if (p != null && e != null) {
@@ -394,7 +355,7 @@ fun ClockScreen(
                 MoonPill(kl, onClick = onMoon)
             } else if (pop == null && mev != null) {
                 MevarchimPill(mev, onClick = { panel = Panel.SHABBAT })
-            } else if (pop == null && !day.isPolarAnomaly) {
+            } else if (pop == null && !day.isPolarAnomaly && Prefs.showZmanim(context)) {
                 // подсказка — на полупрозрачной плашке: под ней яркий закат фона
                 Text(stringResource(R.string.hint), color = ClockColors.Ink2, fontSize = 12.sp, textAlign = TextAlign.Center,
                     modifier = Modifier.background(ClockColors.Surface, RoundedCornerShape(12.dp)).padding(horizontal = 10.dp, vertical = 3.dp))
@@ -1522,82 +1483,100 @@ private fun SettingsSheet(onChange: () -> Unit) {
         Note(stringResource(R.string.theme_note))
         HorizontalDivider(color = ClockColors.Line)
 
-        // Two time systems share one face. The secondary face is always the opposite of the primary.
-        Text(stringResource(R.string.dual_clock_title), fontWeight = FontWeight.Bold, color = ClockColors.Ink)
+        // Оформление и устройство часов (владелец, 24.11.2026: «используй такие стили»)
+        val refresh = {
+            app.mychitas.peleshaon.live.Live.updateAsync(context)
+            onChange()
+        }
+        Text(stringResource(R.string.design_title), fontWeight = FontWeight.Bold, color = ClockColors.Ink)
+        var skinKey by remember { mutableStateOf(Prefs.faceSkin(context)) }
+        Row(
+            modifier = Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()),
+            horizontalArrangement = Arrangement.spacedBy(10.dp)
+        ) {
+            val previewNow = remember { ZonedDateTime.now() }
+            for (skin in FaceSkin.values()) {
+                val on = skinKey == skin.key
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    modifier = Modifier.width(76.dp).clip(RoundedCornerShape(12.dp)).clickable {
+                        skinKey = skin.key
+                        Prefs.setFaceSkin(context, skin.key)
+                        refresh()
+                    }.padding(vertical = 4.dp)
+                ) {
+                    Box(
+                        modifier = Modifier.size(68.dp).border(
+                            if (on) 2.dp else 0.dp, if (on) ClockColors.Gold else Color.Transparent, CircleShape
+                        ).padding(3.dp)
+                    ) {
+                        BigFace(now = previewNow, zone = previewNow.zone, half = null, ring = null, events = emptyList(),
+                            active = null, tziruf = false, modifier = Modifier.fillMaxSize(), analog = true,
+                            timeText = "10:10", skin = skin)
+                    }
+                    Text(stringResource(skin.title), fontSize = 12.sp, color = if (on) ClockColors.GoldDeep else ClockColors.Ink2,
+                        fontWeight = if (on) FontWeight.Bold else FontWeight.Normal, maxLines = 1)
+                }
+            }
+        }
+
         var mainTimeType by remember { mutableStateOf(Prefs.mainTimeType(context)) }
-        var subdialEnabled by remember { mutableStateOf(Prefs.subdialEnabled(context)) }
         var mainFaceStyle by remember { mutableStateOf(Prefs.faceStyle(context)) }
+        var subdialEnabled by remember { mutableStateOf(Prefs.subdialEnabled(context)) }
         var secondaryFaceStyle by remember { mutableStateOf(Prefs.secondaryFaceStyle(context)) }
-        Text(stringResource(R.string.main_time_title), color = ClockColors.Ink2)
-        Text(stringResource(R.string.face_style_title), color = ClockColors.Muted, fontSize = 12.sp)
+        Text(stringResource(R.string.main_clock_title), fontWeight = FontWeight.Bold, color = ClockColors.Ink)
         FlowRow(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-            for ((style, label) in listOf(
-                Prefs.FACE_DIGITAL to R.string.face_digital,
-                Prefs.FACE_ANALOG to R.string.face_analog
-            )) {
+            for ((style, label) in listOf(Prefs.FACE_DIGITAL to R.string.face_digital, Prefs.FACE_ANALOG to R.string.face_analog)) {
                 FilterChip(
                     selected = mainFaceStyle == style,
-                    onClick = {
-                        mainFaceStyle = style
-                        Prefs.setFaceStyle(context, style)
-                        onChange()
-                    },
+                    onClick = { mainFaceStyle = style; Prefs.setFaceStyle(context, style); refresh() },
                     label = { Text(stringResource(label), fontSize = 13.sp) },
                     colors = chipColors()
                 )
             }
         }
+        Text(stringResource(R.string.time_type_title), color = ClockColors.Ink2, fontSize = 13.sp)
         FlowRow(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-            for ((type, label) in listOf(
-                Prefs.TIME_CIVIL to R.string.civil_time_title,
-                Prefs.TIME_HALACHIC to R.string.halachic_time_title
-            )) {
+            for ((type, label) in listOf(Prefs.TIME_CIVIL to R.string.civil_time_title, Prefs.TIME_HALACHIC to R.string.halachic_time_title)) {
                 FilterChip(
                     selected = mainTimeType == type,
+                    onClick = { mainTimeType = type; Prefs.setMainTimeType(context, type); refresh() },
+                    label = { Text(stringResource(label), fontSize = 13.sp) },
+                    colors = chipColors()
+                )
+            }
+        }
+        Text(stringResource(R.string.extra_clock_title), fontWeight = FontWeight.Bold, color = ClockColors.Ink)
+        FlowRow(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+            for ((key, label) in listOf(Prefs.FACE_DIGITAL to R.string.face_digital, Prefs.FACE_ANALOG to R.string.face_analog, "" to R.string.extra_hide)) {
+                FilterChip(
+                    selected = if (key.isEmpty()) !subdialEnabled else subdialEnabled && secondaryFaceStyle == key,
                     onClick = {
-                        mainTimeType = type
-                        Prefs.setMainTimeType(context, type)
-                        app.mychitas.peleshaon.live.Live.updateAsync(context)
-                        onChange()
+                        subdialEnabled = key.isNotEmpty()
+                        Prefs.setSubdialEnabled(context, subdialEnabled)
+                        if (key.isNotEmpty()) { secondaryFaceStyle = key; Prefs.setSecondaryFaceStyle(context, key) }
+                        refresh()
                     },
                     label = { Text(stringResource(label), fontSize = 13.sp) },
                     colors = chipColors()
                 )
             }
         }
-        FilterChip(
-            selected = subdialEnabled,
-            onClick = {
-                subdialEnabled = !subdialEnabled
-                Prefs.setSubdialEnabled(context, subdialEnabled)
-                onChange()
-            },
-            label = { Text(stringResource(R.string.secondary_dial_title), fontSize = 13.sp) },
-            colors = chipColors()
-        )
-        Text(
-            stringResource(if (mainTimeType == Prefs.TIME_CIVIL) R.string.halachic_time_title else R.string.civil_time_title),
-            color = ClockColors.Muted, fontSize = 12.sp
-        )
-        if (subdialEnabled) {
-            Text(stringResource(R.string.secondary_dial_title), color = ClockColors.Ink2)
-            Text(stringResource(R.string.face_style_title), color = ClockColors.Muted, fontSize = 12.sp)
-            FlowRow(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                for ((style, label) in listOf(
-                    Prefs.FACE_DIGITAL to R.string.face_digital,
-                    Prefs.FACE_ANALOG to R.string.face_analog
-                )) {
-                    FilterChip(
-                        selected = secondaryFaceStyle == style,
-                        onClick = {
-                            secondaryFaceStyle = style
-                            Prefs.setSecondaryFaceStyle(context, style)
-                            onChange()
-                        },
-                        label = { Text(stringResource(label), fontSize = 13.sp) },
-                        colors = chipColors()
-                    )
-                }
+        if (subdialEnabled) Note(stringResource(
+            if (mainTimeType == Prefs.TIME_CIVIL) R.string.halachic_time_title else R.string.civil_time_title))
+        for ((label, get, set) in listOf<Triple<Int, (android.content.Context) -> Boolean, (android.content.Context, Boolean) -> Unit>>(
+            Triple(R.string.show_date, Prefs::showDate, Prefs::setShowDate),
+            Triple(R.string.show_sun, Prefs::showSun, Prefs::setShowSun),
+            Triple(R.string.show_zmanim, Prefs::showZmanim, Prefs::setShowZmanim)
+        )) {
+            var on by remember { mutableStateOf(get(context)) }
+            Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+                Text(stringResource(label), color = ClockColors.Ink, modifier = Modifier.weight(1f))
+                Switch(
+                    checked = on,
+                    onCheckedChange = { on = it; set(context, it); refresh() },
+                    colors = SwitchDefaults.colors(checkedTrackColor = ClockColors.Gold, checkedThumbColor = ClockColors.SheetBg)
+                )
             }
         }
         HorizontalDivider(color = ClockColors.Line)

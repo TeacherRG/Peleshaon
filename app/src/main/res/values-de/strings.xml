@@ -310,4 +310,20 @@
     <string name="face_style_title">Anzeigestil</string>
     <string name="face_digital">Digital</string>
     <string name="face_analog">Mit Zeigern</string>
+    <string name="skin_classic">Klassisch</string>
+    <string name="skin_sunset">Abendrot</string>
+    <string name="skin_minimal">Minimal</string>
+    <string name="skin_traditional">Traditionell</string>
+    <string name="skin_light">Hell</string>
+    <string name="skin_dark">Dunkel</string>
+    <string name="design_title">Aussehen der Uhr</string>
+    <string name="main_clock_title">Hauptuhr</string>
+    <string name="time_type_title">Art der Zeit</string>
+    <string name="extra_clock_title">Zusatzuhr (kleines Zifferblatt)</string>
+    <string name="extra_hide">Ausblenden</string>
+    <string name="show_date">Datum zeigen</string>
+    <string name="show_sun">Sonnenaufgang und -untergang</string>
+    <string name="show_zmanim">Wichtige Zmanim am Rand</string>
+    <string name="widget_card_name">Pele Shaon — rechteckige Uhr</string>
+    <string name="widget_card_desc">Uhrzeit, Datum und jüdisches Datum, Sonnenaufgang, Sonnenuntergang und halachische Stunde</string>
 </resources>

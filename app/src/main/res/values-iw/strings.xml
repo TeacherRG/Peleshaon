@@ -311,4 +311,20 @@
     <string name="face_style_title">סגנון תצוגה</string>
     <string name="face_digital">דיגיטלי</string>
     <string name="face_analog">עם מחוגים</string>
+    <string name="skin_classic">קלאסי</string>
+    <string name="skin_sunset">שקיעה</string>
+    <string name="skin_minimal">מינימליסטי</string>
+    <string name="skin_traditional">מסורתי</string>
+    <string name="skin_light">בהיר</string>
+    <string name="skin_dark">כהה</string>
+    <string name="design_title">עיצוב השעון</string>
+    <string name="main_clock_title">השעון הראשי</string>
+    <string name="time_type_title">סוג הזמן</string>
+    <string name="extra_clock_title">שעון נוסף (חוגה קטנה)</string>
+    <string name="extra_hide">הסתר</string>
+    <string name="show_date">הצג תאריך</string>
+    <string name="show_sun">זריחה ושקיעה</string>
+    <string name="show_zmanim">זמנים עיקריים על המסגרת</string>
+    <string name="widget_card_name">פלא שעון — שעון מלבני</string>
+    <string name="widget_card_desc">השעה, התאריך והתאריך העברי, זריחה, שקיעה והשעה ההלכתית</string>
 </resources>

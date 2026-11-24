@@ -17,3 +17,10 @@ class DateWidget : AppWidgetProvider() {
     override fun onUpdate(context: Context, manager: AppWidgetManager, ids: IntArray) = Live.updateAsync(context, goAsync())
     override fun onDisabled(context: Context) = Live.updateAsync(context, goAsync())
 }
+
+/** Прямоугольный виджет «Часы»: дата, время, восход, галахический час, закат — в выбранном оформлении. */
+class CardWidget : AppWidgetProvider() {
+    override fun onUpdate(context: Context, manager: AppWidgetManager, ids: IntArray) = Live.updateAsync(context, goAsync())
+    override fun onAppWidgetOptionsChanged(context: Context, manager: AppWidgetManager, id: Int, options: Bundle) = Live.updateAsync(context, goAsync())
+    override fun onDisabled(context: Context) = Live.updateAsync(context, goAsync())
+}

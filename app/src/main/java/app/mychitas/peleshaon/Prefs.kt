@@ -177,6 +177,17 @@ object Prefs {
         of(context).edit().putString("secondary_face_style", style).apply()
     }
 
+    /** Оформление циферблата (`FaceSkin.key`), владелец, 24.11.2026. */
+    fun faceSkin(context: Context): String = of(context).getString("face_skin", "classic") ?: "classic"
+    fun setFaceSkin(context: Context, key: String) = of(context).edit().putString("face_skin", key).apply()
+    /** На циферблате: дата, восход и закат, основные зманим точками на ободе. */
+    fun showDate(context: Context): Boolean = of(context).getBoolean("face_show_date", true)
+    fun setShowDate(context: Context, on: Boolean) = of(context).edit().putBoolean("face_show_date", on).apply()
+    fun showSun(context: Context): Boolean = of(context).getBoolean("face_show_sun", true)
+    fun setShowSun(context: Context, on: Boolean) = of(context).edit().putBoolean("face_show_sun", on).apply()
+    fun showZmanim(context: Context): Boolean = of(context).getBoolean("face_show_zmanim", true)
+    fun setShowZmanim(context: Context, on: Boolean) = of(context).edit().putBoolean("face_show_zmanim", on).apply()
+
     fun subdialEnabled(context: Context): Boolean =
         of(context).getBoolean("subdial_enabled", true)
 
