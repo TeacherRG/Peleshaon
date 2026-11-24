@@ -68,7 +68,7 @@
     <string name="today">Heute</string>
     <string name="tomorrow_word">morgen</string>
     <string name="tomorrow">Nach Sonnenuntergang — die Zeiten für morgen: %s</string>
-    <string name="evening">ab Sonnenuntergang — neuer Tag</string>
+    <string name="evening">Der jüdische Tag beginnt mit Sonnenuntergang: Am Abend zeigt das Datum oben schon den nächsten Tag.</string>
     <string name="off2">aus</string>
     <string name="dock_shabbat">Schabbat</string>
     <string name="dock_alarm">Wecker</string>

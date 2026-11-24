@@ -257,8 +257,6 @@ fun ClockScreen(
                         day.jewishDateHebrew + " · " + cityNow.format(DateTimeFormatter.ofPattern("EEE d MMM", locale)),
                         color = ClockColors.Ink2, fontSize = 12.sp, textAlign = TextAlign.Center, maxLines = 1, overflow = TextOverflow.Ellipsis
                     )
-                    if (day.isNextJewishDayAfterSunset) Text(stringResource(R.string.evening), color = ClockColors.Muted, fontSize = 11.sp,
-                        textAlign = TextAlign.Center, maxLines = 1, overflow = TextOverflow.Ellipsis)
                 }
                 }
                 // меню: компас, настройки, помощь (владелец, 18.11.2026)
@@ -1352,6 +1350,8 @@ private fun InfoSheet(onNightScreen: () -> Unit, onIntro: () -> Unit, onPrivacy:
         Text(stringResource(R.string.legend_t), fontWeight = FontWeight.Bold, color = ClockColors.Ink)
         DialLegend()
         Note("📅 " + stringResource(R.string.cal_hint))
+        // в шапке дата после заката уже следующая — объяснение здесь, а не строкой под датой (владелец, 24.11.2026)
+        Note("🌇 " + stringResource(R.string.evening))
         HorizontalDivider(color = ClockColors.Line)
         Text(stringResource(R.string.info), fontWeight = FontWeight.Bold, color = ClockColors.Ink)
         Note(minhagNote())
