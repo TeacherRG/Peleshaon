@@ -45,7 +45,6 @@ import androidx.wear.compose.foundation.lazy.rememberScalingLazyListState
 import androidx.wear.compose.material.MaterialTheme
 import androidx.wear.compose.material.Chip
 import app.mychitas.peleshaon.domain.CITIES
-import app.mychitas.peleshaon.domain.Minhag
 import app.mychitas.peleshaon.domain.cityById
 import app.mychitas.peleshaon.domain.findCities
 import java.util.Locale
@@ -90,28 +89,23 @@ fun WearApp() {
     val context = LocalContext.current
     val prefs = remember { context.getSharedPreferences("wear_prefs", android.content.Context.MODE_PRIVATE) }
     var selectedCity by remember { mutableStateOf(prefs.getString("city_id", "") ?: "") }
-    var selectedCommunity by remember { mutableStateOf(prefs.getString("minhag", "CHABAD") ?: "CHABAD") }
     var candleMinutes by remember { mutableStateOf(prefs.getInt("candle_minutes", -1)) }
     var settingsMode by remember { mutableStateOf(0) }
     var cityQuery by remember { mutableStateOf("") }
-    val community = remember(selectedCommunity) {
-        runCatching { Minhag.valueOf(selectedCommunity) }.getOrDefault(Minhag.CHABAD)
-    }
     val city = remember(selectedCity) { cityById(selectedCity.takeIf { it.isNotBlank() }) }
     val zone = city?.zone() ?: ZoneId.systemDefault()
     val cityNow = now.withZoneSameInstant(zone)
-    val day = remember(city, cityNow.truncatedTo(ChronoUnit.MINUTES), community, candleMinutes) {
+    val day = remember(city, cityNow.truncatedTo(ChronoUnit.MINUTES), candleMinutes) {
         city?.let {
-            ZmanimEngine.minhag = community
             ZmanimEngine.candleOffsetOverride = candleMinutes.takeIf { n -> n in setOf(18, 20, 22, 30, 40) }?.toLong()
             ZmanimEngine.calculateForMoment(cityNow, it.name, it.lat, it.lon, 0.0, zone, it.isIsrael)
         }
     }
     val res = LocalContext.current.resources
-    val half = remember(city, cityNow.truncatedTo(ChronoUnit.MINUTES), community) {
+    val half = remember(city, cityNow.truncatedTo(ChronoUnit.MINUTES)) {
         city?.let { ZmanimEngine.halfOf(cityNow, it) }
     }
-    val halfItems = remember(half, city, community) {
+    val halfItems = remember(half, city) {
         if (half == null || city == null) emptyList() else ZmanimEngine.halfItems(half, city)
     }
     val next = halfItems.firstOrNull { it.exactTime.isAfter(cityNow) }
@@ -158,26 +152,6 @@ fun WearApp() {
                     }, modifier = Modifier.fillMaxWidth(),
                         label = { Text(option.title(Locale.getDefault()) +
                             (option.oblastUk?.let { " · $it" } ?: "")) })
-                }
-            }
-        } else if (settingsMode == 2) {
-            ScalingLazyColumn(modifier = Modifier.fillMaxSize().background(Color.Black),
-                horizontalAlignment = Alignment.CenterHorizontally) {
-                item {
-                    Chip(onClick = { settingsMode = 0 }, modifier = Modifier.fillMaxWidth(),
-                        label = { Text(context.getString(R.string.wear_back)) })
-                }
-                items(Minhag.entries) { option ->
-                    val label = when (option) {
-                        Minhag.CHABAD -> R.string.wear_chabad
-                        Minhag.LITVISH -> R.string.wear_litvish
-                        Minhag.SEFARDI -> R.string.wear_sefardi
-                    }
-                    Chip(onClick = {
-                        selectedCommunity = option.name
-                        prefs.edit().putString("minhag", option.name).apply()
-                        settingsMode = 0
-                    }, modifier = Modifier.fillMaxWidth(), label = { Text(context.getString(label)) })
                 }
             }
         } else if (settingsMode == 3) {
@@ -264,10 +238,6 @@ fun WearApp() {
                 Chip(onClick = { settingsMode = 1 }, modifier = Modifier.fillMaxWidth(),
                     label = { Text(context.getString(R.string.wear_city) + ": " +
                         (city?.title(Locale.getDefault()) ?: context.getString(R.string.wear_select_city))) })
-            }
-            item {
-                Chip(onClick = { settingsMode = 2 }, modifier = Modifier.fillMaxWidth(),
-                    label = { Text(context.getString(R.string.wear_community) + ": " + selectedCommunity) })
             }
             item {
                 Chip(onClick = { settingsMode = 3 }, modifier = Modifier.fillMaxWidth(),
@@ -358,8 +328,13 @@ private fun shortLabel(type: ZmanType): Int = when (type) {
     ZmanType.SOF_ZMAN_SHMA -> R.string.zs_shma
     ZmanType.SOF_ZMAN_TFILA -> R.string.zs_tfila
     ZmanType.CHATZOT -> R.string.zs_chatzot
+    ZmanType.MISHEYAKIR -> R.string.zs_misheyakir
+    ZmanType.BIUR_CHAMETZ -> R.string.zs_biur_chametz
     ZmanType.MINCHA_GEDOLA -> R.string.zs_mincha
+    ZmanType.MINCHA_GEDOLA_AR -> R.string.zs_mincha_ar
+    ZmanType.MINCHA_KETANA -> R.string.zs_mincha_ketana
     ZmanType.PLAG_HAMINCHA -> R.string.zs_plag
     ZmanType.SUNSET -> R.string.zs_sunset
     ZmanType.TZAIT -> R.string.zs_tzait
+    ZmanType.TZAIT_AR -> R.string.zs_tzait_ar
 }

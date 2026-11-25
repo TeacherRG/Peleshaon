@@ -1,7 +1,6 @@
 package app.mychitas.peleshaon
 
 import app.mychitas.peleshaon.domain.CityOption
-import app.mychitas.peleshaon.domain.Minhag
 import app.mychitas.peleshaon.domain.ZmanimConfig
 import app.mychitas.peleshaon.domain.ZmanimService
 import app.mychitas.peleshaon.domain.ZmanimEngine
@@ -32,7 +31,7 @@ class Zmanim31MigrationTest {
         val raw = ComprehensiveZmanimCalendar(
             GeoLocation("Berlin", berlin.lat, berlin.lon, 0.0, berlin.zone())
         ).apply { localDate = date }
-        val actual = ZmanimService.calculate(date, ZmanimConfig(berlin, Minhag.CHABAD))
+        val actual = ZmanimService.calculate(date, ZmanimConfig(berlin))
         assertEquals(raw.alosBaalHatanya, actual.dawn)
         assertEquals(raw.tzaisBaalHatanya, actual.ordinaryTzait)
         assertEquals(raw.tzaisGeonim8Point5Degrees, actual.shabbatEnd)
@@ -47,7 +46,7 @@ class Zmanim31MigrationTest {
             LocalDate.of(2026, 7, 4),
             LocalDate.of(2026, 10, 3)
         )) {
-            val z = ZmanimService.calculate(date, ZmanimConfig(berlin, Minhag.CHABAD))
+            val z = ZmanimService.calculate(date, ZmanimConfig(berlin))
             assertTrue(assertNotNull(z.ordinaryTzait).isBefore(assertNotNull(z.shabbatEnd)),
                 "Berlin ${date}: ordinary tzait and Shabbat end must remain distinct")
         }
@@ -55,7 +54,7 @@ class Zmanim31MigrationTest {
 
     @Test fun noFixedFiftyMinutesForSummerBerlin() {
         val date = LocalDate.of(2026, 6, 20)
-        val z = ZmanimService.calculate(date, ZmanimConfig(berlin, Minhag.CHABAD))
+        val z = ZmanimService.calculate(date, ZmanimConfig(berlin))
         val interval = Duration.between(assertNotNull(z.sunset), assertNotNull(z.shabbatEnd))
         assertTrue(interval.toMinutes() > 50, "Summer Berlin has a longer 8.5-degree twilight")
     }
@@ -64,22 +63,22 @@ class Zmanim31MigrationTest {
         val jerusalem = requireNotNull(cityById("Asia/Jerusalem"))
         val telAviv = requireNotNull(cityById("Asia/Tel_Aviv"))
         val date = LocalDate.of(2026, 11, 20)
-        assertEquals(40L, ZmanimService.candleMinutes(ZmanimConfig(jerusalem, Minhag.CHABAD)))
-        assertEquals(22L, ZmanimService.candleMinutes(ZmanimConfig(telAviv, Minhag.CHABAD)))
-        assertEquals(18L, ZmanimService.candleMinutes(ZmanimConfig(berlin, Minhag.CHABAD)))
-        val selected = ZmanimService.calculate(date, ZmanimConfig(jerusalem, Minhag.CHABAD, 18L))
+        assertEquals(40L, ZmanimService.candleMinutes(ZmanimConfig(jerusalem)))
+        assertEquals(22L, ZmanimService.candleMinutes(ZmanimConfig(telAviv)))
+        assertEquals(18L, ZmanimService.candleMinutes(ZmanimConfig(berlin)))
+        val selected = ZmanimService.calculate(date, ZmanimConfig(jerusalem, 18L))
         assertEquals(assertNotNull(selected.sunset).minus(Duration.ofMinutes(18)),
             selected.candleLighting)
     }
 
     @Test fun immutableProfilesDoNotBleedIntoOtherCalls() {
         val date = LocalDate.of(2026, 11, 21)
-        val before = ZmanimService.calculate(date, ZmanimConfig(vienna, Minhag.CHABAD))
-        val other = ZmanimService.calculate(date, ZmanimConfig(vienna, Minhag.SEFARDI))
-        val after = ZmanimService.calculate(date, ZmanimConfig(vienna, Minhag.CHABAD))
+        val before = ZmanimService.calculate(date, ZmanimConfig(vienna))
+        val other = ZmanimService.calculate(date, ZmanimConfig(vienna, 40L))
+        val after = ZmanimService.calculate(date, ZmanimConfig(vienna))
         assertEquals(before, after)
-        assertFalse(before.ordinaryTzait == other.ordinaryTzait)
-        assertTrue(assertNotNull(other.shabbatEnd).isAfter(assertNotNull(other.ordinaryTzait)))
+        assertFalse(before.candleLighting == other.candleLighting)
+        assertTrue(assertNotNull(before.shabbatEnd).isAfter(assertNotNull(before.ordinaryTzait)))
     }
 
     @Test fun sevenReferenceCitiesAcrossAllFourSeasons() {
@@ -101,7 +100,7 @@ class Zmanim31MigrationTest {
         )
         assertEquals(7, cities.size, "Berlin must be an explicit reference city")
         for (city in cities) for (date in dates) {
-            val z = ZmanimService.calculate(date, ZmanimConfig(city, Minhag.CHABAD))
+            val z = ZmanimService.calculate(date, ZmanimConfig(city))
             if (z.sunrise != null && z.sunset != null)
                 assertTrue(z.sunrise.isBefore(z.sunset), "${city.name} $date")
             if (z.ordinaryTzait != null && z.sunset != null)
@@ -112,7 +111,7 @@ class Zmanim31MigrationTest {
         // Midnight sun: no honest 8.5-degree sunset event exists in Tromso on June 20.
         val tromso = cities.last()
         assertNull(ZmanimService.calculate(LocalDate.of(2026, 6, 20),
-            ZmanimConfig(tromso, Minhag.CHABAD)).shabbatEnd)
+            ZmanimConfig(tromso)).shabbatEnd)
     }
 
     @Test fun chabadSummerAlosFallsBackToPreviousSolarMidnight() {
@@ -125,7 +124,7 @@ class Zmanim31MigrationTest {
             assertNull(raw.alosBaalHatanya, "$id must exercise the missing-angle branch")
             val expected = ZmanimService.buildCalendar(summer.minusDays(1),
                 city.name, city.lat, city.lon, 0.0, city.zone()).solarMidnight
-            val snap = ZmanimService.calculate(summer, ZmanimConfig(city, Minhag.CHABAD))
+            val snap = ZmanimService.calculate(summer, ZmanimConfig(city))
             assertNotNull(expected)
             assertEquals(expected, snap.dawn, "$id: previous night lower solar transit")
             assertEquals("chabad.alos.solar_midnight_when_16_9deg_unreachable",
@@ -140,7 +139,7 @@ class Zmanim31MigrationTest {
             val city = requireNotNull(cityById(id))
             val cal = ZmanimService.buildCalendar(winter, city.name, city.lat,
                 city.lon, 0.0, city.zone())
-            val snap = ZmanimService.calculate(winter, ZmanimConfig(city, Minhag.CHABAD))
+            val snap = ZmanimService.calculate(winter, ZmanimConfig(city))
             assertEquals(cal.alosBaalHatanya, snap.dawn)
             assertEquals("chabad.alos.16_9deg", snap.methodIds["dawn"])
         }
@@ -149,11 +148,11 @@ class Zmanim31MigrationTest {
     @Test fun missingNightfallAndShabbatEndAreNotInvented() {
         val yakutsk = requireNotNull(cityById("Asia/Yakutsk"))
         val june = LocalDate.of(2026, 6, 19)
-        val snap = ZmanimService.calculate(june, ZmanimConfig(yakutsk, Minhag.CHABAD))
+        val snap = ZmanimService.calculate(june, ZmanimConfig(yakutsk))
         assertNull(snap.ordinaryTzait, "No fabricated 6-degree nightfall")
         // An absent 8.5-degree event remains absent; no fixed-minute substitute.
         val saturday = ZmanimService.calculate(june.plusDays(1),
-            ZmanimConfig(yakutsk, Minhag.CHABAD))
+            ZmanimConfig(yakutsk))
         assertNull(saturday.shabbatEnd)
     }
 

@@ -3,7 +3,6 @@ package app.mychitas.peleshaon
 import app.mychitas.peleshaon.alarm.ShabbatGuard
 import app.mychitas.peleshaon.alarm.AlarmRules
 import app.mychitas.peleshaon.alarm.AlarmSpec
-import app.mychitas.peleshaon.domain.Minhag
 import app.mychitas.peleshaon.domain.ZmanType
 import app.mychitas.peleshaon.domain.ZmanimEngine
 import app.mychitas.peleshaon.domain.cityById
@@ -17,20 +16,13 @@ import java.time.LocalDate
 import java.time.ZoneId
 
 class ForkRegressionTest {
-    @AfterTest fun resetCommunity() { ZmanimEngine.minhag = Minhag.CHABAD }
-    @Test fun shmaAlarmUsesCommunityFormula() {
+    @Test fun shmaAlarmUsesTheShownAlterRebbeDeadline() {
         val date = LocalDate.of(2026, 11, 17)
         val city = requireNotNull(cityById("Europe/Vienna"))
         val alarm = AlarmSpec(true, true, 7, 0, 30, setOf(0, 1, 2, 3, 4, 5), false)
-        val distinct = mutableSetOf<Long>()
-        for (community in Minhag.entries) {
-            ZmanimEngine.minhag = community
-            val shown = ZmanimEngine.itemsOf(date, city).first { it.type == ZmanType.SOF_ZMAN_SHMA }.roundedTime
-            val scheduled = assertNotNull(AlarmRules.ringOn(alarm, date, city))
-            assertEquals(shown.minusMinutes(30), scheduled, "Community $community")
-            distinct += shown.toEpochSecond()
-        }
-        assertTrue(distinct.size > 1, "Selected community should change the Shma deadline")
+        val shown = ZmanimEngine.itemsOf(date, city).first { it.type == ZmanType.SOF_ZMAN_SHMA }.roundedTime
+        val scheduled = assertNotNull(AlarmRules.ringOn(alarm, date, city))
+        assertEquals(shown.minusMinutes(30), scheduled)
     }
     @Test fun polarHolyDayDoesNotInventClockTimeBoundaries() {
         val city = app.mychitas.peleshaon.domain.CityOption(

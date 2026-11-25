@@ -336,11 +336,7 @@ fun MoonCompass(onClose: () -> Unit, startMoon: Boolean = true) {
                     Text(stringResource(R.string.kl_remind_note), color = ClockColors.Muted, fontSize = 12.sp)
                 }
             }
-            Text(stringResource(when (app.mychitas.peleshaon.domain.ZmanimEngine.minhag) {
-                app.mychitas.peleshaon.domain.Minhag.CHABAD -> R.string.kl_note
-                app.mychitas.peleshaon.domain.Minhag.LITVISH -> R.string.kl_note_litvish
-                app.mychitas.peleshaon.domain.Minhag.SEFARDI -> R.string.kl_note_sefardi
-            }), color = ClockColors.Muted, fontSize = 12.sp, textAlign = TextAlign.Center,
+            Text(stringResource(R.string.kl_note), color = ClockColors.Muted, fontSize = 12.sp, textAlign = TextAlign.Center,
                 modifier = Modifier.widthIn(max = 460.dp).heightIn(min = 0.dp).padding(bottom = 8.dp))
         }
     }

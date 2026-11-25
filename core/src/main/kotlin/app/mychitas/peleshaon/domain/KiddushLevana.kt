@@ -113,7 +113,7 @@ data class KiddushLevanaNow(
 )
 
 /**
- * Когда говорят Кидуш Левана — по общине (`ZmanimEngine.minhag`; ниже — Хабад): с семи суток после молада и до середины месяца (между моладами,
+ * Когда говорят Кидуш Левана — по Алтер Ребе (Хабад): с семи суток после молада и до середины месяца (между моладами,
  * ≈ 14 сут. 18 ч — KosherJava `tchilasZmanKidushLevana7Days` / `sofZmanKidushLevanaBetweenMoldos`), ночью;
  * не в вечер Шабата и Йом Това (вечер после их исхода — можно); в ав — после 9 ава, в тишрей — после Йом Кипура.
  * Раввином не проверено — на экране: «сверяйтесь с раввином общины».
@@ -126,8 +126,8 @@ object KiddushLevanaRules {
         val zone = city.zone()
         fun z(d: java.time.Instant) = d.atZone(zone)
         // Хабад и сефарды — с 7 суток после молада; литовские (по Рема) — с 3 суток. Конец: ашкеназы — середина между моладами, сефарды — 15 суток
-        val start = if (ZmanimEngine.minhag == Minhag.LITVISH) jc.tchilasZmanKidushLevana3Days else jc.tchilasZmanKidushLevana7Days
-        val end = if (ZmanimEngine.minhag == Minhag.SEFARDI) jc.sofZmanKidushLevana15Days else jc.sofZmanKidushLevanaBetweenMoldos
+        val start = jc.tchilasZmanKidushLevana7Days
+        val end = jc.sofZmanKidushLevanaBetweenMoldos
         return z(start) to z(end)
     }
 

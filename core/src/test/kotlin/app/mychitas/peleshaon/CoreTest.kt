@@ -49,7 +49,8 @@ class CoreTest {
     @Test
     fun zmanimInOrderAndRoundedAsOnTheSite() {
         val r = day(at(16, 10))
-        assertEquals(ZmanType.entries.size, r.items.size)
+        // biur chametz exists only on Erev Pesach
+        assertEquals(ZmanType.entries.size - 1, r.items.size)
         r.items.zipWithNext().forEach { (a, b) -> assertTrue(a.exactTime.isBefore(b.exactTime), "${a.type} < ${b.type}") }
         assertEquals(LocalTime.of(9, 18), r.time(ZmanType.SOF_ZMAN_SHMA)!!.roundedTime.toLocalTime())
         // Предельные времена — вниз, начало события (включая восход) — вверх
@@ -68,7 +69,8 @@ class CoreTest {
         // unreachable on a summer night with an actual sunrise/sunset.
         assertNotNull(r.time(ZmanType.ALOT))
         assertNotNull(r.time(ZmanType.SOF_ZMAN_SHMA))
-        assertEquals(ZmanType.entries.size, r.items.size)
+        // biur chametz exists only on Erev Pesach
+        assertEquals(ZmanType.entries.size - 1, r.items.size)
     }
 
     @Test

@@ -1,7 +1,6 @@
 package app.mychitas.peleshaon
 
 import app.mychitas.peleshaon.domain.CityOption
-import app.mychitas.peleshaon.domain.Minhag
 import app.mychitas.peleshaon.domain.ZmanimConfig
 import app.mychitas.peleshaon.domain.ZmanimService
 import app.mychitas.peleshaon.domain.cityById
@@ -84,7 +83,7 @@ class IndependentEphemerisRegressionTest {
             val exit = fields[6]
             val city = requireNotNull(locations[id])
             val date = LocalDate.parse(textDate)
-            val result = ZmanimService.calculate(date, ZmanimConfig(city, Minhag.CHABAD))
+            val result = ZmanimService.calculate(date, ZmanimConfig(city))
             val reference = listOf(
                 "sunrise" to (sunrise to result.sunrise),
                 "sunset" to (sunset to result.sunset),
@@ -117,7 +116,7 @@ class IndependentEphemerisRegressionTest {
     @Test fun publishedBerlinCandleTimeAgreesWithIndependentSunset() {
         val berlin = requireNotNull(locations["ber"])
         val date = LocalDate.of(2026, 6, 19)
-        val snapshot = ZmanimService.calculate(date, ZmanimConfig(berlin, Minhag.CHABAD))
+        val snapshot = ZmanimService.calculate(date, ZmanimConfig(berlin))
         // Published Hebcal Berlin calendar 19 June 2026: candles 21:14, 18 min before sunset.
         // URL in INDEPENDENT_ZMANIM_AUDIT.md; not an independent halakhic ruling.
         val published = date.atTime(21, 14).atZone(berlin.zone()).toInstant()

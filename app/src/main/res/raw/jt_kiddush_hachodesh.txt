@@ -1,0 +1,235 @@
+# The laws of sanctifying the month
+
+## 1. The day and its parts
+Day = 24 hours.
+Hour = 60 minutes.
+Minute = 60 seconds.
+
+For sanctifying the month we use “chalakim” — parts: 1 minute = 18 parts, 1 hour = 1080 parts.
+60 minutes × 18 parts = 1080 parts.
+
+### Example
+How many minutes are 793 parts? Divide 793 by 18: 44 minutes and 1 part.
+793 : 18 = 44 minutes, 1 part.
+
+## 2. The month and its parts
+A lunar month: 29 days, 12 hours, 793 parts.
+> כ"ט י"ב תשצ"ג — 29 days, 12 hours, 793 parts
+
+The difference from one month to the next: 1 day, 12 hours, 793 parts.
+> אי"ב תשצ"ג — 1 day, 12 hours, 793 parts
+
+### How it is calculated
+Divide 29 days by 7: 4 weeks with 1 day left over (29 : 7 = 4, remainder 1).
+The 4 weeks are dropped: every 7 days we return to the same weekday, so the 28 days are not needed.
+What remains is 1 day, 12 hours, 793 parts. This difference is added to the molad (birth) of the moon to get the molad of the next month.
+
+### Today
+Today we usually convert the parts into minutes; the remainder is the parts of a minute. For example, instead of “793 parts” we say “44 minutes and 1 part”.
+
+### Important note
+In today’s usage there is a 6-hour difference between the Rambam’s hours and the hours we are used to. The day begins after sunset in the evening, which in Tishrei and Nissan is about 6 pm. For the Rambam the first hour after sunset is called the first hour of the day, and so on.
+
+### Example
+The molad of Sivan 5758 (תשנ"ח): Monday night (eve of Tuesday), 3 hours 59 minutes 11 parts.
+In the Rambam’s terms: Tuesday, hour 9, 1073 parts.
+
+Add the difference: 1 day, 12 hours, 44 minutes, 1 part.
+In the Rambam’s terms: 1 day, 12 hours, 793 parts.
+
+Result — the molad of Tammuz 5758: Wednesday, 4 hours 43 minutes 12 parts.
+In the Rambam’s terms: Wednesday, hour 22, 786 parts.
+
+### Table: the molad in the Rambam’s terms
+| | Day | Hour | Parts |
+| Molad Sivan 5758 | Tuesday | 9 | 1073 |
+| Add | 1 day | 12 | 793 |
+| Result | Wednesday | 21 | 1866 |
+| Molad Tammuz 5758 | Wednesday | 22 | 786 |
+
+From 1866 parts subtract 1080 (1 hour) and carry it to the hours column: 21 + 1 = 22 hours, leaving 1866 − 1080 = 786 parts.
+
+### Table: the molad in today’s usage
+| | Day | Hours | Minutes | Parts |
+| Molad Sivan 5758 | Eve of Tuesday | 3 | 59 | 11 |
+| Add | 1 day | 12 | 44 | 1 |
+| Result | Eve of Wednesday | 15 | 103 | 12 |
+| Molad Tammuz 5758 | Wednesday | 4 | 43 | 12 |
+
+From 103 minutes carry 60 (1 hour) to the hours column: 43 minutes remain and the hours become 15 + 1 = 16.
+From 16 hours carry 12 (half a day) to the days column: eve of Wednesday + 12 hours = Wednesday, leaving 4 hours.
+The parts stay the same — 12.
+
+## 3. The solar year
+According to Shmuel: 365 days, 6 hours.
+
+According to Rav Ada: 365 days, 5 hours, 997 parts, 48 “rega’im” — moments (1 part = 76 moments).
+
+## 4. The four tekufot (seasons)
+The solar year is divided into 4 equal parts.
+
+According to Shmuel: each tekufah = 91 days, 7½ hours.
+
+According to Rav Ada: each tekufah = 91 days, 7 hours, 519 parts, 31 moments.
+
+### Note
+The years are calculated according to Shmuel: the solar year is exactly 365 days 6 hours.
+
+## 5. The lunar year
+A regular year: 29 days 12 hours 793 parts × 12 months = 354 days, 8 hours, 876 parts.
+
+A leap year: 29 days 12 hours 793 parts × 13 months = 383 days, 21 hours, 589 parts.
+
+## 6. How much longer the solar year is than the lunar year
+365 days 6 hours − 354 days 8 hours 876 parts = 10 days, 21 hours, 204 parts.
+> יכ"א ר"ד — 10 days, 21 hours, 204 parts
+
+## 7. Remainder of a regular year (for the weekdays)
+Divide by 7; the remainder is the difference between one year and the next.
+354 days 8 hours 876 parts : 7 = 50 weeks, 4 days, 8 hours, 876 parts.
+The weeks are dropped — we only need the difference in days.
+
+Remainder: 4 days, 8 hours, 876 parts.
+> ד"ח תתע"ו — 4 days, 8 hours, 876 parts
+
+## 8. Remainder of a leap year (for the weekdays)
+Divide by 7; the remainder is the difference between a leap year and the year after it.
+383 days 21 hours 589 parts : 7 = 54 weeks, 5 days, 21 hours, 589 parts.
+The weeks are dropped — we only need the difference in days.
+
+Remainder: 5 days, 21 hours, 589 parts.
+> הכ"א תקפ"ט — 5 days, 21 hours, 589 parts
+
+## 9. The great cycle — 28 years
+Every 28 years the sun returns to the starting point where it stood at Creation — according to Shmuel.
+
+### How it is calculated
+365 days 6 hours × 28 = 10,227 days; 10,227 : 7 = exactly 1461 weeks, no remainder.
+
+### Example
+5758 (תשנ"ח) : 28 — 205 full cycles have passed, and this is the 18th year of the 206th cycle.
+
+## 10. The small cycle — 19 years
+Every 19 years the lunar months and the solar years come back into line.
+To align the solar years with the lunar months, 7 leap years and 12 regular years were set in every 19 years.
+
+The leap years of the cycle: 3, 6, 8, 11, 14, 17, 19.
+> גו"ח אדז"ט — 3, 6, 8, 11, 14, 17, 19
+
+### According to Shmuel
+After 19 years a difference of 1 hour 485 parts remains.
+> א' תפ"ה — 1 hour, 485 parts
+
+Sun: 365 days 6 hours × 19 = 6939 days 18 hours.
+Moon: regular years — 12 months × 12 years = 144 months; leap years — 13 months × 7 years = 91 months.
+In total 235 months × 29 days 12 hours 793 parts = 6939 days 16 hours 595 parts.
+The difference between sun and moon after 19 years: 6939 days 18 hours − 6939 days 16 hours 595 parts = 1 hour 485 parts.
+
+### According to Rav Ada
+After 19 years there is no remainder at all: the moon and the sun match exactly.
+Sun: 365 days 5 hours 997 parts 48 moments × 19 = 6939 days 16 hours 595 parts.
+Moon: 235 months × 29 days 12 hours 793 parts = 6939 days 16 hours 595 parts.
+
+### Note
+The years are calculated according to Shmuel, so over a 19-year cycle a difference of 1 hour 485 parts remains between the sun and the moon.
+
+### Example
+5758 (תשנ"ח) : 19 — 303 full cycles have passed, and this is the 1st year of the 304th cycle.
+
+## 11. Remainder of the 19-year cycle (for the weekdays)
+> בי"ו תקצ"ה — 2 days, 16 hours, 595 parts
+This is the difference between one cycle and the next.
+
+### How it is calculated
+Remainder of a regular lunar year: ד"ח תתע"ו × 12 years = 52 days 9 hours 792 parts.
+Remainder of a leap lunar year: הכ"א תקפ"ט × 7 years = 41 days 6 hours 883 parts.
+52 days 9 hours 792 parts + 41 days 6 hours 883 parts = 93 days 16 hours 595 parts.
+93 : 7 = 13 weeks; drop the weeks and keep only the remainder: 2 days, 16 hours, 595 parts.
+
+## 12. The molad BaHaRaD
+The molad of Tishrei of the first year of Creation — a year before Adam was created, on Rosh Hashanah of the second year.
+It is called “the molad of Tishrei of the year of tohu”, because the first day of Creation was 25 Elul of the first year.
+> בהר"ד — Monday, 5 hours, 204 parts
+
+## 13. The four postponements (dechiyot)
+The first day of Rosh Hashanah is always set on the day of the molad of Tishrei — except in four cases that postpone Rosh Hashanah to the day after the molad or to the day after that.
+
+### 1. “Lo ADU Rosh”
+> לא אד"ו ראש
+The first day of Rosh Hashanah never falls on Sunday, Wednesday or Friday.
+So if the molad of Tishrei falls on one of these days, Rosh Hashanah is postponed to the next day.
+
+### 2. “Molad zaken” — an old molad
+If the molad of Tishrei is at midday or later — 18 hours from the start of the day, i.e. from 12 noon — Rosh Hashanah is postponed to the next day.
+If after this postponement it falls on Sunday, Wednesday or Friday, Rosh Hashanah is postponed by one more day.
+Example: the molad of Tishrei is on Shabbat exactly at 12 noon (18 hours from the start of the day). Rosh Hashanah is set on Monday: not on Shabbat because of “molad zaken”, and not on Sunday because of “Lo ADU Rosh”.
+
+### 3. GaTRaD
+> גטר"ד — Tuesday, 9 hours, 204 parts
+If the molad of Tishrei of a regular year falls on Tuesday at 9 hours 204 parts or later, Rosh Hashanah is postponed to Thursday: not on Wednesday because of “Lo ADU Rosh”.
+
+### 4. BeTU TaKPaT
+> בט"ו תקפ"ט — Monday, 15 hours, 589 parts
+If the molad of Tishrei of a regular year that comes right after a leap year falls on Monday at 15 hours 589 parts or later, Rosh Hashanah is postponed to Tuesday.
+The years of the cycle that follow leap years: 1, 4, 7, 9, 12, 15, 18.
+
+## 14. The months of the year
+The months alternate in order: one full (30 days), one deficient (29 days). Nissan — 30 days, Iyar — 29, Sivan — 30, Tammuz — 29, Menachem Av — 30, Elul — 29, and so on.
+
+The exception is Cheshvan and Kislev:
+- sometimes Cheshvan is deficient (29) and Kislev full (30) — a “regular” year (kesidrah);
+- sometimes both are deficient, 29 days each — a “deficient” year (chaserah);
+- sometimes both are full, 30 days each — a “complete” year (shleimah).
+
+## 15. The signs of the year types
+To make it easier to determine a year, letter signs are used. For example: בח"ג.
+- the first letter ב — the weekday of the first day of Rosh Hashanah: Monday;
+- the second letter ח — the type of year: deficient (chaserah);
+- the third letter ג — the weekday of the first day of Pesach: Tuesday.
+
+### Regular years
+| Type | Days | Signs |
+| Deficient (chaserah) | 353 | בח"ג, זח"א |
+| Regular (kesidrah) | 354 | גכ"ה, הכ"ז |
+| Complete (shleimah) | 355 | בש"ה, הש"א, זש"ג |
+
+355 is the gematria of the word שנ"ה, “year”.
+
+### Leap years
+| Type | Days | Signs |
+| Deficient (chaserah) | 383 | בח"ה, הח"א, זח"ג |
+| Regular (kesidrah) | 384 | גכ"ז |
+| Complete (shleimah) | 385 | בש"ז, הש"ג, זש"ה |
+
+## 16. How to tell whether a year is deficient, regular or complete
+Calculate the molad of Tishrei of this year and the molad of Tishrei of next year. Using the rules of postponement, find when this Rosh Hashanah and the next one fall.
+Then count the days between the two days of Rosh Hashanah, not counting those days themselves.
+
+### In a regular year
+- a difference of 2 days — a deficient year;
+- 3 days — a regular year;
+- 4 days — a complete year.
+> בג"ד חכ"ם — 2 days: chaserah, 3 days: kesidrah, 4 days: shleimah
+
+### In a leap year
+- a difference of 4 days — a deficient year;
+- 5 days — a regular year;
+- 6 days — a complete year.
+> דה"ו חכ"ם — 4 days: chaserah, 5 days: kesidrah, 6 days: shleimah
+
+### Example 1
+5757 (תשנ"ז): the molad of Tishrei — Thursday night (eve of Friday), 12 hours 34 minutes 8 parts (in the Rambam’s terms: Friday, hour 6, 620 parts). The year’s sign: זח"ג.
+Because of “Lo ADU Rosh” Rosh Hashanah cannot be on Friday and is postponed to Shabbat.
+5757 is a leap year: 5757 : 19 = exactly 303, i.e. it is the 19th year of the 303rd cycle (גו"ח אדז"ט).
+
+5758 (תשנ"ח): the molad of Tishrei — Wednesday night (eve of Thursday), 10 hours 7 minutes 3 parts (in the Rambam’s terms: Thursday, hour 4, 129 parts). The year’s sign: הכ"ז.
+Why: the remainder of a leap year (section 8) is הכ"א תקפ"ט, 5 days 21 hours 589 parts.
+Add it to the previous molad of Tishrei: Friday, hour 6, 620 parts + 5 days 21 hours 589 parts = Thursday, hour 4, 129 parts (Rambam).
+In today’s usage (a 6-hour difference: the day begins in the evening, at about 6) — eve of Thursday, 10 hours 7 minutes 3 parts. Rosh Hashanah is on Thursday.
+
+The difference between the two Rosh Hashanahs: Shabbat (5757) to Thursday (5758), not counting Shabbat and Thursday — 4 days in a leap year.
+So 5757 is a deficient year: Cheshvan and Kislev are both deficient.
+
+### Example 2
+The molad of Tishrei 5759 (תשנ"ט): add ד"ח תתע"ו to the molad of Tishrei 5758 and get Monday, 6 hours 55 minutes 15 parts (in the Rambam’s terms: Monday, hour 12, 1005 parts).
+Rosh Hashanah 5758 is on Thursday, Rosh Hashanah 5759 on Monday. Between them are Friday, Shabbat and Sunday — 3 days (section 16). So 5758 is a regular year of the kesidrah type.

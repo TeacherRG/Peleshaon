@@ -16,16 +16,21 @@
     <string name="candles">הדלקת נרות</string>
     <string name="polar">היום אין זריחה או שקיעה</string>
     <string name="wear_city">עיר</string>
-    <string name="wear_community">קהילה</string>
     <string name="wear_candle_title">זמן הדלקת נרות</string>
     <string name="wear_back">← חזרה</string>
     <string name="wear_auto_city">איפוס בחירת עיר</string>
     <string name="wear_local_candles">לפי העיר</string>
     <string name="wear_candle_min">%1$d דקות</string>
-    <string name="wear_chabad">חב״ד</string>
-    <string name="wear_litvish">ליטאי</string>
-    <string name="wear_sefardi">ספרדי</string>
     <string name="wear_standalone_note">ההגדרות בשעון נפרדות, ללא סנכרון עם הטלפון.</string>
     <string name="wear_city_warning">לחישוב הזמנים ההלכתיים בחרו עיר</string>
     <string name="wear_select_city">בחרו עיר</string>
+
+    <!-- new day times -->
+    <string name="zs_misheyakir">משיכיר</string>
+    <string name="zs_biur_chametz">ביעור חמץ</string>
+    <string name="zs_mincha_ar">מנחה אדה״ז</string>
+    <string name="zs_mincha_ketana">מנחה קט׳</string>
+
+    <!-- nightfall 7° -->
+    <string name="zs_tzait_ar">צאה״כ אדה״ז</string>
 </resources>

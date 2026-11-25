@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -31,6 +32,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
@@ -48,10 +50,9 @@ import app.mychitas.peleshaon.domain.CityOption
 import app.mychitas.peleshaon.domain.JewishCal
 import app.mychitas.peleshaon.domain.ZmanType
 import app.mychitas.peleshaon.domain.ZmanimEngine
-import app.mychitas.peleshaon.domain.ZmanimService
-import app.mychitas.peleshaon.domain.ZmanimConfig
-import app.mychitas.peleshaon.domain.Minhag
-import java.time.Instant
+import app.mychitas.peleshaon.reminder.Reminder
+import app.mychitas.peleshaon.reminder.ReminderRules
+import app.mychitas.peleshaon.reminder.ReminderStore
 import java.time.DayOfWeek
 import java.time.LocalDate
 import java.time.ZonedDateTime
@@ -100,6 +101,19 @@ fun CalendarSheet(city: CityOption, now: ZonedDateTime) {
     val sel = remember(selected, city) { JewishCal.day(selected, city.isIsrael) }
     val upcoming = remember(today, city) { JewishCal.upcoming(today, city.isIsrael) }
     val inThisMonth = month.any { it.date == today }
+    // свечи и исход Шабата / праздника — мелко прямо в клетке дня, как пометка-напоминание (владелец, 25.11.2026)
+    val cellTimes = remember(month, city) { month.mapNotNull { d -> cellShabbatTime(d, city)?.let { d.date to it } }.toMap() }
+
+    // напоминания пользователя: список, дни месяца с ними, редактор
+    val context = LocalContext.current
+    var reminders by remember { mutableStateOf(ReminderStore.load(context)) }
+    var editing by remember { mutableStateOf<Pair<Reminder, Boolean>?>(null) }
+    val askNotifications = rememberNotificationAsk()
+    val reminderDays = remember(reminders, first.date) {
+        val end = month.last().date
+        reminders.flatMap { ReminderRules.occurrences(it, first.date, end) }.toSet()
+    }
+    val selectedReminders = remember(reminders, selected) { reminders.filter { ReminderRules.occursOn(it, selected) } }
 
     Column(
         modifier = Modifier.fillMaxWidth().verticalScroll(rememberScrollState()).padding(start = 16.dp, end = 16.dp, bottom = 28.dp),
@@ -157,7 +171,8 @@ fun CalendarSheet(city: CityOption, now: ZonedDateTime) {
                     for (i in 0 until 7) {
                         val d = row.getOrNull(i)
                         Box(Modifier.weight(1f)) {
-                            if (d != null) DayCell(d, today = d.date == today, selected = d.date == selected, locale = locale) { selected = d.date }
+                            if (d != null) DayCell(d, today = d.date == today, selected = d.date == selected, locale = locale,
+                                reminder = d.date in reminderDays, shabbatTime = cellTimes[d.date]) { selected = d.date }
                         }
                     }
                 }
@@ -166,6 +181,28 @@ fun CalendarSheet(city: CityOption, now: ZonedDateTime) {
 
         // ---- выбранный день
         DayDetails(sel, city, locale)
+
+        // ---- напоминания выбранного дня; импорт и экспорт
+        DayReminders(
+            day = selected, todays = selectedReminders,
+            onEdit = { editing = it to false },
+            onAdd = { editing = newReminder(selected) to true }
+        )
+        ReminderFiles(reminders) { reminders = it }
+        editing?.let { (r, isNew) ->
+            ReminderEditor(
+                initial = r, isNew = isNew, isIsrael = city.isIsrael,
+                onSave = { saved ->
+                    reminders = ReminderStore.upsert(context, saved)
+                    if (saved.alertMinutes != null) askNotifications()
+                    selected = if (ReminderRules.occursOn(saved, selected)) selected else saved.date
+                    anchor = selected
+                    editing = null
+                },
+                onDelete = { reminders = ReminderStore.delete(context, r.id); editing = null },
+                onDismiss = { editing = null }
+            )
+        }
 
         // ---- ближайшие даты
         HorizontalDivider(color = ClockColors.Line)
@@ -213,7 +250,13 @@ private fun NavButton(text: String, label: String, onClick: () -> Unit) {
 }
 
 @Composable
-private fun DayCell(d: CalDay, today: Boolean, selected: Boolean, locale: Locale, onClick: () -> Unit) {
+private fun DayCell(
+    d: CalDay, today: Boolean, selected: Boolean, locale: Locale,
+    reminder: Boolean = false,
+    /** 🕯 время свечей или ✨ исход Шабата / праздника; null — нет */
+    shabbatTime: Pair<String, String>? = null,
+    onClick: () -> Unit
+) {
     val shabbat = d.date.dayOfWeek == DayOfWeek.SATURDAY
     val holiday = d.holy && !shabbat
     val bg = when {
@@ -225,7 +268,7 @@ private fun DayCell(d: CalDay, today: Boolean, selected: Boolean, locale: Locale
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .aspectRatio(0.82f)
+            .aspectRatio(0.66f)
             .background(bg, RoundedCornerShape(10.dp))
             .border(
                 width = if (selected) 2.dp else 1.dp,
@@ -256,16 +299,31 @@ private fun DayCell(d: CalDay, today: Boolean, selected: Boolean, locale: Locale
         val g = d.date
         Text(
             if (g.dayOfMonth == 1) "${g.dayOfMonth} ${g.month.getDisplayName(TextStyle.SHORT_STANDALONE, locale)}" else "${g.dayOfMonth}",
-            modifier = Modifier.align(Alignment.Center).padding(top = 14.dp),
+            modifier = Modifier.align(Alignment.TopCenter).padding(top = 28.dp),
             fontSize = 10.sp,
             color = ClockColors.Muted,
             maxLines = 1
         )
+        // свечи / исход — маленькими цифрами со значком
+        shabbatTime?.let { (icon, time) ->
+            Text(
+                icon + time,
+                modifier = Modifier.align(Alignment.TopCenter).padding(top = 42.dp),
+                fontSize = 8.5.sp,
+                lineHeight = 10.sp,
+                fontWeight = FontWeight.Bold,
+                color = ClockColors.GoldDeep,
+                maxLines = 1,
+                softWrap = false
+            )
+        }
         if (dots.isNotEmpty()) {
             Row(Modifier.align(Alignment.BottomCenter).padding(bottom = 2.dp), horizontalArrangement = Arrangement.spacedBy(3.dp)) {
                 for (c in dots) Box(Modifier.size(6.dp).background(c, CircleShape))
             }
         }
+        // своё напоминание — маленький колокольчик в правом верхнем углу
+        if (reminder) Text("🔔", fontSize = 8.sp, modifier = Modifier.align(Alignment.TopEnd))
     }
 }
 
@@ -275,12 +333,6 @@ private val HHMM: DateTimeFormatter = DateTimeFormatter.ofPattern("HH:mm")
 @Composable
 private fun DayDetails(d: CalDay, city: CityOption, locale: Locale) {
     val items = remember(d.date, city) { ZmanimEngine.itemsOf(d.date, city).associateBy { it.type } }
-    val extras = remember(d.date, city, ZmanimEngine.minhag) {
-        if (ZmanimEngine.minhag == Minhag.CHABAD)
-            ZmanimService.calculate(d.date, ZmanimConfig(city, Minhag.CHABAD))
-        else null
-    }
-    val next = remember(d.date, city) { JewishCal.day(d.date.plusDays(1), city.isIsrael) }
     val hebrew = remember(d.date, city) { ZmanimEngine.jewishDate(d.date, city.isIsrael).first }
     Surface(
         shape = RoundedCornerShape(16.dp),
@@ -301,65 +353,12 @@ private fun DayDetails(d: CalDay, city: CityOption, locale: Locale) {
             for (e in d.events) EventRow(e, locale)
 
             HorizontalDivider(color = ClockColors.Line)
+            ShabbatTimeRows(d.date, city)
+            // все времена дня — те же, что в окне «Времена» под часами; по точному времени
             val zone = city.zone()
-            // свечи: канун Шабата или Йом Това — за 18 мин до заката; между двумя святыми днями — после выхода звёзд
-            val sunset = items[ZmanType.SUNSET]?.exactTime
-            if (d.candles && sunset != null) {
-                when (JewishCal.candleTransition(d.date, city.isIsrael)) {
-                    CandleTransition.BEFORE_SUNSET -> {
-                        ZmanimEngine.candleLightingOn(d.date, city)?.let {
-                            TimeRow("🕯️", stringResource(R.string.z_t_candles),
-                                it.withZoneSameInstant(zone).format(HHMM), ClockColors.GoldDeep)
-                        }
-                    }
-                    CandleTransition.AFTER_NIGHTFALL -> {
-                        val previousEnd = ZmanimEngine.havdalahOn(d.date, city)
-                        if (previousEnd != null) {
-                            TimeRow("🕯️", stringResource(R.string.cal_candles_after),
-                                previousEnd.withZoneSameInstant(zone).format(HHMM), ClockColors.GoldDeep)
-                        } else {
-                            Text(stringResource(R.string.polar_shabbat_undefined),
-                                color = ClockColors.Bad, fontSize = 13.sp)
-                        }
-                    }
-                    CandleTransition.NONE -> Unit
-                }
-            }
-            if (d.holy && !next.holy) {
-                val end = ZmanimEngine.havdalahOn(d.date, city)
-                if (end != null) {
-                    TimeRow("✨", stringResource(R.string.z_t_havdalah),
-                        end.withZoneSameInstant(zone).format(HHMM), ClockColors.GoldDeep)
-                } else {
-                    Text(stringResource(R.string.polar_shabbat_undefined),
-                        color = ClockColors.Bad, fontSize = 13.sp)
-                }
-            }
-            // Extras are Chabad-specific and must keep their own earliest/deadline
-            // rounding semantics. Sort by exact instants, never by the minute label.
-            val rows = mutableListOf<Triple<Instant, String, Color>>()
-            for (t in listOf(ZmanType.SUNRISE, ZmanType.SOF_ZMAN_SHMA,
-                ZmanType.SOF_ZMAN_TFILA, ZmanType.SUNSET, ZmanType.TZAIT)) {
-                items[t]?.let { rows += Triple(it.exactTime.toInstant(), stringResource(full(t.name)), zmanColor(t)) }
-            }
-            extras?.misheyakir?.let {
-                rows += Triple(it, stringResource(R.string.cal_misheyakir), ClockColors.TcheletDeep)
-            }
-            extras?.minchaKetana?.let {
-                rows += Triple(it, stringResource(R.string.cal_mincha_ketana), ClockColors.TcheletDeep)
-            }
-            extras?.sofZmanBiurChametz?.let {
-                rows += Triple(it, stringResource(R.string.cal_biur_chametz), ClockColors.Bad)
-            }
-            for ((instant, label, color) in rows.sortedBy { it.first }) {
-                val existing = items.values.firstOrNull { it.exactTime.toInstant() == instant }
-                val display = existing?.roundedTime ?: run {
-                    val fullMinute = instant.atZone(zone).truncatedTo(ChronoUnit.MINUTES)
-                    // Chametz burning is a deadline; other new times are earliest times.
-                    if (extras?.sofZmanBiurChametz == instant || !instant.isAfter(fullMinute.toInstant()))
-                        fullMinute else fullMinute.plusMinutes(1)
-                }
-                TimeRow(null, label, display.withZoneSameInstant(zone).format(HHMM), color)
+            for (z in items.values.sortedBy { it.exactTime }) {
+                TimeRow(null, stringResource(full(z.type.name)),
+                    z.roundedTime.withZoneSameInstant(zone).format(HHMM), zmanColor(z.type))
             }
             if (items.isEmpty()) Text(stringResource(R.string.polar_short), color = ClockColors.Muted, fontSize = 13.sp)
             else if (items[ZmanType.TZAIT] == null) {
@@ -368,6 +367,63 @@ private fun DayDetails(d: CalDay, city: CityOption, locale: Locale) {
             }
         }
     }
+}
+
+/**
+ * Свечи и исход Шабата / праздника этого календарного дня — в календаре и в окне «Времена».
+ * Канун Шабата или Йом Това — за N мин до заката; между двумя святыми днями — после выхода звёзд.
+ */
+@Composable
+internal fun ShabbatTimeRows(date: LocalDate, city: CityOption) {
+    val d = remember(date, city) { JewishCal.day(date, city.isIsrael) }
+    val next = remember(date, city) { JewishCal.day(date.plusDays(1), city.isIsrael) }
+    val zone = city.zone()
+    if (d.candles && ZmanimEngine.sunsetOf(date, city) != null) {
+        when (JewishCal.candleTransition(date, city.isIsrael)) {
+            CandleTransition.BEFORE_SUNSET -> {
+                ZmanimEngine.candleLightingOn(date, city)?.let {
+                    TimeRow("🕯️", stringResource(R.string.z_t_candles),
+                        it.withZoneSameInstant(zone).format(HHMM), ClockColors.GoldDeep)
+                }
+            }
+            CandleTransition.AFTER_NIGHTFALL -> {
+                val previousEnd = ZmanimEngine.havdalahOn(date, city)
+                if (previousEnd != null) {
+                    TimeRow("🕯️", stringResource(R.string.cal_candles_after),
+                        previousEnd.withZoneSameInstant(zone).format(HHMM), ClockColors.GoldDeep)
+                } else {
+                    Text(stringResource(R.string.polar_shabbat_undefined), color = ClockColors.Bad, fontSize = 13.sp)
+                }
+            }
+            CandleTransition.NONE -> Unit
+        }
+    }
+    if (d.holy && !next.holy) {
+        val end = ZmanimEngine.havdalahOn(date, city)
+        if (end != null) {
+            TimeRow("✨", stringResource(R.string.z_t_havdalah),
+                end.withZoneSameInstant(zone).format(HHMM), ClockColors.GoldDeep)
+        } else {
+            Text(stringResource(R.string.polar_shabbat_undefined), color = ClockColors.Bad, fontSize = 13.sp)
+        }
+    }
+}
+
+/** Время для клетки календаря: 🕯 свечи (до заката или после выхода звёзд между святыми днями) или ✨ исход. */
+private fun cellShabbatTime(d: CalDay, city: CityOption): Pair<String, String>? {
+    val zone = city.zone()
+    if (d.candles) {
+        val t = when (JewishCal.candleTransition(d.date, city.isIsrael)) {
+            CandleTransition.BEFORE_SUNSET -> ZmanimEngine.candleLightingOn(d.date, city)
+            CandleTransition.AFTER_NIGHTFALL -> ZmanimEngine.havdalahOn(d.date, city)
+            CandleTransition.NONE -> null
+        }
+        return t?.let { "🕯" to it.withZoneSameInstant(zone).format(HHMM) }
+    }
+    if (d.holy && !JewishCal.day(d.date.plusDays(1), city.isIsrael).holy) {
+        return ZmanimEngine.havdalahOn(d.date, city)?.let { "✨" to it.withZoneSameInstant(zone).format(HHMM) }
+    }
+    return null
 }
 
 @Composable
@@ -382,10 +438,10 @@ private fun EventRow(e: CalEvent, locale: Locale) {
 
 @Composable
 private fun TimeRow(icon: String?, label: String, time: String, color: Color) {
-    Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth().height(28.dp)) {
+    Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth().heightIn(min = 28.dp)) {
         if (icon != null) Text(icon, fontSize = 14.sp, modifier = Modifier.width(24.dp))
         else Box(Modifier.width(24.dp)) { Box(Modifier.size(8.dp).background(color, CircleShape)) }
-        Text(label, color = ClockColors.Ink2, fontSize = 13.sp, modifier = Modifier.weight(1f), maxLines = 1, overflow = TextOverflow.Ellipsis)
+        Text(label, color = ClockColors.Ink2, fontSize = 13.sp, modifier = Modifier.weight(1f).padding(vertical = 3.dp), maxLines = 2, overflow = TextOverflow.Ellipsis)
         Text(time, color = color, fontWeight = FontWeight.Bold, fontSize = 15.sp)
     }
 }

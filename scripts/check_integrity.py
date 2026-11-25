@@ -140,7 +140,7 @@ def main() -> None:
     check("getQuietStart(today, cityName, lat, lon, zoneId, earlyShabbatMinutes)" in guard,
           "Early Friday silence not used by ShabbatGuard")
     cal = read("app/src/main/java/app/mychitas/peleshaon/ui/CalendarSheet.kt")
-    check("ZmanimEngine.havdalahOn(d.date, city)" in cal and
+    check("ZmanimEngine.havdalahOn(date, city)" in cal and
           "CandleTransition.BEFORE_SUNSET" in cal and
           "ZmanimEngine.END_MIN" not in cal,
           "Calendar candle/havdalah transition regression")
@@ -149,8 +149,24 @@ def main() -> None:
     wear = read("wear/src/main/java/app/mychitas/peleshaon/wear/WearActivity.kt")
     check("WatchRing(cityNow, half, halfItems, next)" in wear,
           "Wear halachic half-day ring regression")
-    check("selectedCommunity" in wear and "selectedCity" in wear,
-          "Wear OS independent community/city selectors are missing")
+    check("selectedCity" in wear and "Minhag" not in wear,
+          "Wear OS city selector missing, or the removed community choice came back")
+    # Community choice was removed (owner, 25.11.2026): everything follows the Alter Rebbe.
+    check("enum class Minhag" not in engine and "Minhag" not in service31,
+          "Community (minhag) selection reintroduced")
+    check("minchaGedolaAlterRebbe" in service31 and "MINCHA_GEDOLA_AR" in engine,
+          "Alter Rebbe mincha gedola (greater of half proportional hour or 30 minutes) missing")
+    check("TZAIT_ALTER_REBBE_ZENITH = 97.0" in service31 and "TZAIT_AR" in engine,
+          "Alter Rebbe nightfall at 7 degrees missing")
+    # Help articles (res/raw) must exist in every app language with the same section count.
+    raw_base = ROOT / "app" / "src" / "main" / "res"
+    for article in sorted(p.name for p in (raw_base / "raw").glob("*.txt")):
+        counts = {}
+        for locale in LOCALES:
+            path = raw_base / locale.replace("values", "raw") / article
+            check(path.exists(), f"Help article {article} missing in {path.parent.name}")
+            counts[locale] = sum(1 for l in path.read_text(encoding="utf-8").splitlines() if l.startswith("## "))
+        check(len(set(counts.values())) == 1, f"Help article {article}: section counts differ {counts}")
     print(f"OK: phone {len(resources['values'])} keys, Wear {len(wear_resources['values'])} keys × {len(LOCALES)} languages")
     print("OK: upstream package/manifest, Shma formula, alarm isolation, polar fallback")
 

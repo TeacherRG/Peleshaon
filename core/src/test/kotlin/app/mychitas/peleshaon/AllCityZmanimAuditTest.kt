@@ -1,7 +1,6 @@
 package app.mychitas.peleshaon
 
 import app.mychitas.peleshaon.domain.CITIES
-import app.mychitas.peleshaon.domain.Minhag
 import app.mychitas.peleshaon.domain.ZmanType
 import app.mychitas.peleshaon.domain.ZmanimConfig
 import app.mychitas.peleshaon.domain.ZmanimEngine
@@ -52,10 +51,8 @@ class AllCityZmanimAuditTest {
         val problems = mutableListOf<String>()
         var polarOrUndefined = 0
         var complete = 0
-        val prevMinhag = ZmanimEngine.minhag
         val prevOverride = ZmanimEngine.candleOffsetOverride
         try {
-            ZmanimEngine.minhag = Minhag.CHABAD
             ZmanimEngine.candleOffsetOverride = null
             for (city in CITIES) {
                 val cityProblems = mutableListOf<String>()
@@ -75,10 +72,10 @@ class AllCityZmanimAuditTest {
                 var definedDates = 0
                 for (date in dates) {
                     val issues = mutableListOf<String>()
-                    val z = ZmanimService.calculate(date, ZmanimConfig(city, Minhag.CHABAD))
+                    val z = ZmanimService.calculate(date, ZmanimConfig(city))
                     val fri = date.dayOfWeek == DayOfWeek.FRIDAY
                     val sat = if (fri) ZmanimService.calculate(
-                        date.plusDays(1), ZmanimConfig(city, Minhag.CHABAD)
+                        date.plusDays(1), ZmanimConfig(city)
                     ) else null
                     val events = ZmanimEngine.itemsOf(date, city)
                     val dawn = z.dawn
@@ -113,7 +110,7 @@ class AllCityZmanimAuditTest {
                     if (z.shabbatEnd != null && set != null &&
                         !z.shabbatEnd.isAfter(set))
                         issues += "shabbat_end_not_after_sunset"
-                    val offset = ZmanimService.candleMinutes(ZmanimConfig(city, Minhag.CHABAD))
+                    val offset = ZmanimService.candleMinutes(ZmanimConfig(city))
                     if (set != null && z.candleLighting != set.minus(Duration.ofMinutes(offset)))
                         issues += "candles_not_sunset_minus_local_offset"
                     if (fri && sat?.sunset != null && end != null &&
@@ -156,7 +153,6 @@ class AllCityZmanimAuditTest {
                 ).joinToString("\t")
             }
         } finally {
-            ZmanimEngine.minhag = prevMinhag
             ZmanimEngine.candleOffsetOverride = prevOverride
         }
         val dir = File("build/reports")

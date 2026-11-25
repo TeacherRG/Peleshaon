@@ -1,7 +1,6 @@
 package app.mychitas.peleshaon
 
 import app.mychitas.peleshaon.alarm.ShabbatGuard
-import app.mychitas.peleshaon.domain.Minhag
 import app.mychitas.peleshaon.domain.ZmanimConfig
 import app.mychitas.peleshaon.domain.ZmanimService
 import app.mychitas.peleshaon.domain.cityById
@@ -51,7 +50,7 @@ class IndependentHolidayAndDayFractionsTest {
                 LocalDate.of(2026, 3, 20), LocalDate.of(2026, 6, 19),
                 LocalDate.of(2026, 9, 18), LocalDate.of(2026, 12, 18)
             )) {
-                val snap = ZmanimService.calculate(date, ZmanimConfig(city, Minhag.CHABAD))
+                val snap = ZmanimService.calculate(date, ZmanimConfig(city))
                 val raw = ZmanimService.buildCalendar(date, city.name, city.lat,
                     city.lon, 0.0, city.zone())
                 // The Alter Rebbe's proportional day uses hidden TRUE sunrise and

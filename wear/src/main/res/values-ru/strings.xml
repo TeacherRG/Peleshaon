@@ -16,16 +16,21 @@
     <string name="candles">Свечи</string>
     <string name="polar">Сегодня нет восхода или заката</string>
     <string name="wear_city">Город</string>
-    <string name="wear_community">Община</string>
     <string name="wear_candle_title">Время свечей</string>
     <string name="wear_back">← Назад</string>
     <string name="wear_auto_city">Сбросить выбор города</string>
     <string name="wear_local_candles">По городу</string>
     <string name="wear_candle_min">%1$d мин</string>
-    <string name="wear_chabad">Хабад</string>
-    <string name="wear_litvish">Литовская</string>
-    <string name="wear_sefardi">Сефардская</string>
     <string name="wear_standalone_note">Настройки часов автономны; с телефона не синхронизируются.</string>
     <string name="wear_city_warning">Для расчёта галахического времени выберите город</string>
     <string name="wear_select_city">Выберите город</string>
+
+    <!-- new day times -->
+    <string name="zs_misheyakir">Мишеякир</string>
+    <string name="zs_biur_chametz">Хамец</string>
+    <string name="zs_mincha_ar">Минха АР</string>
+    <string name="zs_mincha_ketana">Минха кт.</string>
+
+    <!-- nightfall 7° -->
+    <string name="zs_tzait_ar">Звёзды АР</string>
 </resources>

@@ -136,7 +136,7 @@ object JewishCal {
         if (jc.isRoshChodesh) ev += CalEvent(CalKind.ROSH_CHODESH, "rosh_chodesh")
         val omer = jc.dayOfOmer
         if (omer > 0) ev += CalEvent(CalKind.OMER, "omer", omer)
-        if (ZmanimEngine.minhag == Minhag.CHABAD) for ((m, d, key) in CHABAD) if (jc.jewishMonth == m && jc.jewishDayOfMonth == d) ev += CalEvent(CalKind.CHABAD, key)
+        for ((m, d, key) in CHABAD) if (jc.jewishMonth == m && jc.jewishDayOfMonth == d) ev += CalEvent(CalKind.CHABAD, key)
         if (date.dayOfWeek == java.time.DayOfWeek.SATURDAY) {
             val p = jc.parshah
             if (p != JewishCalendar.Parshah.NONE) ev += CalEvent(CalKind.PARSHA, "parsha_${p.name}")

@@ -6,16 +6,16 @@ import android.content.Context
 import android.content.res.Configuration
 import android.os.Build
 import android.os.LocaleList
-import app.mychitas.peleshaon.domain.Minhag
 import app.mychitas.peleshaon.domain.ZmanimEngine
 import java.util.Locale
 
-/** При запуске — община (по ней считаются времена) и язык приложения: и для экрана, и для будильников, виджетов, уведомлений. */
+/** При запуске — свечи и язык приложения: и для экрана, и для будильников, виджетов, уведомлений. */
 class PeleApp : Application() {
     override fun onCreate() {
         super.onCreate()
         Prefs.migrateKashrut(this)
-        ZmanimEngine.minhag = Prefs.minhag(this)
+        // выбор общины убран: всё по Алтер Ребе (владелец, 25.11.2026); старую настройку стираем
+        Prefs.of(this).edit().remove("minhag").apply()
         ZmanimEngine.candleOffsetOverride = Prefs.candleOffset(this)
         AppLang.migratePlatformLanguage(this)
         AppLang.applyToProcess(this)
