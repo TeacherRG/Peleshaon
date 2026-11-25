@@ -4,7 +4,6 @@ import app.mychitas.peleshaon.alarm.AlarmRules
 import app.mychitas.peleshaon.alarm.AlarmSpec
 import app.mychitas.peleshaon.alarm.KashrutPolicy
 import app.mychitas.peleshaon.alarm.ShabbatGuard
-import app.mychitas.peleshaon.domain.Minhag
 import app.mychitas.peleshaon.domain.ZmanimEngine
 import app.mychitas.peleshaon.domain.cityById
 import java.time.LocalDate
@@ -23,7 +22,6 @@ class ShabbatSafetyTest {
     private val friday = LocalDate.of(2026, 11, 20)
 
     @AfterTest fun reset() {
-        ZmanimEngine.minhag = Minhag.CHABAD
         ZmanimEngine.candleOffsetOverride = null
     }
 

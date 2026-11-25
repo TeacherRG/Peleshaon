@@ -89,7 +89,6 @@ import app.mychitas.peleshaon.domain.CityOption
 import app.mychitas.peleshaon.domain.Dial
 import app.mychitas.peleshaon.domain.ZmanType
 import app.mychitas.peleshaon.domain.ZmanimEngine
-import app.mychitas.peleshaon.domain.Minhag
 import app.mychitas.peleshaon.domain.JewishCal
 import app.mychitas.peleshaon.domain.Mevarchim
 import androidx.compose.ui.res.pluralStringResource
@@ -810,7 +809,6 @@ private fun ShabbatSheet(
 /** 7-й час ночи Шабата: с … до … — в этот час не делают кидуш. */
 @Composable
 private fun SeventhHour(friday: LocalDate, city: CityOption, now: ZonedDateTime) {
-    if (ZmanimEngine.minhag != Minhag.CHABAD) return
     val h = remember(friday, city) { ZmanimEngine.seventhHourOfShabbatNight(friday, city) }
     if (!now.isBefore(h.second)) return
     val z = city.zone()
@@ -871,7 +869,7 @@ private fun MevarchimBlock(m: Mevarchim) {
     val rc = m.roshChodesh.joinToString(" · ") { it.format(DateTimeFormatter.ofPattern("EEEE, d MMMM", locale)) }
     Text(stringResource(R.string.mev_rc, rc), color = ClockColors.Ink2)
     Note(stringResource(R.string.mev_note))
-    if (ZmanimEngine.minhag == Minhag.CHABAD) Note(stringResource(R.string.mev_tehillim))
+    Note(stringResource(R.string.mev_tehillim))
 }
 
 // ---------------------------------------------------------------- будильники
@@ -1190,6 +1188,8 @@ private fun TimesSheet(
             else -> null
         }
         fri?.let { SeventhHour(it, city, now) }
+        // свечи и исход Шабата / праздника — как в календаре (владелец, 25.11.2026: «все времена, как в календаре»)
+        ShabbatTimeRows(if (tomorrow) now.toLocalDate().plusDays(1) else now.toLocalDate(), city)
         Column {
             for (z in items) {
                 val past = !z.roundedTime.isAfter(now)
@@ -1294,7 +1294,7 @@ private fun InfoSheet(
         Note("📅 " + stringResource(R.string.cal_hint))
         HorizontalDivider(color = ClockColors.Line)
         Text(stringResource(R.string.info), fontWeight = FontWeight.Bold, color = ClockColors.Ink)
-        Note(minhagNote())
+        Note(stringResource(R.string.note))
         Note(stringResource(R.string.shabbat_note))
         Note(stringResource(R.string.alarm_note))
         Note(stringResource(R.string.kl_help))
@@ -1439,12 +1439,6 @@ private fun TzirufMore() {
 }
 
 /** Как считаем: у Хабада — прежний текст, у других общин — их правило и точность расчёта. */
-@Composable
-private fun minhagNote(): String = when (ZmanimEngine.minhag) {
-    Minhag.CHABAD -> stringResource(R.string.note)
-    Minhag.LITVISH -> stringResource(R.string.minhag_d_litvish) + " " + stringResource(R.string.note_acc)
-    Minhag.SEFARDI -> stringResource(R.string.minhag_d_sefardi) + " " + stringResource(R.string.note_acc)
-}
 
 /**
  * «Настройки» (владелец, 18.11.2026): язык, тема и община — Хабад, литовская, сефардская; по общине сами меняются
@@ -1561,44 +1555,5 @@ private fun SettingsSheet(onChange: () -> Unit) {
             }
         }
         Note(stringResource(R.string.shabbat_quiet_early_note))
-        HorizontalDivider(color = ClockColors.Line)
-
-        // община
-        Text(stringResource(R.string.minhag_t), fontWeight = FontWeight.Bold, color = ClockColors.Ink)
-        var minhag by remember { mutableStateOf(ZmanimEngine.minhag) }
-        for ((m, title, about) in listOf(
-            Triple(Minhag.CHABAD, R.string.minhag_chabad, R.string.minhag_d_chabad),
-            Triple(Minhag.LITVISH, R.string.minhag_litvish, R.string.minhag_d_litvish),
-            Triple(Minhag.SEFARDI, R.string.minhag_sefardi, R.string.minhag_d_sefardi)
-        )) {
-            val on = minhag == m
-            Surface(
-                onClick = {
-                    if (on) return@Surface
-                    minhag = m
-                    ZmanimEngine.minhag = m
-                    Prefs.setMinhag(context, m)
-                    // будильник «до конца Шма», покой в Шабат, напоминание о Кидуш Левана, виджеты — по новой общине
-                    AlarmScheduler.rescheduleAllFromPrefs(context)
-                    app.mychitas.peleshaon.moon.MoonReminder.schedule(context)
-                    app.mychitas.peleshaon.live.Live.updateAsync(context)
-                    onChange()
-                },
-                shape = RoundedCornerShape(12.dp),
-                color = if (on) ClockColors.Gold.copy(alpha = 0.18f) else ClockColors.Surface,
-                border = BorderStroke(if (on) 2.dp else 1.dp, if (on) ClockColors.Gold else ClockColors.Line),
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Row(Modifier.padding(12.dp), verticalAlignment = Alignment.Top) {
-                    RadioButton(selected = on, onClick = null, colors = radioColors())
-                    Spacer(Modifier.width(8.dp))
-                    Column {
-                        Text(stringResource(title), fontWeight = FontWeight.Bold, color = ClockColors.Ink)
-                        Text(stringResource(about), color = ClockColors.Ink2, fontSize = 13.sp)
-                    }
-                }
-            }
-        }
-        Note(stringResource(R.string.minhag_note))
     }
 }

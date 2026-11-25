@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -48,10 +49,6 @@ import app.mychitas.peleshaon.domain.CityOption
 import app.mychitas.peleshaon.domain.JewishCal
 import app.mychitas.peleshaon.domain.ZmanType
 import app.mychitas.peleshaon.domain.ZmanimEngine
-import app.mychitas.peleshaon.domain.ZmanimService
-import app.mychitas.peleshaon.domain.ZmanimConfig
-import app.mychitas.peleshaon.domain.Minhag
-import java.time.Instant
 import java.time.DayOfWeek
 import java.time.LocalDate
 import java.time.ZonedDateTime
@@ -275,12 +272,6 @@ private val HHMM: DateTimeFormatter = DateTimeFormatter.ofPattern("HH:mm")
 @Composable
 private fun DayDetails(d: CalDay, city: CityOption, locale: Locale) {
     val items = remember(d.date, city) { ZmanimEngine.itemsOf(d.date, city).associateBy { it.type } }
-    val extras = remember(d.date, city, ZmanimEngine.minhag) {
-        if (ZmanimEngine.minhag == Minhag.CHABAD)
-            ZmanimService.calculate(d.date, ZmanimConfig(city, Minhag.CHABAD))
-        else null
-    }
-    val next = remember(d.date, city) { JewishCal.day(d.date.plusDays(1), city.isIsrael) }
     val hebrew = remember(d.date, city) { ZmanimEngine.jewishDate(d.date, city.isIsrael).first }
     Surface(
         shape = RoundedCornerShape(16.dp),
@@ -301,71 +292,58 @@ private fun DayDetails(d: CalDay, city: CityOption, locale: Locale) {
             for (e in d.events) EventRow(e, locale)
 
             HorizontalDivider(color = ClockColors.Line)
+            ShabbatTimeRows(d.date, city)
+            // все времена дня — те же, что в окне «Времена» под часами; по точному времени
             val zone = city.zone()
-            // свечи: канун Шабата или Йом Това — за 18 мин до заката; между двумя святыми днями — после выхода звёзд
-            val sunset = items[ZmanType.SUNSET]?.exactTime
-            if (d.candles && sunset != null) {
-                when (JewishCal.candleTransition(d.date, city.isIsrael)) {
-                    CandleTransition.BEFORE_SUNSET -> {
-                        ZmanimEngine.candleLightingOn(d.date, city)?.let {
-                            TimeRow("🕯️", stringResource(R.string.z_t_candles),
-                                it.withZoneSameInstant(zone).format(HHMM), ClockColors.GoldDeep)
-                        }
-                    }
-                    CandleTransition.AFTER_NIGHTFALL -> {
-                        val previousEnd = ZmanimEngine.havdalahOn(d.date, city)
-                        if (previousEnd != null) {
-                            TimeRow("🕯️", stringResource(R.string.cal_candles_after),
-                                previousEnd.withZoneSameInstant(zone).format(HHMM), ClockColors.GoldDeep)
-                        } else {
-                            Text(stringResource(R.string.polar_shabbat_undefined),
-                                color = ClockColors.Bad, fontSize = 13.sp)
-                        }
-                    }
-                    CandleTransition.NONE -> Unit
-                }
-            }
-            if (d.holy && !next.holy) {
-                val end = ZmanimEngine.havdalahOn(d.date, city)
-                if (end != null) {
-                    TimeRow("✨", stringResource(R.string.z_t_havdalah),
-                        end.withZoneSameInstant(zone).format(HHMM), ClockColors.GoldDeep)
-                } else {
-                    Text(stringResource(R.string.polar_shabbat_undefined),
-                        color = ClockColors.Bad, fontSize = 13.sp)
-                }
-            }
-            // Extras are Chabad-specific and must keep their own earliest/deadline
-            // rounding semantics. Sort by exact instants, never by the minute label.
-            val rows = mutableListOf<Triple<Instant, String, Color>>()
-            for (t in listOf(ZmanType.SUNRISE, ZmanType.SOF_ZMAN_SHMA,
-                ZmanType.SOF_ZMAN_TFILA, ZmanType.SUNSET, ZmanType.TZAIT)) {
-                items[t]?.let { rows += Triple(it.exactTime.toInstant(), stringResource(full(t.name)), zmanColor(t)) }
-            }
-            extras?.misheyakir?.let {
-                rows += Triple(it, stringResource(R.string.cal_misheyakir), ClockColors.TcheletDeep)
-            }
-            extras?.minchaKetana?.let {
-                rows += Triple(it, stringResource(R.string.cal_mincha_ketana), ClockColors.TcheletDeep)
-            }
-            extras?.sofZmanBiurChametz?.let {
-                rows += Triple(it, stringResource(R.string.cal_biur_chametz), ClockColors.Bad)
-            }
-            for ((instant, label, color) in rows.sortedBy { it.first }) {
-                val existing = items.values.firstOrNull { it.exactTime.toInstant() == instant }
-                val display = existing?.roundedTime ?: run {
-                    val fullMinute = instant.atZone(zone).truncatedTo(ChronoUnit.MINUTES)
-                    // Chametz burning is a deadline; other new times are earliest times.
-                    if (extras?.sofZmanBiurChametz == instant || !instant.isAfter(fullMinute.toInstant()))
-                        fullMinute else fullMinute.plusMinutes(1)
-                }
-                TimeRow(null, label, display.withZoneSameInstant(zone).format(HHMM), color)
+            for (z in items.values.sortedBy { it.exactTime }) {
+                TimeRow(null, stringResource(full(z.type.name)),
+                    z.roundedTime.withZoneSameInstant(zone).format(HHMM), zmanColor(z.type))
             }
             if (items.isEmpty()) Text(stringResource(R.string.polar_short), color = ClockColors.Muted, fontSize = 13.sp)
             else if (items[ZmanType.TZAIT] == null) {
                 Text(stringResource(R.string.polar_nightfall_undefined),
                     color = ClockColors.Bad, fontSize = 13.sp)
             }
+        }
+    }
+}
+
+/**
+ * Свечи и исход Шабата / праздника этого календарного дня — в календаре и в окне «Времена».
+ * Канун Шабата или Йом Това — за N мин до заката; между двумя святыми днями — после выхода звёзд.
+ */
+@Composable
+internal fun ShabbatTimeRows(date: LocalDate, city: CityOption) {
+    val d = remember(date, city) { JewishCal.day(date, city.isIsrael) }
+    val next = remember(date, city) { JewishCal.day(date.plusDays(1), city.isIsrael) }
+    val zone = city.zone()
+    if (d.candles && ZmanimEngine.sunsetOf(date, city) != null) {
+        when (JewishCal.candleTransition(date, city.isIsrael)) {
+            CandleTransition.BEFORE_SUNSET -> {
+                ZmanimEngine.candleLightingOn(date, city)?.let {
+                    TimeRow("🕯️", stringResource(R.string.z_t_candles),
+                        it.withZoneSameInstant(zone).format(HHMM), ClockColors.GoldDeep)
+                }
+            }
+            CandleTransition.AFTER_NIGHTFALL -> {
+                val previousEnd = ZmanimEngine.havdalahOn(date, city)
+                if (previousEnd != null) {
+                    TimeRow("🕯️", stringResource(R.string.cal_candles_after),
+                        previousEnd.withZoneSameInstant(zone).format(HHMM), ClockColors.GoldDeep)
+                } else {
+                    Text(stringResource(R.string.polar_shabbat_undefined), color = ClockColors.Bad, fontSize = 13.sp)
+                }
+            }
+            CandleTransition.NONE -> Unit
+        }
+    }
+    if (d.holy && !next.holy) {
+        val end = ZmanimEngine.havdalahOn(date, city)
+        if (end != null) {
+            TimeRow("✨", stringResource(R.string.z_t_havdalah),
+                end.withZoneSameInstant(zone).format(HHMM), ClockColors.GoldDeep)
+        } else {
+            Text(stringResource(R.string.polar_shabbat_undefined), color = ClockColors.Bad, fontSize = 13.sp)
         }
     }
 }
@@ -382,10 +360,10 @@ private fun EventRow(e: CalEvent, locale: Locale) {
 
 @Composable
 private fun TimeRow(icon: String?, label: String, time: String, color: Color) {
-    Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth().height(28.dp)) {
+    Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth().heightIn(min = 28.dp)) {
         if (icon != null) Text(icon, fontSize = 14.sp, modifier = Modifier.width(24.dp))
         else Box(Modifier.width(24.dp)) { Box(Modifier.size(8.dp).background(color, CircleShape)) }
-        Text(label, color = ClockColors.Ink2, fontSize = 13.sp, modifier = Modifier.weight(1f), maxLines = 1, overflow = TextOverflow.Ellipsis)
+        Text(label, color = ClockColors.Ink2, fontSize = 13.sp, modifier = Modifier.weight(1f).padding(vertical = 3.dp), maxLines = 2, overflow = TextOverflow.Ellipsis)
         Text(time, color = color, fontWeight = FontWeight.Bold, fontSize = 15.sp)
     }
 }

@@ -35,8 +35,8 @@
     <string name="z_t_chatzot">חצות היום</string>
     <string name="z_d_chatzot">חצות היום — באמצע בין הנץ לשקיעה. השמש בשיא גובהה.</string>
     <string name="z_s_mincha_gedola">מנחה גד׳</string>
-    <string name="z_t_mincha_gedola">מנחה גדולה</string>
-    <string name="z_d_mincha_gedola">חצי שעה אחרי חצות — מכאן אפשר להתפלל מנחה.</string>
+    <string name="z_t_mincha_gedola">מנחה גדולה (רגילה)</string>
+    <string name="z_d_mincha_gedola">חצי שעה זמנית אחרי חצות — מעתה אפשר להתפלל מנחה.</string>
     <string name="z_s_plag_hamincha">פלג</string>
     <string name="z_t_plag_hamincha">פלג המנחה</string>
     <string name="z_d_plag_hamincha">פלג המנחה — שעה ורבע זמניות לפני סוף היום. מכאן אפשר לקבל שבת מוקדם.</string>
@@ -243,17 +243,6 @@
     <string name="settings">הגדרות</string>
     <string name="lang_t">שפה</string>
     <string name="lang_system">כמו בטלפון</string>
-    <string name="minhag_t">קהילה</string>
-    <string name="minhag_chabad">חב״ד</string>
-    <string name="minhag_litvish">ליטאית (אשכנזית)</string>
-    <string name="minhag_sefardi">ספרדית</string>
-    <string name="minhag_d_chabad">הזמנים לפי אדמו״ר הזקן (בעל התניא), כמו בלוחות חב״ד. קידוש לבנה — משבעה ימים אחרי המולד. בלוח — תאריכי חב״ד.</string>
-    <string name="minhag_d_litvish">הזמנים לפי הגר״א: קריאת שמע ותפילת שחרית מחושבות מהזריחה עד השקיעה; צאת הכוכבים וצאת השבת — כשהשמש 8.5° מתחת לאופק. קידוש לבנה — משלושה ימים אחרי המולד.</string>
-    <string name="minhag_d_sefardi">פרופיל החישוב ביישומון: עלות השחר 72 דקות זמניות לפני הזריחה, שמע לפי מגן אברהם, תפילת שחרית לפי הגר״א, צאת הכוכבים אחרי 13.5 דקות זמניות, וצאת השבת לפי רבנו תם (72 דקות זמניות). זו אינה הלכה אחידה לכל קהילות הספרדים.</string>
-    <string name="minhag_note">זמני היום, צאת השבת, השעונים המעוררים ותזכורות הירח נקבעים לפי הפרופיל שנבחר. זמן הנרות תלוי בעיר ובהגדרות. יש להתייעץ עם רב הקהילה.</string>
-    <string name="note_acc">החישוב לפי קואורדינטות העיר, בדיוק של 1–2 דקות: אל תשאירו לרגע האחרון והשוו ללוח של הקהילה.</string>
-    <string name="kl_note_litvish">הזמנים לפי מנהג אשכנז: משלושה ימים אחרי המולד עד חצי החודש, לא בליל שבת ויום טוב; באב — אחרי תשעה באב, בתשרי — אחרי יום כיפור. התייעצו עם רב הקהילה.</string>
-    <string name="kl_note_sefardi">הזמנים לפי מנהג הספרדים: משבעה עד חמישה עשר ימים אחרי המולד, לא בליל שבת ויום טוב; באב — אחרי תשעה באב, בתשרי — אחרי יום כיפור. התייעצו עם רב הקהילה.</string>
     <string name="mev_title">שבת מברכים</string>
     <string name="mev_bless">מברכים את החודש: %1$s</string>
     <string name="mev_molad">המולד: %1$s, %2$s ו־%3$s</string>
@@ -338,4 +327,15 @@
     <string name="jt_kh_sub">מהמולד והחודש דרך שנת החמה ושנת הלבנה ועד חישוב ראש השנה</string>
     <string name="jt_expand">להרחיב הכול ▾</string>
     <string name="jt_collapse">לכווץ הכול ▴</string>
+
+    <!-- времена из календаря и минха гдола по Алтер Ребе -->
+    <string name="z_s_misheyakir">משיכיר</string>
+    <string name="z_d_misheyakir">מעתה מותר להניח טלית ותפילין (השמש 10.2° מתחת לאופק).</string>
+    <string name="z_s_biur_chametz">ביעור חמץ</string>
+    <string name="z_d_biur_chametz">רק בערב פסח: עד שעה זו יש לשרוף את החמץ.</string>
+    <string name="z_s_mincha_gedola_ar">מנחה גד׳ אדה״ז</string>
+    <string name="z_t_mincha_gedola_ar">מנחה גדולה לשיטת אדמו״ר הזקן</string>
+    <string name="z_d_mincha_gedola_ar">לשיטת אדמו״ר הזקן — חצי שעה אחרי חצות, ותמיד החצי שעה הארוכה: בקיץ — חצי שעה זמנית, בחורף — 30 דקות רגילות.</string>
+    <string name="z_s_mincha_ketana">מנחה קט׳</string>
+    <string name="z_d_mincha_ketana">מנחה קטנה — תשע שעות זמניות וחצי מתחילת היום.</string>
 </resources>

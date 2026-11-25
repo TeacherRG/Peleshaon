@@ -8,10 +8,10 @@ import java.time.LocalDate
 import java.time.ZoneId
 import java.util.Locale
 
-/** An immutable, fully specified request: never read UI or process-global preferences in a calculation. */
+/** An immutable, fully specified request: never read UI or process-global preferences in a calculation.
+ * Все времена считаются только по Алтер Ребе (Бааль ґа-Тания); выбор общины убран (владелец, 25.11.2026). */
 data class ZmanimConfig(
     val city: CityOption,
-    val minhag: Minhag,
     val candleOffsetMinutes: Long? = null
 )
 
@@ -25,7 +25,13 @@ data class ZmanimSnapshot(
     val shema: Instant?,
     val tfila: Instant?,
     val chatzot: Instant?,
+    /** Ordinary mincha gedola: half a proportional hour after chatzot. */
     val minchaGedola: Instant?,
+    /**
+     * Mincha gedola per the Alter Rebbe: half an hour after chatzot, taking whichever half hour
+     * is LONGER — half a proportional hour (summer) or 30 clock minutes (winter).
+     */
+    val minchaGedolaAlterRebbe: Instant?,
     val plagHamincha: Instant?,
     val sunset: Instant?,
     val ordinaryTzait: Instant?,
@@ -41,14 +47,12 @@ data class ZmanimSnapshot(
 )
 
 /**
- * Canonical KosherJava 3.1.0 API adapter. In particular, ordinary Chabad tzait
- * (6 degrees) is not the Shabbat/Yom Tov exit (8.5 degrees).
- *
- * The Sephardi profile deliberately preserves its old calculation choices pending
- * qualified rabbinic review. These choices are not universal halakhic rulings.
+ * Canonical KosherJava 3.1.0 API adapter, Alter Rebbe (Baal Hatanya) only. In particular,
+ * ordinary Chabad tzait (6 degrees) is not the Shabbat/Yom Tov exit (8.5 degrees).
  */
 object ZmanimService {
     private val overrides = setOf(18L, 20L, 22L, 30L, 40L)
+    private val HALF_HOUR: Duration = Duration.ofMinutes(30)
 
     fun candleMinutes(config: ZmanimConfig): Long =
         config.candleOffsetMinutes?.takeIf { it in overrides }
@@ -64,7 +68,7 @@ object ZmanimService {
     fun calculate(date: LocalDate, config: ZmanimConfig): ZmanimSnapshot {
         val c = config.city
         val calendar = buildCalendar(date, c.name, c.lat, c.lon, 0.0, c.zone())
-        return fromCalendar(calendar, config.minhag, candleMinutes(config))
+        return fromCalendar(calendar, candleMinutes(config))
     }
 
     fun buildCalendar(
@@ -79,19 +83,27 @@ object ZmanimService {
             GeoLocation(cityName, latitude, longitude, elevation, zone)
         ).apply { localDate = date }
 
-    /** Used by the legacy public ZmanimEngine while UI consumers migrate to explicit configs. */
+    /**
+     * Alter Rebbe rule: mincha gedola is half an hour after chatzot, and the LONGER half hour is used —
+     * half of a proportional hour in summer, 30 ordinary minutes in winter.
+     */
+    fun minchaGedolaAlterRebbe(chatzot: Instant?, trueRise: Instant?, trueSet: Instant?): Instant? {
+        if (chatzot == null || trueRise == null || trueSet == null || !trueSet.isAfter(trueRise)) return null
+        val halfZmanit = Duration.ofNanos(Duration.between(trueRise, trueSet).toNanos() / 24L)
+        return chatzot.plus(if (halfZmanit > HALF_HOUR) halfZmanit else HALF_HOUR)
+    }
+
+    /** Used by the public ZmanimEngine. */
     internal fun fromCalendar(
         calendar: ComprehensiveZmanimCalendar,
-        community: Minhag,
         candleMinutes: Long
     ): ZmanimSnapshot {
         // Chabad.org: when summer twilight never reaches -16.9 degrees,
         // alos begins at the lowest point of the *previous* night.
         // SolarMidnight is calculated at the END of its calendar date, so
         // use the previous civil date. Never turn polar night into false dawn.
-        val chabadDawnByDegrees = if (community == Minhag.CHABAD) calendar.alosBaalHatanya else null
-        val solarMidnightDawn = if (community == Minhag.CHABAD &&
-            chabadDawnByDegrees == null &&
+        val chabadDawnByDegrees = calendar.alosBaalHatanya
+        val solarMidnightDawn = if (chabadDawnByDegrees == null &&
             calendar.sunrise != null && calendar.sunset != null) {
             val yesterday = ComprehensiveZmanimCalendar(calendar.geoLocation).apply {
                 localDate = calendar.localDate.minusDays(1)
@@ -106,79 +118,44 @@ object ZmanimService {
                     candidate.isAfter(lastSunset) && candidate.isBefore(nextSunrise)
             }
         } else null
-        val actualDawn = chabadDawnByDegrees ?: solarMidnightDawn
 
         // Chabad.org's chatzos is half-way between the *true* Baal Hatanya
         // sunrise and sunset (solar center -1.583 degrees), not solar transit.
         // The hidden true boundaries are not the published practical hanetz/shkiah.
-        val trueRise = if (community == Minhag.CHABAD)
-            calendar.getSunriseOffsetByDegrees(91.583) else null
-        val trueSet = if (community == Minhag.CHABAD)
-            calendar.getSunsetOffsetByDegrees(91.583) else null
+        val trueRise = calendar.getSunriseOffsetByDegrees(91.583)
+        val trueSet = calendar.getSunsetOffsetByDegrees(91.583)
         val chabadMidday = if (trueRise != null && trueSet != null && trueSet.isAfter(trueRise))
             trueRise.plusNanos(Duration.between(trueRise, trueSet).toNanos() / 2L)
         else null
 
-        val ordinary = when (community) {
-            Minhag.CHABAD -> calendar.tzaisBaalHatanya
-            Minhag.LITVISH -> calendar.tzaisGeonim8Point5Degrees
-            Minhag.SEFARDI -> calendar.getZmanisBasedOffset(13.5 / 60.0)
-        }
-        val exit = when (community) {
-            Minhag.CHABAD, Minhag.LITVISH -> calendar.tzaisGeonim8Point5Degrees
-            Minhag.SEFARDI -> calendar.tzais72Zmanis
-        }
-        val methods = when (community) {
-            Minhag.CHABAD -> mapOf(
+        return ZmanimSnapshot(
+            dawn = chabadDawnByDegrees ?: solarMidnightDawn,
+            sunrise = calendar.sunrise,
+            shema = calendar.sofZmanShmaBaalHatanya,
+            tfila = calendar.sofZmanTfilaBaalHatanya,
+            chatzot = chabadMidday,
+            minchaGedola = calendar.minchaGedolaBaalHatanya,
+            minchaGedolaAlterRebbe = minchaGedolaAlterRebbe(chabadMidday, trueRise, trueSet),
+            plagHamincha = calendar.plagHaminchaBaalHatanya,
+            sunset = calendar.sunset,
+            ordinaryTzait = calendar.tzaisBaalHatanya,
+            shabbatEnd = calendar.tzaisGeonim8Point5Degrees,
+            candleLighting = if (candleMinutes in overrides) {
+                calendar.candleLightingOffset = candleMinutes.toDouble()
+                calendar.candleLighting
+            } else null,
+            methodIds = mapOf(
                 "dawn" to (if (solarMidnightDawn != null)
                     "chabad.alos.solar_midnight_when_16_9deg_unreachable"
                     else "chabad.alos.16_9deg"),
                 "ordinaryTzait" to "chabad.tzait.6deg",
                 "shabbatEnd" to "chabad.havdalah.8_5deg",
-                "shema" to "baal_hatanya.shema"
-            )
-            Minhag.LITVISH -> mapOf(
-                "dawn" to "gra.alos.16_1deg",
-                "ordinaryTzait" to "selected.gra.tzait.8_5deg",
-                "shabbatEnd" to "selected.gra.havdalah.8_5deg",
-                "shema" to "gra.shema"
-            )
-            Minhag.SEFARDI -> mapOf(
-                "dawn" to "selected.sefardi.alos.72zmanis",
-                "ordinaryTzait" to "selected.sefardi.tzait.13_5zmanis",
-                "shabbatEnd" to "selected.sefardi.rabbeinu_tam.72zmanis",
-                "shema" to "selected.sefardi.mga72zmanis"
-            )
-        }
-        return ZmanimSnapshot(
-            dawn = when (community) {
-                Minhag.CHABAD -> actualDawn
-                Minhag.LITVISH -> calendar.alos16Point1Degrees
-                Minhag.SEFARDI -> calendar.alos72Zmanis
-            },
-            sunrise = calendar.sunrise,
-            shema = when (community) {
-                Minhag.CHABAD -> calendar.sofZmanShmaBaalHatanya
-                Minhag.LITVISH -> calendar.sofZmanShmaGRA
-                Minhag.SEFARDI -> calendar.sofZmanShmaMGA72MinutesZmanis
-            },
-            tfila = if (community == Minhag.CHABAD) calendar.sofZmanTfilaBaalHatanya else calendar.sofZmanTfilaGRA,
-            chatzot = if (community == Minhag.CHABAD) chabadMidday else calendar.chatzosHayom,
-            // Revisit the 30-minute threshold with an approved community policy; do not silently decide it.
-            minchaGedola = if (community == Minhag.CHABAD) calendar.minchaGedolaBaalHatanya else calendar.minchaGedolaGRA,
-            plagHamincha = if (community == Minhag.CHABAD) calendar.plagHaminchaBaalHatanya else calendar.plagHaminchaGRA,
-            sunset = calendar.sunset,
-            ordinaryTzait = ordinary,
-            shabbatEnd = exit,
-            candleLighting = if (candleMinutes in setOf(18L, 20L, 22L, 30L, 40L)) {
-                calendar.candleLightingOffset = candleMinutes.toDouble()
-                calendar.candleLighting
-            } else null,
-            methodIds = methods,
-            misheyakir = if (community == Minhag.CHABAD) calendar.misheyakir10Point2Degrees else null,
-            minchaKetana = if (community == Minhag.CHABAD) calendar.minchaKetanaBaalHatanya else null,
-            sofZmanBiurChametz = if (community == Minhag.CHABAD)
-                calendar.sofZmanBiurChametzBaalHatanya else null
+                "shema" to "baal_hatanya.shema",
+                "minchaGedolaAlterRebbe" to "baal_hatanya.mincha_gedola.greater_of_half_zmanit_or_30min"
+            ),
+            misheyakir = calendar.misheyakir10Point2Degrees,
+            minchaKetana = calendar.minchaKetanaBaalHatanya,
+            sofZmanBiurChametz = calendar.sofZmanBiurChametzBaalHatanya
         )
     }
 }

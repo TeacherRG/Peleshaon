@@ -1,6 +1,5 @@
 package app.mychitas.peleshaon
 
-import app.mychitas.peleshaon.domain.Minhag
 import app.mychitas.peleshaon.domain.ZmanimConfig
 import app.mychitas.peleshaon.domain.ZmanimService
 import app.mychitas.peleshaon.domain.cityById
@@ -47,7 +46,7 @@ class ChabadTimesProbeTest {
         for (id in cityIds) {
             val city = requireNotNull(cityById(id)) { "Missing audit city: $id" }
             for (date in dates) {
-                val conf = ZmanimConfig(city, Minhag.CHABAD)
+                val conf = ZmanimConfig(city)
                 val snap = ZmanimService.calculate(date, conf)
                 val nextDay = ZmanimService.calculate(date.plusDays(1), conf)
                 val zone = city.zone()

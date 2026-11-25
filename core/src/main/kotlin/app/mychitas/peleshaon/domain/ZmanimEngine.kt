@@ -20,12 +20,19 @@ import java.time.temporal.ChronoUnit
 enum class ZmanType(val isDeadline: Boolean, val defaultPinned: Boolean, val roundDown: Boolean) {
     // For fast days, never display the dawn threshold after its exact onset.
     ALOT(isDeadline = false, defaultPinned = false, roundDown = true),
+    // Earliest tallit and tefillin (10.2 degrees).
+    MISHEYAKIR(isDeadline = false, defaultPinned = false, roundDown = false),
     SUNRISE(isDeadline = false, defaultPinned = false, roundDown = false),
     SOF_ZMAN_SHMA(isDeadline = true, defaultPinned = true, roundDown = true),
     SOF_ZMAN_TFILA(isDeadline = true, defaultPinned = true, roundDown = true),
+    // Only on Erev Pesach: last time to burn chametz.
+    BIUR_CHAMETZ(isDeadline = true, defaultPinned = false, roundDown = true),
     // Chatzot also limits late Shacharit; never show a later minute.
     CHATZOT(isDeadline = false, defaultPinned = false, roundDown = true),
     MINCHA_GEDOLA(isDeadline = false, defaultPinned = false, roundDown = false),
+    /** По Алтер Ребе: полчаса после полудня — бо́льшие из «временных» и обычных (владелец, 25.11.2026). */
+    MINCHA_GEDOLA_AR(isDeadline = false, defaultPinned = false, roundDown = false),
+    MINCHA_KETANA(isDeadline = false, defaultPinned = false, roundDown = false),
     PLAG_HAMINCHA(isDeadline = false, defaultPinned = false, roundDown = false),
     SUNSET(isDeadline = true, defaultPinned = true, roundDown = true),
     TZAIT(isDeadline = false, defaultPinned = false, roundDown = false)
@@ -83,15 +90,6 @@ data class ShabbatTimes(
     val saturday: LocalDate get() = friday.plusDays(1)
 }
 
-/**
- * Община — по ней считаются времена дня, исход Шабата, Кидуш Левана и даты календаря (владелец, 18.11.2026:
- * «выбор общины: Хабад, литовская, сефардская — даты и зманим автоматически подстроятся»). Раввином не проверено.
- * - `CHABAD` — по Алтер Ребе (Бааль ґа-Тания), как в календарях Хабада; обычный цет −6°, исход Шабата −8,5°, рассвет −16,9°.
- * - `LITVISH` — по Виленскому Гаону (ГРА): «Шма» и молитва — от восхода до заката; выход звёзд и исход Шабата — солнце на 8,5° под горизонтом.
- * - `SEFARDI` — по раву Овадье Йосефу («Ялкут Йосеф»): рассвет — 72 «временные» минуты, «Шма» — по Маген Авраґаму, молитва — по ГРА,
- *   выход звёзд — 13,5 «временной» минуты после заката, исход Шабата — по Рабейну Таму (72 «временные» минуты).
- */
-enum class Minhag { CHABAD, LITVISH, SEFARDI }
 
 object ZmanimEngine {
 
@@ -99,11 +97,7 @@ object ZmanimEngine {
     @Deprecated("Do not use a fixed Shabbat-end offset")
     const val END_MIN = 50L
 
-    /** Община приложения; ставится при запуске и в «Настройках». */
-    @Volatile
-    var minhag: Minhag = Minhag.CHABAD
-
-    /** null = city default; a user's minhag may override local practice. */
+    /** null = city default; the user may override the local candle-lighting custom. */
     @Volatile
     var candleOffsetOverride: Long? = null
 
@@ -114,7 +108,7 @@ object ZmanimEngine {
         candleOffsetOverride ?: localCandleMinutesFor(cityName)
 
     fun candleLightingOn(date: LocalDate, city: CityOption): ZonedDateTime? =
-        ZmanimService.calculate(date, ZmanimConfig(city, minhag, candleOffsetOverride))
+        ZmanimService.calculate(date, ZmanimConfig(city, candleOffsetOverride))
             .candleLighting?.atZone(city.zone())
 
     /** When sunrise is missing, a known sunset still fixes the transition of the Jewish date. */
@@ -149,7 +143,7 @@ object ZmanimEngine {
                 jewishDateTranslit = translitStr,
                 isPolarAnomaly = true,
                 items = extractZmanim(targetCal, zoneId),
-                candleLighting = ZmanimService.fromCalendar(todayCal, minhag,
+                candleLighting = ZmanimService.fromCalendar(todayCal,
                     candleMinutesFor(cityName)).candleLighting?.atZone(zoneId),
                 tzeitShabbat = havdalahOf(todayCal, zoneId)
             )
@@ -175,7 +169,7 @@ object ZmanimEngine {
             isPolarAnomaly = items.none { it.type == ZmanType.SUNRISE } ||
                 items.none { it.type == ZmanType.SUNSET },
             items = items,
-            candleLighting = ZmanimService.fromCalendar(todayCal, minhag,
+            candleLighting = ZmanimService.fromCalendar(todayCal,
                 candleMinutesFor(cityName)).candleLighting?.atZone(zoneId),
             tzeitShabbat = havdalahOf(todayCal, zoneId)
         )
@@ -185,7 +179,7 @@ object ZmanimEngine {
     fun sunsetOf(date: LocalDate, city: CityOption): ZonedDateTime? =
         buildCalendar(date, city.name, city.lat, city.lon, 0.0, city.zone()).sunset?.toZoned(city.zone())
 
-    /** Конец времени Шма по выбранной общине (округлён вниз). */
+    /** Конец времени Шма по Алтер Ребе (округлён вниз). */
     fun shmaOf(date: LocalDate, city: CityOption): ZonedDateTime? =
         shmaFrom(cal(date, city))?.toZoned(city.zone())?.truncatedTo(ChronoUnit.MINUTES)
 
@@ -265,17 +259,21 @@ object ZmanimEngine {
         ZmanimService.buildCalendar(date, cityName, lat, lon, elevation, zoneId)
 
     private fun snapshot(cal: ComprehensiveZmanimCalendar): ZmanimSnapshot =
-        ZmanimService.fromCalendar(cal, minhag, candleOffsetOverride ?: CANDLE_MIN)
+        ZmanimService.fromCalendar(cal, candleOffsetOverride ?: CANDLE_MIN)
 
     private fun extractZmanim(cal: ComprehensiveZmanimCalendar, zoneId: ZoneId): List<ZmanItem> {
         val z = snapshot(cal)
         val rawMap = listOf(
             ZmanType.ALOT to z.dawn,
+            ZmanType.MISHEYAKIR to z.misheyakir,
             ZmanType.SUNRISE to z.sunrise,
             ZmanType.SOF_ZMAN_SHMA to z.shema,
             ZmanType.SOF_ZMAN_TFILA to z.tfila,
+            ZmanType.BIUR_CHAMETZ to z.sofZmanBiurChametz,
             ZmanType.CHATZOT to z.chatzot,
             ZmanType.MINCHA_GEDOLA to z.minchaGedola,
+            ZmanType.MINCHA_GEDOLA_AR to z.minchaGedolaAlterRebbe,
+            ZmanType.MINCHA_KETANA to z.minchaKetana,
             ZmanType.PLAG_HAMINCHA to z.plagHamincha,
             ZmanType.SUNSET to z.sunset,
             ZmanType.TZAIT to z.ordinaryTzait
@@ -286,7 +284,7 @@ object ZmanimEngine {
             val rounded = if (type.roundDown || !zdt.isAfter(truncated)) truncated
                 else truncated.plusMinutes(1)
             ZmanItem(type, zdt, rounded)
-        }
+        }.sortedBy { it.exactTime }
     }
 
     private fun alotOf(cal: ComprehensiveZmanimCalendar): Instant? = snapshot(cal).dawn
