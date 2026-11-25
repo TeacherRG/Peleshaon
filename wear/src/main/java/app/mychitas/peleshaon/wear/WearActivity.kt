@@ -320,4 +320,5 @@ private fun shortLabel(type: ZmanType): Int = when (type) {
     ZmanType.PLAG_HAMINCHA -> R.string.zs_plag
     ZmanType.SUNSET -> R.string.zs_sunset
     ZmanType.TZAIT -> R.string.zs_tzait
+    ZmanType.TZAIT_AR -> R.string.zs_tzait_ar
 }

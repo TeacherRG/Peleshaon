@@ -30,4 +30,7 @@
     <string name="zs_biur_chametz">Хамец</string>
     <string name="zs_mincha_ar">Минха АР</string>
     <string name="zs_mincha_ketana">Минха кт.</string>
+
+    <!-- nightfall 7° -->
+    <string name="zs_tzait_ar">Звёзды АР</string>
 </resources>

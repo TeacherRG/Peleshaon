@@ -89,6 +89,7 @@ fun zmanColor(type: ZmanType): Color = when (type) {
     ZmanType.PLAG_HAMINCHA -> ClockColors.GoldDeep
     ZmanType.SUNSET -> ClockColors.Bad
     ZmanType.TZAIT -> ClockColors.Ink2
+    ZmanType.TZAIT_AR -> ClockColors.Tchelet
 }
 
 /** Время дня на циферблате: ZmanType.name, или CANDLES / HAVDALAH. */

@@ -35,7 +35,9 @@ enum class ZmanType(val isDeadline: Boolean, val defaultPinned: Boolean, val rou
     MINCHA_KETANA(isDeadline = false, defaultPinned = false, roundDown = false),
     PLAG_HAMINCHA(isDeadline = false, defaultPinned = false, roundDown = false),
     SUNSET(isDeadline = true, defaultPinned = true, roundDown = true),
-    TZAIT(isDeadline = false, defaultPinned = false, roundDown = false)
+    TZAIT(isDeadline = false, defaultPinned = false, roundDown = false),
+    /** Выход звёзд по Алтер Ребе — солнце на 7° под горизонтом (владелец, 25.11.2026). */
+    TZAIT_AR(isDeadline = false, defaultPinned = false, roundDown = false)
 }
 
 data class ZmanItem(
@@ -276,7 +278,8 @@ object ZmanimEngine {
             ZmanType.MINCHA_KETANA to z.minchaKetana,
             ZmanType.PLAG_HAMINCHA to z.plagHamincha,
             ZmanType.SUNSET to z.sunset,
-            ZmanType.TZAIT to z.ordinaryTzait
+            ZmanType.TZAIT to z.ordinaryTzait,
+            ZmanType.TZAIT_AR to z.tzaitAlterRebbe
         )
         return rawMap.mapNotNull { (type, instant) ->
             val zdt = instant?.atZone(zoneId) ?: return@mapNotNull null

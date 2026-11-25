@@ -22,6 +22,7 @@ internal fun short(id: String): Int = when (id) {
         ZmanType.PLAG_HAMINCHA -> R.string.z_s_plag_hamincha
         ZmanType.SUNSET -> R.string.z_s_sunset
         ZmanType.TZAIT -> R.string.z_s_tzait
+        ZmanType.TZAIT_AR -> R.string.z_s_tzait_ar
     }
 }
 
@@ -42,6 +43,7 @@ internal fun full(id: String): Int = when (id) {
         ZmanType.PLAG_HAMINCHA -> R.string.z_t_plag_hamincha
         ZmanType.SUNSET -> R.string.z_t_sunset
         ZmanType.TZAIT -> R.string.z_t_tzait
+        ZmanType.TZAIT_AR -> R.string.z_t_tzait_ar
     }
 }
 
@@ -62,6 +64,7 @@ internal fun about(id: String): Int = when (id) {
         ZmanType.PLAG_HAMINCHA -> R.string.z_d_plag_hamincha
         ZmanType.SUNSET -> R.string.z_d_sunset
         ZmanType.TZAIT -> R.string.z_d_tzait
+        ZmanType.TZAIT_AR -> R.string.z_d_tzait_ar
     }
 }
 

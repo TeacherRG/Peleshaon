@@ -30,4 +30,7 @@
     <string name="zs_biur_chametz">ביעור חמץ</string>
     <string name="zs_mincha_ar">מנחה אדה״ז</string>
     <string name="zs_mincha_ketana">מנחה קט׳</string>
+
+    <!-- nightfall 7° -->
+    <string name="zs_tzait_ar">צאה״כ אדה״ז</string>
 </resources>

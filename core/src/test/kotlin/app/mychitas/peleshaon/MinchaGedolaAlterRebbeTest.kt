@@ -63,3 +63,24 @@ class MinchaGedolaAlterRebbeTest {
         assertEquals(items.sortedBy { it.exactTime }, items)
     }
 }
+
+class TzaitAlterRebbeTest {
+    private val vienna = requireNotNull(cityById("Europe/Vienna"))
+
+    @Test fun sevenDegreesIsBetweenOrdinaryNightfallAndShabbatEnd() {
+        var d = LocalDate.of(2026, 1, 1)
+        while (d.year == 2026) {
+            val z = ZmanimService.calculate(d, ZmanimConfig(vienna))
+            val six = assertNotNull(z.ordinaryTzait, "$d")
+            val seven = assertNotNull(z.tzaitAlterRebbe, "$d")
+            val shabbatEnd = assertNotNull(z.shabbatEnd, "$d")
+            assertTrue(seven.isAfter(six) && seven.isBefore(shabbatEnd), "$d: $six < $seven < $shabbatEnd")
+            d = d.plusDays(1)
+        }
+    }
+
+    @Test fun shownInTheDayList() {
+        val types = ZmanimEngine.itemsOf(LocalDate.of(2026, 12, 21), vienna).map { it.type }
+        assertTrue(ZmanType.TZAIT in types && ZmanType.TZAIT_AR in types)
+    }
+}

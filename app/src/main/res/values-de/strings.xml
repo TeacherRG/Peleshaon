@@ -44,7 +44,7 @@
     <string name="z_t_sunset">Ende der Zeit für Mincha (Sonnenuntergang)</string>
     <string name="z_d_sunset">Mincha darf grundsätzlich nicht nach Sonnenuntergang gebetet werden; mit ihm beginnt der nächste jüdische Tag.</string>
     <string name="z_s_tzait">Sterne</string>
-    <string name="z_t_tzait">Sternenaufgang</string>
+    <string name="z_t_tzait">Sternenaufgang (6°)</string>
     <string name="z_d_tzait">Nachteinbruch — die Sterne sind zu sehen. Die Zeit des Abend-Schma und von Maariw.</string>
     <string name="z_s_candles">Kerzen</string>
     <string name="z_t_candles">Kerzen anzünden</string>
@@ -337,4 +337,9 @@
     <string name="z_d_mincha_gedola_ar">Nach dem Alter Rebbe — eine halbe Stunde nach Mittag, und zwar immer die längere halbe Stunde: im Sommer eine halbe halachische Stunde, im Winter gewöhnliche 30 Minuten.</string>
     <string name="z_s_mincha_ketana">Mincha K.</string>
     <string name="z_d_mincha_ketana">Mincha Ketana — 9½ halachische Stunden nach Tagesbeginn.</string>
+
+    <!-- выход звёзд по Алтер Ребе (7°) -->
+    <string name="z_s_tzait_ar">Sterne AR</string>
+    <string name="z_t_tzait_ar">Sternenaufgang nach dem Alter Rebbe (7°)</string>
+    <string name="z_d_tzait_ar">Nach dem Alter Rebbe — die Sonne steht 7° unter dem Horizont. Etwas früher als der Schabbatausgang (8,5°).</string>
 </resources>

@@ -30,4 +30,7 @@
     <string name="zs_biur_chametz">Chamez</string>
     <string name="zs_mincha_ar">Mincha AR</string>
     <string name="zs_mincha_ketana">Mincha k.</string>
+
+    <!-- nightfall 7° -->
+    <string name="zs_tzait_ar">Sterne AR</string>
 </resources>

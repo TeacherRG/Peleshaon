@@ -35,6 +35,8 @@ data class ZmanimSnapshot(
     val plagHamincha: Instant?,
     val sunset: Instant?,
     val ordinaryTzait: Instant?,
+    /** Nightfall per the Alter Rebbe: sun 7 degrees below the horizon (earlier than the 8.5-degree Shabbat exit). */
+    val tzaitAlterRebbe: Instant?,
     val shabbatEnd: Instant?,
     val candleLighting: Instant?,
     val methodIds: Map<String, String>,
@@ -53,6 +55,8 @@ data class ZmanimSnapshot(
 object ZmanimService {
     private val overrides = setOf(18L, 20L, 22L, 30L, 40L)
     private val HALF_HOUR: Duration = Duration.ofMinutes(30)
+    /** 90° + 7°: nightfall per the Alter Rebbe (owner, 25.11.2026). */
+    const val TZAIT_ALTER_REBBE_ZENITH = 97.0
 
     fun candleMinutes(config: ZmanimConfig): Long =
         config.candleOffsetMinutes?.takeIf { it in overrides }
@@ -139,6 +143,7 @@ object ZmanimService {
             plagHamincha = calendar.plagHaminchaBaalHatanya,
             sunset = calendar.sunset,
             ordinaryTzait = calendar.tzaisBaalHatanya,
+            tzaitAlterRebbe = calendar.getSunsetOffsetByDegrees(TZAIT_ALTER_REBBE_ZENITH),
             shabbatEnd = calendar.tzaisGeonim8Point5Degrees,
             candleLighting = if (candleMinutes in overrides) {
                 calendar.candleLightingOffset = candleMinutes.toDouble()
@@ -149,6 +154,7 @@ object ZmanimService {
                     "chabad.alos.solar_midnight_when_16_9deg_unreachable"
                     else "chabad.alos.16_9deg"),
                 "ordinaryTzait" to "chabad.tzait.6deg",
+                "tzaitAlterRebbe" to "alter_rebbe.tzait.7deg",
                 "shabbatEnd" to "chabad.havdalah.8_5deg",
                 "shema" to "baal_hatanya.shema",
                 "minchaGedolaAlterRebbe" to "baal_hatanya.mincha_gedola.greater_of_half_zmanit_or_30min"

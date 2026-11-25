@@ -156,6 +156,8 @@ def main() -> None:
           "Community (minhag) selection reintroduced")
     check("minchaGedolaAlterRebbe" in service31 and "MINCHA_GEDOLA_AR" in engine,
           "Alter Rebbe mincha gedola (greater of half proportional hour or 30 minutes) missing")
+    check("TZAIT_ALTER_REBBE_ZENITH = 97.0" in service31 and "TZAIT_AR" in engine,
+          "Alter Rebbe nightfall at 7 degrees missing")
     # Help articles (res/raw) must exist in every app language with the same section count.
     raw_base = ROOT / "app" / "src" / "main" / "res"
     for article in sorted(p.name for p in (raw_base / "raw").glob("*.txt")):

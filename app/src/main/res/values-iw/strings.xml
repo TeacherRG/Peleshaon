@@ -44,7 +44,7 @@
     <string name="z_t_sunset">סוף זמן מנחה (שקיעה)</string>
     <string name="z_d_sunset">לכתחילה אין להתפלל מנחה לאחר שקיעת החמה; עם השקיעה מתחיל היום העברי הבא.</string>
     <string name="z_s_tzait">צאת</string>
-    <string name="z_t_tzait">צאת הכוכבים</string>
+    <string name="z_t_tzait">צאת הכוכבים (6°)</string>
     <string name="z_d_tzait">צאת הכוכבים — לילה. זמן קריאת שמע של ערבית ותפילת ערבית.</string>
     <string name="z_s_candles">הדלקת נרות</string>
     <string name="z_t_candles">הדלקת נרות</string>
@@ -338,4 +338,9 @@
     <string name="z_d_mincha_gedola_ar">לשיטת אדמו״ר הזקן — חצי שעה אחרי חצות, ותמיד החצי שעה הארוכה: בקיץ — חצי שעה זמנית, בחורף — 30 דקות רגילות.</string>
     <string name="z_s_mincha_ketana">מנחה קט׳</string>
     <string name="z_d_mincha_ketana">מנחה קטנה — תשע שעות זמניות וחצי מתחילת היום.</string>
+
+    <!-- выход звёзд по Алтер Ребе (7°) -->
+    <string name="z_s_tzait_ar">צאה״כ אדה״ז</string>
+    <string name="z_t_tzait_ar">צאת הכוכבים לשיטת אדמו״ר הזקן (7°)</string>
+    <string name="z_d_tzait_ar">לשיטת אדמו״ר הזקן — השמש 7° מתחת לאופק. מעט לפני צאת השבת (8.5°).</string>
 </resources>

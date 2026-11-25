@@ -44,7 +44,7 @@
     <string name="z_t_sunset">Кінець часу Мінхи (захід сонця)</string>
     <string name="z_d_sunset">За початковим правилом не можна молитися Мінху після заходу сонця; із заходом починається наступний єврейський день.</string>
     <string name="z_s_tzait">Зорі</string>
-    <string name="z_t_tzait">Вихід зірок</string>
+    <string name="z_t_tzait">Вихід зірок (6°)</string>
     <string name="z_d_tzait">Вихід зірок — настала ніч. Час вечірнього «Шма» і Маарива.</string>
     <string name="z_s_candles">Свічки</string>
     <string name="z_t_candles">Запалювання свічок</string>
@@ -339,4 +339,9 @@
     <string name="z_d_mincha_gedola_ar">За Алтер Ребе — пів години після полудня, і завжди беруть більші пів години: влітку — половину галахічної години, взимку — звичайні 30 хвилин.</string>
     <string name="z_s_mincha_ketana">Мінха кт.</string>
     <string name="z_d_mincha_ketana">Мінха ктана — через 9½ галахічних годин від початку дня.</string>
+
+    <!-- выход звёзд по Алтер Ребе (7°) -->
+    <string name="z_s_tzait_ar">Зорі АР</string>
+    <string name="z_t_tzait_ar">Вихід зірок за Алтер Ребе (7°)</string>
+    <string name="z_d_tzait_ar">За Алтер Ребе — сонце на 7° під горизонтом. Трохи раніше виходу Шабату (8,5°).</string>
 </resources>

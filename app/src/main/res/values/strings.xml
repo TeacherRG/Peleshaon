@@ -44,7 +44,7 @@
     <string name="z_t_sunset">Latest time for Minchah (sunset)</string>
     <string name="z_d_sunset">In principle, Minchah must not be prayed after sunset; at sunset the next Jewish day begins.</string>
     <string name="z_s_tzait">Nightfall</string>
-    <string name="z_t_tzait">Nightfall</string>
+    <string name="z_t_tzait">Nightfall (6°)</string>
     <string name="z_d_tzait">Nightfall — the stars are out. The time of the evening Shema and Maariv.</string>
     <string name="z_s_candles">Candles</string>
     <string name="z_t_candles">Candle lighting</string>
@@ -337,4 +337,9 @@
     <string name="z_d_mincha_gedola_ar">Per the Alter Rebbe — half an hour after midday, always taking the longer half hour: in summer half a halachic hour, in winter ordinary 30 minutes.</string>
     <string name="z_s_mincha_ketana">Minchah K.</string>
     <string name="z_d_mincha_ketana">Minchah Ketanah — 9½ halachic hours into the day.</string>
+
+    <!-- выход звёзд по Алтер Ребе (7°) -->
+    <string name="z_s_tzait_ar">Stars AR</string>
+    <string name="z_t_tzait_ar">Nightfall per the Alter Rebbe (7°)</string>
+    <string name="z_d_tzait_ar">Per the Alter Rebbe — the sun is 7° below the horizon. A little earlier than the end of Shabbat (8.5°).</string>
 </resources>
