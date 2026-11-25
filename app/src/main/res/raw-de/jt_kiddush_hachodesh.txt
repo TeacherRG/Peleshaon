@@ -1,0 +1,235 @@
+# Die Gesetze der Heiligung des Monats
+
+## 1. Der Tag und seine Teile
+Tag = 24 Stunden.
+Stunde = 60 Minuten.
+Minute = 60 Sekunden.
+
+Für die Heiligung des Monats verwendet man „Chalakim“ — Teile: 1 Minute = 18 Teile, 1 Stunde = 1080 Teile.
+60 Minuten × 18 Teile = 1080 Teile.
+
+### Beispiel
+Wie viele Minuten sind 793 Teile? Man teilt 793 durch 18: 44 Minuten und 1 Teil.
+793 : 18 = 44 Minuten, 1 Teil.
+
+## 2. Der Monat und seine Teile
+Ein Mondmonat: 29 Tage, 12 Stunden, 793 Teile.
+> כ"ט י"ב תשצ"ג — 29 Tage, 12 Stunden, 793 Teile
+
+Der Unterschied von einem Monat zum nächsten: 1 Tag, 12 Stunden, 793 Teile.
+> אי"ב תשצ"ג — 1 Tag, 12 Stunden, 793 Teile
+
+### So wird gerechnet
+Man teilt 29 Tage durch 7: 4 Wochen und 1 Tag Rest (29 : 7 = 4, Rest 1).
+Die 4 Wochen fallen weg: Alle 7 Tage kehrt man zum selben Wochentag zurück, die 28 Tage braucht man nicht.
+Es bleiben 1 Tag, 12 Stunden, 793 Teile. Diesen Unterschied addiert man zum Molad (der „Geburt“) des Mondes und erhält den Molad des nächsten Monats.
+
+### Heute
+Heute rechnet man die Teile meist in Minuten um; der Rest sind die Teile einer Minute. Statt „793 Teile“ sagt man zum Beispiel „44 Minuten und 1 Teil“.
+
+### Wichtiger Hinweis
+Nach heutigem Brauch berücksichtigt man einen Unterschied von 6 Stunden zwischen den Stunden des Rambam und den uns vertrauten Stunden. Der Tag beginnt nach Sonnenuntergang am Abend, in den Tagen von Tischri und Nissan etwa um 18 Uhr. Beim Rambam heißt die erste Stunde nach Sonnenuntergang die erste Stunde des Tages, und so weiter.
+
+### Beispiel
+Molad des Monats Siwan 5758 (תשנ"ח): Nacht auf Dienstag, 3 Stunden 59 Minuten 11 Teile.
+In der Sprache des Rambam: Dienstag, 9. Stunde, 1073 Teile.
+
+Man addiert den Unterschied: 1 Tag, 12 Stunden, 44 Minuten, 1 Teil.
+In der Sprache des Rambam: 1 Tag, 12 Stunden, 793 Teile.
+
+Ergebnis — Molad des Monats Tammus 5758: Mittwoch, 4 Stunden 43 Minuten 12 Teile.
+In der Sprache des Rambam: Mittwoch, 22. Stunde, 786 Teile.
+
+### Tabelle: Molad in der Sprache des Rambam
+| | Tag | Stunde | Teile |
+| Molad Siwan 5758 | Dienstag | 9 | 1073 |
+| Addieren | 1 Tag | 12 | 793 |
+| Ergibt | Mittwoch | 21 | 1866 |
+| Molad Tammus 5758 | Mittwoch | 22 | 786 |
+
+Von 1866 Teilen zieht man 1080 (1 Stunde) ab und überträgt sie in die Stundenspalte: 21 + 1 = 22 Stunden, es bleiben 1866 − 1080 = 786 Teile.
+
+### Tabelle: Molad nach heutigem Brauch
+| | Tag | Stunden | Minuten | Teile |
+| Molad Siwan 5758 | Nacht auf Dienstag | 3 | 59 | 11 |
+| Addieren | 1 Tag | 12 | 44 | 1 |
+| Ergibt | Nacht auf Mittwoch | 15 | 103 | 12 |
+| Molad Tammus 5758 | Mittwoch | 4 | 43 | 12 |
+
+Von 103 Minuten überträgt man 60 (1 Stunde) in die Stundenspalte: Es bleiben 43 Minuten, und die Stunden werden 15 + 1 = 16.
+Von 16 Stunden überträgt man 12 (einen halben Tag) in die Tagesspalte: Nacht auf Mittwoch + 12 Stunden = Mittwoch, es bleiben 4 Stunden.
+Die Teile bleiben gleich — 12.
+
+## 3. Das Sonnenjahr
+Nach Schmuel: 365 Tage, 6 Stunden.
+
+Nach Raw Ada: 365 Tage, 5 Stunden, 997 Teile, 48 „Rega’im“ — Augenblicke (1 Teil = 76 Augenblicke).
+
+## 4. Die vier Tekufot (Jahreszeiten)
+Das Sonnenjahr wird in 4 gleiche Teile geteilt.
+
+Nach Schmuel: jede Tekufa = 91 Tage, 7½ Stunden.
+
+Nach Raw Ada: jede Tekufa = 91 Tage, 7 Stunden, 519 Teile, 31 Augenblicke.
+
+### Hinweis
+Die Jahre werden nach Schmuel berechnet: Das Sonnenjahr hat genau 365 Tage 6 Stunden.
+
+## 5. Das Mondjahr
+Gemeinjahr: 29 Tage 12 Stunden 793 Teile × 12 Monate = 354 Tage, 8 Stunden, 876 Teile.
+
+Schaltjahr: 29 Tage 12 Stunden 793 Teile × 13 Monate = 383 Tage, 21 Stunden, 589 Teile.
+
+## 6. Um wie viel das Sonnenjahr länger ist als das Mondjahr
+365 Tage 6 Stunden − 354 Tage 8 Stunden 876 Teile = 10 Tage, 21 Stunden, 204 Teile.
+> יכ"א ר"ד — 10 Tage, 21 Stunden, 204 Teile
+
+## 7. Rest eines Gemeinjahres (für die Wochentage)
+Man teilt durch 7; der Rest ist der Unterschied zwischen einem Jahr und dem nächsten.
+354 Tage 8 Stunden 876 Teile : 7 = 50 Wochen, 4 Tage, 8 Stunden, 876 Teile.
+Die Wochen fallen weg — wir brauchen nur den Unterschied in Tagen.
+
+Rest: 4 Tage, 8 Stunden, 876 Teile.
+> ד"ח תתע"ו — 4 Tage, 8 Stunden, 876 Teile
+
+## 8. Rest eines Schaltjahres (für die Wochentage)
+Man teilt durch 7; der Rest ist der Unterschied zwischen einem Schaltjahr und dem Jahr danach.
+383 Tage 21 Stunden 589 Teile : 7 = 54 Wochen, 5 Tage, 21 Stunden, 589 Teile.
+Die Wochen fallen weg — wir brauchen nur den Unterschied in Tagen.
+
+Rest: 5 Tage, 21 Stunden, 589 Teile.
+> הכ"א תקפ"ט — 5 Tage, 21 Stunden, 589 Teile
+
+## 9. Der große Zyklus — 28 Jahre
+Alle 28 Jahre kehrt die Sonne zu dem Ausgangspunkt zurück, an dem sie bei der Schöpfung stand — nach Schmuel.
+
+### So wird gerechnet
+365 Tage 6 Stunden × 28 = 10 227 Tage; 10 227 : 7 = genau 1461 Wochen, ohne Rest.
+
+### Beispiel
+5758 (תשנ"ח) : 28 — 205 volle Zyklen sind vergangen, und es ist das 18. Jahr des 206. Zyklus.
+
+## 10. Der kleine Zyklus — 19 Jahre
+Alle 19 Jahre gleichen sich Mondmonate und Sonnenjahre wieder an.
+Um die Sonnenjahre mit den Mondmonaten auszugleichen, wurden in 19 Jahren 7 Schaltjahre und 12 Gemeinjahre festgelegt.
+
+Die Schaltjahre des Zyklus: 3, 6, 8, 11, 14, 17, 19.
+> גו"ח אדז"ט — 3, 6, 8, 11, 14, 17, 19
+
+### Nach Schmuel
+Nach 19 Jahren bleibt ein Unterschied von 1 Stunde 485 Teilen.
+> א' תפ"ה — 1 Stunde, 485 Teile
+
+Sonne: 365 Tage 6 Stunden × 19 = 6939 Tage 18 Stunden.
+Mond: Gemeinjahre — 12 Monate × 12 Jahre = 144 Monate; Schaltjahre — 13 Monate × 7 Jahre = 91 Monate.
+Zusammen 235 Monate × 29 Tage 12 Stunden 793 Teile = 6939 Tage 16 Stunden 595 Teile.
+Unterschied zwischen Sonne und Mond nach 19 Jahren: 6939 Tage 18 Stunden − 6939 Tage 16 Stunden 595 Teile = 1 Stunde 485 Teile.
+
+### Nach Raw Ada
+Nach 19 Jahren bleibt überhaupt kein Rest: Mond und Sonne stimmen genau überein.
+Sonne: 365 Tage 5 Stunden 997 Teile 48 Augenblicke × 19 = 6939 Tage 16 Stunden 595 Teile.
+Mond: 235 Monate × 29 Tage 12 Stunden 793 Teile = 6939 Tage 16 Stunden 595 Teile.
+
+### Hinweis
+Die Jahre werden nach Schmuel berechnet; im 19-jährigen Zyklus bleibt also zwischen Sonne und Mond ein Unterschied von 1 Stunde 485 Teilen.
+
+### Beispiel
+5758 (תשנ"ח) : 19 — 303 volle Zyklen sind vergangen, und es ist das 1. Jahr des 304. Zyklus.
+
+## 11. Rest des 19-jährigen Zyklus (für die Wochentage)
+> בי"ו תקצ"ה — 2 Tage, 16 Stunden, 595 Teile
+Das ist der Unterschied zwischen einem Zyklus und dem nächsten.
+
+### So wird gerechnet
+Rest eines Mond-Gemeinjahres: ד"ח תתע"ו × 12 Jahre = 52 Tage 9 Stunden 792 Teile.
+Rest eines Mond-Schaltjahres: הכ"א תקפ"ט × 7 Jahre = 41 Tage 6 Stunden 883 Teile.
+52 Tage 9 Stunden 792 Teile + 41 Tage 6 Stunden 883 Teile = 93 Tage 16 Stunden 595 Teile.
+93 : 7 = 13 Wochen; die Wochen fallen weg, es zählt nur der Rest: 2 Tage, 16 Stunden, 595 Teile.
+
+## 12. Der Molad BaHaRaD
+Der Molad des Tischri im ersten Jahr der Schöpfung — ein Jahr vor der Erschaffung Adams, der an Rosch haSchana des zweiten Jahres erschaffen wurde.
+Er heißt „Molad Tischri des Jahres Tohu“, weil der erste Schöpfungstag der 25. Elul des ersten Jahres war.
+> בהר"ד — Montag, 5 Stunden, 204 Teile
+
+## 13. Die vier Verschiebungen (Dechijot)
+Der erste Tag von Rosch haSchana wird immer auf den Tag des Molad Tischri gelegt — außer in vier Fällen, die Rosch haSchana auf den Tag nach dem Molad oder noch einen Tag später verschieben.
+
+### 1. „Lo ADU Rosch“
+> לא אד"ו ראש
+Der erste Tag von Rosch haSchana fällt nie auf Sonntag, Mittwoch oder Freitag.
+Fällt der Molad Tischri auf einen dieser Tage, wird Rosch haSchana auf den nächsten Tag verschoben.
+
+### 2. „Molad Saken“ — ein alter Molad
+Ist der Molad Tischri um Mittag oder später — 18 Stunden nach Tagesbeginn, also ab 12 Uhr mittags —, wird Rosch haSchana auf den nächsten Tag verschoben.
+Fällt er danach auf Sonntag, Mittwoch oder Freitag, wird Rosch haSchana um einen weiteren Tag verschoben.
+Beispiel: Der Molad Tischri ist am Schabbat genau um 12 Uhr mittags (18 Stunden nach Tagesbeginn). Rosch haSchana ist dann am Montag: nicht am Schabbat wegen „Molad Saken“ und nicht am Sonntag wegen „Lo ADU Rosch“.
+
+### 3. GaTRaD
+> גטר"ד — Dienstag, 9 Stunden, 204 Teile
+Fällt der Molad Tischri eines Gemeinjahres auf Dienstag, 9 Stunden 204 Teile oder später, wird Rosch haSchana auf Donnerstag verschoben: Mittwoch geht wegen „Lo ADU Rosch“ nicht.
+
+### 4. BeTU TaKPaT
+> בט"ו תקפ"ט — Montag, 15 Stunden, 589 Teile
+Fällt der Molad Tischri eines Gemeinjahres, das direkt auf ein Schaltjahr folgt, auf Montag, 15 Stunden 589 Teile oder später, wird Rosch haSchana auf Dienstag verschoben.
+Die Jahre des Zyklus, die auf Schaltjahre folgen: 1, 4, 7, 9, 12, 15, 18.
+
+## 14. Die Monate des Jahres
+Die Monate wechseln der Reihe nach: einer voll (30 Tage), einer mangelhaft (29 Tage). Nissan — 30 Tage, Ijar — 29, Siwan — 30, Tammus — 29, Menachem Aw — 30, Elul — 29 und so weiter.
+
+Ausnahme sind Cheschwan und Kislew:
+- manchmal ist Cheschwan mangelhaft (29) und Kislew voll (30) — ein „regelmäßiges“ Jahr (Kessidra);
+- manchmal sind beide mangelhaft, je 29 Tage — ein „mangelhaftes“ Jahr (Chasera);
+- manchmal sind beide voll, je 30 Tage — ein „vollständiges“ Jahr (Schlema).
+
+## 15. Die Zeichen der Jahrestypen
+Um das Jahr leichter zu bestimmen, verwendet man Buchstabenzeichen. Zum Beispiel: בח"ג.
+- der erste Buchstabe ב — Wochentag des ersten Tages von Rosch haSchana: Montag;
+- der zweite Buchstabe ח — Jahrestyp: mangelhaft (Chasera);
+- der dritte Buchstabe ג — Wochentag des ersten Tages von Pessach: Dienstag.
+
+### Gemeinjahre
+| Typ | Tage | Zeichen |
+| Mangelhaft (Chasera) | 353 | בח"ג, זח"א |
+| Regelmäßig (Kessidra) | 354 | גכ"ה, הכ"ז |
+| Vollständig (Schlema) | 355 | בש"ה, הש"א, זש"ג |
+
+355 ist der Zahlenwert (Gematria) des Wortes שנ"ה, „Jahr“.
+
+### Schaltjahre
+| Typ | Tage | Zeichen |
+| Mangelhaft (Chasera) | 383 | בח"ה, הח"א, זח"ג |
+| Regelmäßig (Kessidra) | 384 | גכ"ז |
+| Vollständig (Schlema) | 385 | בש"ז, הש"ג, זש"ה |
+
+## 16. Wie man erkennt, ob ein Jahr mangelhaft, regelmäßig oder vollständig ist
+Man berechnet den Molad Tischri dieses Jahres und den Molad Tischri des nächsten Jahres. Nach den Regeln der Verschiebungen bestimmt man, wann dieses und das nächste Rosch haSchana fallen.
+Dann zählt man die Tage zwischen den beiden Tagen von Rosch haSchana, ohne diese Tage selbst.
+
+### In einem Gemeinjahr
+- Unterschied 2 Tage — mangelhaftes Jahr;
+- 3 Tage — regelmäßiges Jahr;
+- 4 Tage — vollständiges Jahr.
+> בג"ד חכ"ם — 2 Tage: Chasera, 3 Tage: Kessidra, 4 Tage: Schlema
+
+### In einem Schaltjahr
+- Unterschied 4 Tage — mangelhaftes Jahr;
+- 5 Tage — regelmäßiges Jahr;
+- 6 Tage — vollständiges Jahr.
+> דה"ו חכ"ם — 4 Tage: Chasera, 5 Tage: Kessidra, 6 Tage: Schlema
+
+### Beispiel 1
+5757 (תשנ"ז): Molad Tischri — Nacht auf Freitag, 12 Stunden 34 Minuten 8 Teile (in der Sprache des Rambam: Freitag, 6. Stunde, 620 Teile). Zeichen des Jahres: זח"ג.
+Wegen „Lo ADU Rosch“ kann Rosch haSchana nicht am Freitag sein und wird auf Schabbat verschoben.
+5757 ist ein Schaltjahr: 5757 : 19 = genau 303, also das 19. Jahr des 303. Zyklus (גו"ח אדז"ט).
+
+5758 (תשנ"ח): Molad Tischri — Nacht auf Donnerstag, 10 Stunden 7 Minuten 3 Teile (nach dem Rambam: Donnerstag, 4. Stunde, 129 Teile). Zeichen des Jahres: הכ"ז.
+Warum: Der Rest eines Schaltjahres (Abschnitt 8) ist הכ"א תקפ"ט, 5 Tage 21 Stunden 589 Teile.
+Man addiert ihn zum vorigen Molad Tischri: Freitag, 6. Stunde, 620 Teile + 5 Tage 21 Stunden 589 Teile = Donnerstag, 4. Stunde, 129 Teile (nach dem Rambam).
+Nach heutigem Brauch (6 Stunden Unterschied: der Tag beginnt am Abend, etwa um 18 Uhr) — Nacht auf Donnerstag, 10 Stunden 7 Minuten 3 Teile. Rosch haSchana ist am Donnerstag.
+
+Der Unterschied zwischen den beiden Rosch haSchana: Schabbat (5757) bis Donnerstag (5758), ohne Schabbat und Donnerstag — 4 Tage in einem Schaltjahr.
+Also ist 5757 ein mangelhaftes Jahr: Cheschwan und Kislew sind beide mangelhaft.
+
+### Beispiel 2
+Molad Tischri 5759 (תשנ"ט): Man addiert ד"ח תתע"ו zum Molad Tischri 5758 und erhält Montag, 6 Stunden 55 Minuten 15 Teile (nach dem Rambam: Montag, 12. Stunde, 1005 Teile).
+Rosch haSchana 5758 ist am Donnerstag, Rosch haSchana 5759 am Montag. Dazwischen liegen Freitag, Schabbat und Sonntag — 3 Tage (Abschnitt 16). Also ist 5758 ein regelmäßiges Gemeinjahr (Kessidra).

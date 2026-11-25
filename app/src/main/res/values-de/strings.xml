@@ -326,4 +326,15 @@
     <string name="tour_times">Alle Zeiten des Tages als Liste. Markiere, welche davon auf dem Zifferblatt erscheinen.</string>
     <string name="tour_done">Verstanden</string>
     <string name="tour_again">Bildschirmhinweise zeigen</string>
+
+    <!-- Помощь: «О программе» и «Еврейское время» -->
+    <string name="about_sub">Was die App kann, Version, Kontakt</string>
+    <string name="about_desc">Ein jüdischer Kalender und die Tageszeiten auf Handy und Uhr.\n\nDas Zifferblatt zeigt die 12 halachischen Stunden des Tages oder der Nacht, daneben das jüdische Datum, Schabbat und Feiertage für deine Stadt. Die Zeiten werden nach dem Alter Rebbe (Chabad) oder nach der gewählten Gemeinde berechnet.\n\nWecker, die an Schabbat und Feiertagen schweigen, eine Erinnerung an das Torastudium, der Timer „Fleischig → milchig“, Kiddusch Lewana und ein Kompass nach Jerusalem. Die App funktioniert ohne Internet.</string>
+    <string name="jt_t">Jüdische Zeit</string>
+    <string name="jt_sub">Wie der jüdische Kalender und die Zeit gezählt werden</string>
+    <string name="jt_intro">Artikel über die jüdische Zeitrechnung: Monat, Jahr und Kalender.</string>
+    <string name="jt_kh_t">Die Gesetze der Heiligung des Monats — ausführlich erklärt</string>
+    <string name="jt_kh_sub">Vom Molad und Monat über Sonnen- und Mondjahr bis zur Berechnung von Rosch haSchana</string>
+    <string name="jt_expand">Alle aufklappen ▾</string>
+    <string name="jt_collapse">Alle zuklappen ▴</string>
 </resources>

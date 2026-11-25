@@ -110,7 +110,7 @@ import java.util.Locale
 import kotlin.math.roundToInt
 
 /** Окно поверх часов: город, Шабат, два будильника, все времена, «Как считаем». */
-private enum class Panel { SETTINGS, CITY, SHABBAT, WAKE, STUDY, CUSTOM, TIMES, INFO, PRIVACY, CALENDAR }
+private enum class Panel { SETTINGS, CITY, SHABBAT, WAKE, STUDY, CUSTOM, TIMES, INFO, PRIVACY, CALENDAR, ABOUT, JTIME }
 
 /** «осталось / через N ч M мин» — как на сайте: минуты вверх, больше суток — дни и часы. */
 private fun until(context: Context, now: ZonedDateTime, at: ZonedDateTime, deadline: Boolean): String {
@@ -413,9 +413,12 @@ fun ClockScreen(
                         Prefs.setTziruf(context, it)
                         app.mychitas.peleshaon.live.Live.updateAsync(context)
                     })
-                Panel.INFO -> InfoSheet(onNightScreen = { panel = null; onNightScreen() }, onIntro = { panel = null; onIntro() }, onPrivacy = { panel = Panel.PRIVACY },
+                Panel.INFO -> InfoSheet(onNightScreen = { panel = null; onNightScreen() }, onIntro = { panel = null; onIntro() },
+                    onAbout = { panel = Panel.ABOUT }, onJewishTime = { panel = Panel.JTIME },
                     onTour = { panel = null; onTour() })
                 Panel.PRIVACY -> PrivacySheet()
+                Panel.ABOUT -> AboutSheet(onBack = { panel = Panel.INFO }, onPrivacy = { panel = Panel.PRIVACY })
+                Panel.JTIME -> JewishTimeSheet(onBack = { panel = Panel.INFO })
                 Panel.CALENDAR -> CalendarSheet(city, cityNow)
                 Panel.SETTINGS -> SettingsSheet(onChange = bump)
             }
@@ -501,8 +504,11 @@ private fun NoCityClockScreen(
                 Panel.CALENDAR -> CalendarNoCity(now.toLocalDate())
                 Panel.SETTINGS -> SettingsSheet(onChange = onChanged)
                 Panel.INFO -> InfoSheet(onNightScreen = { panel = null; onNightScreen() },
-                    onIntro = { panel = null; onIntro() }, onPrivacy = { panel = Panel.PRIVACY })
+                    onIntro = { panel = null; onIntro() },
+                    onAbout = { panel = Panel.ABOUT }, onJewishTime = { panel = Panel.JTIME })
                 Panel.PRIVACY -> PrivacySheet()
+                Panel.ABOUT -> AboutSheet(onBack = { panel = Panel.INFO }, onPrivacy = { panel = Panel.PRIVACY })
+                Panel.JTIME -> JewishTimeSheet(onBack = { panel = Panel.INFO })
                 else -> Text(stringResource(R.string.city_required_for_halacha),
                     modifier = Modifier.padding(24.dp), color = ClockColors.Ink)
             }
@@ -1270,9 +1276,19 @@ private fun TimesSheet(
 // ---------------------------------------------------------------- как считаем
 
 @Composable
-private fun InfoSheet(onNightScreen: () -> Unit, onIntro: () -> Unit, onPrivacy: () -> Unit, onTour: (() -> Unit)? = null) {
+private fun InfoSheet(
+    onNightScreen: () -> Unit,
+    onIntro: () -> Unit,
+    onAbout: () -> Unit,
+    onJewishTime: () -> Unit,
+    onTour: (() -> Unit)? = null
+) {
     SheetColumn {
         SheetTitle(stringResource(R.string.help))
+        // подпункты «Помощи» (владелец, 25.11.2026): 1. О программе, 2. Еврейское время
+        HelpItem("ℹ️", stringResource(R.string.about_t), stringResource(R.string.about_sub), onAbout)
+        HelpItem("🕰️", stringResource(R.string.jt_t), stringResource(R.string.jt_sub), onJewishTime)
+        HorizontalDivider(color = ClockColors.Line)
         Text(stringResource(R.string.legend_t), fontWeight = FontWeight.Bold, color = ClockColors.Ink)
         DialLegend()
         Note("📅 " + stringResource(R.string.cal_hint))
@@ -1300,6 +1316,50 @@ private fun InfoSheet(onNightScreen: () -> Unit, onIntro: () -> Unit, onPrivacy:
         }
         OutlinedButton(onClick = onIntro, border = BorderStroke(1.dp, ClockColors.Line)) {
             Text(stringResource(R.string.ob_again), color = ClockColors.Ink)
+        }
+    }
+}
+
+/** Пункт «Помощи», открывающий своё окно. */
+@Composable
+internal fun HelpItem(icon: String, title: String, sub: String, onClick: () -> Unit) {
+    Surface(
+        onClick = onClick,
+        shape = RoundedCornerShape(14.dp),
+        color = ClockColors.Surface,
+        border = BorderStroke(1.dp, ClockColors.Line),
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        Row(Modifier.padding(horizontal = 14.dp, vertical = 12.dp), verticalAlignment = Alignment.CenterVertically) {
+            Text(icon, fontSize = 22.sp, modifier = Modifier.padding(end = 12.dp))
+            Column(Modifier.weight(1f)) {
+                Text(title, fontWeight = FontWeight.Bold, fontSize = 16.sp, color = ClockColors.Ink)
+                Text(sub, fontSize = 13.sp, lineHeight = 18.sp, color = ClockColors.Muted)
+            }
+            Text("›", fontSize = 22.sp, color = ClockColors.TcheletDeep, modifier = Modifier.padding(start = 8.dp))
+        }
+    }
+}
+
+/** «← Помощь» — назад к списку подпунктов. */
+@Composable
+internal fun BackToHelp(onBack: () -> Unit) {
+    Text(
+        "‹ " + stringResource(R.string.help),
+        color = ClockColors.TcheletDeep, fontWeight = FontWeight.SemiBold, fontSize = 15.sp,
+        modifier = Modifier.clickable(onClick = onBack).padding(vertical = 4.dp)
+    )
+}
+
+/** «О программе»: что умеет приложение, версия, сайт, почта, конфиденциальность. */
+@Composable
+private fun AboutSheet(onBack: () -> Unit, onPrivacy: () -> Unit) {
+    SheetColumn {
+        BackToHelp(onBack)
+        SheetTitle(stringResource(R.string.about_t))
+        Text(stringResource(R.string.app_name), fontWeight = FontWeight.Bold, fontSize = 18.sp, color = ClockColors.GoldDeep)
+        for (p in stringResource(R.string.about_desc).split("\n\n")) {
+            Text(p, fontSize = 14.5.sp, lineHeight = 21.sp, color = ClockColors.Ink2)
         }
         HorizontalDivider(color = ClockColors.Line)
         AboutBlock(onPrivacy)
@@ -1329,7 +1389,6 @@ private fun AboutBlock(onPrivacy: () -> Unit) {
     val version = remember {
         runCatching { context.packageManager.getPackageInfo(context.packageName, 0).versionName }.getOrNull() ?: ""
     }
-    Text(stringResource(R.string.about_t), fontWeight = FontWeight.Bold, color = ClockColors.Ink)
     Note(stringResource(R.string.about_by) + " · " + stringResource(R.string.about_version, version))
     LinkRow(stringResource(R.string.about_site)) { openUri(context, "$SITE?lang=${langParam()}&ref=app") }
     LinkRow(stringResource(R.string.about_mail)) { openUri(context, "mailto:$MAIL") }

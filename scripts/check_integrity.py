@@ -151,6 +151,15 @@ def main() -> None:
           "Wear halachic half-day ring regression")
     check("selectedCommunity" in wear and "selectedCity" in wear,
           "Wear OS independent community/city selectors are missing")
+    # Help articles (res/raw) must exist in every app language with the same section count.
+    raw_base = ROOT / "app" / "src" / "main" / "res"
+    for article in sorted(p.name for p in (raw_base / "raw").glob("*.txt")):
+        counts = {}
+        for locale in LOCALES:
+            path = raw_base / locale.replace("values", "raw") / article
+            check(path.exists(), f"Help article {article} missing in {path.parent.name}")
+            counts[locale] = sum(1 for l in path.read_text(encoding="utf-8").splitlines() if l.startswith("## "))
+        check(len(set(counts.values())) == 1, f"Help article {article}: section counts differ {counts}")
     print(f"OK: phone {len(resources['values'])} keys, Wear {len(wear_resources['values'])} keys × {len(LOCALES)} languages")
     print("OK: upstream package/manifest, Shma formula, alarm isolation, polar fallback")
 

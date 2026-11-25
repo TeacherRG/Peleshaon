@@ -157,7 +157,7 @@
     <string name="legend_t">Как читать циферблат</string>
     <string name="help">Помощь</string>
     <string name="alarm_how_note">Свет — экран плавно светлеет, как рассвет; «Только свет» будит без звука.</string>
-    <string name="about_t">О приложении</string>
+    <string name="about_t">О программе</string>
     <string name="about_version">Версия %s</string>
     <string name="about_by">Тора-проект MyChitas · «Часы» сайта Нифлаот</string>
     <string name="about_site">Сайт Нифлаот — niflaot.mychitas.app</string>
@@ -328,4 +328,15 @@
     <string name="tour_times">Все времена дня списком. Отметьте, какие из них показывать на циферблате.</string>
     <string name="tour_done">Понятно</string>
     <string name="tour_again">Подсказки по экрану</string>
+
+    <!-- Помощь: «О программе» и «Еврейское время» -->
+    <string name="about_sub">Что умеет приложение, версия, контакты</string>
+    <string name="about_desc">Еврейский календарь и времена дня в телефоне и на часах.\n\nЦиферблат показывает 12 галахических часов дня или ночи, рядом — еврейская дата, Шабат и праздники для вашего города. Времена считаются по Алтер Ребе (Хабад) или по выбранной общине.\n\nБудильники, которые молчат в Шабат и праздники, напоминание об учёбе Торы, таймер «мясное → молочное», Кидуш Левана и компас на Йерушалаим. Приложение работает без интернета.</string>
+    <string name="jt_t">Еврейское время</string>
+    <string name="jt_sub">Как устроены еврейский календарь и счёт времени</string>
+    <string name="jt_intro">Статьи о еврейском счёте времени: месяц, год и календарь.</string>
+    <string name="jt_kh_t">Подробное объяснение законов освящения месяца</string>
+    <string name="jt_kh_sub">От молада и месяца через солнечный и лунный год до расчёта Рош а-Шана</string>
+    <string name="jt_expand">Развернуть всё ▾</string>
+    <string name="jt_collapse">Свернуть всё ▴</string>
 </resources>

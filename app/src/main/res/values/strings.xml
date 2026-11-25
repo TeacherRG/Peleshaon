@@ -326,4 +326,15 @@
     <string name="tour_times">All times of the day in a list. Mark which of them to show on the dial.</string>
     <string name="tour_done">Got it</string>
     <string name="tour_again">Show screen hints</string>
+
+    <!-- Помощь: «О программе» и «Еврейское время» -->
+    <string name="about_sub">What the app can do, version, contacts</string>
+    <string name="about_desc">A Jewish calendar and the times of the day on your phone and watch.\n\nThe dial shows the 12 halachic hours of the day or the night; next to it — the Jewish date, Shabbat and holidays for your city. Times are calculated according to the Alter Rebbe (Chabad) or the community you choose.\n\nAlarms that stay silent on Shabbat and holidays, a Torah study reminder, the meat → dairy timer, Kiddush Levanah and a compass to Jerusalem. The app works without the internet.</string>
+    <string name="jt_t">Jewish time</string>
+    <string name="jt_sub">How the Jewish calendar and time are counted</string>
+    <string name="jt_intro">Articles about how Jewish time is counted: the month, the year and the calendar.</string>
+    <string name="jt_kh_t">The laws of sanctifying the month — a comprehensive explanation</string>
+    <string name="jt_kh_sub">From the molad and the month, through the solar and lunar year, to calculating Rosh Hashanah</string>
+    <string name="jt_expand">Expand all ▾</string>
+    <string name="jt_collapse">Collapse all ▴</string>
 </resources>
