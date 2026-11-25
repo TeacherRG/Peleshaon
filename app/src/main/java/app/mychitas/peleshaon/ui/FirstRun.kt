@@ -90,6 +90,7 @@ fun CityGate(onChosen: () -> Unit) {
             ClockTheme.refresh(context)
             AlarmScheduler.rescheduleAllFromPrefs(context)
             MoonReminder.schedule(context)
+            app.mychitas.peleshaon.reminder.ReminderNotifier.schedule(context)
             Live.updateAsync(context)
             onChosen()
         }

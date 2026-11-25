@@ -101,6 +101,8 @@ fun CalendarSheet(city: CityOption, now: ZonedDateTime) {
     val sel = remember(selected, city) { JewishCal.day(selected, city.isIsrael) }
     val upcoming = remember(today, city) { JewishCal.upcoming(today, city.isIsrael) }
     val inThisMonth = month.any { it.date == today }
+    // свечи и исход Шабата / праздника — мелко прямо в клетке дня, как пометка-напоминание (владелец, 25.11.2026)
+    val cellTimes = remember(month, city) { month.mapNotNull { d -> cellShabbatTime(d, city)?.let { d.date to it } }.toMap() }
 
     // напоминания пользователя: список, дни месяца с ними, редактор
     val context = LocalContext.current
@@ -170,7 +172,7 @@ fun CalendarSheet(city: CityOption, now: ZonedDateTime) {
                         val d = row.getOrNull(i)
                         Box(Modifier.weight(1f)) {
                             if (d != null) DayCell(d, today = d.date == today, selected = d.date == selected, locale = locale,
-                                reminder = d.date in reminderDays) { selected = d.date }
+                                reminder = d.date in reminderDays, shabbatTime = cellTimes[d.date]) { selected = d.date }
                         }
                     }
                 }
@@ -248,7 +250,13 @@ private fun NavButton(text: String, label: String, onClick: () -> Unit) {
 }
 
 @Composable
-private fun DayCell(d: CalDay, today: Boolean, selected: Boolean, locale: Locale, reminder: Boolean = false, onClick: () -> Unit) {
+private fun DayCell(
+    d: CalDay, today: Boolean, selected: Boolean, locale: Locale,
+    reminder: Boolean = false,
+    /** 🕯 время свечей или ✨ исход Шабата / праздника; null — нет */
+    shabbatTime: Pair<String, String>? = null,
+    onClick: () -> Unit
+) {
     val shabbat = d.date.dayOfWeek == DayOfWeek.SATURDAY
     val holiday = d.holy && !shabbat
     val bg = when {
@@ -260,7 +268,7 @@ private fun DayCell(d: CalDay, today: Boolean, selected: Boolean, locale: Locale
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .aspectRatio(0.82f)
+            .aspectRatio(0.66f)
             .background(bg, RoundedCornerShape(10.dp))
             .border(
                 width = if (selected) 2.dp else 1.dp,
@@ -291,11 +299,24 @@ private fun DayCell(d: CalDay, today: Boolean, selected: Boolean, locale: Locale
         val g = d.date
         Text(
             if (g.dayOfMonth == 1) "${g.dayOfMonth} ${g.month.getDisplayName(TextStyle.SHORT_STANDALONE, locale)}" else "${g.dayOfMonth}",
-            modifier = Modifier.align(Alignment.Center).padding(top = 14.dp),
+            modifier = Modifier.align(Alignment.TopCenter).padding(top = 28.dp),
             fontSize = 10.sp,
             color = ClockColors.Muted,
             maxLines = 1
         )
+        // свечи / исход — маленькими цифрами со значком
+        shabbatTime?.let { (icon, time) ->
+            Text(
+                icon + time,
+                modifier = Modifier.align(Alignment.TopCenter).padding(top = 42.dp),
+                fontSize = 8.5.sp,
+                lineHeight = 10.sp,
+                fontWeight = FontWeight.Bold,
+                color = ClockColors.GoldDeep,
+                maxLines = 1,
+                softWrap = false
+            )
+        }
         if (dots.isNotEmpty()) {
             Row(Modifier.align(Alignment.BottomCenter).padding(bottom = 2.dp), horizontalArrangement = Arrangement.spacedBy(3.dp)) {
                 for (c in dots) Box(Modifier.size(6.dp).background(c, CircleShape))
@@ -386,6 +407,23 @@ internal fun ShabbatTimeRows(date: LocalDate, city: CityOption) {
             Text(stringResource(R.string.polar_shabbat_undefined), color = ClockColors.Bad, fontSize = 13.sp)
         }
     }
+}
+
+/** Время для клетки календаря: 🕯 свечи (до заката или после выхода звёзд между святыми днями) или ✨ исход. */
+private fun cellShabbatTime(d: CalDay, city: CityOption): Pair<String, String>? {
+    val zone = city.zone()
+    if (d.candles) {
+        val t = when (JewishCal.candleTransition(d.date, city.isIsrael)) {
+            CandleTransition.BEFORE_SUNSET -> ZmanimEngine.candleLightingOn(d.date, city)
+            CandleTransition.AFTER_NIGHTFALL -> ZmanimEngine.havdalahOn(d.date, city)
+            CandleTransition.NONE -> null
+        }
+        return t?.let { "🕯" to it.withZoneSameInstant(zone).format(HHMM) }
+    }
+    if (d.holy && !JewishCal.day(d.date.plusDays(1), city.isIsrael).holy) {
+        return ZmanimEngine.havdalahOn(d.date, city)?.let { "✨" to it.withZoneSameInstant(zone).format(HHMM) }
+    }
+    return null
 }
 
 @Composable

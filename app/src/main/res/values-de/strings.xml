@@ -51,7 +51,7 @@
     <string name="z_d_candles">Die Kerzenzeit am Freitag richtet sich nach Stadt und gewähltem Ortsbrauch.</string>
     <string name="z_s_havdalah">Ausgang</string>
     <string name="z_t_havdalah">Schabbat-Ende</string>
-    <string name="z_d_havdalah">Das Schabbatende wird nach der ausgewählten Gemeindemethode berechnet. Den lokalen Brauch beachten.</string>
+    <string name="z_d_havdalah">Ende von Schabbat und Feiertag — nach dem Alter Rebbe: die Sonne steht 8,5° unter dem Horizont.</string>
     <string name="left_hm">noch %1$d Std. %2$d Min.</string>
     <string name="left_m">noch %d Min.</string>
     <string name="in_hm">in %1$d Std. %2$d Min.</string>
@@ -302,7 +302,7 @@
     <string name="tour_date_t">📅 Datum und Kalender</string>
     <string name="tour_date">Das heutige jüdische und bürgerliche Datum. Tippe, um den Kalender mit Feiertagen und Zeiten für jeden Tag zu öffnen.</string>
     <string name="tour_menu_t">☰ Menü</string>
-    <string name="tour_menu">Kompass nach Jerusalem, Einstellungen (Sprache, Gemeinde, Design) und Hilfe «?» — dort kannst du diese Hinweise erneut ansehen.</string>
+    <string name="tour_menu">Kompass nach Jerusalem, Einstellungen (Sprache, Design, Wecker) und Hilfe «?» — dort kannst du diese Hinweise erneut ansehen.</string>
     <string name="tour_dial_t">🕒 Zifferblatt des Tages</string>
     <string name="tour_dial">Ein halber Tag: 12 halachische Stunden des Tages oder der Nacht. Tippe auf einen Punkt am Rand, um zu sehen, welche Zeit es ist und wie lange es noch dauert.</string>
     <string name="tour_shabbat_t">🕯️ Schabbat</string>

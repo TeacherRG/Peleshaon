@@ -51,7 +51,7 @@
     <string name="z_d_candles">Время свечей в пятницу зависит от города и выбранного местного обычая.</string>
     <string name="z_s_havdalah">Исход</string>
     <string name="z_t_havdalah">Исход Шабата</string>
-    <string name="z_d_havdalah">Исход Шабата рассчитывается по выбранному методу общины. Сверяйтесь с местным обычаем.</string>
+    <string name="z_d_havdalah">Исход Шабата и праздника — по Алтер Ребе: солнце на 8,5° под горизонтом.</string>
     <string name="left_hm">осталось %1$d ч %2$d мин</string>
     <string name="left_m">осталось %d мин</string>
     <string name="in_hm">через %1$d ч %2$d мин</string>
@@ -304,7 +304,7 @@
     <string name="tour_date_t">📅 Дата и календарь</string>
     <string name="tour_date">Сегодняшняя еврейская и гражданская дата. Нажмите — откроется календарь с праздниками и временами на любой день.</string>
     <string name="tour_menu_t">☰ Меню</string>
-    <string name="tour_menu">Компас на Йерушалаим, настройки (язык, община, тема) и справка «?» — там можно снова посмотреть эти подсказки.</string>
+    <string name="tour_menu">Компас на Йерушалаим, настройки (язык, тема, будильники) и справка «?» — там можно снова посмотреть эти подсказки.</string>
     <string name="tour_dial_t">🕒 Циферблат дня</string>
     <string name="tour_dial">Половина суток: 12 галахических часов дня или ночи. Нажмите на точку на ободе — увидите, что это за время и сколько до него осталось.</string>
     <string name="tour_shabbat_t">🕯️ Шабат</string>

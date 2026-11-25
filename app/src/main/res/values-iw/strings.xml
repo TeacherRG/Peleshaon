@@ -51,7 +51,7 @@
     <string name="z_d_candles">זמן הדלקת הנרות ביום שישי תלוי בעיר ובמנהג המקומי שנבחר.</string>
     <string name="z_s_havdalah">צאת השבת</string>
     <string name="z_t_havdalah">צאת השבת</string>
-    <string name="z_d_havdalah">צאת השבת מחושב לפי שיטת הקהילה שנבחרה. יש לברר את המנהג המקומי.</string>
+    <string name="z_d_havdalah">צאת השבת והחג — לשיטת אדמו״ר הזקן: השמש 8.5° מתחת לאופק.</string>
     <string name="left_hm">נותרו %1$d ש׳ %2$d דק׳</string>
     <string name="left_m">נותרו %d דק׳</string>
     <string name="in_hm">בעוד %1$d ש׳ %2$d דק׳</string>
@@ -303,7 +303,7 @@
     <string name="tour_date_t">📅 תאריך ולוח שנה</string>
     <string name="tour_date">התאריך העברי והלועזי של היום. הקישו כדי לפתוח את לוח השנה עם החגים והזמנים לכל יום.</string>
     <string name="tour_menu_t">☰ תפריט</string>
-    <string name="tour_menu">מצפן לירושלים, הגדרות (שפה, קהילה, ערכת נושא) ועזרה «?» — שם אפשר לראות שוב את הרמזים האלה.</string>
+    <string name="tour_menu">מצפן לירושלים, הגדרות (שפה, ערכת נושא, שעונים מעוררים) ועזרה «?» — שם אפשר לראות שוב את הרמזים האלה.</string>
     <string name="tour_dial_t">🕒 שעון היום</string>
     <string name="tour_dial">חצי יממה: 12 שעות זמניות של היום או של הלילה. הקישו על נקודה בשפת השעון כדי לראות איזה זמן זה וכמה נשאר עד אליו.</string>
     <string name="tour_shabbat_t">🕯️ שבת</string>

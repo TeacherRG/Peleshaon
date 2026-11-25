@@ -51,7 +51,7 @@
     <string name="z_d_candles">Friday candle time depends on the city and the chosen local custom.</string>
     <string name="z_s_havdalah">Shabbat ends</string>
     <string name="z_t_havdalah">Shabbat ends</string>
-    <string name="z_d_havdalah">The end of Shabbat is calculated using the selected community method. Confirm local practice.</string>
+    <string name="z_d_havdalah">End of Shabbat and festivals — per the Alter Rebbe: the sun is 8.5° below the horizon.</string>
     <string name="left_hm">%1$d h %2$d min left</string>
     <string name="left_m">%d min left</string>
     <string name="in_hm">in %1$d h %2$d min</string>
@@ -302,7 +302,7 @@
     <string name="tour_date_t">📅 Date and calendar</string>
     <string name="tour_date">Today\'s Jewish and civil date. Tap to open the calendar with holidays and times for any day.</string>
     <string name="tour_menu_t">☰ Menu</string>
-    <string name="tour_menu">Compass to Jerusalem, settings (language, community, theme) and help «?» — where you can watch these hints again.</string>
+    <string name="tour_menu">Compass to Jerusalem, settings (language, theme, alarms) and help «?» — where you can watch these hints again.</string>
     <string name="tour_dial_t">🕒 Dial of the day</string>
     <string name="tour_dial">Half a day: 12 halachic hours of the day or the night. Tap a dot on the rim to see which time it is and how much is left.</string>
     <string name="tour_shabbat_t">🕯️ Shabbat</string>
