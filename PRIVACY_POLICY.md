@@ -2,12 +2,12 @@
 
 **Продукт:** Пеле Шаон Луах (Pele Shaon Luach)  
 **Платформа:** Android и Wear OS  
-**Статус документа:** предварительная версия; требуется финальная проверка перед публикацией  
+**Статус документа:** рабочая версия; требуется финальная сверка с подписанным релизным AAB перед публикацией  
 **Дата вступления в силу:** будет указана перед публикацией
 
 ## 1. Разработчик и контакт
 
-По вопросам конфиденциальности обращайтесь: **Office@niflaot.app**.
+По вопросам конфиденциальности обращайтесь: **office@niflaot.app**.
 
 ## 2. Что делает приложение
 
@@ -58,7 +58,7 @@
 
 В манифесте телефонного приложения указано `android:allowBackup="true"`. В проекте не найдено отдельного файла правил резервного копирования `backup_rules.xml` или `data_extraction_rules.xml`. Поэтому данные приложения могут быть включены в системное резервное копирование Android в зависимости от версии системы, настроек устройства и доступных системных сервисов.
 
-Резервное копирование контролируется Android и настройками пользователя. Перед публикацией разработчику следует отдельно решить, допустимо ли резервное копирование настроек будильников, выбранного города и введённых вручную координат, и при необходимости задать явные правила исключения/включения данных.
+Резервное копирование выполняется средствами Android и зависит от версии системы, настроек устройства и доступных системных служб. Пользователь может управлять резервным копированием в настройках Android. В этой версии проекта резервное копирование оставлено включённым.
 
 ## 7. Безопасность и удаление данных
 
@@ -78,7 +78,7 @@
 
 **Product:** Pele Shaon Luach  
 **Platforms:** Android and Wear OS  
-**Document status:** Preliminary; final review required before publication  
+**Document status:** Working draft; final comparison with the signed release AAB is required before publication  
 **Effective date:** To be added before publication
 
 ## 1. Developer and contact
@@ -134,7 +134,7 @@ If accounts, analytics, crash reporting, advertising, cloud synchronization, or 
 
 The phone app manifest sets `android:allowBackup="true"`. No separate `backup_rules.xml` or `data_extraction_rules.xml` file was found in the project. Android may therefore include app data in system backups depending on the OS version, device settings, and available system backup services.
 
-Backup is controlled by Android and the user's device settings. Before publication, the developer should decide whether alarm settings, selected cities, and manually entered coordinates may be backed up, and configure explicit include/exclude rules if needed.
+Backup is handled by Android and depends on the OS version, device settings, and available system services. Users can manage backup through Android settings. Backup remains enabled in this version of the project.
 
 ## 7. Security and deletion
 
