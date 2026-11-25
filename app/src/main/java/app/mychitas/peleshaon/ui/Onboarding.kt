@@ -145,7 +145,7 @@ private fun LiveDial(modifier: Modifier) {
     } else {
         val s = remember(Prefs.chosenCity(context)) { LiveState.of(context) }
         BigFace(now = s.now, zone = s.city.zone(), half = s.half, ring = s.ring,
-            events = s.events, active = null, tziruf = false, modifier = modifier)
+            events = s.events, active = null, tziruf = false, modifier = modifier, seconds = false)
     }
 }
 

@@ -286,7 +286,9 @@ private fun DrawScope.drawSun(c: Offset, color: Color, s: Float = 1f) {
 /** Текст в пикселях (единицы × k), по центру точки; тень на тёмном фоне, по желанию — золотой градиент сверху вниз. */
 private class Texts(val canvas: android.graphics.Canvas, val k: Float, val shadow: Boolean) {
     fun draw(s: String, x: Float, y: Float, size: Float, color: Color, weight: Int = 700,
-             gradient: Pair<Color, Color>? = null, serif: Boolean = false, spacing: Float = 0f) {
+             gradient: Pair<Color, Color>? = null, serif: Boolean = false, spacing: Float = 0f,
+             /** «чч:мм» с бледным двоеточием — мигание раз в секунду */
+             dimColon: Boolean = false) {
         canvas.save()
         canvas.scale(1f / k, 1f / k, 0f, 0f)
         val p = Paint(Paint.ANTI_ALIAS_FLAG).apply {
@@ -308,7 +310,20 @@ private class Texts(val canvas: android.graphics.Canvas, val k: Float, val shado
             p.shader = android.graphics.LinearGradient(0f, base + fm.ascent * 0.8f, 0f, base,
                 gradient.first.toArgb(), gradient.second.toArgb(), android.graphics.Shader.TileMode.CLAMP)
         }
-        canvas.drawText(s, x * k, base, p)
+        val colon = s.indexOf(':')
+        if (dimColon && colon > 0) {
+            // части рисуются по отдельности от общего левого края — цифры не прыгают, гаснет только двоеточие
+            val a = s.substring(0, colon); val b = s.substring(colon + 1)
+            val wa = p.measureText(a); val wc = p.measureText(":"); val wb = p.measureText(b)
+            var left = x * k - (wa + wc + wb) / 2
+            p.textAlign = Paint.Align.LEFT
+            canvas.drawText(a, left, base, p); left += wa
+            val alpha = p.alpha
+            p.alpha = (alpha * 0.2f).toInt()
+            canvas.drawText(":", left, base, p); left += wc
+            p.alpha = alpha
+            canvas.drawText(b, left, base, p)
+        } else canvas.drawText(s, x * k, base, p)
         canvas.restore()
     }
 }
@@ -335,6 +350,8 @@ fun BigFace(
     timeSystemHalachic: Boolean = false,
     skin: FaceSkin = FaceSkin.CLASSIC,
     info: FaceInfo? = null,
+    /** секундная стрелка и мигающее двоеточие; в маленьких превью — нет */
+    seconds: Boolean = true,
     onPick: ((String?, Float, Float) -> Unit)? = null
 ) {
     val dots = remember(events, half) { place(events, half) }
@@ -363,9 +380,16 @@ fun BigFace(
             scale(k, k, pivot = Offset.Zero) {
                 translate(-BOX_MIN, -BOX_MIN) {
                     val t = now.withZoneSameInstant(zone)
+                    // секунды: обычные — от часов, галахические — доля галахической минуты половины суток
+                    val sec = when {
+                        !seconds -> null
+                        timeSystemHalachic && half != null -> (half.frac(now).coerceIn(0.0, 0.99999) * 43200.0) % 60.0
+                        else -> t.second.toDouble()
+                    }
                     drawFace(skin, artwork, k, now, dots, active, info,
                         timeText = timeText ?: String.format(Locale.ROOT, "%02d:%02d", t.hour, t.minute),
                         analog = analog,
+                        seconds = sec,
                         tzirufText = if (tziruf && ring != null && !analog) Dial.TZIRUFIM[ring.hour] else null)
                 }
             }
@@ -384,6 +408,8 @@ private fun DrawScope.drawFace(
     /** null — время не рисуется (в виджете его показывает TextClock) */
     timeText: String?,
     analog: Boolean = false,
+    /** 0…60: тонкая секундная стрелка (стрелки) или мигающее двоеточие (цифры); null — нет */
+    seconds: Double? = null,
     tzirufText: String? = null
 ) {
     val c = Offset(100f, 100f)
@@ -431,7 +457,8 @@ private fun DrawScope.drawFace(
     info?.jewishLine?.let { tx.draw(it, 100f, 54.5f, 9.4f, accent) }
 
     if (!analog && timeText != null) {
-        tx.draw(timeText, 100f, 80f, 40f, text, gradient = Color(skin.time0) to Color(skin.time1), spacing = -0.02f)
+        tx.draw(timeText, 100f, 80f, 40f, text, gradient = Color(skin.time0) to Color(skin.time1), spacing = -0.02f,
+            dimColon = seconds != null && seconds.toInt() % 2 == 1)
     }
     tzirufText?.let { tx.draw(it, 100f, 106.5f, 10f, accent, serif = true) }
 
@@ -440,7 +467,16 @@ private fun DrawScope.drawFace(
     info?.sunset?.let { drawSun(Offset(148f, 108f), accent); tx.draw(it, 148f, 120f, 9f, text, weight = 600) }
 
     // стрелки главного времени — до малого циферблата: он лежит сверху, как на настоящих часах
-    if (analog && timeText != null) drawHands(timeText, c, 38f, 58f, 4.2f, 2.4f, accent, Color(skin.sub))
+    if (analog && timeText != null) {
+        drawHands(timeText, c, 38f, 58f, 4.2f, 2.4f, accent, Color(skin.sub))
+        // тонкая секундная стрелка с коротким хвостом
+        if (seconds != null) {
+            val turn = seconds / 60.0
+            drawLine(Color(0xFFE0533F), polarAt(c, turn + 0.5, 12.0), polarAt(c, turn, 72.0), 0.9f, cap = StrokeCap.Round)
+            drawCircle(Color(0xFFE0533F), radius = 2.2f, center = c)
+            drawCircle(Color(skin.sub), radius = 0.9f, center = c)
+        }
+    }
 
     // малый циферблат
     info?.subText?.let { sub ->

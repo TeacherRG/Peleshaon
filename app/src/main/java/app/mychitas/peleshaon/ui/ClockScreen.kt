@@ -1512,7 +1512,7 @@ private fun SettingsSheet(onChange: () -> Unit) {
                     ) {
                         BigFace(now = previewNow, zone = previewNow.zone, half = null, ring = null, events = emptyList(),
                             active = null, tziruf = false, modifier = Modifier.fillMaxSize(), analog = true,
-                            timeText = "10:10", skin = skin.resolve(ClockTheme.light))
+                            timeText = "10:10", skin = skin.resolve(ClockTheme.light), seconds = false)
                     }
                     Text(stringResource(skin.title), fontSize = 12.sp, color = if (on) ClockColors.GoldDeep else ClockColors.Ink2,
                         fontWeight = if (on) FontWeight.Bold else FontWeight.Normal, maxLines = 2,

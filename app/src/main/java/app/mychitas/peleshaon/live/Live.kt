@@ -270,13 +270,15 @@ object Live {
         val pill = if (withPill) 15f * font * 1.2f + 8f + 2f else 0f   // компактная дата: текст, отступы и зазор
         val side = minOf(w - 16f, h - 16f - pill).coerceAtLeast(96f)
         // время — там же, где в приложении: чуть выше центра, между датой и восходом / закатом
-        val time = (side * 0.18f).coerceIn(20f, 48f)
+        val time = (side * 0.16f).coerceIn(20f, 44f)
         v.setTextViewTextSize(R.id.w_time, TypedValue.COMPLEX_UNIT_DIP, time)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
             v.setViewLayoutWidth(R.id.w_face_box, side, TypedValue.COMPLEX_UNIT_DIP)
             v.setViewLayoutHeight(R.id.w_face_box, side, TypedValue.COMPLEX_UNIT_DIP)
-            v.setViewLayoutMargin(R.id.w_time, RemoteViews.MARGIN_BOTTOM, side * 0.18f, TypedValue.COMPLEX_UNIT_DIP)
-            v.setViewLayoutMargin(R.id.w_tziruf, RemoteViews.MARGIN_TOP, side * 0.06f, TypedValue.COMPLEX_UNIT_DIP)
+            // FrameLayout сдвигает центрированный вид на весь отступ: время — на 0,09 стороны выше центра
+            // (на циферблате оно между еврейской датой и восходом), сочетание — на 0,03 ниже
+            v.setViewLayoutMargin(R.id.w_time, RemoteViews.MARGIN_BOTTOM, side * 0.09f, TypedValue.COMPLEX_UNIT_DIP)
+            v.setViewLayoutMargin(R.id.w_tziruf, RemoteViews.MARGIN_TOP, side * 0.035f, TypedValue.COMPLEX_UNIT_DIP)
         }
     }
 
