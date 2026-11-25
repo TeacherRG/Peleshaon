@@ -342,4 +342,12 @@
     <string name="z_s_tzait_ar">Stars AR</string>
     <string name="z_t_tzait_ar">Nightfall per the Alter Rebbe (7°)</string>
     <string name="z_d_tzait_ar">Per the Alter Rebbe — the sun is 7° below the horizon. A little earlier than the end of Shabbat (8.5°).</string>
+    <string name="dual_clock_title">Dual time display</string>
+    <string name="main_time_title">Main dial</string>
+    <string name="civil_time_title">Ordinary time</string>
+    <string name="halachic_time_title">Halachic time</string>
+    <string name="secondary_dial_title">Show secondary dial</string>
+    <string name="face_style_title">Display style</string>
+    <string name="face_digital">Digital</string>
+    <string name="face_analog">Analog</string>
 </resources>

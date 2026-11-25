@@ -343,4 +343,12 @@
     <string name="z_s_tzait_ar">צאה״כ אדה״ז</string>
     <string name="z_t_tzait_ar">צאת הכוכבים לשיטת אדמו״ר הזקן (7°)</string>
     <string name="z_d_tzait_ar">לשיטת אדמו״ר הזקן — השמש 7° מתחת לאופק. מעט לפני צאת השבת (8.5°).</string>
+    <string name="dual_clock_title">שני זמנים על לוח שעון אחד</string>
+    <string name="main_time_title">לוח ראשי</string>
+    <string name="civil_time_title">זמן רגיל</string>
+    <string name="halachic_time_title">זמן הלכתי</string>
+    <string name="secondary_dial_title">הצגת לוח משני</string>
+    <string name="face_style_title">סגנון תצוגה</string>
+    <string name="face_digital">דיגיטלי</string>
+    <string name="face_analog">עם מחוגים</string>
 </resources>

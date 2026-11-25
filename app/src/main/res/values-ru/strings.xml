@@ -344,4 +344,12 @@
     <string name="z_s_tzait_ar">Звёзды АР</string>
     <string name="z_t_tzait_ar">Выход звёзд по Алтер Ребе (7°)</string>
     <string name="z_d_tzait_ar">По Алтер Ребе — солнце на 7° под горизонтом. Немного раньше исхода Шабата (8,5°).</string>
+    <string name="dual_clock_title">Два времени на одном циферблате</string>
+    <string name="main_time_title">Главный циферблат</string>
+    <string name="civil_time_title">Обычное время</string>
+    <string name="halachic_time_title">Алохическое время</string>
+    <string name="secondary_dial_title">Показывать субциферблат</string>
+    <string name="face_style_title">Стиль отображения</string>
+    <string name="face_digital">Цифровой</string>
+    <string name="face_analog">Со стрелками</string>
 </resources>

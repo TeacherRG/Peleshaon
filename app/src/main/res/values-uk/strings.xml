@@ -344,4 +344,12 @@
     <string name="z_s_tzait_ar">Зорі АР</string>
     <string name="z_t_tzait_ar">Вихід зірок за Алтер Ребе (7°)</string>
     <string name="z_d_tzait_ar">За Алтер Ребе — сонце на 7° під горизонтом. Трохи раніше виходу Шабату (8,5°).</string>
+    <string name="dual_clock_title">Два часи на одному циферблаті</string>
+    <string name="main_time_title">Головний циферблат</string>
+    <string name="civil_time_title">Звичайний час</string>
+    <string name="halachic_time_title">Алохічний час</string>
+    <string name="secondary_dial_title">Показувати субциферблат</string>
+    <string name="face_style_title">Стиль відображення</string>
+    <string name="face_digital">Цифровий</string>
+    <string name="face_analog">Зі стрілками</string>
 </resources>
