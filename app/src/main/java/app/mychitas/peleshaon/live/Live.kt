@@ -110,25 +110,15 @@ object Live {
         update(context)
     }
 
-    /** First tap reveals the configured four-letter Name; the next tap opens the app. */
+    /**
+     * Нажатие на круглый виджет открывает приложение. Сочетания Имени на виджетах нет (владелец, 25.11.2026: «невозможно
+     * контролировать, чтобы человек это правильно использовал») — только в самом приложении.
+     */
     fun handleFaceWidgetTap(context: Context, widgetId: Int) {
         val app = context.applicationContext
-        if (!Prefs.tziruf(app) || Prefs.chosenCity(app) == null) {
-            app.startActivity(Intent(app, MainActivity::class.java)
-                .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP))
-            return
-        }
-        val prefs = Prefs.of(app)
-        val revealed = prefs.getBoolean("widget_tziruf_revealed", false)
-        if (revealed) {
-            prefs.edit().remove("widget_tziruf_revealed").apply()
-            updateAsync(app)
-            app.startActivity(Intent(app, MainActivity::class.java)
-                .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP))
-            return
-        }
-        prefs.edit().putBoolean("widget_tziruf_revealed", true).apply()
-        updateAsync(app)
+        Prefs.of(app).edit().remove("widget_tziruf_revealed").apply()
+        app.startActivity(Intent(app, MainActivity::class.java)
+            .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP))
     }
 
     /** Keep bitmap rendering off the BroadcastReceiver/main thread. */
@@ -293,7 +283,7 @@ object Live {
         val info = faceInfo(context, s.city, s.now, s.day, s.half, widget = true)
         v.setImageViewBitmap(R.id.w_face, renderFace(
             context, px, s.now, s.city.zone(), s.half, s.ring,
-            if (Prefs.showZmanim(context)) s.events else emptyList(), Prefs.tziruf(context),
+            if (Prefs.showZmanim(context)) s.events else emptyList(), false,
             skin = skin, info = info
         ))
         v.setInt(
@@ -308,13 +298,8 @@ object Live {
         v.setTextColor(R.id.w_time, skin.time1.toInt())
         v.paint(light, R.id.w_date to CREAM)
         val ring = s.ring
-        val showTziruf = Prefs.tziruf(context) && ring != null &&
-            Prefs.of(context).getBoolean("widget_tziruf_revealed", false)
-        v.setViewVisibility(R.id.w_tziruf, if (showTziruf) View.VISIBLE else View.GONE)
-        if (showTziruf && ring != null) {
-            v.setTextViewText(R.id.w_tziruf, Dial.TZIRUFIM[ring.hour])
-            v.setTextColor(R.id.w_tziruf, skin.accent.toInt())
-        }
+        // сочетания Имени на виджете нет — только в приложении
+        v.setViewVisibility(R.id.w_tziruf, View.GONE)
         v.clocks(context, s, R.id.w_time)
         v.setTextViewText(R.id.w_date, dateLine(s))
         val tapIntent = Intent(context, FaceWidgetTapReceiver::class.java)

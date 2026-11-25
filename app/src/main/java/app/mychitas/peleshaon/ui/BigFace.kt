@@ -390,7 +390,8 @@ fun BigFace(
                         timeText = timeText ?: String.format(Locale.ROOT, "%02d:%02d", t.hour, t.minute),
                         analog = analog,
                         seconds = sec,
-                        tzirufText = if (tziruf && ring != null && !analog) Dial.TZIRUFIM[ring.hour] else null)
+                        // сочетание — под временем (у стрелок — там же, между восходом и закатом)
+                        tzirufText = if (tziruf && ring != null) Dial.TZIRUFIM[ring.hour] else null)
                 }
             }
         }
