@@ -160,7 +160,7 @@
     <string name="about_t">About</string>
     <string name="about_version">Version %s</string>
     <string name="about_by">MyChitas Torah project · the «Clock» of the Niflaot site</string>
-    <string name="about_site">Niflaot site — niflaot.mychitas.app</string>
+    <string name="about_site">Niflaot site — niflaot.app</string>
     <string name="about_mail">Write to us — Office@mychitas.app</string>
     <string name="privacy_t">Privacy</string>
     <string name="privacy_1">The app collects no data about you: no accounts, no ads, no analytics, no trackers.</string>
